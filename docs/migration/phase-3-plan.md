@@ -6,7 +6,7 @@
 >
 > Propósito: definir las etapas de ejecución de la Fase 3 sin iniciar todavía ninguna implementación.
 >
-> P3-01: **COMPLETED** — ESPERANDO APROBACIÓN para P3-02
+> P3-01: **COMPLETED** — P3-02: **COMPLETED** — ESPERANDO APROBACIÓN para P3-03
 
 ---
 
@@ -160,7 +160,7 @@ Este plan se construye con evidencia técnica de:
   - pruebas de integración contra SQL Server para SPs piloto,
   - pruebas de error/timeout/transacción.
 - **Dependencias con otras etapas:** depende de P3-01; bloquea P3-03 a P3-12.
-- **Estado:** NOT_STARTED
+- **Estado:** COMPLETED — 2026-08-11
 
 ### Etapa P3-03
 

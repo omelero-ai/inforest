@@ -640,4 +640,29 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-SQL-CMD-001
+**Nombre:** Timeout de 600 segundos para ejecución de stored procedures
+
+**Origen:** Legacy/clsComando.cls
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Clases/clsComando.cls`
+
+**Procedimiento/Función:** `CreateCmdSp`
+
+**Descripción:** El Legacy establece `Cmd.CommandTimeout = 600` para todos los SPs ejecutados a través de `clsComando`. Este timeout cubre SPs de reporte pesados y operaciones batch en horarios de alta concurrencia.
+
+**Condición:** Toda ejecución de SP vía `clsComando.cls`
+
+**Resultado:** La conexión espera hasta 600 segundos antes de lanzar error de timeout.
+
+**Excepciones:** Ninguna — el timeout es uniforme para todos los SPs.
+
+**Destino .NET:** `SpExecutor` — constante `CommandTimeoutSeconds = 600`
+
+**Estado:** COMPLETED
+
+**Evidencia:** CONFIRMED
+
+---
+
 *Este documento se amplía con cada análisis de módulo.*

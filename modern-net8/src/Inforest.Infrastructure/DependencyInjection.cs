@@ -1,3 +1,5 @@
+using Inforest.Application.Interfaces;
+using Inforest.Infrastructure.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -23,6 +25,10 @@ public static class DependencyInjection
 
         services.AddLogging(loggingBuilder =>
             loggingBuilder.AddSerilog(dispose: true));
+
+        // P3-02: Contrato SQL y ejecución de datos Legacy
+        services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
+        services.AddSingleton<ISpExecutor, SpExecutor>();
 
         // Registrar repositorios aquí a medida que se implementen
         // services.AddScoped<IPedidoRepository, PedidoRepository>();

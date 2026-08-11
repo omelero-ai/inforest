@@ -76,7 +76,10 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Notas |
 |---|---|---|---|---|---|
-| `clsComando.cls` | Data Access | — | — | NOT_STARTED | Wrapper SP ADO |
+| `clsComando.cls` | Data Access | `IDbConnectionFactory` + `SqlConnectionFactory` | Interface + Class | COMPLETED | `src/Inforest.Application/Interfaces/IDbConnectionFactory.cs`, `src/Inforest.Infrastructure/Data/SqlConnectionFactory.cs` |
+| `clsComando.cls` ExecSP/GetSP | Data Access | `ISpExecutor` + `SpExecutor` | Interface + Class | COMPLETED | `src/Inforest.Application/Interfaces/ISpExecutor.cs`, `src/Inforest.Infrastructure/Data/SpExecutor.cs` |
+| `clsComando.cls` transactions | Data Access | `UnitOfWork` | Class | COMPLETED | `src/Inforest.Infrastructure/Data/UnitOfWork.cs` |
+| `clsComando.cls` MsgBox err | Error handling | `SqlExceptionTranslator` | Class | COMPLETED | `src/Inforest.Infrastructure/Data/SqlExceptionTranslator.cs` |
 | `ClsDocumento.cls` | Domain | — | — | NOT_STARTED | Documentos almacén |
 | `clsAlmacen.cls` | Domain | — | — | NOT_STARTED | Kardex, descargos |
 | `ClsSeguridad.cls` | Security | — | — | NOT_STARTED | Reemplazar con BCrypt |
