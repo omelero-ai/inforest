@@ -338,6 +338,31 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ## Seguridad / Licencia
 
+### BR-015
+**Nombre:** Login por módulo con sesión operativa y auditoría de acceso
+
+**Origen:** Legacy/frmAcceso.frm + modAuditoriaIntegral.bas + usp_Inforest_ObtieneUsuarios
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmAcceso.frm`
+
+**Procedimiento/Función:** `imgOpcion_Click`, `AccesoInicio`, `registroAccesoAuditoria`
+
+**Descripción:** El acceso al sistema filtra usuarios por módulo, valida password legacy o banda magnética, abre una sesión operativa por caja/terminal y registra el ingreso/salida en `MMOVIMIENTOACCESO`.
+
+**Condición:** Al iniciar sesión en el ejecutable POS/Administración/Consulta.
+
+**Resultado:** Solo ingresan usuarios activos habilitados para el módulo; la sesión queda asociada a usuario, caja, terminal y correlativo de auditoría.
+
+**Excepciones:** La migración .NET reemplaza el cifrado XOR/César por BCrypt y deja la validación física de HardKey como gap controlado.
+
+**Destino .NET:** `IAuthService`, `ISessionService`, `IRbacService`, `IAuditoriaService`, `Form1`
+
+**Estado:** IN_PROGRESS
+
+**Evidencia:** CONFIRMED
+
+---
+
 ### BR-014
 **Nombre:** Validación de licencia por hardware key (dongle)
 
@@ -353,9 +378,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** PARTIAL — comportamiento exacto ante dongle ausente no determinado con certeza
 
-**Destino .NET:** Definir modelo de licenciamiento (ver ADR-001)
+**Destino .NET:** `ILicenseService` + `LicenseService` con contrato SQL Legacy y hardkey físico pendiente
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
 

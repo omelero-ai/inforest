@@ -31,7 +31,7 @@ internal sealed class RbacService : IRbacService
         if (_cache.TryGetValue(cacheKey, out var cached))
             return cached;
 
-        await using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", cancellationToken);
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", cancellationToken);
         const string sql = """
             SELECT
                 a.tCodigoAcceso AS CodigoAcceso,

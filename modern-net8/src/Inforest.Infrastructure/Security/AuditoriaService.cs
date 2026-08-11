@@ -24,7 +24,7 @@ internal sealed class AuditoriaService : IAuditoriaService
     {
         try
         {
-            await using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
+            using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
             var parameters = CreateAccessParameters(request);
             parameters.Add("@nCorrelativo", dbType: System.Data.DbType.Int64, direction: System.Data.ParameterDirection.Output);
 
@@ -48,7 +48,7 @@ internal sealed class AuditoriaService : IAuditoriaService
     {
         try
         {
-            await using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
+            using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
             var parameters = CreateAccessParameters(request);
             parameters.Add("@nCorrelativo", request.CorrelativoAcceso, dbType: System.Data.DbType.Int64, direction: System.Data.ParameterDirection.Output);
 
@@ -71,7 +71,7 @@ internal sealed class AuditoriaService : IAuditoriaService
     {
         try
         {
-            await using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
+            using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
             var parameters = new DynamicParameters();
             parameters.Add("@vch_nCorrelativo", DateTime.UtcNow.Ticks % int.MaxValue);
             parameters.Add("@vch_nCorrelativoCampo", 1);

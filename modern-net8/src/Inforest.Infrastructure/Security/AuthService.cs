@@ -46,7 +46,7 @@ internal sealed class AuthService : IAuthService
         if (string.IsNullOrWhiteSpace(request.Contrasena) && string.IsNullOrWhiteSpace(request.BandaMagnetica))
             return AuthResult.Fallido("Ingrese su contraseña.", "SEGURIDAD_PASSWORD_REQUERIDO");
 
-        await using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", cancellationToken);
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", cancellationToken);
         var records = await _spExecutor.QueryAsync<LegacyModuleUserRecord>(
             connection,
             "usp_Inforest_ObtieneUsuarios",
@@ -72,7 +72,7 @@ internal sealed class AuthService : IAuthService
             new RegistroAccesoAuditoriaRequest("I", request.BaseDatos, moduloSeguridad, user.tResumido.ToUpperInvariant(), 0),
             cancellationToken);
 
-        if (!auditResult.EsExitoso || auditResult.Valor is null)
+        if (!auditResult.EsExitoso)
             return AuthResult.Fallido(auditResult.MensajeError ?? "No se pudo registrar la auditoría de ingreso.", auditResult.CodigoError ?? "SEGURIDAD_AUDITORIA_INGRESO");
 
         var session = SesionOperativa.Iniciar(
@@ -83,7 +83,7 @@ internal sealed class AuthService : IAuthService
             request.CodigoCaja,
             request.CodigoTerminal,
             request.BaseDatos,
-            auditResult.Valor.Value,
+            auditResult.Valor,
             DateTime.UtcNow,
             permissions);
 

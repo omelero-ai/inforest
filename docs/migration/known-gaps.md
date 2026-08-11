@@ -28,6 +28,7 @@
 | SEC-003 | SQL inline potencialmente vulnerable a injection | Múltiples `*.frm` | Alto | Media |
 | SEC-004 | Variables globales sin control de acceso (543 vars) | `modDeclaracion.bas` | Medio | Media |
 | SEC-005 | Licencia por dongle físico sin alternativa moderna | `License.cls`, `ModuloHardKey.bas` | Bajo | Baja |
+| SEC-006 | `TUSUARIO.tPassword` (`varchar(8)`) no permite persistir BCrypt sin tabla sidecar o cambio de esquema | `TUSUARIO` | Alto | Alta |
 
 ---
 
@@ -95,6 +96,7 @@
 | `Mapping.cls` | Uso no determinado — requiere revisión | `Clases/Mapping.cls` |
 | `INFHOTEL.INI` | Integración hotelera — detalles sin documentar | Configuración runtime |
 | Triggers SQL | Triggers eliminados en runtime (`ElminaTriguer`) — existencia real no confirmada | `modProcedimiento.bas` |
+| HardKey físico | La validación de presencia/conexión del dongle (`hk.VerificaConexion`, `hk.IniciaConexion`) aún no tiene equivalente .NET | `frmAcceso.frm`, `License.cls` |
 
 ---
 

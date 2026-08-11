@@ -15,7 +15,7 @@ public sealed class LicenseServiceTests
     [Fact]
     public void GetLicensedCount_InfoRest_LeePosicionLegacyCorrecta()
     {
-        var licencia = "1108202610099" + "15" + "0000000000";
+        var licencia = "00000000000" + "15" + "0000000000";
 
         var result = LicenseService.GetLicensedCount(licencia, "INFOREST");
 

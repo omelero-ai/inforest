@@ -30,7 +30,7 @@ internal sealed class LicenseService : ILicenseService
 
         try
         {
-            await using var securityConnection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
+            using var securityConnection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
             var encodedRuc = LegacyLicenseCodec.EncodeAsciiTriplets(request.RucEmpresa);
 
             const string sql = """
@@ -77,7 +77,7 @@ internal sealed class LicenseService : ILicenseService
 
                 if (maxLicenses != 99)
                 {
-                    await using var mainConnection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", cancellationToken);
+                    using var mainConnection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", cancellationToken);
                     var concurrencyResult = await mainConnection.QueryFirstOrDefaultAsync<int>(new CommandDefinition(
                         "usp_Seg_cLientes",
                         new

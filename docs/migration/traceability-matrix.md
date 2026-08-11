@@ -53,9 +53,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `modImpresoraFiscal.bas` | Integration | — | — | NOT_STARTED | Epson fiscal |
 | `modAuditoria.bas` | Audit | — | — | NOT_STARTED | Auditoría |
 | `modAuditoriaEquipo.bas` | Audit | — | — | NOT_STARTED | Auditoría equipo |
-| `modAuditoriaIntegral.bas` | Audit | — | — | NOT_STARTED | INFSEGURIDAD |
+| `modAuditoriaIntegral.bas` | Audit | `IAuditoriaService` + `AuditoriaService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IAuditoriaService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/AuditoriaService.cs` |
 | `modBarcode.bas` | Utility | — | — | NOT_STARTED | Códigos de barras |
-| `modSeguridadInfhotel.bas` | License | — | — | NOT_STARTED | Licencias |
+| `modSeguridadInfhotel.bas` | License | `ILicenseService` + `LicenseService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/ILicenseService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/LicenseService.cs` |
 | `modConexionIp.bas` | Network | — | — | NOT_STARTED | Conectividad |
 | `modCrearInis.bas` | Config | — | — | NOT_STARTED | Creación INIs |
 | `modTime.bas` | Utility | — | — | NOT_STARTED | Control de tiempo |
@@ -82,12 +82,12 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `clsComando.cls` MsgBox err | Error handling | `SqlExceptionTranslator` | Class | COMPLETED | `src/Inforest.Infrastructure/Data/SqlExceptionTranslator.cs` |
 | `ClsDocumento.cls` | Domain | — | — | NOT_STARTED | Documentos almacén |
 | `clsAlmacen.cls` | Domain | — | — | NOT_STARTED | Kardex, descargos |
-| `ClsSeguridad.cls` | Security | — | — | NOT_STARTED | Reemplazar con BCrypt |
+| `ClsSeguridad.cls` | Security | `IAuthService` + `AuthService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IAuthService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/AuthService.cs` |
 | `clsDiaContable.cls` | Domain | — | — | NOT_STARTED | Día contable |
 | `claCorreoElectronico.cls` | Notification | — | — | NOT_STARTED | Email |
 | `clsxml.cls` | Utility | — | — | NOT_STARTED | XML |
 | `clsTrama.cls` | Integration | — | — | NOT_STARTED | FE Paperlees |
-| `License.cls` | License | — | — | NOT_STARTED | Validación licencia |
+| `License.cls` | License | `ILicenseService` + `LicenseService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/ILicenseService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/LicenseService.cs` |
 | `Mapping.cls` | Mapping | — | — | UNKNOWN | Propósito no determinado |
 
 ---
@@ -178,6 +178,16 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | *(transversal)* | — | `Inforest.Domain.Common.Result` | Class | COMPLETED | `src/Inforest.Domain/Common/Result.cs` |
 | *(transversal)* | — | `Inforest.Domain.Common.Result<T>` | Class | COMPLETED | `src/Inforest.Domain/Common/Result.cs` |
 | `clsComando.cls` On Error | Error handling | `Inforest.Infrastructure.Exceptions.InfrastructureException` | Class | COMPLETED | `src/Inforest.Infrastructure/Exceptions/InfrastructureException.cs` |
+
+---
+
+## Componentes de Seguridad (P3-03 — Inicio)
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmAcceso.frm` | Form | `src/Inforest.Desktop/Form1.cs` | WinForms Form | IN_PROGRESS | `modern-net8/src/Inforest.Desktop/Form1.cs`, `modern-net8/src/Inforest.Desktop/Form1.Designer.cs` |
+| `frmAcceso.frm` / `USUARIO.INI` | Session bootstrap | `ISessionService` + `SessionService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/ISessionService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/SessionService.cs` |
+| `TACCESO` / `TGRUPOACCESO` | RBAC | `IRbacService` + `RbacService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IRbacService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/RbacService.cs` |
 | `clsComando.cls` ADODB errors | DB errors | `Inforest.Infrastructure.Exceptions.DatabaseException` | Class | COMPLETED | `src/Inforest.Infrastructure/Exceptions/InfrastructureException.cs` |
 | `Sub Main()` modPuntoVenta.bas | Startup | `Inforest.Desktop.Program` (DI-corrected bootstrap) | Class | COMPLETED | `src/Inforest.Desktop/Program.cs` |
 | *(test baseline)* | — | `Inforest.Domain.Tests` (20 tests) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/` |

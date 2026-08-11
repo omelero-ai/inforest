@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-11
 >
-> Estado general: **Fase 3 — P3-01 COMPLETADA — ESPERANDO APROBACIÓN para P3-02**
+> Estado general: **Fase 3 — P3-01 y P3-02 COMPLETADAS — P3-03 EN PROGRESO**
 
 ---
 
@@ -10,8 +10,8 @@
 
 | Indicador | Valor |
 |---|---|
-| Fase actual | 3 — P3-01 Re-baseline completada |
-| Código .NET 8 existente | IN_PROGRESS — Baseline validado: Result<T>, contratos de error, bootstrap DI corregido, 25 tests verdes |
+| Fase actual | 3 — P3-03 Seguridad, sesión, auditoría y licenciamiento en progreso |
+| Código .NET 8 existente | IN_PROGRESS — Baseline + seguridad inicial validados: auth, RBAC, sesión, auditoría, licenciamiento y 49 tests verdes |
 | Módulos migrados | 0 / 7 |
 | Documentación Legacy | IN_PROGRESS — inventarios y matrices de Fase 2 en construcción/actualización |
 | Arquitectura Target definida | IN_PROGRESS — ADR-001 a ADR-008 aceptados |
@@ -36,8 +36,8 @@
 
 | Capa | Legacy | .NET 8 | Estado |
 |---|---|---|---|
-| Presentación (UI) | 400 formularios VB6 detectados | 0 | NOT_STARTED |
-| Lógica de negocio | 32 módulos + 10 clases | 0 | NOT_STARTED |
+| Presentación (UI) | 400 formularios VB6 detectados | 1 login base | IN_PROGRESS |
+| Lógica de negocio | 32 módulos + 10 clases | Seguridad transveral inicial | IN_PROGRESS |
 | Acceso a datos | ADO + `clsComando` + 150 SP | 0 | NOT_STARTED |
 | Base de datos | 126T + 116V + 150SP | 0 | IN_PROGRESS |
 | Reportes | 206 Crystal Reports | 0 | NOT_STARTED |
@@ -72,6 +72,8 @@
 | M2 | Arquitectura Target definida | IN_PROGRESS |
 | M3 | Proyecto .NET 8 base creado | COMPLETED |
 | M3-P3-01 | Re-baseline arquitectura ejecutable (P3-01) | COMPLETED — 2026-08-11 |
+| M3-P3-02 | Contrato SQL y ejecución de datos Legacy (P3-02) | COMPLETED — 2026-08-11 |
+| M3-P3-03 | Seguridad, sesión, auditoría y licenciamiento | IN_PROGRESS — 2026-08-11 |
 | M4 | Primer módulo migrado (Maestros) | NOT_STARTED |
 | M5 | Punto de Venta migrado | NOT_STARTED |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
@@ -98,10 +100,10 @@
 
 ## Próximos Pasos
 
-1. **Completado P3-01** — Re-baseline arquitectura ejecutable. Ver criterios de salida en `phase-3-plan.md`.
-2. **Pendiente aprobación** para iniciar P3-02 — Contrato SQL y ejecución de datos Legacy (`clsComando.cls`).
-3. Modelar Infrastructure + Database adapters para SQL Server/SPs.
-4. Migrar Seguridad y Configuración (`TPARAMETRO` / `TCAJA`) — P3-03 y P3-04.
+1. **Completado P3-02** — Contrato SQL y ejecución de datos Legacy.
+2. **En progreso P3-03** — Seguridad inicial con login base, RBAC, sesión y auditoría.
+3. Cerrar estrategia de persistencia BCrypt y validación física de HardKey.
+4. Iniciar P3-04 — Configuración (`TPARAMETRO` / `TCAJA`).
 5. Iniciar Maestros (Productos / Grupos / Clientes) — P3-05.
 
 ---

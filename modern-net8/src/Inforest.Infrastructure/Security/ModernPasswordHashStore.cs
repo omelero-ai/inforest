@@ -33,7 +33,7 @@ internal sealed class ModernPasswordHashStore : IModernPasswordHashStore
         if (!await TableExistsAsync(cancellationToken))
             return null;
 
-        await using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
         var sql = $"SELECT tHashBCrypt FROM dbo.[{_tableName}] WHERE tCodigoUsuario = @CodigoUsuario";
         return await connection.QueryFirstOrDefaultAsync<string?>(new CommandDefinition(
             sql,
@@ -46,7 +46,7 @@ internal sealed class ModernPasswordHashStore : IModernPasswordHashStore
         if (!await TableExistsAsync(cancellationToken))
             return false;
 
-        await using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
         var sql = $"""
             MERGE dbo.[{_tableName}] AS target
             USING (SELECT @CodigoUsuario AS tCodigoUsuario, @Hash AS tHashBCrypt) AS source
@@ -71,7 +71,7 @@ internal sealed class ModernPasswordHashStore : IModernPasswordHashStore
         if (!SafeIdentifierRegex.IsMatch(_tableName))
             return false;
 
-        await using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("INFSEGURIDAD", cancellationToken);
         const string sql = """
             SELECT COUNT(*)
             FROM INFORMATION_SCHEMA.TABLES
