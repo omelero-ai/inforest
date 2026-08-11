@@ -239,4 +239,140 @@ Al trabajar con código VB6:
 
 ---
 
+## Fase 2 — Instrucciones Específicas
+
+### Decisiones Arquitectónicas Tomadas (NO negociar)
+
+Las siguientes decisiones están ACEPTADAS (ver `docs/architecture/architecture-decisions.md`):
+
+```
+ADR-001: WinForms .NET 8 — cliente POS principal
+ADR-002: SQL Server mantenido + Dapper para SPs Legacy
+ADR-003: Clean Architecture + CQRS
+ADR-004: Strangler Fig Pattern — migración incremental
+ADR-005: appsettings.json + variables de entorno para credenciales
+ADR-006: BCrypt para passwords + RBAC basado en TGRUPOUSUARIO/TACCESO
+ADR-007: FastReport .NET para reportes (reemplaza Crystal Reports)
+ADR-008: Feature flags por país + tenant_id para multi-local
+```
+
+### Estructura del Proyecto .NET 8
+
+```
+modern-net8/
+├── Inforest.sln
+├── src/
+│   ├── Inforest.Domain/        ← Entidades, reglas, interfaces de repositorios
+│   ├── Inforest.Application/   ← Casos de uso, Commands, Queries, interfaces de servicios
+│   ├── Inforest.Infrastructure/ ← Dapper/SQL Server, BCrypt, Serilog, hardware adapters
+│   └── Inforest.Desktop/       ← WinForms .NET 8 (net8.0-windows)
+└── tests/
+    ├── Inforest.Domain.Tests/
+    ├── Inforest.Application.Tests/
+    └── Inforest.Infrastructure.Tests/
+```
+
+### Reglas de Dependencia (OBLIGATORIAS)
+
+```
+Desktop → Application → Domain ← Infrastructure
+```
+
+- **Domain**: cero dependencias externas. Solo .NET BCL.
+- **Application**: depende solo de Domain. Define interfaces (IRepository, IService).
+- **Infrastructure**: implementa interfaces de Application/Domain. SQL, BCrypt, Serilog, hardware.
+- **Desktop**: depende de Application e Infrastructure. Solo UI + DI setup.
+
+### ANTES DE PROGRAMAR cualquier componente
+
+```
+1. Leer docs/migration/legacy-inventory.md
+2. Leer docs/migration/database/sql-inventory.md
+3. Leer el código VB6 correspondiente (encoding: latin-1)
+4. Leer el SQL relacionado (encoding: utf-16-le)
+5. Identificar SPs usados: spIns_*, spUpd_*, spRep_*, usp_*
+6. Identificar tablas: MPEDIDO, DPEDIDO, TPRODUCTO, TCAJA, TPARAMETRO, etc.
+7. Revisar docs/migration/traceability/business-logic-matrix.md
+8. Revisar docs/migration/business-rules.md para el módulo
+9. Revisar docs/migration/migration-order.md (respetar el orden)
+10. Identificar el BR-XXX correspondiente
+11. Diseñar antes de implementar
+```
+
+### REGLAS PARA STORED PROCEDURES
+
+```
+NUNCA eliminar un SP sin:
+  1. Leer su contenido completo
+  2. Identificar tablas, transacciones, side effects
+  3. Documentar lógica de negocio en business-rules.md
+  4. Clasificar: Mantener / Migrar a .NET / Dividir / Reemplazar
+  5. Actualizar docs/migration/database/sql-inventory.md
+
+SPs de reporte (spRep_*):
+  → Mantener en SQL Server, reutilizar desde .NET
+
+SPs de operación (spIns_*, spUpd_*):
+  → Mantener durante migración, migrar gradualmente a .NET si corresponde
+```
+
+### REGLAS PARA LEER ARCHIVOS LEGACY
+
+```csharp
+// Archivos VB6 (.frm, .bas, .cls): encoding latin-1
+// Archivos SQL (.sql): encoding utf-16-le
+
+// Python para leer SQL:
+// with open('5. SP.sql', 'r', encoding='utf-16-le', errors='replace') as f:
+//     content = f.read()
+```
+
+### REGLAS DE TRAZABILIDAD
+
+Cada componente migrado DEBE:
+
+```
+1. Tener comentario con Legacy source en el archivo .cs:
+   /// Legacy: frmVenta.frm, spIns_MPEDIDO, MPEDIDO/DPEDIDO
+
+2. Referenciar el BR-XXX en el comentario XML:
+   /// Regla BR-001, BR-SQL-001
+
+3. Actualizarse en docs/migration/traceability-matrix.md
+
+4. Actualizarse en docs/migration/traceability/business-logic-matrix.md
+```
+
+### DESPUÉS DE PROGRAMAR
+
+```
+1. Ejecutar tests: dotnet test tests/
+2. Verificar que no se inventó comportamiento (¿está en el Legacy?)
+3. Registrar gaps en docs/migration/known-gaps.md si aplica
+4. Actualizar docs/migration/traceability-matrix.md
+5. Actualizar docs/migration/traceability/business-logic-matrix.md
+6. Actualizar docs/migration/migration-status.md si corresponde
+```
+
+### CONVENCIONES .NET ESPECÍFICAS DE INFOREST
+
+```csharp
+// Entidades: nombres equivalentes al Legacy
+// MPEDIDO → Pedido (cabecera)
+// DPEDIDO → DetallePedido
+// TPRODUCTO → Producto
+// MTURNO → Turno
+// TCAJA → ConfiguracionCaja
+
+// SPs se llaman por nombre exacto del Legacy:
+await connection.ExecuteAsync("spIns_MPEDIDO", parameters, commandType: CommandType.StoredProcedure);
+
+// Parámetros SQL con @ y nombre exacto del SP Legacy:
+parameters.Add("@tCodigoPedido", pedido.CodigoPedido);
+
+// NO crear nombres "modernos" para SPs — usar exactamente el nombre Legacy hasta decisión explícita
+```
+
+---
+
 *Estas instrucciones son mandatorias para cualquier trabajo de migración en este repositorio.*

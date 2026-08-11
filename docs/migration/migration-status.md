@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-11
 >
-> Estado general: **Fase 1 — Análisis y Documentación (EN CURSO)**
+> Estado general: **Fase 2 — Análisis Técnico, Arquitectura y Setup (EN CURSO)**
 
 ---
 
@@ -10,11 +10,11 @@
 
 | Indicador | Valor |
 |---|---|
-| Fase actual | 1 — Análisis y Documentación |
-| Código .NET 8 existente | 0% — NOT_STARTED |
+| Fase actual | 2 — Análisis Técnico, Arquitectura y Setup |
+| Código .NET 8 existente | IN_PROGRESS — Solución base creada en `modern-net8/` (Domain, Application, Infrastructure, Desktop, Tests) |
 | Módulos migrados | 0 / 7 |
-| Documentación Legacy | PARTIAL — README completo, docs/ en construcción |
-| Arquitectura Target definida | NOT_STARTED |
+| Documentación Legacy | IN_PROGRESS — inventarios y matrices de Fase 2 en construcción/actualización |
+| Arquitectura Target definida | IN_PROGRESS — ADR-001 a ADR-008 aceptados |
 
 ---
 
@@ -22,13 +22,13 @@
 
 | Módulo | Ejecutable Legacy | Fase | Estado | Notas |
 |---|---|---|---|---|
-| Punto de Venta | `InfoRest.exe` | Análisis | NOT_STARTED | Legacy analizado en README |
-| Caja Rápida | `CajaRapida.exe` | Análisis | NOT_STARTED | Comparte código con InfoRest |
-| Adición | `Adicion.exe` | Análisis | NOT_STARTED | Módulo auxiliar de comandas |
-| Administración | `Administracion.exe` | Análisis | NOT_STARTED | 151 formularios |
-| Consultas | `Consulta.exe` | Análisis | NOT_STARTED | 76+ reportes |
-| Despachador | `Despachador.exe` | Análisis | NOT_STARTED | Delivery y despacho |
-| Motorizados | `Motorizado.exe` | Análisis | NOT_STARTED | Módulo pequeño |
+| Punto de Venta | `InfoRest.exe` | Análisis | NOT_STARTED | Baseline funcional identificado; depende de Infrastructure + Configuración + Turno |
+| Caja Rápida | `CajaRapida.exe` | Análisis | NOT_STARTED | Comparte gran parte del stack POS/caja |
+| Adición | `Adicion.exe` | Análisis | NOT_STARTED | Flujo auxiliar sobre pedidos en curso |
+| Administración | `Administracion.exe` | Análisis | NOT_STARTED | Maestros, parámetros y catálogos críticos |
+| Consultas | `Consulta.exe` | Análisis | NOT_STARTED | Alta concentración de reportes `spRep_*` + Crystal |
+| Despachador | `Despachador.exe` | Análisis | NOT_STARTED | Delivery, central pedidos e integraciones externas |
+| Motorizados | `Motorizado.exe` | Análisis | NOT_STARTED | Depende de delivery/despacho y tarifas |
 
 ---
 
@@ -36,29 +36,29 @@
 
 | Capa | Legacy | .NET 8 | Estado |
 |---|---|---|---|
-| Presentación (UI) | 401 formularios VB6 | 0 | NOT_STARTED |
+| Presentación (UI) | 400 formularios VB6 detectados | 0 | NOT_STARTED |
 | Lógica de negocio | 32 módulos + 10 clases | 0 | NOT_STARTED |
-| Acceso a datos | ADO + clsComando | 0 | NOT_STARTED |
-| Base de datos | 126T + 105V + 105+SP | 0 | NOT_STARTED |
+| Acceso a datos | ADO + `clsComando` + 150 SP | 0 | NOT_STARTED |
+| Base de datos | 126T + 116V + 150SP | 0 | IN_PROGRESS |
 | Reportes | 206 Crystal Reports | 0 | NOT_STARTED |
-| Integraciones | 10+ COM/DLL/OCX | 0 | NOT_STARTED |
-| Seguridad/Auth | XOR+César + INFSEGURIDAD | 0 | NOT_STARTED |
-| Configuración | INI files | 0 | NOT_STARTED |
+| Integraciones | COM/DLL/OCX + hardware POS | 0 | NOT_STARTED |
+| Seguridad/Auth | `INFSEGURIDAD` + cifrado débil Legacy | 0 | IN_PROGRESS |
+| Configuración | INI + `TPARAMETRO` + `TCAJA` | 0 | IN_PROGRESS |
 
 ---
 
 ## Cobertura de Migración
 
-> No disponible — no existe código .NET 8.
+> No disponible todavía para código ejecutable — no existe implementación .NET 8 funcional.
 
 | Componente | Inventario Legacy | Migrado | Cobertura |
 |---|---|---|---|
-| Formularios | 401 | 0 | NOT_AVAILABLE |
+| Formularios | 400 | 0 | NOT_AVAILABLE |
 | Módulos BAS | 32 | 0 | NOT_AVAILABLE |
 | Clases | 10 | 0 | NOT_AVAILABLE |
-| Stored Procedures | 105+ | 0 | NOT_AVAILABLE |
+| Stored Procedures | 150 | 0 | NOT_AVAILABLE |
 | Tablas | 126 | 0 | NOT_AVAILABLE |
-| Vistas | 105 | 0 | NOT_AVAILABLE |
+| Vistas | 116 | 0 | NOT_AVAILABLE |
 | Reportes | 206 | 0 | NOT_AVAILABLE |
 | Integraciones externas | 10+ | 0 | NOT_AVAILABLE |
 
@@ -68,9 +68,9 @@
 
 | Milestone | Descripción | Estado |
 |---|---|---|
-| M1 | Documentación Legacy completa | IN_PROGRESS |
-| M2 | Arquitectura Target definida | NOT_STARTED |
-| M3 | Proyecto .NET 8 base creado | NOT_STARTED |
+| M1 | Documentación Legacy completa | COMPLETED |
+| M2 | Arquitectura Target definida | IN_PROGRESS |
+| M3 | Proyecto .NET 8 base creado | IN_PROGRESS |
 | M4 | Primer módulo migrado (Maestros) | NOT_STARTED |
 | M5 | Punto de Venta migrado | NOT_STARTED |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
@@ -84,26 +84,31 @@
 
 | Blocker | Descripción | Impacto |
 |---|---|---|
-| ADR-001 pendiente | Tipo de aplicación Target no definido | Bloquea inicio de desarrollo |
-| ADR-002 pendiente | Base de datos Target no definida | Bloquea diseño de persistencia |
-| ADR-003 pendiente | Patrón arquitectónico no definido | Bloquea estructura del proyecto |
-| ADR-007 pendiente | Estrategia de reportes no definida | 206 reportes sin plan de migración |
+| ADR-001 resuelto | Cliente POS objetivo definido: WinForms .NET 8 | Desbloqueado |
+| ADR-002 resuelto | Motor de base y estrategia de compatibilidad definidos: SQL Server | Desbloqueado |
+| ADR-003 resuelto | Patrón arquitectónico definido: Clean Architecture + CQRS | Desbloqueado |
+| ADR-004 resuelto | Estrategia de migración definida: Strangler Fig | Desbloqueado |
+| ADR-005 resuelto | Configuración y secretos definidos | Desbloqueado |
+| ADR-006 resuelto | Línea base de autenticación/autorización definida | Desbloqueado |
+| ADR-007 resuelto | Estrategia de reportes definida: FastReport .NET | Desbloqueado |
+| ADR-008 resuelto | Estrategia multi-país/multi-local definida | Desbloqueado |
 
 ---
 
 ## Próximos Pasos
 
-1. Tomar decisiones arquitectónicas (ADR-001 a ADR-008)
-2. Crear proyecto .NET 8 en `modern-net8/`
-3. Configurar CI/CD básico
-4. Comenzar con módulo de Maestros (menor complejidad)
-5. Actualizar este documento con cada avance
+1. Crear la solución base .NET 8 en `modern-net8/` conforme a ADR-001..ADR-003.
+2. Modelar Infrastructure + Database adapters para SQL Server/SPs.
+3. Migrar Seguridad y Configuración (`TPARAMETRO` / `TCAJA`).
+4. Iniciar Maestros (Productos / Grupos / Clientes).
+5. Preparar la primera vertical operativa: Turno → Pedido simple.
 
 ---
 
 ## Referencias
 
 - [Estrategia de migración](migration-strategy.md)
-- [Brechas conocidas](known-gaps.md)
-- [Matriz de trazabilidad](traceability-matrix.md)
+- [Inventario Legacy](legacy-inventory.md)
+- [Inventario SQL](database/sql-inventory.md)
+- [Matriz de lógica de negocio](traceability/business-logic-matrix.md)
 - [Decisiones arquitectónicas](../architecture/architecture-decisions.md)

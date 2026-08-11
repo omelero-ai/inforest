@@ -1,6 +1,6 @@
 # Decisiones Arquitectónicas — INFOREST (ADR)
 
-> Registro de decisiones arquitectónicas importantes del proyecto de migración INFOREST VB6 → .NET 8.
+> Registro formal de decisiones arquitectónicas aceptadas para la migración INFOREST VB6 → .NET 8.
 
 ---
 
@@ -8,271 +8,285 @@
 
 | ADR | Título | Estado |
 |---|---|---|
-| [ADR-001](#adr-001) | Selección de tipo de aplicación Target | Proposed |
-| [ADR-002](#adr-002) | Estrategia de base de datos Target | Proposed |
-| [ADR-003](#adr-003) | Patrón arquitectónico para la nueva implementación | Proposed |
-| [ADR-004](#adr-004) | Estrategia de migración: Big Bang vs Strangler Fig | Proposed |
-| [ADR-005](#adr-005) | Gestión de credenciales y configuración | Proposed |
-| [ADR-006](#adr-006) | Seguridad: autenticación y autorización | Proposed |
-| [ADR-007](#adr-007) | Estrategia de reportes | Proposed |
-| [ADR-008](#adr-008) | Manejo de multi-país y multi-local | Proposed |
+| [ADR-001](#adr-001) | WinForms .NET 8 como cliente POS principal | Accepted |
+| [ADR-002](#adr-002) | SQL Server mantenido como motor y contrato de datos | Accepted |
+| [ADR-003](#adr-003) | Clean Architecture + CQRS | Accepted |
+| [ADR-004](#adr-004) | Strangler Fig Pattern para migración gradual | Accepted |
+| [ADR-005](#adr-005) | `appsettings.json` + User Secrets para configuración | Accepted |
+| [ADR-006](#adr-006) | BCrypt + RBAC en memoria sobre tablas Legacy | Accepted |
+| [ADR-007](#adr-007) | FastReport .NET para reportes | Accepted |
+| [ADR-008](#adr-008) | Feature flags por país + tenant ID | Accepted |
 
 ---
 
 ## ADR-001
 
-**Título:** Selección de tipo de aplicación Target
+**Título:** WinForms .NET 8 como cliente POS principal
 
-**Estado:** Proposed
+**Estado:** Accepted
 
 **Contexto:**
-El sistema Legacy es una aplicación desktop Windows (VB6 Forms) instalada en cada terminal POS. Existen dependencias de hardware (impresoras térmicas, cajones, PinPad, biometría) que son dependientes de Windows.
+El sistema Legacy es Windows-only, opera en terminales POS con dependencias intensivas de hardware (impresoras térmicas, cajón, PinPad, biometría, impresora fiscal) y concentra 400 formularios `.frm` con flujos altamente interactivos y latencia crítica.
 
 **Problema:**
-¿El sistema Target debe ser una aplicación Web, Desktop nativo (.NET WinForms/WPF/MAUI) o híbrido?
+Definir el tipo de cliente Target que minimice riesgo de migración y preserve compatibilidad con hardware POS y operación offline/local.
 
 **Decisión:**
-UNKNOWN — pendiente de decisión del equipo y stakeholders.
+El cliente principal del nuevo sistema será **WinForms sobre .NET 8**. Se mantendrá un enfoque desktop nativo para los ejecutables operativos (POS, Caja, Administración, Consulta, Despacho, Motorizados), encapsulando el hardware detrás de adaptadores de Infrastructure.
 
 **Alternativas consideradas:**
-- Aplicación Web (Blazor / React + .NET API): mayor accesibilidad, pero requiere abstracción de hardware
-- Desktop .NET 8 (WinForms/WPF): migración más directa, sigue siendo Windows-only
-- Desktop MAUI: multiplataforma, pero limitaciones de hardware
-- Híbrido: API .NET 8 + cliente Web para gestión + cliente Desktop para POS
+- Aplicación Web: descartada para el core POS por dependencia intensiva de hardware y sensibilidad a latencia.
+- WPF: viable, pero con menor alineación con el modelo de formularios/eventos VB6 y mayor costo de reentrenamiento.
+- .NET MAUI: insuficiente para el ecosistema Win32/COM heredado del POS.
+- Híbrido web + desktop: se reserva para etapas futuras, no para el primer corte del core operativo.
 
 **Consecuencias:**
-La elección impacta directamente en la estrategia de integración de hardware POS.
+- La migración de UI puede hacerse formulario a formulario conservando patrones de interacción cercanos al Legacy.
+- Las integraciones Win32/COM siguen siendo factibles durante la transición.
+- El sistema Target continúa siendo Windows-first para operación POS.
+- La portabilidad multiplataforma se posterga explícitamente.
 
-**Fecha:** UNKNOWN
+**Fecha:** 2026-08-11
 
 **Evidencia:**
-- `legacy-restaurant/restaurant-vb6/` — hardware dependencies
-- `modern-net8/README.md` — placeholder sin definición
+- `legacy-restaurant/restaurant-vb6/Formularios/` — 400 formularios
+- `IFEpson.ocx`, `CAJA_PINPAD.dll`, `sgfplibx.ocx`
+- `modImpresoraFiscal.bas`, `DLL3500.bas`, `modBlueVision.bas`, `modKDS.bas`
 
 ---
 
 ## ADR-002
 
-**Título:** Estrategia de base de datos Target
+**Título:** SQL Server mantenido como motor y contrato de datos
 
-**Estado:** Proposed
+**Estado:** Accepted
 
 **Contexto:**
-El Legacy usa SQL Server con 126 tablas, 105 vistas y 105+ stored procedures. Los nombres de tablas siguen convenciones específicas (prefijos M, D, T, A).
+El Legacy opera sobre SQL Server con 126 tablas, 116 vistas y 150 stored procedures detectados en el repositorio actual. Parte relevante de la lógica de negocio está implementada en SPs (`spIns_MPEDIDO`, `spUpd_MPEDIDO`, `spRep_*`, `USP_*`).
 
 **Problema:**
-¿Se migra a SQL Server (misma plataforma) o a otro motor (PostgreSQL, etc.)? ¿Se mantienen los nombres de tablas Legacy o se renombran?
+Definir si la migración cambia de motor o preserva SQL Server para reducir riesgo funcional.
 
 **Decisión:**
-UNKNOWN — pendiente de decisión.
+Se **mantiene SQL Server** como motor de base de datos del Target y como contrato de datos inicial de migración. Los nombres Legacy se preservan durante la fase de coexistencia y los SP críticos pueden reutilizarse temporalmente tras encapsulación en Infrastructure.
 
 **Alternativas consideradas:**
-- Mantener SQL Server: mínimo riesgo, reutiliza SPs existentes
-- Migrar a PostgreSQL: reduce costo de licencias, mayor compatibilidad cloud
-- Renombrar tablas siguiendo convenciones modernas: más legible pero requiere mapeo
+- PostgreSQL: descartado para la primera fase por costo alto de reescritura de SPs y diferencias dialectales.
+- Renombrado masivo de tablas: descartado mientras la trazabilidad no esté madura.
+- Reescritura inmediata de toda la lógica SQL en C#: descartada por riesgo funcional y falta de baseline .NET.
 
 **Consecuencias:**
-Si se renombran tablas, se requiere mapeo completo en `docs/database/mapping.md`.
-Si se mantiene SQL Server, algunos SPs pueden reutilizarse.
+- Se habilita migración gradual módulo a módulo.
+- Infrastructure deberá abstraer ADO/consultas/SPs sin acoplar el Domain al esquema Legacy.
+- La deuda de nombres Legacy se acepta temporalmente y se documenta en trazabilidad/mapping.
 
-**Fecha:** UNKNOWN
+**Fecha:** 2026-08-11
 
 **Evidencia:**
-- `legacy-restaurant/database-sql-server/1. Estructura.sql` — 126 tablas
+- `legacy-restaurant/database-sql-server/1. Estructura.sql`
+- `legacy-restaurant/database-sql-server/4. Vistas.sql`
+- `legacy-restaurant/database-sql-server/5. SP.sql`
 
 ---
 
 ## ADR-003
 
-**Título:** Patrón arquitectónico para la nueva implementación
+**Título:** Clean Architecture + CQRS
 
-**Estado:** Proposed
+**Estado:** Accepted
 
 **Contexto:**
-El Legacy es monolítico sin separación de capas. El target debe tener separación explícita para mantenibilidad.
+El Legacy mezcla UI, lógica de negocio y datos dentro de formularios y módulos globales. La nueva solución necesita separación fuerte de responsabilidades para ser migrable, testeable y mantenible.
 
 **Problema:**
-¿Qué patrón arquitectónico usar para la implementación .NET 8?
+Elegir una estructura que permita aislar reglas de negocio del legado tecnológico, sin perder velocidad de implementación.
 
 **Decisión:**
-UNKNOWN — pendiente de decisión del equipo.
+La solución .NET 8 adoptará **Clean Architecture** con capas **Domain / Application / Infrastructure / Presentation**, y usará **CQRS** a nivel de Application para separar comandos operativos y consultas/reportes.
 
 **Alternativas consideradas:**
-- Clean Architecture (Uncle Bob): Domain, Application, Infrastructure, Presentation
-- N-Layer tradicional: UI, BLL, DAL, DB
-- CQRS + Event Sourcing: mayor complejidad, más trazabilidad
-- Monolito modular: por módulo funcional (POS, Caja, Delivery, Admin, Cocina)
-- Microservicios: mayor complejidad operacional
+- N-Layer tradicional: más simple, pero menos explícita para aislar reglas y dependencias externas.
+- Monolito sin CQRS: insuficiente para la densidad de reportes/consultas vs comandos operativos.
+- Microservicios: descartado por complejidad operacional temprana.
+- Event sourcing: descartado para la fase inicial por sobrecosto innecesario.
 
 **Consecuencias:**
-Impacta en la organización del código en `modern-net8/` y en la estrategia de pruebas.
+- `modern-net8/` deberá estructurarse por capas y módulos funcionales.
+- Los SPs/reportes pueden implementarse como Queries sin contaminar el Domain.
+- Los workflows operativos (pedido, cobro, cierre, FE) se modelan como Commands.
 
-**Fecha:** UNKNOWN
+**Fecha:** 2026-08-11
 
 ---
 
 ## ADR-004
 
-**Título:** Estrategia de migración: Big Bang vs Strangler Fig
+**Título:** Strangler Fig Pattern para migración gradual
 
-**Estado:** Proposed
+**Estado:** Accepted
 
 **Contexto:**
-INFOREST es un sistema en producción. No existe código .NET 8. La migración debe hacerse sin interrumpir operaciones.
+INFOREST está orientado a operación continua y no existe todavía una base .NET 8. El riesgo de un corte total es alto por amplitud funcional, hardware e integraciones multi-país.
 
 **Problema:**
-¿Se migra todo a la vez (Big Bang) o se migra gradualmente módulo a módulo (Strangler Fig)?
+Definir la estrategia de transición entre Legacy VB6 y el Target .NET 8.
 
 **Decisión:**
-UNKNOWN — pendiente de decisión.
+La migración seguirá el **Strangler Fig Pattern**: coexistencia controlada de Legacy y .NET 8, reemplazando capacidades en slices verificables (seguridad, maestros, configuración, pedidos, venta, caja, reportes, hardware, KDS/delivery).
 
 **Alternativas consideradas:**
-- **Big Bang:** Reescribir todo y desplegar en una sola versión. Alto riesgo.
-- **Strangler Fig Pattern:** Migrar módulo por módulo, coexistiendo Legacy y .NET. Bajo riesgo, mayor duración.
-- **Parallel Run:** Ejecutar Legacy y .NET en paralelo para validar comportamiento. Costo alto pero validación completa.
+- Big Bang: descartado por alto riesgo operativo.
+- Parallel Run total: útil para validación, pero demasiado costoso como estrategia primaria.
+- Reescritura por repositorio sin convivencia: no resuelve rollout progresivo.
 
 **Consecuencias:**
-Strangler Fig requiere definir la interfaz entre Legacy y .NET durante la transición.
+- La trazabilidad Legacy→.NET se vuelve artefacto obligatorio de gobierno.
+- Los componentes nuevos deben validar equivalencia contra VB6/SQL antes de desplazar funcionalidad.
+- Se necesitan feature toggles y puntos de integración claros entre ambos mundos.
 
-**Fecha:** UNKNOWN
+**Fecha:** 2026-08-11
 
 **Evidencia:**
-- Sistema en uso activo (evidenciado por complejidad del código y múltiples países soportados)
+- Repositorio sin código .NET operativo en `modern-net8/`
+- Dependencias de hardware y multi-país documentadas en `legacy-restaurant/README.md`
 
 ---
 
 ## ADR-005
 
-**Título:** Gestión de credenciales y configuración
+**Título:** `appsettings.json` + User Secrets para configuración
 
-**Estado:** Proposed
+**Estado:** Accepted
 
 **Contexto:**
-El Legacy tiene credenciales SQL Server hardcodeadas en `modPuntoVenta.bas` Sub Main(). Este es un riesgo crítico de seguridad.
+El Legacy usa archivos INI y credenciales embebidas en código VB6, lo que constituye un riesgo crítico de seguridad y complica despliegues controlados.
 
 **Problema:**
-¿Cómo gestionar credenciales y configuración en el sistema Target?
+Definir un mecanismo moderno de configuración que separe parámetros no sensibles de secretos.
 
 **Decisión:**
-Las credenciales NO deben estar en el código fuente. Se propone usar:
-- `appsettings.json` para configuración no sensible
-- Variables de entorno o secrets manager para credenciales
+Se utilizará **`appsettings.json`** para configuración no sensible, **`.NET User Secrets`** para desarrollo local y un **secret store del entorno** (variables de entorno / vault corporativo) para ambientes no locales. La configuración Legacy basada en INI será absorbida mediante adaptadores de migración, no replicada como estándar final.
 
 **Alternativas consideradas:**
-- Environment variables: simple, disponible en todos los entornos
-- Azure Key Vault / AWS Secrets Manager: más seguro para producción cloud
-- .NET User Secrets (desarrollo): solo para ambiente de desarrollo
-- INI files cifrados: migración mínima del enfoque actual
+- Seguir con INI cifrados: descartado por deuda técnica y debilidad de seguridad.
+- Variables de entorno exclusivamente: insuficiente para configuración jerárquica compleja del POS.
+- Secret manager sin `appsettings`: innecesariamente rígido para parámetros no sensibles.
 
 **Consecuencias:**
-- El sistema deja de ser portable por copia de ejecutable + INI
-- Requiere proceso de configuración en despliegue
+- Se elimina el hardcoding de credenciales.
+- Deployment y soporte deberán contemplar bootstrap de configuración por local/país.
+- Será necesario mapear los parámetros de `INFOREST.INI`, `ALMACEN.INI`, `FACTURACION.INI`, etc.
 
-**Estado:** Proposed — aceptable para proyecto
-
-**Fecha:** UNKNOWN
+**Fecha:** 2026-08-11
 
 **Evidencia:**
-- Credenciales hardcodeadas detectadas en análisis Legacy (ver `legacy-restaurant/README.md` §7)
+- Credenciales hardcodeadas documentadas en `legacy-restaurant/README.md`
+- Archivos `Inforest.ini`, `Almacen.ini`, `Facturacion.ini`, `DLL3500.ini`, `Tiempo.ini`
 
 ---
 
 ## ADR-006
 
-**Título:** Seguridad: autenticación y autorización
+**Título:** BCrypt + RBAC en memoria sobre tablas Legacy
 
-**Estado:** Proposed
+**Estado:** Accepted
 
 **Contexto:**
-El Legacy usa `TUSUARIO`, `TGRUPOUSUARIO`, `TACCESO`, `TGRUPOACCESO` para control de acceso. El cifrado actual (`ClsSeguridad`) usa XOR+César que es criptográficamente débil.
+El Legacy usa `TUSUARIO`, `TGRUPOUSUARIO`, `TACCESO`, `TGRUPOACCESO` y cifrado débil en `ClsSeguridad.cls` (XOR/César). Se necesita compatibilidad funcional sin heredar el esquema de seguridad inseguro.
 
 **Problema:**
-¿Cómo implementar autenticación y autorización en el sistema Target?
+Definir autenticación y autorización para el Target .NET 8, manteniendo equivalencia con los permisos existentes.
 
 **Decisión:**
-UNKNOWN — pendiente de decisión.
+La autenticación Target usará **hash BCrypt** para contraseñas. La autorización se implementará como **RBAC en memoria** cargado desde las tablas Legacy de grupos y accesos (`TGRUPOUSUARIO`, `TACCESO`, `TGRUPOACCESO`), encapsulado en Infrastructure/Application.
 
 **Alternativas consideradas:**
-- ASP.NET Core Identity con RBAC
-- JWT ******
-- Windows Authentication (si se mantiene desktop)
-- OAuth2 / OpenID Connect
+- Mantener algoritmo Legacy: descartado por inseguro.
+- ASP.NET Core Identity completo: posible, pero sobredimensionado para la primera fase desktop.
+- Windows Authentication: insuficiente para escenarios multi-local/multi-país con usuarios propios del sistema.
 
 **Consecuencias:**
-Los modelos de usuario y grupos (`TUSUARIO`, `TGRUPOUSUARIO`) deben migrarse.
-Los passwords deben re-hashearse con BCrypt/Argon2.
+- Se deberá diseñar estrategia de transición/rehash de contraseñas.
+- El modelo RBAC Legacy puede reutilizarse sin depender del cifrado actual.
+- Seguridad queda desacoplada de formularios VB6 y de variables globales.
 
-**Fecha:** UNKNOWN
+**Fecha:** 2026-08-11
 
 **Evidencia:**
-- `Clases/ClsSeguridad.cls` — cifrado débil
-- Tablas `TUSUARIO`, `TGRUPOUSUARIO`, `TACCESO` en BD Legacy
+- `legacy-restaurant/restaurant-vb6/Clases/ClsSeguridad.cls`
+- Tablas `TUSUARIO`, `TGRUPOUSUARIO`, `TACCESO`, `TGRUPOACCESO`
 
 ---
 
 ## ADR-007
 
-**Título:** Estrategia de reportes
+**Título:** FastReport .NET para reportes
 
-**Estado:** Proposed
+**Estado:** Accepted
 
 **Contexto:**
-El Legacy tiene 206 reportes Crystal Reports (.dsr/.dca). Crystal Reports requiere licencia y no es compatible con .NET 8 directamente.
+El Legacy contiene 206 reportes Crystal Reports `.Dsr` más artefactos `.DCA/.dsx`. Crystal Reports no ofrece una ruta moderna limpia para .NET 8 y agregaría dependencia propietaria heredada.
 
 **Problema:**
-¿Cómo migrar 206 reportes Crystal Reports a .NET 8?
+Definir el motor de reportes del Target equilibrando compatibilidad .NET 8 y reutilización del SQL existente.
 
 **Decisión:**
-UNKNOWN — pendiente de decisión.
+Se adopta **FastReport .NET** como motor objetivo de reportes. Los SPs/vistas Legacy de reporting (`spRep_*`, `v*`) se reutilizarán como contratos de datos mientras se migran las plantillas Crystal.
 
 **Alternativas consideradas:**
-- SAP Crystal Reports for Visual Studio (compatibilidad limitada con .NET 8)
-- FastReport .NET (reescritura manual pero compatible)
-- SSRS (SQL Server Reporting Services)
-- Telerik Reporting
-- rdlc (Report Definition Language Client-side)
+- Crystal Reports para Visual Studio: descartado por alineación débil con .NET 8 y continuidad del stack legado.
+- SSRS: viable para backoffice, menos adecuado para todos los flujos desktop POS.
+- Telerik/RDLC: opciones posibles, pero FastReport ofrece mejor balance para desktop .NET 8 y rediseño gradual.
 
 **Consecuencias:**
-206 reportes requieren migración manual o herramienta de conversión.
-Los SPs de reporte (`spRep_*`) pueden reutilizarse independientemente del motor de reportes.
+- La migración de los 206 reportes será manual/semi-manual, no automática.
+- Los reportes se podrán validar reutilizando SPs existentes antes de refactorizar datasets.
+- La capa Presentation/Reporting debe aislarse del resto del POS.
 
-**Fecha:** UNKNOWN
+**Fecha:** 2026-08-11
 
 **Evidencia:**
-- `legacy-restaurant/restaurant-vb6/Reportes/` — 206 reportes .dsr
+- `legacy-restaurant/restaurant-vb6/Reportes/` — 206 `.Dsr`
+- `5. SP.sql` — familia `spRep_*`
 
 ---
 
 ## ADR-008
 
-**Título:** Manejo de multi-país y multi-local
+**Título:** Feature flags por país + tenant ID
 
-**Estado:** Proposed
+**Estado:** Accepted
 
 **Contexto:**
-El Legacy soporta múltiples países con scripts SQL específicos y múltiples locales con administración centralizada. La configuración por país incluye impuestos, facturación electrónica y normativa fiscal.
+El Legacy soporta Perú, Chile, Bolivia, Ecuador, Argentina y España con scripts SQL específicos, configuraciones fiscales diferenciadas y administración centralizada multi-local.
 
 **Problema:**
-¿Cómo implementar multi-país y multi-local en .NET 8?
+Definir un modelo Target que maneje variaciones por país/local sin forkear la base funcional.
 
 **Decisión:**
-UNKNOWN — pendiente de decisión.
+El Target usará **feature flags por país** y un **tenant ID / local ID** explícito para aislar configuración, fiscalidad, capacidades y rollout por local. Las variantes de país no se codificarán como ramas de UI, sino como políticas/configuración externalizada.
 
 **Alternativas consideradas:**
-- Multi-tenancy por país/local: un solo deployment con configuración por tenant
-- Deployments independientes por país/local
-- Feature flags por país
-- Configuración externalizada con perfiles por país
+- Deployments totalmente separados por país: eleva costo de mantenimiento.
+- Un solo comportamiento rígido: incompatible con normativa fiscal multi-país.
+- Solo multi-local sin flags: insuficiente para diferencias regulatorias reales.
 
 **Consecuencias:**
-La base de datos debe soportar `local_id` para mantener unicidad en arquitectura multi-local.
+- `TPARAMETRO`, `TCAJA` y scripts por país deben mapearse a configuración externalizada.
+- Cada integración fiscal/hardware podrá habilitarse selectivamente.
+- La estrategia de pruebas debe incluir matrices país × local × feature set.
 
-**Fecha:** UNKNOWN
+**Fecha:** 2026-08-11
 
 **Evidencia:**
-- `legacy-restaurant/database-sql-server/opcionales/` — scripts por país (6 países)
-- Flag `CENTRALIZADA=ON` en `INFOREST.INI`
+- `legacy-restaurant/database-sql-server/opcionales/scriptPeruAlIniciar.sql`
+- `legacy-restaurant/database-sql-server/opcionales/scriptChileAlIniciar.sql`
+- `legacy-restaurant/database-sql-server/opcionales/scriptBoliviaAlIniciar.sql`
+- `legacy-restaurant/database-sql-server/opcionales/scriptEcuadorAlIniciar.sql`
+- `legacy-restaurant/database-sql-server/opcionales/scriptArgentinaAlIniciar.sql`
+- `legacy-restaurant/database-sql-server/opcionales/scriptEspanaAlIniciar.sql`
+- `modPuntoVenta.bas` — `AdministracionCentralizada`
 
 ---
 
-*Los ADRs en estado `Proposed` están pendientes de aceptación formal por el equipo de arquitectura.*
+*Todos los ADR listados en este documento quedan aceptados como baseline arquitectónico de Fase 2.*

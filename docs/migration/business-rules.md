@@ -361,4 +361,283 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+## Reglas SQL
+
+> Reglas extraídas directamente de `legacy-restaurant/database-sql-server/5. SP.sql` y relacionadas con la lógica operativa más crítica de ventas e inventario.
+
+### BR-VENTAS-SQL-001
+**Nombre:** Correlativo global de pedido desde `TPARAMETRO`
+
+**Origen:** SQL/spIns_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spIns_MPEDIDO`
+
+**Descripción:** Antes de insertar un pedido, el SP incrementa `TPARAMETRO.nCorrelativo` y usa el nuevo valor como correlativo interno del pedido.
+
+**Condición:** Inserción de un nuevo pedido.
+
+**Resultado:** `TPARAMETRO.nCorrelativo` aumenta en 1 y `MPEDIDO.nCorrelativo` recibe ese valor.
+
+**Excepciones:** No hay control transaccional explícito en el script para concurrencia; requiere validación en migración.
+
+**Destino .NET:** `Application/Commands/CreatePedidoCommand`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-VENTAS-SQL-002
+**Nombre:** Código de pedido anual con prefijo de año
+
+**Origen:** SQL/spIns_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spIns_MPEDIDO`
+
+**Descripción:** El código del pedido se genera con los dos últimos dígitos del año más una secuencia de 8 dígitos basada en el máximo `tCodigoPedido` del año actual.
+
+**Condición:** Inserción de un nuevo pedido.
+
+**Resultado:** `MPEDIDO.tCodigoPedido` queda con formato `YY########`.
+
+**Excepciones:** Si no existe pedido previo del año, la secuencia inicia en `00000001`.
+
+**Destino .NET:** `Domain/ValueObjects/PedidoId`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-VENTAS-SQL-003
+**Nombre:** Derivación automática de salón desde la mesa
+
+**Origen:** SQL/spIns_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spIns_MPEDIDO`
+
+**Descripción:** Si se informa una mesa, el salón real del pedido se obtiene desde `TMESA.tSalon`; solo si no hay mesa se usa el salón recibido como parámetro.
+
+**Condición:** `@tMesa <> ''`.
+
+**Resultado:** `MPEDIDO.tSalon` se persiste con el salón asociado a la mesa.
+
+**Excepciones:** Si no hay mesa, el SP conserva `@tSalon`.
+
+**Destino .NET:** `Domain/Services/MesaAssignmentService`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-VENTAS-SQL-004
+**Nombre:** Inserción diferenciada por canal central de pedidos
+
+**Origen:** SQL/spIns_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spIns_MPEDIDO`
+
+**Descripción:** El SP consulta `vTipoPedido.lCanalCentralPedidos`; según el canal, cambia qué columnas se completan durante la inserción (`tEntregarA`, `tTiporecepcion`, `fRegistro`).
+
+**Condición:** `COUNT(codigo)` en `vTipoPedido` con `lCanalCentralPedidos = 0` o distinto.
+
+**Resultado:** El pedido se inserta con diferentes valores operativos para venta local vs canal centralizado.
+
+**Excepciones:** La diferencia exacta debe preservarse por estrategia de compatibilidad funcional, no por simplificación.
+
+**Destino .NET:** `Application/Policies/TipoPedidoPolicy`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-VENTAS-SQL-005
+**Nombre:** Persistencia de descuentos autorizados y origen de venta
+
+**Origen:** SQL/spIns_MPEDIDO + spUpd_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spIns_MPEDIDO`, `spUpd_MPEDIDO`
+
+**Descripción:** Tanto alta como edición de pedido persisten `nDescuento`, `tDescuento`, `tObservacionDescuento`, `tUsuarioDescuento` y `CodigoOrigenVenta`.
+
+**Condición:** Pedido creado o modificado con descuento y/o canal de origen.
+
+**Resultado:** El pedido conserva trazabilidad de descuento autorizado y del canal/origen de venta.
+
+**Excepciones:** No se observa validación de permisos dentro del SP; se asume resuelta en VB6 o capa superior.
+
+**Destino .NET:** `Application/Commands/CreateOrUpdatePedidoCommand`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-VENTAS-SQL-006
+**Nombre:** Sincronización de `TPEDIDOMESA` tras crear pedido
+
+**Origen:** SQL/spIns_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spIns_MPEDIDO`
+
+**Descripción:** Después de insertar el pedido, el SP actualiza `TPEDIDOMESA` asignando el nuevo código donde exista `tCodigoPedido = ''`.
+
+**Condición:** Inserción de un nuevo pedido.
+
+**Resultado:** Las relaciones temporales mesa↔pedido quedan vinculadas al nuevo pedido persistido.
+
+**Excepciones:** Requiere revisión de concurrencia para mesas múltiples o inserciones simultáneas.
+
+**Destino .NET:** `Infrastructure/Repositories/PedidoMesaRepository`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-VENTAS-SQL-007
+**Nombre:** Regularización automática de pedidos no entregados con programación nula
+
+**Origen:** SQL/spIns_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spIns_MPEDIDO`
+
+**Descripción:** Tras cada inserción, el SP marca como entregados (`lEntregado = 1`) y fija `fProgramacion = fFecha` para pedidos recientes con `fProgramacion IS NULL` y no entregados.
+
+**Condición:** Existencia de pedidos creados en el último día sin programación y sin entrega.
+
+**Resultado:** Se corrigen pedidos incompletos para evitar estados operativos inválidos.
+
+**Excepciones:** Es una corrección lateral del SP; debe analizarse si corresponde migrarla igual o encapsularla como job/regla separada.
+
+**Destino .NET:** `Application/Policies/PedidoConsistencyPolicy`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-VENTAS-SQL-008
+**Nombre:** Actualización integral del pedido respetando mesa/salón vigentes
+
+**Origen:** SQL/spUpd_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spUpd_MPEDIDO`
+
+**Descripción:** La edición del pedido actualiza cliente delivery, tipo de pedido, prioridad, atención, mozo, motorizado, observaciones, datos hoteleros, descuentos, programación, invitado/pariente, entrega, origen de venta, mesa y salón.
+
+**Condición:** Modificación de un pedido existente.
+
+**Resultado:** `MPEDIDO` se actualiza en una sola operación SQL, recalculando `tSalon` desde `TMESA` si se cambió la mesa.
+
+**Excepciones:** Si no hay mesa, conserva el salón previamente registrado en `MPEDIDO`.
+
+**Destino .NET:** `Application/Commands/UpdatePedidoCommand`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-VENTAS-SQL-009
+**Nombre:** Reporte de ventas con filtros dinámicos por cliente/documento/estado/caja/tipo de pago
+
+**Origen:** SQL/spRep_RegVenta
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spRep_RegVenta`
+
+**Descripción:** El reporte arma criterios dinámicos en SQL para filtrar por cliente, tipo de documento, estado del documento, caja y tipo de pago.
+
+**Condición:** Ejecución del reporte con alguno de esos parámetros informado.
+
+**Resultado:** El dataset final de ventas se restringe a los criterios solicitados por el operador.
+
+**Excepciones:** El SP usa SQL dinámico; la migración debe preservar el resultado sin reproducir riesgos de concatenación indiscriminada.
+
+**Destino .NET:** `Application/Queries/ReporteRegistroVentaQuery`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-VENTAS-SQL-010
+**Nombre:** Reporte de ventas con orden configurable y fecha operativa / día contable
+
+**Origen:** SQL/spRep_RegVenta
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spRep_RegVenta`
+
+**Descripción:** El reporte soporta orden por correlativo, montos o fechas, utiliza tablas temporales (`#DBTRANS`, `#DBTRANS1`, `#TEMP`) y bifurca la lógica según `@diaContable` para fecha calendario vs fecha operativa.
+
+**Condición:** Ejecución del reporte con combinación de `@sOrden`, `@flagAnoMes`, `@diaContable`, rangos de fecha y hora de corte.
+
+**Resultado:** El registro de ventas consolida documentos y notas de crédito conforme a la fecha operativa esperada por negocio.
+
+**Excepciones:** La migración debe validar contra Legacy la semántica exacta de hora de corte y agrupaciones.
+
+**Destino .NET:** `Application/Queries/ReporteRegistroVentaQuery`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-ALMACEN-SQL-001
+**Nombre:** Modificación de insumo con normalización de descripción y actualización condicional de stock
+
+**Origen:** SQL/USP_MODIFICARINSUMOS
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `USP_MODIFICARINSUMOS`
+
+**Descripción:** El SP normaliza la descripción del insumo a mayúsculas y, según `@MODULO`, actualiza o no el stock (`NSTOCK`) además de usuario, caja, activo, bandera `LINSUMO` y fecha de modificación.
+
+**Condición:** Edición de un insumo desde mantenimiento.
+
+**Resultado:** `TINSUMO` queda actualizado con auditoría básica y consistencia de descripción.
+
+**Excepciones:** Si `@MODULO = 0`, el stock no se modifica.
+
+**Destino .NET:** `Application/Commands/UpdateInsumoCommand`
+
+**Estado:** NOT_STARTED
+
+**Evidencia:** CONFIRMED
+
+---
+
 *Este documento se amplía con cada análisis de módulo.*
