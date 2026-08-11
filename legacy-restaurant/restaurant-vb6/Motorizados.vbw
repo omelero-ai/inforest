@@ -1,0 +1,12 @@
+modMotorizado = 66, 87, 1444, 438, C
+modProcedimiento = 0, 0, 0, 0, C
+modDeclaracion = 0, 0, 0, 0, C
+frmLlegadaSalida = 0, 0, 0, 0, C, 22, 22, 1187, 515, C
+modConexionIp = 0, 0, 0, 0, C
+CodigoControl = 0, 0, 0, 0, C
+modSeguridadInfhotel = 0, 0, 0, 0, C
+clsComando = 0, 0, 0, 0, C
+claCorreoElectronico = 0, 0, 0, 0, C
+clsTrama = 0, 0, 0, 0, C
+modTime = 0, 0, 0, 0, C
+fmrPedidosEntregado = 44, 58, 1422, 409, C, 66, 66, 1231, 559, C
