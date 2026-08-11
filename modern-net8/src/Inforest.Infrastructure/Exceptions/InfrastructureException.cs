@@ -30,6 +30,9 @@ public class InfrastructureException : Exception
 /// </summary>
 public class DatabaseException : InfrastructureException
 {
-    public DatabaseException(string message, Exception? innerException = null)
-        : base(message, innerException!, "DB_ERROR") { }
+    public DatabaseException(string message)
+        : base(message) { }
+
+    public DatabaseException(string message, Exception innerException)
+        : base(message, innerException, "DB_ERROR") { }
 }
