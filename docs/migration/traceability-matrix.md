@@ -163,3 +163,20 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 ---
 
 *Esta matriz debe actualizarse con cada avance de migración.*
+
+---
+
+## Componentes de Infraestructura Transversal (P3-01 — Baseline)
+
+> Etapa P3-01 — Re-baseline de arquitectura ejecutable y gobierno técnico. Completada 2026-08-11.
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| *(transversal)* | — | `Inforest.Domain.Common.Result` | Class | COMPLETED | `src/Inforest.Domain/Common/Result.cs` |
+| *(transversal)* | — | `Inforest.Domain.Common.Result<T>` | Class | COMPLETED | `src/Inforest.Domain/Common/Result.cs` |
+| `clsComando.cls` On Error | Error handling | `Inforest.Infrastructure.Exceptions.InfrastructureException` | Class | COMPLETED | `src/Inforest.Infrastructure/Exceptions/InfrastructureException.cs` |
+| `clsComando.cls` ADODB errors | DB errors | `Inforest.Infrastructure.Exceptions.DatabaseException` | Class | COMPLETED | `src/Inforest.Infrastructure/Exceptions/InfrastructureException.cs` |
+| `Sub Main()` modPuntoVenta.bas | Startup | `Inforest.Desktop.Program` (DI-corrected bootstrap) | Class | COMPLETED | `src/Inforest.Desktop/Program.cs` |
+| *(test baseline)* | — | `Inforest.Domain.Tests` (20 tests) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/` |
+| *(test baseline)* | — | `Inforest.Application.Tests` (2 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/` |
+| *(test baseline)* | — | `Inforest.Infrastructure.Tests` (3 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/` |

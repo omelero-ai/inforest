@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-11
 >
-> Estado general: **Fase 2 — Análisis Técnico, Arquitectura y Setup (EN CURSO)**
+> Estado general: **Fase 3 — P3-01 COMPLETADA — ESPERANDO APROBACIÓN para P3-02**
 
 ---
 
@@ -10,8 +10,8 @@
 
 | Indicador | Valor |
 |---|---|
-| Fase actual | 2 — Análisis Técnico, Arquitectura y Setup |
-| Código .NET 8 existente | IN_PROGRESS — Solución base creada en `modern-net8/` (Domain, Application, Infrastructure, Desktop, Tests) |
+| Fase actual | 3 — P3-01 Re-baseline completada |
+| Código .NET 8 existente | IN_PROGRESS — Baseline validado: Result<T>, contratos de error, bootstrap DI corregido, 25 tests verdes |
 | Módulos migrados | 0 / 7 |
 | Documentación Legacy | IN_PROGRESS — inventarios y matrices de Fase 2 en construcción/actualización |
 | Arquitectura Target definida | IN_PROGRESS — ADR-001 a ADR-008 aceptados |
@@ -70,7 +70,8 @@
 |---|---|---|
 | M1 | Documentación Legacy completa | COMPLETED |
 | M2 | Arquitectura Target definida | IN_PROGRESS |
-| M3 | Proyecto .NET 8 base creado | IN_PROGRESS |
+| M3 | Proyecto .NET 8 base creado | COMPLETED |
+| M3-P3-01 | Re-baseline arquitectura ejecutable (P3-01) | COMPLETED — 2026-08-11 |
 | M4 | Primer módulo migrado (Maestros) | NOT_STARTED |
 | M5 | Punto de Venta migrado | NOT_STARTED |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
@@ -97,11 +98,11 @@
 
 ## Próximos Pasos
 
-1. Crear la solución base .NET 8 en `modern-net8/` conforme a ADR-001..ADR-003.
-2. Modelar Infrastructure + Database adapters para SQL Server/SPs.
-3. Migrar Seguridad y Configuración (`TPARAMETRO` / `TCAJA`).
-4. Iniciar Maestros (Productos / Grupos / Clientes).
-5. Preparar la primera vertical operativa: Turno → Pedido simple.
+1. **Completado P3-01** — Re-baseline arquitectura ejecutable. Ver criterios de salida en `phase-3-plan.md`.
+2. **Pendiente aprobación** para iniciar P3-02 — Contrato SQL y ejecución de datos Legacy (`clsComando.cls`).
+3. Modelar Infrastructure + Database adapters para SQL Server/SPs.
+4. Migrar Seguridad y Configuración (`TPARAMETRO` / `TCAJA`) — P3-03 y P3-04.
+5. Iniciar Maestros (Productos / Grupos / Clientes) — P3-05.
 
 ---
 
