@@ -12,8 +12,8 @@ static class Program
     /// Punto de entrada de INFOREST Desktop .NET 8.
     /// Legacy: Sub Main() en modPuntoVenta.bas — inicialización de conexión y formulario principal.
     ///
-    /// Bootstrap corregido P3-01: formulario principal se resuelve desde el contenedor DI
-    /// para que las capas Application e Infrastructure sean inyectables en la UI.
+    /// Bootstrap P3-03: formulario de acceso se resuelve desde DI
+    /// para inicializar licencia, autenticación, sesión y auditoría.
     /// </summary>
     [STAThread]
     static void Main()
@@ -22,8 +22,7 @@ static class Program
 
         var host = CreateHostBuilder().Build();
 
-        // Formulario principal resuelto desde DI — permite inyección de servicios de Application.
-        // TODO: Reemplazar Form1 con formulario principal real (equivalente a frmPrincipal.frm).
+        // Formulario de acceso resuelto desde DI.
         var form = host.Services.GetRequiredService<Form1>();
         System.Windows.Forms.Application.Run(form);
     }
@@ -44,8 +43,7 @@ static class Program
                 services.AddApplication();
                 services.AddInfrastructure(context.Configuration);
 
-                // Formularios registrados en DI para recibir servicios inyectados.
-                // TODO: Reemplazar Form1 con formulario principal real.
+                // Formulario de acceso registrado en DI.
                 services.AddTransient<Form1>();
             });
     }

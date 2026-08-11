@@ -1,5 +1,6 @@
 using Inforest.Application.Interfaces;
 using Inforest.Infrastructure.Data;
+using Inforest.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -29,6 +30,12 @@ public static class DependencyInjection
         // P3-02: Contrato SQL y ejecución de datos Legacy
         services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
         services.AddSingleton<ISpExecutor, SpExecutor>();
+        services.AddSingleton<IModernPasswordHashStore, ModernPasswordHashStore>();
+        services.AddSingleton<ISessionService, SessionService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IRbacService, RbacService>();
+        services.AddScoped<IAuditoriaService, AuditoriaService>();
+        services.AddScoped<ILicenseService, LicenseService>();
 
         // Registrar repositorios aquí a medida que se implementen
         // services.AddScoped<IPedidoRepository, PedidoRepository>();

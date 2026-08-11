@@ -1,3 +1,6 @@
+using Inforest.Domain.Common;
+using Inforest.Domain.Entities.Seguridad;
+
 namespace Inforest.Application.Interfaces;
 
 /// <summary>
@@ -8,17 +11,43 @@ namespace Inforest.Application.Interfaces;
 public interface IAuthService
 {
     /// <summary>
-    /// Autentica un usuario con contraseña.
-    /// Legacy: ClsSeguridad.VerificarPassword() + TUSUARIO
-    /// IMPORTANTE: La contraseña legacy usa XOR+César — migrar gradualmente con rehash en login.
+    /// Autentica un usuario con contraseña/sesión base.
+    /// Legacy: frmAcceso.frm + usp_Inforest_ObtieneUsuarios + ClsSeguridad.TextDecript().
     /// </summary>
-    Task<AuthResult> AutenticarAsync(string codigoUsuario, string contrasena, CancellationToken cancellationToken = default);
+    Task<AuthResult> AutenticarAsync(AuthRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Verifica si un usuario tiene acceso a una funcionalidad.
-    /// Legacy: TACCESO/TGRUPOACCESO
+    /// Legacy: TACCESO/TGRUPOACCESO.
     /// </summary>
-    Task<bool> TieneAccesoAsync(string codigoUsuario, string codigoAcceso, CancellationToken cancellationToken = default);
+    Task<bool> TieneAccesoAsync(string codigoUsuario, string modulo, string codigoAcceso, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Cierra la sesión actual y registra la salida de auditoría.
+    /// </summary>
+    Task<Result> CerrarSesionAsync(CancellationToken cancellationToken = default);
 }
 
-public record AuthResult(bool Exitoso, string? CodigoUsuario, string? NombreUsuario, string? MensajeError);
+public sealed record AuthRequest(
+    string CodigoUsuario,
+    string Contrasena,
+    string Modulo,
+    string CodigoCaja,
+    string CodigoTerminal,
+    string BaseDatos,
+    string? BandaMagnetica = null);
+
+public sealed record AuthResult(
+    bool Exitoso,
+    SesionOperativa? Sesion,
+    string? CodigoError,
+    string? MensajeError,
+    bool PasswordMigrated,
+    bool PasswordUpgradePending)
+{
+    public static AuthResult Fallido(string mensaje, string codigoError)
+       => new(false, null, codigoError, mensaje, false, false);
+
+    public static AuthResult ExitosoConSesion(SesionOperativa sesion, bool passwordMigrated, bool passwordUpgradePending)
+       => new(true, sesion, null, null, passwordMigrated, passwordUpgradePending);
+}
