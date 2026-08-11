@@ -33,7 +33,7 @@ public static class DependencyInjection
         services.AddSingleton<IModernPasswordHashStore, ModernPasswordHashStore>();
         services.AddSingleton<ISessionService, SessionService>();
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IRbacService, RbacService>();
+        services.AddSingleton<IRbacService, RbacService>();
         services.AddScoped<IAuditoriaService, AuditoriaService>();
         services.AddScoped<ILicenseService, LicenseService>();
 
