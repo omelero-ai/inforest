@@ -913,3 +913,237 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Destino .NET:** `TipoPedidoDelivery`, `ObtenerDeliveryPendientesQuery`, `ObtenerPedidosDespachadorQuery`
 
 **Estado:** MIGRATED
+
+---
+
+## Reglas de Negocio — Etapa 10: Reportes
+
+---
+
+### BR-REP-001
+
+**Nombre:** Reporte de Comanda — modo detalle vs. cabecera
+
+**Origen:** `frmRepComanda.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepComanda.frm`
+
+**Procedimiento/Función:** `spRep_Comanda`
+
+**Descripción:** El reporte de comanda tiene dos modos: `@flagTipo=1` muestra un registro por ítem DPEDIDO (detallado); `@flagTipo=0` muestra agrupado por comanda. La opción de ordenamiento (`@SOrden`) puede ser por Pedido, Comanda, Mozo o Fecha.
+
+**Condición:** Al ejecutar `ObtenerReporteComandaQuery`
+
+**Resultado:** Dataset con columnas: tCodigoPedido, tComanda, NombreProducto, Mozo, nCantidad, PrecioUnitario, PrecioTotal, fFecha, Usuario, tDocumento, Estado, tObservacion
+
+**Excepciones:** Si `@sCriterio` no está vacío, se agrega como cláusula WHERE adicional en el SQL dinámico del SP.
+
+**Destino .NET:** `ObtenerReporteComandaHandler`, `FrmComandaReporte.cs`, `RepComanda.frx`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-REP-002
+
+**Nombre:** Reporte de Propinas — filtro por condición dinámica
+
+**Origen:** `frmRepPropina.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepPropina.frm`
+
+**Procedimiento/Función:** `spRep_Propina`
+
+**Descripción:** Muestra propinas de tipo tarjeta (`tTipoPago='02'` y `nPropina>0`) en el rango de fechas. El SP construye SQL dinámico. El parámetro `@sCondicion` permite filtrar adicionalmente por mozo, motorizado o tarjeta.
+
+**Condición:** Al ejecutar `ObtenerReportePropinaQuery`
+
+**Resultado:** Dataset con Mozo, Motorizado, Tarjeta, Propina, Documento, Fecha, Trabajador, TipoPedido, FactorRetencion
+
+**Excepciones:** Si `@sCondicion` no está vacío, se añade como AND al WHERE del SQL dinámico.
+
+**Destino .NET:** `ObtenerReportePropinaHandler`, `FrmPropinaReporte.cs`, `RepPropina.frx`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-REP-003
+
+**Nombre:** Reporte de Clientes Principales — monto mínimo y modo
+
+**Origen:** `frmRepPrincipal.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepPrincipal.frm`
+
+**Procedimiento/Función:** `spRep_PrincipalCliente`
+
+**Descripción:** Identifica clientes con consumo acumulado mayor o igual a `@sMonto` en el rango de fechas. `@flagTipo=1` retorna el detalle por documento; `@flagTipo=0` retorna el resumen por cliente con totales. `@SCliente` vacío = todos los clientes.
+
+**Condición:** Al ejecutar `ObtenerReportePrincipalClienteQuery`
+
+**Resultado:** Modo detalle: Cliente, Empresa, Documento, Fecha, Neto, Impuestos, Venta. Modo resumen: Cliente, Empresa, CantidadDocumentos, Totales.
+
+**Excepciones:** La subquery de clientes calificados usa el mismo rango de fechas que el resultado principal.
+
+**Destino .NET:** `ObtenerReportePrincipalClienteHandler`, `RepPrincipalClienteDetalle.frx`, `RepPrincipalClienteResumen.frx`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-REP-004
+
+**Nombre:** Reporte Cuenta Corriente Integrado — tres modos de visualización
+
+**Origen:** `frmRepCtaCteIntegrado.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepCtaCteIntegrado.frm`
+
+**Procedimiento/Función:** `spRep_CtaCteIntegrado`
+
+**Descripción:** `@flagTipo='1'`=consolidado por cliente, `'2'`=detalle por documento, `'3'`=estado de cuenta. Consulta las tablas MDOCUMENTO y TCLIENTE (cuenta corriente habilitada en MPEDIDO.tClienteCtaCte).
+
+**Condición:** Al ejecutar `ObtenerReporteCtaCteIntegradoQuery`
+
+**Resultado:** Dataset con información de cuenta corriente según el modo seleccionado.
+
+**Destino .NET:** `ObtenerReporteCtaCteIntegradoHandler`, `RepCtaCteIntegradoConsolidado.frx`, `RepCtaCteIntegradoDetallado.frx`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-REP-005
+
+**Nombre:** Paloteo Comparativo — modo turno vs. fecha y cantidad vs. valor
+
+**Origen:** `frmRepPaloteoComparativo.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepPaloteoComparativo.frm`
+
+**Procedimiento/Función:** `spRep_PaloteoComparativo`
+
+**Descripción:** Compara ventas por producto desglosado en canales (Salon/Delivery/Llevar/Canal4/Canal5). `@flagTurnoOFecha=0` filtra por turno; `=1` filtra por rango de fechas. `@flagTipoValor=0` muestra cantidad; `=1` muestra valor monetario. `@flagNFacturado=1` incluye solo pedidos con documento emitido.
+
+**Condición:** Al ejecutar `ObtenerReportePaloteoComparativoQuery`
+
+**Resultado:** Columnas: Codigo, Grupo, SubGrupo, Producto, Valor, Produccion, Venta, Cortesia, CtaCte, Canal1-5
+
+**Destino .NET:** `ObtenerReportePaloteoComparativoHandler`, `FrmPaloteoComparativoReporte.cs`, `RepPaloteoComparativo.frx`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-REP-006
+
+**Nombre:** Paloteo Sub-Productos — apertura por componentes de combo
+
+**Origen:** `frmRepPaloteoSubProd.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepPaloteoSubProd.frm`
+
+**Procedimiento/Función:** `spRep_PaloteoSubProd`
+
+**Descripción:** Muestra productos vendidos desagregados en sub-productos (componentes de combos). Usa la vista `vPRODUCTOXPRODUCTO` para obtener los sub-productos de cada ítem vendido. `@flagTurno=0` filtra por turno; `=1` por rango de fecha.
+
+**Condición:** Al ejecutar `ObtenerReportePaloteoSubProdQuery`
+
+**Resultado:** Local, Salón, Mesa, TipoProducto, Grupo, SubGrupo, Producto, Cantidad, Venta, SubProducto, CantProd
+
+**Destino .NET:** `ObtenerReportePaloteoSubProdHandler`, `RepPaloteoSubProd.frx`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-REP-SQL-DYN-001
+
+**Nombre:** Expresión de precio — protección contra SQL injection en SPs dinámicos
+
+**Origen:** `frmRepPaloteoVentaIntegrado.frm`, `frmRepRankingIntegrado.frm`, `frmRepDiarioVentaIntegrado.frm`, `frmRepAnaliticoMotorizadoIntegrado.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepPaloteoVentaIntegrado.frm`
+
+**Descripción:** Los SPs de integrado reciben un parámetro `@sPrecio` que se inyecta directamente como expresión SQL en el SELECT. En VB6, este valor se construye en el formulario (ej. `"dbo.DPEDIDO.nVenta"`). En .NET 8, NUNCA se acepta este valor como texto libre del usuario: solo se permite a través del enum `ExpresionPrecio` con valores controlados (Venta, Neto, Costo). `ExpresionPrecioExtensions.ToSqlExpresion()` convierte el enum a la expresión SQL exacta que el SP Legacy espera.
+
+**Condición:** Al construir los parámetros de los handlers de reportes integrados
+
+**Resultado:** Expresión SQL segura, sin caracteres de injection (`;`, `--`, `'`)
+
+**Excepciones:** Ninguna — el enum cubre todos los casos del Legacy.
+
+**Destino .NET:** `ExpresionPrecio`, `ExpresionPrecioExtensions`, handlers de reportes integrados
+
+**Estado:** MIGRATED
+
+---
+
+### BR-REP-009
+
+**Nombre:** Venta Mensual Integrado — hora de corte del día contable
+
+**Origen:** `frmRepVentaMensualIntegrado.frm`, `frmRepDiarioVentaIntegrado.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepVentaMensualIntegrado.frm`
+
+**Procedimiento/Función:** `spRep_VentaMensualIntegrado`
+
+**Descripción:** El parámetro `@dHour` define la hora de corte del día contable. Si un pedido se registra antes de esa hora, se asigna al día anterior. Esto permite que un restaurante que cierra a las 2 AM tenga la venta correctamente asignada al día operativo (no calendario). El SP agrupa por día y por tipo de pedido para mostrar venta de Salon, Delivery, Llevar y canales adicionales.
+
+**Condición:** Al ejecutar `ObtenerReporteVentaMensualIntegradoQuery`
+
+**Resultado:** Fila por día con venta por canal, cantidad de pedidos, pax y costo
+
+**Excepciones:** `@tipo='D'` = informe diario; `'M'` = informe mensual acumulado
+
+**Destino .NET:** `ObtenerReporteVentaMensualIntegradoHandler`, `FrmVentaMensualIntegradoReporte.cs`, `RepVentaMensualIntegrado.frx`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-REP-011
+
+**Nombre:** KDS — Reporte de tiempos de preparación por pedido
+
+**Origen:** KDS monitor (módulo cocina)
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `USP_KDS_ResporteTiempoPedido`
+
+**Descripción:** Calcula tiempos de preparación KDS (cocina) por pedido. `fSalida` es cuando el ítem fue despachado desde la cocina; `fEnvio` o `fRegistro` es cuando entró al KDS. El SP calcula mínimo, máximo y promedio de tiempo por producto en el rango de fechas. El tiempo promedio se calcula como la media de todos los ítems del producto.
+
+**Condición:** Al ejecutar `ObtenerReporteTiempoKdsPedidoQuery`
+
+**Resultado:** Pedido, Producto, TiempoCorto (HH:mm:ss), TiempoLargo, TiempoPromedio
+
+**Excepciones:** Si `DPEDIDOKDS.fSalida` es NULL, el registro se excluye del cálculo.
+
+**Destino .NET:** `ObtenerReporteTiempoKdsPedidoHandler`, `FrmTiempoKdsReporte.cs`, `RepTiempoKdsPedido.frx`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-REP-012
+
+**Nombre:** KDS — Reporte de tiempos de preparación por producto
+
+**Origen:** KDS monitor (módulo cocina)
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `USP_KDS_ResporteTiempoProducto`
+
+**Descripción:** Similar a BR-REP-011 pero agrupa por Grupo/SubGrupo/Producto para análisis estadístico de producción. Permite filtrar por grupo, subgrupo y producto. El SP usa las tablas DPEDIDOKDS, DPEDIDO, TPRODUCTO, TGRUPO y TSUBGRUPO.
+
+**Condición:** Al ejecutar `ObtenerReporteTiempoKdsProductoQuery`
+
+**Resultado:** Grupo, SubGrupo, Producto, TiempoCorto, TiempoLargo, TiempoPromedio
+
+**Destino .NET:** `ObtenerReporteTiempoKdsProductoHandler`, `FrmTiempoKdsReporte.cs`, `RepTiempoKdsProducto.frx`
+
+**Estado:** IN_PROGRESS

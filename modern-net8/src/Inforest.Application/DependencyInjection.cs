@@ -4,6 +4,7 @@ using Inforest.Application.Delivery;
 using Inforest.Application.Despacho;
 using Inforest.Application.Motorizado;
 using Inforest.Application.CentralPedidos;
+using Inforest.Application.Reportes;
 using Inforest.Domain.Services;
 
 namespace Inforest.Application;
@@ -39,6 +40,20 @@ public static class DependencyInjection
         services.AddScoped<SincronizarPedidoCentralHandler>();
         services.AddScoped<ObtenerOrdenesExternasHandler>();
         services.AddScoped<EnviarDatosRappiHandler>();
+
+        // P3-10: Reportes — Handlers (ADR-007)
+        services.AddScoped<ObtenerReporteComandaHandler>();
+        services.AddScoped<ObtenerReportePropinaHandler>();
+        services.AddScoped<ObtenerReportePrincipalClienteHandler>();
+        services.AddScoped<ObtenerReporteCtaCteIntegradoHandler>();
+        services.AddScoped<ObtenerReportePaloteoComparativoHandler>();
+        services.AddScoped<ObtenerReportePaloteoSubProdHandler>();
+        services.AddScoped<ObtenerReportePaloteoVentaIntegradoHandler>();
+        services.AddScoped<ObtenerReporteRankingIntegradoHandler>();
+        services.AddScoped<ObtenerReporteVentaMensualIntegradoHandler>();
+        services.AddScoped<ObtenerReporteAnaliticoMotorizadoIntegradoHandler>();
+        services.AddScoped<ObtenerReporteTiempoKdsPedidoHandler>();
+        services.AddScoped<ObtenerReporteTiempoKdsProductoHandler>();
 
         return services;
     }

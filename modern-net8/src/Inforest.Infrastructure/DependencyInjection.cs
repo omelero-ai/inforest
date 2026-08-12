@@ -1,9 +1,11 @@
 using Inforest.Application.Interfaces;
+using Inforest.Application.Reportes;
 using Inforest.Domain.Repositories;
 using Inforest.Infrastructure.Data;
 using Inforest.Infrastructure.Delivery;
 using Inforest.Infrastructure.Kitchen;
 using Inforest.Infrastructure.Motorizado;
+using Inforest.Infrastructure.Reportes;
 using Inforest.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,6 +60,9 @@ public static class DependencyInjection
         // Registrar repositorios aquí a medida que se implementen
         // services.AddScoped<IPedidoRepository, PedidoRepository>();
         // services.AddScoped<IProductoRepository, ProductoRepository>();
+
+        // P3-10: Reportes — IReporteRepository + ReporteRepository (ADR-007)
+        services.AddScoped<IReporteRepository, ReporteRepository>();
 
         return services;
     }

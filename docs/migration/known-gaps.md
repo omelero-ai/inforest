@@ -12,7 +12,7 @@
 |---|---|---|---|---|
 | GAP-001 | No existe arquitectura .NET 8 definida | CRÍTICO — bloquea toda migración | Alta | OPEN |
 | GAP-002 | No existe código .NET 8 en el repositorio | CRÍTICO | Alta | OPEN |
-| GAP-003 | 206 reportes Crystal Reports sin plan de migración | Alto | Alta | OPEN |
+| GAP-003 | 206 reportes Crystal Reports — plan de migración definido, implementación en progreso | Alto | Alta | IN_PROGRESS — Etapa 10 |
 | GAP-004 | Hardware POS (PinPad, fiscal, cajón) sin abstracción .NET | Alto | Alta | OPEN |
 | GAP-005 | Multi-país (impuestos, FE) sin arquitectura definida | Alto | Alta | OPEN |
 | GAP-006 | Base de datos Target no definida | Alto | Alta | OPEN |
@@ -126,5 +126,5 @@
 | GAP-DEL-002 | ADR-009 pendiente | Estrategia de sincronización multi-local: polling actual a CENTRALDELIVERY no escala. Decidir entre polling, Service Bus o SQL replication | `modDespachador.bas` | OPEN |
 | GAP-DEL-003 | ADR-010 pendiente | Integración Rappi: actualmente stub. Definir si se mantiene adaptador embebido o se expone endpoint | `frmOrdenesConsola.frm`, `frmEnvioDatosRappi.frm` | OPEN |
 | GAP-DEL-004 | RappiOrderAdapter HTTP | `RappiOrderAdapter` retorna lista vacía. El conector HTTP real a la API de Rappi no está implementado | `Inforest.Infrastructure/Delivery/RappiOrderAdapter.cs` | NOT_STARTED |
-| GAP-DEL-005 | Reportes FastReport Etapa 9 | 8 reportes del módulo Despachador/Motorizado no migrados: RepAnaliticoMotorizado, RepControlMotorizado, RepTiempoDelivery, RepPlanillaMovilidad, RepClienteDelivery, RepPedido, variantes integradas | `Reportes/` | NOT_STARTED |
+| GAP-DEL-005 | Reportes FastReport Etapa 9 | 8 reportes del módulo Despachador/Motorizado: RepAnaliticoMotorizado, RepControlMotorizado, RepTiempoDelivery, RepPlanillaMovilidad, RepClienteDelivery, RepPedido, variantes integradas — handlers y repositorio implementados en Etapa 10; plantillas .frx pendientes | `Reportes/` | IN_PROGRESS — Etapa 10 |
 | GAP-DEL-006 | Formularios WinForms faltantes | Pendientes: AsignacionMotorizadoForm, ReasignacionMotorizadoForm, ClienteDeliveryForm, PedidoDeliveryForm, OrdenesConsolaForm, BusquedaDeliveryForm | `frmAsignacionMotorizado.frm` etc. | IN_PROGRESS |

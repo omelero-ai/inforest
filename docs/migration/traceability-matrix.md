@@ -220,3 +220,37 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmOrdenesConsola.frm` | Form | `ObtenerOrdenesExternasHandler` + `RappiOrderAdapter` | Handler+Service | IN_PROGRESS | `src/Inforest.Application/Delivery/RappiHandlers.cs` |
 | `(test etapa 9 domain)` | — | `DeliveryDomainTests` (12 tests) + `MotorizadoDomainTests` (11 tests) | xUnit | IN_PROGRESS | `tests/Inforest.Domain.Tests/Delivery/` |
 | `(test etapa 9 application)` | — | `DeliveryHandlersTests` (4 tests) + `MotorizadoHandlersTests` (5 tests) | xUnit | IN_PROGRESS | `tests/Inforest.Application.Tests/` |
+
+| **Etapa 10 — Reportes, Consultas y Salidas Operativas** | | | | | |
+| `spRep_Comanda` | SP | `ReporteRepository.ObtenerComandaAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrComandaD.Dsr` / `dsrComandaR.Dsr` | Crystal | `RepComanda.frx` / `RepComandaDetallado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `frmRepComanda.frm` | Form | `FrmComandaReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmComandaReporte.cs` |
+| `spRep_Propina` | SP | `ReporteRepository.ObtenerPropinaAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrPropinaD.Dsr` / `dsrPropinaR.Dsr` | Crystal | `RepPropina.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `frmRepPropina.frm` | Form | `FrmPropinaReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmPropinaReporte.cs` |
+| `spRep_PrincipalCliente` | SP | `ReporteRepository.ObtenerPrincipalCliente*Async` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrPrincipalD.Dsr` / `dsrPrincipalR.Dsr` | Crystal | `RepPrincipalClienteDetalle.frx` / `ResumenRepPrincipalCliente.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `spRep_PaloteoComparativo` | SP | `ReporteRepository.ObtenerPaloteoComparativoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrPaloteoComparativo.Dsr` | Crystal | `RepPaloteoComparativo.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `frmRepPaloteoComparativo.frm` | Form | `FrmPaloteoComparativoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmPaloteoComparativoReporte.cs` |
+| `spRep_PaloteoSubProd` | SP | `ReporteRepository.ObtenerPaloteoSubProdAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrPaloteoSPD.Dsr` | Crystal | `RepPaloteoSubProd.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `spRep_PaloteoVentaIntegrado` | SP | `ReporteRepository.ObtenerPaloteoVentaIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrPaloteoVentaIntegradol.Dsr` | Crystal | `RepPaloteoVentaIntegradoDetallado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `spRep_RankingIntegrado` | SP | `ReporteRepository.ObtenerRankingIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrRankingIntegradol.Dsr` | Crystal | `RepRankingIntegradoDetallado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `spRep_VentaMensualIntegrado` | SP | `ReporteRepository.ObtenerVentaMensualIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrVentaMensualIntegrada.Dsr` | Crystal | `RepVentaMensualIntegrado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `frmRepVentaMensualIntegrado.frm` | Form | `FrmVentaMensualIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmVentaMensualIntegradoReporte.cs` |
+| `spRep_AnaliticoMotorizadoIntegrado` | SP | `ReporteRepository.ObtenerAnaliticoMotorizadoIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrAnaliticoMotorizadoIntegradoConsolidado.Dsr` | Crystal | `RepAnaliticoMotorizadoIntegrado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `frmRepAnaliticoMotorizadoIntegrado.frm` | Form | `FrmAnaliticoMotorizadoIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmAnaliticoMotorizadoIntegradoReporte.cs` |
+| `USP_KDS_ResporteTiempoPedido` | SP | `ReporteRepository.ObtenerTiempoKdsPedidoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `USP_KDS_ResporteTiempoProducto` | SP | `ReporteRepository.ObtenerTiempoKdsProductoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrTiempoKdsP.Dsr` / `dsrTiempoKdsR.Dsr` | Crystal | `RepTiempoKdsPedido.frx` / `RepTiempoKdsProducto.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `(KDS tiempo form)` | Form | `FrmTiempoKdsReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmTiempoKdsReporte.cs` |
+| `IReporteRepository` | Interface | `IReporteRepository` | Interface | COMPLETED | `src/Inforest.Application/Reportes/IReporteRepository.cs` |
+| `ReporteRepository` | — | `ReporteRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `(test etapa 10 application)` | — | `ReportesHandlersTests` (14 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/Reportes/` |

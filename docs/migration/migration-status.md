@@ -40,7 +40,7 @@
 | Lógica de negocio | 32 módulos + 10 clases | Seguridad transversal inicial + routing de producción/KDS base | IN_PROGRESS |
 | Acceso a datos | ADO + `clsComando` + 150 SP | 0 | NOT_STARTED |
 | Base de datos | 126T + 116V + 150SP | 0 | IN_PROGRESS |
-| Reportes | 206 Crystal Reports | 0 | NOT_STARTED |
+| Reportes | 206 Crystal Reports | 12 SPs + contratos | IN_PROGRESS |
 | Integraciones | COM/DLL/OCX + hardware POS | KDS XML/directorio + dispatchers de comanda base | IN_PROGRESS |
 | Seguridad/Auth | `INFSEGURIDAD` + cifrado débil Legacy | 0 | IN_PROGRESS |
 | Configuración | INI + `TPARAMETRO` + `TCAJA` | 0 | IN_PROGRESS |
@@ -75,6 +75,7 @@
 | M3-P3-02 | Contrato SQL y ejecución de datos Legacy (P3-02) | COMPLETED — 2026-08-11 |
 | M3-P3-03 | Seguridad, sesión, auditoría y licenciamiento | IN_PROGRESS — 2026-08-11 |
 | M3-P3-08 | Cocina, comanda, áreas y KDS | IN_PROGRESS — 2026-08-12 |
+| M3-P3-10 | Reportes, consultas y salidas operativas | IN_PROGRESS — 2026-08-12 |
 | M4 | Primer módulo migrado (Maestros) | NOT_STARTED |
 | M5 | Punto de Venta migrado | NOT_STARTED |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
