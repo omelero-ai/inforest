@@ -1,5 +1,6 @@
 using Inforest.Application.Interfaces;
 using Inforest.Infrastructure.Data;
+using Inforest.Infrastructure.Kitchen;
 using Inforest.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +37,12 @@ public static class DependencyInjection
         services.AddSingleton<IRbacService, RbacService>();
         services.AddScoped<IAuditoriaService, AuditoriaService>();
         services.AddScoped<ILicenseService, LicenseService>();
+        services.AddSingleton<IImpresoraService, NullImpresoraService>();
+        services.AddScoped<IKitchenConfigurationProvider, KitchenConfigurationProvider>();
+        services.AddScoped<IProduccionCocinaService, ProduccionCocinaService>();
+        services.AddScoped<IKdsLegacyGateway, KdsLegacyGateway>();
+        services.AddScoped<IComandaAreaDispatcher, ComandaAreaDispatcher>();
+        services.AddScoped<IKdsDispatcher, KdsXmlDispatcher>();
 
         // Registrar repositorios aquí a medida que se implementen
         // services.AddScoped<IPedidoRepository, PedidoRepository>();

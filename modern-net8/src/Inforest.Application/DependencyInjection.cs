@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Inforest.Application.Interfaces;
+using Inforest.Domain.Services;
 
 namespace Inforest.Application;
 
@@ -10,7 +11,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        // Registrar servicios de aplicación aquí a medida que se migren
+        services.AddSingleton<AreaProduccionRouter>();
         return services;
     }
 }
