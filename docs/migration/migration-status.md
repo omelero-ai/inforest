@@ -1,6 +1,6 @@
 # Estado de Migración — INFOREST
 
-> Última actualización: 2026-08-11
+> Última actualización: 2026-08-12
 >
 > Estado general: **Fase 3 — P3-01 y P3-02 COMPLETADAS — P3-03 EN PROGRESO**
 
@@ -10,8 +10,8 @@
 
 | Indicador | Valor |
 |---|---|
-| Fase actual | 3 — P3-03 Seguridad, sesión, auditoría y licenciamiento en progreso |
-| Código .NET 8 existente | IN_PROGRESS — Baseline + seguridad inicial validados: auth, RBAC, sesión, auditoría, licenciamiento y 49 tests verdes |
+| Fase actual | 3 — baseline transversal + seguridad inicial y cocina/KDS base en progreso |
+| Código .NET 8 existente | IN_PROGRESS — Baseline + seguridad inicial + cocina/comanda/KDS base validados: auth, RBAC, sesión, auditoría, licenciamiento, routing de producción y 58 tests verdes |
 | Módulos migrados | 0 / 7 |
 | Documentación Legacy | IN_PROGRESS — inventarios y matrices de Fase 2 en construcción/actualización |
 | Arquitectura Target definida | IN_PROGRESS — ADR-001 a ADR-008 aceptados |
@@ -37,11 +37,11 @@
 | Capa | Legacy | .NET 8 | Estado |
 |---|---|---|---|
 | Presentación (UI) | 400 formularios VB6 detectados | 1 login base | IN_PROGRESS |
-| Lógica de negocio | 32 módulos + 10 clases | Seguridad transveral inicial | IN_PROGRESS |
+| Lógica de negocio | 32 módulos + 10 clases | Seguridad transversal inicial + routing de producción/KDS base | IN_PROGRESS |
 | Acceso a datos | ADO + `clsComando` + 150 SP | 0 | NOT_STARTED |
 | Base de datos | 126T + 116V + 150SP | 0 | IN_PROGRESS |
 | Reportes | 206 Crystal Reports | 0 | NOT_STARTED |
-| Integraciones | COM/DLL/OCX + hardware POS | 0 | NOT_STARTED |
+| Integraciones | COM/DLL/OCX + hardware POS | KDS XML/directorio + dispatchers de comanda base | IN_PROGRESS |
 | Seguridad/Auth | `INFSEGURIDAD` + cifrado débil Legacy | 0 | IN_PROGRESS |
 | Configuración | INI + `TPARAMETRO` + `TCAJA` | 0 | IN_PROGRESS |
 
@@ -74,6 +74,7 @@
 | M3-P3-01 | Re-baseline arquitectura ejecutable (P3-01) | COMPLETED — 2026-08-11 |
 | M3-P3-02 | Contrato SQL y ejecución de datos Legacy (P3-02) | COMPLETED — 2026-08-11 |
 | M3-P3-03 | Seguridad, sesión, auditoría y licenciamiento | IN_PROGRESS — 2026-08-11 |
+| M3-P3-08 | Cocina, comanda, áreas y KDS | IN_PROGRESS — 2026-08-12 |
 | M4 | Primer módulo migrado (Maestros) | NOT_STARTED |
 | M5 | Punto de Venta migrado | NOT_STARTED |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
@@ -102,9 +103,9 @@
 
 1. **Completado P3-02** — Contrato SQL y ejecución de datos Legacy.
 2. **En progreso P3-03** — Seguridad inicial con login base, RBAC, sesión y auditoría.
-3. Cerrar estrategia de persistencia BCrypt y validación física de HardKey.
-4. Iniciar P3-04 — Configuración (`TPARAMETRO` / `TCAJA`).
-5. Iniciar Maestros (Productos / Grupos / Clientes) — P3-05.
+3. **En progreso P3-08** — baseline de cocina/comanda/KDS con routing por área, XML y SPs Legacy.
+4. Cerrar wiring de Desktop/POS para disparo operativo real y resolver hardware/impresoras físicas.
+5. Iniciar P3-04 — Configuración (`TPARAMETRO` / `TCAJA`) y P3-05 Maestros para completar dependencias funcionales.
 
 ---
 

@@ -255,9 +255,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** En caso de combo, el nombre del ítem incluye iniciales del combo como prefijo
 
-**Destino .NET:** Servicio KDS — generación y envío de órdenes
+**Destino .NET:** `IProduccionCocinaService` + `KdsXmlDispatcher` + `KdsLegacyGateway`
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
 
@@ -278,9 +278,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** Si `lImprimeArea = false`, no se envía al área
 
-**Destino .NET:** Servicio de comandas y routing de cocina
+**Destino .NET:** `AreaProduccionRouter` + `ComandaAreaDispatcher` + `KitchenConfigurationProvider`
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
 

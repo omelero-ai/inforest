@@ -48,7 +48,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `modConsultaIntregrada.bas` | Multi-local | — | — | NOT_STARTED | Consulta multi-local |
 | `modDespachador.bas` | App Entry | — | — | NOT_STARTED | Sub Main despacho |
 | `modMotorizado.bas` | App Entry | — | — | NOT_STARTED | Sub Main motorizado |
-| `modKDS.bas` | Integration | — | — | NOT_STARTED | XML KDS |
+| `modKDS.bas` | Integration | `IProduccionCocinaService` + `KdsXmlDispatcher` + `KdsLegacyGateway` | Interface + Classes | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IProduccionCocinaService.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsXmlDispatcher.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsLegacyGateway.cs` |
 | `modBlueVision.bas` | Integration | — | — | NOT_STARTED | BlueVision TVS |
 | `modImpresoraFiscal.bas` | Integration | — | — | NOT_STARTED | Epson fiscal |
 | `modAuditoria.bas` | Audit | — | — | NOT_STARTED | Auditoría |
@@ -126,7 +126,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `spUpd_MPEDIDO` | Pedidos | — | — | NOT_STARTED | Actualización pedido |
 | `spRep_RegVenta` | Reportes | — | — | NOT_STARTED | Reporte ventas |
 | `spRep_Anulacion` | Reportes | — | — | NOT_STARTED | Reporte anulaciones |
-| `USP_KDS_ObtenerProductoPedido` | KDS | — | — | NOT_STARTED | Productos para KDS |
+| `USP_KDS_ObtenerProductoPedido` | KDS | `KdsLegacyGateway` | Class | IN_PROGRESS | `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsLegacyGateway.cs` |
 | `USP_MODIFICARINSUMOS` | Almacén | — | — | NOT_STARTED | Gestión insumos |
 | `usp_Aud_ObtenerSalones` | Auditoría | — | — | NOT_STARTED | Auditoría salones |
 
@@ -152,7 +152,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | Legacy | Tecnología | .NET 8 | Tipo | Estado |
 |---|---|---|---|---|
-| KDS (Kitchen Display) | XML sobre directorio | — | — | NOT_STARTED |
+| KDS (Kitchen Display) | XML sobre directorio | `KdsXmlDispatcher` | Class | IN_PROGRESS |
 | BlueVision/TVS | COM ActiveX | — | — | NOT_STARTED |
 | Facturación Electrónica | Múltiples SDKs | — | — | NOT_STARTED |
 | PinPad DLL3500 | Win32 DLL | — | — | NOT_STARTED |

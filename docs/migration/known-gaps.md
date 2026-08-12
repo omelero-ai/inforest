@@ -69,7 +69,7 @@
 | PinPad DLL3500 | `DLL3500.bas`, `CAJA_PINPAD.dll` | Alta — DLL Win32 | UNKNOWN |
 | Impresora fiscal Epson | `modImpresoraFiscal.bas`, `IFEpson.ocx` | Alta — OCX Win32 | UNKNOWN |
 | Biometría SecuGen | `FpLibX_Const.bas`, `sgfplibx.ocx` | Alta — OCX Win32 | UNKNOWN |
-| KDS pantalla cocina | `modKDS.bas` | Media — XML sobre directorio | UNKNOWN |
+| KDS pantalla cocina | `modKDS.bas` | Media — XML sobre directorio | PARTIAL — existe baseline .NET para XML/directorio, falta pantalla operativa y confirmación con hardware real |
 | BlueVision/TVS | `modBlueVision.bas` | Alta — COM Win32 | UNKNOWN |
 
 ---
