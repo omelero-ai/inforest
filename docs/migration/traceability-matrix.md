@@ -28,8 +28,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `Adicion.vbp` / `Adicion.exe` | VBP Project | — | — | NOT_STARTED | — |
 | `Administracion.vbp` / `Administracion.exe` | VBP Project | — | — | NOT_STARTED | — |
 | `Consulta.vbp` / `Consulta.exe` | VBP Project | — | — | NOT_STARTED | — |
-| `Despachador.vbp` / `Despachador.exe` | VBP Project | — | — | NOT_STARTED | — |
-| `Motorizados.vbp` / `Motorizado.exe` | VBP Project | — | — | NOT_STARTED | — |
+| `Despachador.vbp` / `Despachador.exe` | VBP Project | `DespachadorModule` | WinForms Module | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Delivery/ |
+| `Motorizados.vbp` / `Motorizado.exe` | VBP Project | `MotorizadoModule` | WinForms Module | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Motorizado/ |
 
 ---
 
@@ -46,8 +46,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `modAdministracion.bas` | App Entry | — | — | NOT_STARTED | Sub Main admin |
 | `modConsulta.bas` | App Entry | — | — | NOT_STARTED | Sub Main consultas |
 | `modConsultaIntregrada.bas` | Multi-local | — | — | NOT_STARTED | Consulta multi-local |
-| `modDespachador.bas` | App Entry | — | — | NOT_STARTED | Sub Main despacho |
-| `modMotorizado.bas` | App Entry | — | — | NOT_STARTED | Sub Main motorizado |
+| `modDespachador.bas` | App Entry | `Program.cs` (DespachadorModule) + `DespachadorForm` | WinForms + DI | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Delivery/ |
+| `modMotorizado.bas` | App Entry | `Program.cs` (MotorizadoModule) + `LlegadaSalidaForm` | WinForms + DI | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Motorizado/ |
 | `modKDS.bas` | Integration | `IProduccionCocinaService` + `KdsXmlDispatcher` + `KdsLegacyGateway` | Interface + Classes | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IProduccionCocinaService.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsXmlDispatcher.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsLegacyGateway.cs` |
 | `modBlueVision.bas` | Integration | — | — | NOT_STARTED | BlueVision TVS |
 | `modImpresoraFiscal.bas` | Integration | — | — | NOT_STARTED | Epson fiscal |
@@ -193,3 +193,30 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | *(test baseline)* | — | `Inforest.Domain.Tests` (20 tests) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/` |
 | *(test baseline)* | — | `Inforest.Application.Tests` (2 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/` |
 | *(test baseline)* | — | `Inforest.Infrastructure.Tests` (3 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/` |
+
+### Etapa 9 — Delivery, Despacho, Motorizados
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmNuevoDelivery.frm` | Form | `NuevoDeliveryForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/NuevoDeliveryForm.cs` |
+| `frmDespachador.frm` | Form | `DespachadorForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/DespachadorForm.cs` |
+| `frmCentralPedidos.frm` | Form | `CentralPedidosForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/CentralPedidosForm.cs` |
+| `frmLlegadaSalida.frm` | Form | `LlegadaSalidaForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Motorizado/LlegadaSalidaForm.cs` |
+| `frmTarifaMotorizado.frm` | Form | `TarifaMotorizadoForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Motorizado/TarifaMotorizadoForm.cs` |
+| `TDELIVERY` | Table | `ClienteDelivery` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Delivery/ClienteDelivery.cs` |
+| `MPEDIDO` (delivery fields) | Table | `PedidoDelivery` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Delivery/PedidoDelivery.cs` |
+| `TLOCAL` | Table | `LocalRestaurante` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Delivery/LocalRestaurante.cs` |
+| `TTIPOPEDIDODETALLE` | Table | `TipoPedidoDelivery` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Delivery/TipoPedidoDelivery.cs` |
+| `TMOTORIZADODATOS` | Table | `Motorizado` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Motorizado/Motorizado.cs` |
+| `(asignacion pedido-motorizado)` | Logic | `AsignacionMotorizado` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Motorizado/AsignacionMotorizado.cs` |
+| `IClienteDeliveryRepository` | Interface | `IClienteDeliveryRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/IClienteDeliveryRepository.cs` |
+| `IPedidoDeliveryRepository` | Interface | `IPedidoDeliveryRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/IPedidoDeliveryRepository.cs` |
+| `IMotorizadoRepository` | Interface | `IMotorizadoRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/IMotorizadoRepository.cs` |
+| `ILocalRepository` | Interface | `ILocalRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/ILocalRepository.cs` |
+| `ICentralPedidosRepository` | Interface | `ICentralPedidosRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/ICentralPedidosRepository.cs` |
+| `sp_Inforest_PedidosCentralPedido` | SP | `CentralPedidosRepository.ObtenerPedidosCentralAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Delivery/CentralPedidosRepository.cs` |
+| `sp_CD_Modificar_EstadoDelivery_Cabecera` | SP | `CentralPedidosRepository.ModificarEstadoDeliveryAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Delivery/CentralPedidosRepository.cs` |
+| `spRep_AnaliticoMotorizadoIntegrado` | SP | *(reporte FastReport pendiente)* | Report | NOT_STARTED | — |
+| `frmOrdenesConsola.frm` | Form | `ObtenerOrdenesExternasHandler` + `RappiOrderAdapter` | Handler+Service | IN_PROGRESS | `src/Inforest.Application/Delivery/RappiHandlers.cs` |
+| `(test etapa 9 domain)` | — | `DeliveryDomainTests` (12 tests) + `MotorizadoDomainTests` (11 tests) | xUnit | IN_PROGRESS | `tests/Inforest.Domain.Tests/Delivery/` |
+| `(test etapa 9 application)` | — | `DeliveryHandlersTests` (4 tests) + `MotorizadoHandlersTests` (5 tests) | xUnit | IN_PROGRESS | `tests/Inforest.Application.Tests/` |

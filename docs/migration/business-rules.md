@@ -691,3 +691,225 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 ---
 
 *Este documento se amplía con cada análisis de módulo.*
+
+---
+
+## Módulo Despachador / Motorizado (Etapa 9)
+
+### BR-DEL-001
+
+**Nombre:** Tipo de pedido determina si requiere motorizado y cliente frecuente
+
+**Origen:** `TTIPOPEDIDODETALLE.lActivaMotorizado`, `lObligaMotorizado`, `lObligaClienteFrecuente`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNuevoDelivery.frm`
+
+**Descripción:** Según el tipo de pedido, puede ser obligatorio asignar un motorizado y/o un cliente frecuente de delivery.
+
+**Condición:** Al crear o confirmar un pedido delivery
+
+**Resultado:** Si `lObligaMotorizado=true` el sistema exige motorizado; si `lObligaClienteFrecuente=true` exige cliente frecuente registrado en TDELIVERY.
+
+**Excepciones:** Si el canal es `lCanalCentralPedidos`, la lógica puede diferir.
+
+**Destino .NET:** `CrearPedidoDeliveryCommand`, `TipoPedidoDelivery`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-002
+
+**Nombre:** Tarifa motorizado varía por tipo de día: LV/SD/ES
+
+**Origen:** `TMOTORIZADODATOS.nTarifaLV`, `nTarifaSD`, `nTarifaES`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modDespachador.bas`
+
+**Descripción:** Cada motorizado tiene tres tarifas configuradas: lunes-viernes (LV), sábado-domingo (SD) y especial/feriado (ES). La tarifa activa en un momento dado está en `TPARAMETRO.tTarifaActualMotorizado`.
+
+**Condición:** Al consultar la tarifa a aplicar en un día específico
+
+**Resultado:** Se retorna `nTarifaLV`, `nTarifaSD` o `nTarifaES` según el tipo de día.
+
+**Excepciones:** La tarifa activa puede ser sobreescrita manualmente vía `frmTarifaMotorizado`.
+
+**Destino .NET:** `Motorizado.ObtenerTarifaPorTipoDia()`, `ActualizarTarifaMotorizadoCommand`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-003
+
+**Nombre:** Flag `lCD` en TCAJA habilita modo CENTRALDELIVERY
+
+**Origen:** `modDespachador.bas: CD = Calcular("select lCD...")`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modDespachador.bas`
+
+**Descripción:** Si `TCAJA.lCD = true`, la caja opera en modo Central de Pedidos, conectándose a `CENTRALDELIVERY` para sincronizar pedidos.
+
+**Condición:** Al iniciar el módulo Despachador
+
+**Resultado:** Se habilita `CentralPedidosRepository` y se muestra panel de pedidos centralizados.
+
+**Excepciones:** Si `lCD = false`, solo se muestra el panel local.
+
+**Destino .NET:** `ObtenerPedidosCentralQuery`, `CentralPedidosRepository`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-004
+
+**Nombre:** Flag `lOrdenesRappi` en TCAJA habilita integración Rappi
+
+**Origen:** `modDespachador.bas: lOrdenesRappi`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modDespachador.bas`
+
+**Descripción:** Si `TCAJA.lOrdenesRappi = true`, la consola muestra las órdenes recibidas desde Rappi y permite enviar datos.
+
+**Condición:** Al iniciar el módulo Despachador
+
+**Resultado:** Se habilita `OrdenesConsolaForm` y `EnvioDatosRappiCommand`.
+
+**Excepciones:** Si `false`, la pestaña Rappi no se muestra.
+
+**Destino .NET:** `RappiOrderAdapter`, `ObtenerOrdenesExternasQuery`
+
+**Estado:** MIGRATED (stub; conector HTTP Rappi pendiente — GAP-DEL-004)
+
+---
+
+### BR-DEL-005
+
+**Nombre:** `tTarifaActualMotorizado` en TPARAMETRO indica tarifa vigente
+
+**Origen:** `modDespachador.bas`, `frmTarifaMotorizado.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmTarifaMotorizado.frm`
+
+**Descripción:** `TPARAMETRO.tTarifaActualMotorizado` almacena el código de tarifa activa actualmente. Al cambiar tarifa desde `frmTarifaMotorizado`, se actualiza este campo.
+
+**Condición:** Al ejecutar `ActualizarTarifaMotorizadoCommand`
+
+**Resultado:** Se actualiza `TPARAMETRO.tTarifaActualMotorizado` con el código del nuevo tipo de día.
+
+**Excepciones:** Requiere permisos de supervisión.
+
+**Destino .NET:** `MotorizadoRepository.ActualizarTarifaActivaAsync()`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-006
+
+**Nombre:** `Motorizado.exe` inicia directamente en `frmLlegadaSalida`
+
+**Origen:** `modMotorizado.bas: frmLlegadaSalida.Show`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modMotorizado.bas`
+
+**Descripción:** El ejecutable Motorizado no muestra login; va directamente a la pantalla de control de llegada/salida del motorizado.
+
+**Condición:** Al iniciar el proceso `Motorizado.exe`
+
+**Resultado:** Se muestra `frmLlegadaSalida` como primera pantalla.
+
+**Excepciones:** Ninguna — comportamiento fijo en Sub Main.
+
+**Destino .NET:** `Program.cs` del módulo Motorizado → `Application.Run(new LlegadaSalidaForm(...))`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-007
+
+**Nombre:** TLOCAL controla multi-local: IP, BD INFOREST por local, flag réplica
+
+**Origen:** `TLOCAL` schema
+
+**Archivo:** `legacy-restaurant/database-sql-server/1. Estructura.sql`
+
+**Descripción:** Cada local registrado en `TLOCAL` tiene su propia IP, nombre de base de datos INFOREST y flag `lReplica`. El Despachador puede consolidar pedidos de múltiples locales.
+
+**Condición:** Al consultar pedidos multi-local
+
+**Resultado:** `LocalRepository` retorna locales activos; `CentralPedidosRepository` accede a `CENTRALDELIVERY`.
+
+**Excepciones:** Si `lActivo = false`, el local no se consulta.
+
+**Destino .NET:** `LocalRestaurante`, `ILocalRepository`, `LocalRepository`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-008
+
+**Nombre:** Central Pedidos usa conexión separada a CENTRALDELIVERY configurada en INI
+
+**Origen:** `modDespachador.bas: sRutaCD, sMDBCD`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modDespachador.bas`
+
+**Descripción:** La base `CENTRALDELIVERY` tiene su propia cadena de conexión, configurada en INFOREST.INI sección `[CentralDelivery]`. El módulo Despachador la lee al iniciar.
+
+**Condición:** Al iniciar con `lCD = true`
+
+**Resultado:** Se usa `IDbConnectionFactory` con `databaseName = "CENTRALDELIVERY"`.
+
+**Excepciones:** Si no está configurada, se deshabilita el panel Central.
+
+**Destino .NET:** `IDbConnectionFactory`, `CentralPedidosRepository`, `appsettings.json`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-009
+
+**Nombre:** Estado delivery se modifica vía `sp_CD_Modificar_EstadoDelivery_Cabecera`
+
+**Origen:** `frmDespachador.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDespachador.frm`
+
+**Descripción:** Cualquier cambio de estado de un pedido delivery (pendiente → en preparación → en camino → entregado) se persiste llamando al SP `sp_CD_Modificar_EstadoDelivery_Cabecera` sobre la base `CENTRALDELIVERY`.
+
+**Condición:** Al ejecutar `ActualizarEstadoDeliveryCommand`
+
+**Resultado:** Se llama el SP con el nuevo estado; ambas bases (INFOREST y CENTRALDELIVERY) quedan sincronizadas.
+
+**Excepciones:** Si `lCD = false`, el estado se actualiza solo en INFOREST.
+
+**Destino .NET:** `CentralPedidosRepository.ModificarEstadoDeliveryAsync()`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-010
+
+**Nombre:** Tipo de pedido tiene flags canal: `lCanalCentralPedidos`, `lCanalDelivery`
+
+**Origen:** `TTIPOPEDIDODETALLE`
+
+**Archivo:** `legacy-restaurant/database-sql-server/1. Estructura.sql`
+
+**Descripción:** Cada tipo de pedido puede habilitar/deshabilitar canales: `lCanalCentralPedidos` permite que aparezca en el Central de Pedidos; `lCanalDelivery` habilita el flujo delivery con motorizado.
+
+**Condición:** Al filtrar pedidos en el panel Despachador o Central Pedidos
+
+**Resultado:** Solo se muestran pedidos cuyo tipo tiene habilitado el canal correspondiente.
+
+**Excepciones:** Tipos sin flags = comportamiento local standard.
+
+**Destino .NET:** `TipoPedidoDelivery`, `ObtenerDeliveryPendientesQuery`, `ObtenerPedidosDespachadorQuery`
+
+**Estado:** MIGRATED

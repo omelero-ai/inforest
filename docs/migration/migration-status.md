@@ -27,8 +27,8 @@
 | Adición | `Adicion.exe` | Análisis | NOT_STARTED | Flujo auxiliar sobre pedidos en curso |
 | Administración | `Administracion.exe` | Análisis | NOT_STARTED | Maestros, parámetros y catálogos críticos |
 | Consultas | `Consulta.exe` | Análisis | NOT_STARTED | Alta concentración de reportes `spRep_*` + Crystal |
-| Despachador | `Despachador.exe` | Análisis | NOT_STARTED | Delivery, central pedidos e integraciones externas |
-| Motorizados | `Motorizado.exe` | Análisis | NOT_STARTED | Depende de delivery/despacho y tarifas |
+| Despachador | `Despachador.exe` | Implementación | IN_PROGRESS | Domain+Application+Infrastructure+WinForms stubs; reportes FastReport pendientes |
+| Motorizados | `Motorizado.exe` | Implementación | IN_PROGRESS | Domain+Application+Infrastructure+LlegadaSalida+Tarifa; reportes pendientes |
 
 ---
 

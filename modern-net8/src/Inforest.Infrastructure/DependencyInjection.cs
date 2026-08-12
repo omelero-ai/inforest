@@ -1,6 +1,9 @@
 using Inforest.Application.Interfaces;
+using Inforest.Domain.Repositories;
 using Inforest.Infrastructure.Data;
+using Inforest.Infrastructure.Delivery;
 using Inforest.Infrastructure.Kitchen;
+using Inforest.Infrastructure.Motorizado;
 using Inforest.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +46,14 @@ public static class DependencyInjection
         services.AddScoped<IKdsLegacyGateway, KdsLegacyGateway>();
         services.AddScoped<IComandaAreaDispatcher, ComandaAreaDispatcher>();
         services.AddScoped<IKdsDispatcher, KdsXmlDispatcher>();
+
+        // P3-09: Delivery, Despacho, Motorizados y Centralización
+        services.AddScoped<IClienteDeliveryRepository, ClienteDeliveryRepository>();
+        services.AddScoped<IPedidoDeliveryRepository, PedidoDeliveryRepository>();
+        services.AddScoped<IMotorizadoRepository, MotorizadoRepository>();
+        services.AddScoped<ILocalRepository, LocalRepository>();
+        services.AddScoped<ICentralPedidosRepository, CentralPedidosRepository>();
+        services.AddScoped<IRappiOrderService, RappiOrderAdapter>();
 
         // Registrar repositorios aquí a medida que se implementen
         // services.AddScoped<IPedidoRepository, PedidoRepository>();
