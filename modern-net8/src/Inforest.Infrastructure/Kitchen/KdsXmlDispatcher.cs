@@ -93,27 +93,7 @@ internal sealed class KdsXmlDispatcher : IKdsDispatcher
 
             foreach (var archivo in Directory.EnumerateFiles(directorio, "*.xml"))
             {
-                var xml = await File.ReadAllTextAsync(archivo, cancellationToken);
-                var document = XDocument.Parse(xml);
-                var orderNode = document.Root?.Element("Order");
-                var codigoPedido = orderNode?.Element("ID")?.Value;
-                var item = orderNode?.Elements("Item").FirstOrDefault()?.Element("ID")?.Value;
-
-                if (!string.IsNullOrWhiteSpace(codigoPedido) && !string.IsNullOrWhiteSpace(item))
-                {
-                    await _legacyGateway.RegistrarTiempoSalidaAsync(
-                        codigoPedido,
-                        item,
-                        File.GetCreationTimeUtc(archivo),
-                        cancellationToken);
-                    procesados++;
-                }
-
-                var destino = Path.Combine(historial, Path.GetFileName(archivo));
-                if (File.Exists(destino))
-                    File.Delete(destino);
-
-                File.Move(archivo, destino);
+                procesados += await ProcesarArchivoBumpAsync(archivo, historial, cancellationToken);
             }
         }
 
@@ -215,6 +195,53 @@ internal sealed class KdsXmlDispatcher : IKdsDispatcher
 
         var digits = new string(valor.Where(char.IsDigit).ToArray());
         return string.IsNullOrWhiteSpace(digits) ? "0" : digits;
+    }
+
+    private async Task<int> ProcesarArchivoBumpAsync(
+        string archivo,
+        string historial,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var xml = await File.ReadAllTextAsync(archivo, cancellationToken);
+            var document = XDocument.Parse(xml);
+            var orderNode = document.Root?.Element("Order");
+            var codigoPedido = orderNode?.Element("ID")?.Value;
+            var item = orderNode?.Elements("Item").FirstOrDefault()?.Element("ID")?.Value;
+
+            if (!string.IsNullOrWhiteSpace(codigoPedido) && !string.IsNullOrWhiteSpace(item))
+            {
+                await _legacyGateway.RegistrarTiempoSalidaAsync(
+                    codigoPedido,
+                    item,
+                    File.GetCreationTimeUtc(archivo),
+                    cancellationToken);
+                await MoverArchivoAsync(archivo, historial);
+                return 1;
+            }
+
+            _logger.LogWarning("Archivo bump KDS sin pedido/item válido: {Archivo}", archivo);
+            await MoverArchivoAsync(archivo, Path.Combine(historial, "invalid"));
+            return 0;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.Xml.XmlException)
+        {
+            _logger.LogWarning(ex, "No se pudo procesar archivo bump KDS {Archivo}", archivo);
+            await MoverArchivoAsync(archivo, Path.Combine(historial, "errores"));
+            return 0;
+        }
+    }
+
+    private static Task MoverArchivoAsync(string origen, string destinoDirectorio)
+    {
+        Directory.CreateDirectory(destinoDirectorio);
+        var destino = Path.Combine(destinoDirectorio, Path.GetFileName(origen));
+        if (File.Exists(destino))
+            File.Delete(destino);
+
+        File.Move(origen, destino);
+        return Task.CompletedTask;
     }
 
     private async Task GuardarDocumentoAsync(

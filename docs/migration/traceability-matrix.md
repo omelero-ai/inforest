@@ -1,8 +1,8 @@
 # Matriz de Trazabilidad — INFOREST Legacy → .NET 8
 
-> Status: NOT_STARTED — No existe código .NET 8. Esta matriz se completa a medida que avanza la migración.
+> Status: IN_PROGRESS — baseline transversal de Fase 3 validado; la matriz refleja equivalencias parciales y gaps controlados.
 >
-> Última actualización: 2026-08-11
+> Última actualización: 2026-08-12
 
 ---
 
@@ -39,8 +39,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 |---|---|---|---|---|---|
 | `modDeclaracion.bas` | Global State | — | — | NOT_STARTED | 543 variables globales — requiere análisis especial |
 | `modProcedimiento.bas` | Core Utils | — | — | NOT_STARTED | Actualizador, FPay, botones, QR |
-| `modProcedimientoNuevo.bas` | Extensions | — | — | NOT_STARTED | CashDro |
-| `modPuntoVenta.bas` | App Entry | — | — | NOT_STARTED | Sub Main POS |
+| `modProcedimientoNuevo.bas` | Extensions | `ICashDroService` + `CashDroService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/Hardware/ICashDroService.cs`, `modern-net8/src/Inforest.Infrastructure/Hardware/CashDroService.cs` |
+| `modPuntoVenta.bas` | App Entry | `Program.cs` + `Form1` | WinForms + DI | COMPLETED | `modern-net8/src/Inforest.Desktop/Program.cs`, `modern-net8/src/Inforest.Desktop/Form1.cs` |
 | `modCajaRapida.bas` | App Entry | — | — | NOT_STARTED | Sub Main caja |
 | `modAdicion.bas` | App Entry | — | — | NOT_STARTED | Sub Main adición |
 | `modAdministracion.bas` | App Entry | — | — | NOT_STARTED | Sub Main admin |
@@ -49,8 +49,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `modDespachador.bas` | App Entry | `Program.cs` (DespachadorModule) + `DespachadorForm` | WinForms + DI | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Delivery/ |
 | `modMotorizado.bas` | App Entry | `Program.cs` (MotorizadoModule) + `LlegadaSalidaForm` | WinForms + DI | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Motorizado/ |
 | `modKDS.bas` | Integration | `IProduccionCocinaService` + `KdsXmlDispatcher` + `KdsLegacyGateway` | Interface + Classes | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IProduccionCocinaService.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsXmlDispatcher.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsLegacyGateway.cs` |
-| `modBlueVision.bas` | Integration | — | — | NOT_STARTED | BlueVision TVS |
-| `modImpresoraFiscal.bas` | Integration | — | — | NOT_STARTED | Epson fiscal |
+| `modBlueVision.bas` | Integration | `IBlueVisionService` + `BlueVisionHttpClient` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/Hardware/IBlueVisionService.cs`, `modern-net8/src/Inforest.Infrastructure/Hardware/BlueVisionHttpClient.cs` |
+| `modImpresoraFiscal.bas` | Integration | `IImpresoraFiscalService` + `NullImpresoraFiscalService` | Interface + Stub | BLOCKED | OCX 32-bit sin SDK .NET; ver `modern-net8/src/Inforest.Infrastructure/Hardware/NullImpresoraFiscalService.cs` |
 | `modAuditoria.bas` | Audit | — | — | NOT_STARTED | Auditoría |
 | `modAuditoriaEquipo.bas` | Audit | — | — | NOT_STARTED | Auditoría equipo |
 | `modAuditoriaIntegral.bas` | Audit | `IAuditoriaService` + `AuditoriaService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IAuditoriaService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/AuditoriaService.cs` |
@@ -64,10 +64,10 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `modGuias.bas` | Dispatch | — | — | NOT_STARTED | Guías transporte |
 | `modPvCorp.bas` | Unknown | — | — | UNKNOWN | Propósito no determinado |
 | `CodigoControl.bas` | Fiscal | — | — | NOT_STARTED | Bolivia código control |
-| `DLL3500.bas` | Hardware | — | — | NOT_STARTED | PinPad DLL3500 |
-| `FpLibX_Const.bas` | Hardware | — | — | NOT_STARTED | Biometría constantes |
+| `DLL3500.bas` | Hardware | `IPinPadService` + `PinPadService` | Interface + P/Invoke | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/Hardware/IPinPadService.cs`, `modern-net8/src/Inforest.Infrastructure/Hardware/PinPadService.cs` |
+| `FpLibX_Const.bas` | Hardware | `IBiometriaService` + `NullBiometriaService` | Interface + Stub | BLOCKED | OCX 32-bit sin SDK .NET; ver `modern-net8/src/Inforest.Infrastructure/Hardware/NullBiometriaService.cs` |
 | `ModPictureBoxCustom.bas` | UI Utility | — | — | NOT_STARTED | PictureBox custom |
-| `ModuloHardKey.bas` | License | — | — | NOT_STARTED | Dongle |
+| `ModuloHardKey.bas` | License | `ILicenseService` + `LicenseService` | Interface + Class | IN_PROGRESS | Validación contractual/SQL migrada; validación física del dongle pendiente |
 | `VBZipBas.bas` | Utility | — | — | NOT_STARTED | ZIP |
 
 ---
@@ -153,14 +153,14 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | Legacy | Tecnología | .NET 8 | Tipo | Estado |
 |---|---|---|---|---|
 | KDS (Kitchen Display) | XML sobre directorio | `KdsXmlDispatcher` | Class | IN_PROGRESS |
-| BlueVision/TVS | COM ActiveX | — | — | NOT_STARTED |
-| Facturación Electrónica | Múltiples SDKs | — | — | NOT_STARTED |
-| PinPad DLL3500 | Win32 DLL | — | — | NOT_STARTED |
-| CashDro | HTTP API | — | — | NOT_STARTED |
-| Rappi | SQL SP | — | — | NOT_STARTED |
+| BlueVision/TVS | COM ActiveX | `BlueVisionHttpClient` | Class | IN_PROGRESS |
+| Facturación Electrónica | Múltiples SDKs | `FacturacionElectronicaFactory` + gateways por país | Factory + Stubs | IN_PROGRESS |
+| PinPad DLL3500 | Win32 DLL | `PinPadService` | P/Invoke | IN_PROGRESS |
+| CashDro | HTTP API | `CashDroService` | Process adapter | IN_PROGRESS |
+| Rappi | SQL SP | `IRappiOrderService` + `RappiOrderAdapter` | Interface + Stub | IN_PROGRESS |
 | FPay/MercadoPago QR | SP + motor | — | — | NOT_STARTED |
-| Biometría SecuGen | OCX Win32 | — | — | NOT_STARTED |
-| Impresora Fiscal Epson | OCX Win32 | — | — | NOT_STARTED |
+| Biometría SecuGen | OCX Win32 | `IBiometriaService` + `NullBiometriaService` | Interface + Stub | BLOCKED |
+| Impresora Fiscal Epson | OCX Win32 | `IImpresoraFiscalService` + `NullImpresoraFiscalService` | Interface + Stub | BLOCKED |
 | Chilkat Email | COM | — | — | NOT_STARTED |
 
 ---
@@ -190,9 +190,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `TACCESO` / `TGRUPOACCESO` | RBAC | `IRbacService` + `RbacService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IRbacService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/RbacService.cs` |
 | `clsComando.cls` ADODB errors | DB errors | `Inforest.Infrastructure.Exceptions.DatabaseException` | Class | COMPLETED | `src/Inforest.Infrastructure/Exceptions/InfrastructureException.cs` |
 | `Sub Main()` modPuntoVenta.bas | Startup | `Inforest.Desktop.Program` (DI-corrected bootstrap) | Class | COMPLETED | `src/Inforest.Desktop/Program.cs` |
-| *(test baseline)* | — | `Inforest.Domain.Tests` (20 tests) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/` |
-| *(test baseline)* | — | `Inforest.Application.Tests` (2 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/` |
-| *(test baseline)* | — | `Inforest.Infrastructure.Tests` (3 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/` |
+| *(suite Fase 3 domain)* | — | `Inforest.Domain.Tests` (51 tests) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/` |
+| *(suite Fase 3 application)* | — | `Inforest.Application.Tests` (26 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/` |
+| *(suite Fase 3 infrastructure)* | — | `Inforest.Infrastructure.Tests` (72 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/` |
 
 ### Etapa 9 — Delivery, Despacho, Motorizados
 

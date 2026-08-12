@@ -2,7 +2,7 @@
 
 > Inventario de brechas, pendientes y elementos que requieren atención durante la migración.
 >
-> Status: PARTIAL — análisis basado en el código Legacy. Se actualizará a medida que avance la migración.
+> Status: IN_PROGRESS — baseline .NET 8 de Fase 3 validado; los gaps remanentes se mantienen como backlog controlado para fases posteriores.
 
 ---
 
@@ -10,11 +10,11 @@
 
 | ID | Descripción | Impacto | Prioridad | Estado |
 |---|---|---|---|---|
-| GAP-001 | No existe arquitectura .NET 8 definida | CRÍTICO — bloquea toda migración | Alta | OPEN |
-| GAP-002 | No existe código .NET 8 en el repositorio | CRÍTICO | Alta | OPEN |
+| GAP-001 | Arquitectura .NET 8 aún no cubre módulos funcionales completos de operación | Alto | Alta | IN_PROGRESS — ADR-001 a ADR-012 aceptados y baseline transversal validado; faltan slices funcionales P3-04+ |
+| GAP-002 | No existe todavía un módulo funcional completo listo para producción en .NET 8 | CRÍTICO | Alta | IN_PROGRESS — existe baseline ejecutable con seguridad/KDS/reportes/periféricos, pero ningún ejecutable reemplaza al Legacy end-to-end |
 | GAP-003 | 206 reportes Crystal Reports — plan de migración definido, implementación en progreso | Alto | Alta | IN_PROGRESS — Etapa 10 |
 | GAP-004 | Hardware POS (PinPad, fiscal, cajón) sin abstracción .NET | Alto | Alta | IN_PROGRESS — P3-11: PinPad (P/Invoke), CashDro y BlueVision implementados. Biometría SecuGen y Fiscal Epson BLOCKED (OCX 32-bit sin SDK .NET). |
-| GAP-005 | Multi-país (impuestos, FE) sin arquitectura definida | Alto | Alta | IN_PROGRESS — P3-11: IPaisPolicy + FacturacionElectronicaFactory + 5 gateways FE implementados como stubs. Integración real con SUNAT/AFIP/SII/SRI/SIAT pendiente. |
+| GAP-005 | Integraciones fiscales reales multi-país siguen pendientes pese a la arquitectura base ya definida | Alto | Alta | IN_PROGRESS — P3-11: IPaisPolicy + FacturacionElectronicaFactory + 5 gateways FE implementados como stubs. Integración real con SUNAT/AFIP/SII/SRI/SIAT pendiente. |
 | GAP-006 | Base de datos Target no definida | Alto | Alta | OPEN |
 
 ---
@@ -34,7 +34,7 @@
 
 ## Funcionalidades Legacy Sin Equivalente .NET
 
-> Lista de componentes Legacy que NO tienen equivalente en el Target (porque no existe código .NET 8).
+> Lista de componentes Legacy que siguen sin equivalente .NET completo o productivo.
 
 | Componente Legacy | Tipo | Estado Target |
 |---|---|---|
@@ -42,7 +42,7 @@
 | Todos los 32 módulos BAS | Business Logic | NOT_STARTED |
 | Todas las 10 clases | Domain Objects | NOT_STARTED |
 | Todos los 206 reportes Crystal | Reports | NOT_STARTED |
-| Todas las integraciones hardware | Hardware | NOT_STARTED |
+| Integraciones hardware críticas (SecuGen, Epson fiscal, periféricos productivos) | Hardware | PARTIAL |
 
 ---
 
@@ -65,12 +65,12 @@
 |---|---|---|---|
 | Impresora térmica (ESC/POS) | TTIPODOCUMENTOIMPRESORA | Media | UNKNOWN |
 | Cajón de dinero (RJ11) | API serial | Baja | UNKNOWN |
-| CashDro (cajón automático) | `modProcedimientoNuevo.bas` | Media | UNKNOWN |
-| PinPad DLL3500 | `DLL3500.bas`, `CAJA_PINPAD.dll` | Alta — DLL Win32 | UNKNOWN |
+| CashDro (cajón automático) | `modProcedimientoNuevo.bas` | Media | `ICashDroService` + `CashDroService` (Process.Start). Validado en tests; wiring operativo real pendiente. |
+| PinPad DLL3500 | `DLL3500.bas`, `CAJA_PINPAD.dll` | Alta — DLL Win32 | `IPinPadService` + `PinPadService` (P/Invoke). Falta validación con DLL/hardware real. |
 | Impresora fiscal Epson | `modImpresoraFiscal.bas`, `IFEpson.ocx` | Alta — OCX Win32 | UNKNOWN |
 | Biometría SecuGen | `FpLibX_Const.bas`, `sgfplibx.ocx` | Alta — OCX Win32 | UNKNOWN |
 | KDS pantalla cocina | `modKDS.bas` | Media — XML sobre directorio | PARTIAL — existe baseline .NET para XML/directorio, falta pantalla operativa y confirmación con hardware real |
-| BlueVision/TVS | `modBlueVision.bas` | Alta — COM Win32 | UNKNOWN |
+| BlueVision/TVS | `modBlueVision.bas` | Alta — COM Win32 | PARTIAL — `IBlueVisionService` + `BlueVisionHttpClient`; falta validar servidor/protocolo real en ambiente operativo |
 
 ---
 
@@ -78,12 +78,12 @@
 
 | País | Integración | Módulo Legacy | Plan .NET |
 |---|---|---|---|
-| Perú | SUNAT FE, RUC, IGV | SP + `scriptPeruAlIniciar.sql` | UNKNOWN |
-| Chile | SII, IVA | `scriptChileAlIniciar.sql` | UNKNOWN |
-| Bolivia | SIN código de control | `CodigoControl.bas` | UNKNOWN |
-| Ecuador | SRI | `scriptEcuadorAlIniciar.sql` | UNKNOWN |
-| Argentina | AFIP impresora fiscal | `modImpresoraFiscal.bas` | UNKNOWN |
-| España | IVA España | `scriptEspanaAlIniciar.sql` | UNKNOWN |
+| Perú | SUNAT FE, RUC, IGV | SP + `scriptPeruAlIniciar.sql` | `PeruFEGateway` stub + `PeruPaisPolicy`; integración OSE/SUNAT real pendiente |
+| Chile | SII, IVA | `scriptChileAlIniciar.sql` | `ChileFEGateway` stub + `ChilePaisPolicy` |
+| Bolivia | SIN código de control | `CodigoControl.bas` | `BoliviaFEGateway` stub + `BoliviaPaisPolicy`; código de control/fiscalidad real pendiente |
+| Ecuador | SRI | `scriptEcuadorAlIniciar.sql` | `EcuadorFEGateway` stub + `EcuadorPaisPolicy` |
+| Argentina | AFIP impresora fiscal | `modImpresoraFiscal.bas` | `ArgentinaFEGateway` stub + `ArgentinaPaisPolicy`; impresora fiscal sigue BLOCKED |
+| España | IVA España | `scriptEspanaAlIniciar.sql` | `EspanaPaisPolicy`; gateway FE dedicado no implementado |
 
 ---
 

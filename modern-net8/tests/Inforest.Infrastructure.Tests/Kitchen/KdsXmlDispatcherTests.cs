@@ -81,6 +81,38 @@ public sealed class KdsXmlDispatcherTests : IDisposable
         Assert.True(File.Exists(Path.Combine(bump, "Historial", "order.xml")));
     }
 
+    [Fact]
+    public async Task ProcesarBumpNotificationsAsync_XmlInvalido_ContinuaYMueveArchivoAErrores()
+    {
+        var bump = Path.Combine(_root, "bump");
+        Directory.CreateDirectory(bump);
+        var gateway = new Mock<IKdsLegacyGateway>();
+        var dispatcher = new KdsXmlDispatcher(gateway.Object, NullLogger<KdsXmlDispatcher>.Instance);
+
+        await File.WriteAllTextAsync(Path.Combine(bump, "bad.xml"), "<Transaction><Order>");
+        await File.WriteAllTextAsync(
+            Path.Combine(bump, "ok.xml"),
+            """
+            <Transaction>
+              <Order>
+                <ID>999</ID>
+                <Item>
+                  <ID>5</ID>
+                </Item>
+              </Order>
+            </Transaction>
+            """);
+
+        var config = ConfiguracionProduccionCocina.Crear(true, false, false, false, _root, null, bump, null);
+
+        var processed = await dispatcher.ProcesarBumpNotificationsAsync(config);
+
+        Assert.Equal(1, processed);
+        gateway.Verify(g => g.RegistrarTiempoSalidaAsync("999", "5", It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.True(File.Exists(Path.Combine(bump, "Historial", "errores", "bad.xml")));
+        Assert.True(File.Exists(Path.Combine(bump, "Historial", "ok.xml")));
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_root))
