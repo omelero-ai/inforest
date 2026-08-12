@@ -290,3 +290,148 @@ El Target usará **feature flags por país** y un **tenant ID / local ID** expl�
 ---
 
 *Todos los ADR listados en este documento quedan aceptados como baseline arquitectónico de Fase 2.*
+
+---
+
+## ADR-009
+
+**Título:** Estrategia de interop Win32 para OCX/DLL Legacy (PinPad, fiscal Epson, biometría)
+
+**Estado:** Accepted
+
+**Contexto:**
+Los periféricos clave del Legacy (PinPad via `caja_pinpad.dll`, Impresora Fiscal Epson via `IFEpson.ocx`, Biometría SecuGen via `sgfplibx.ocx`) dependen de librerías Win32 de 32 bits sin SDK .NET oficial disponible.
+
+**Problema:**
+Definir cómo integrar estas librerías en un proceso .NET 8 (64 bits, WinForms) sin acoplar el dominio a tecnologías Win32 heredadas.
+
+**Decisión:**
+- Para DLL nativas con firmas conocidas (`caja_pinpad.dll`): usar **P/Invoke** con declaraciones `[DllImport]` en la capa Infrastructure. La ruta de la DLL es configurable via `appsettings.json`.
+- Para OCX de 32 bits sin SDK .NET reemplazable (`IFEpson.ocx`, `sgfplibx.ocx`): implementar **proceso host de 32 bits** separado con comunicación via pipe/IPC, o esperar reemplazo de hardware. Mientras tanto, registrar como `NOT_APPLICABLE` con `Null*Service` stub.
+- Todos los periféricos tienen interfaz en Application (`IPinPadService`, `IBiometriaService`, `IImpresoraFiscalService`) con implementación Null por defecto. La implementación real se activa via `appsettings.json` (`Hardware.*.Habilitado = true`).
+- La capa Domain no tiene dependencia directa de ninguna librería Win32.
+
+**Alternativas consideradas:**
+- COM Interop directo desde proceso 64 bits: no funciona para OCX de 32 bits.
+- Recompilar OCX a 64 bits: no factible sin código fuente del proveedor.
+- Migrar a SDK moderno equivalente (ej. SecuGen .NET SDK): viable pero requiere evaluación de hardware disponible.
+
+**Consecuencias:**
+- PinPad (`caja_pinpad.dll`) puede implementarse con P/Invoke en el corto plazo.
+- Fiscal Epson y biometría SecuGen quedan como `NullService` (GAP-004) hasta resolución de hardware.
+- El sistema es operativo sin estos periféricos; se habilitan por configuración.
+
+**Fecha:** 2026-08-12
+
+**Evidencia:**
+- `legacy-restaurant/restaurant-vb6/Modulos/DLL3500.bas` — `Declare Function fiOpenPort Lib "caja_pinpad.dll"`
+- `legacy-restaurant/restaurant-vb6/Modulos/modImpresoraFiscal.bas` — `IFEpson.ocx`
+- `legacy-restaurant/restaurant-vb6/Modulos/FpLibX_Const.bas` — `sgfplibx.ocx`
+
+---
+
+## ADR-010
+
+**Título:** Estrategia de Facturación Electrónica por país
+
+**Estado:** Accepted
+
+**Contexto:**
+El Legacy integra FE via base MDB auxiliar (`FACTURACION`) con clases VB6 (`clsTrama.cls`, `clsxml.cls`) que generan XML por país. Cada país tiene regulación diferente: SUNAT (Perú), AFIP (Argentina), SII (Chile), SRI (Ecuador), SIAT (Bolivia).
+
+**Problema:**
+Definir una arquitectura de FE que soporte múltiples países sin condicionales de país en el código de negocio.
+
+**Decisión:**
+- Se define `IFacturacionElectronicaGateway` como contrato polimórfico en Application.
+- `FacturacionElectronicaFactory` en Infrastructure resuelve la implementación por `CodigoPais` (leído de `TPARAMETRO`/`appsettings.json`).
+- Cada país implementa su propio gateway: `PeruFEGateway`, `ArgentinaFEGateway`, `ChileFEGateway`, `EcuadorFEGateway`, `BoliviaFEGateway`.
+- **No se replica la base MDB auxiliar**: la integración es directa con la API del proveedor FE vía HTTP/SOAP.
+- Las credenciales por proveedor se configuran en `appsettings.json` bajo `FE.<CodigoPais>` (ADR-005).
+- `NullFEGateway` es el default cuando FE no está habilitado (`FE.Habilitado = false`).
+
+**Alternativas consideradas:**
+- Replicar el modelo MDB auxiliar Legacy: agrega complejidad innecesaria y no tiene ventajas en .NET 8.
+- Un gateway único con switches por país: rompe Open/Closed; dificulta pruebas y extensión.
+- Microservicio FE externo: overhead excesivo para fase de migración.
+
+**Consecuencias:**
+- Añadir soporte para un nuevo país requiere solo una nueva implementación de `IFacturacionElectronicaGateway`.
+- El modelo de documento `DocumentoFE` es el contrato compartido entre todos los gateways.
+- Las credenciales y endpoints FE están externalizados y no en código.
+
+**Fecha:** 2026-08-12
+
+**Evidencia:**
+- `legacy-restaurant/restaurant-vb6/Modulos/modDeclaracion.bas` — `lFacturacionE`, `clsTramaFE`, `TipoFacturacion`
+- `legacy-restaurant/database-sql-server/8. InfoFact.sql`
+- `legacy-restaurant/restaurant-vb6/Clases/clsTrama.cls`
+- `legacy-restaurant/restaurant-vb6/Clases/clsxml.cls`
+
+---
+
+## ADR-011
+
+**Título:** CashDro — integración via process launcher
+
+**Estado:** Accepted
+
+**Contexto:**
+El Legacy integra el cajón automático CashDro lanzando el proceso externo `MotorCashDrow.exe` con `ShellExecute`. No existe DLL de comunicación directa.
+
+**Problema:**
+Definir cómo replicar esta integración en .NET 8 manteniendo la compatibilidad con el motor CashDro existente.
+
+**Decisión:**
+- `ICashDroService` define los métodos `IniciarMotorAsync(argumentos)` y `AbrirCajonAsync()`.
+- `CashDroService` implementa la integración lanzando el proceso via `System.Diagnostics.Process.Start()`.
+- La ruta del ejecutable se configura en `appsettings.json` (`Hardware.CashDro.RutaMotor`).
+- Si el ejecutable no existe, se lanza `InfrastructureException` con mensaje descriptivo.
+- `NullCashDroService` es el default cuando CashDro está deshabilitado.
+
+**Alternativas consideradas:**
+- Comunicación IPC directa con MotorCashDrow: requiere conocer el protocolo interno del motor, no documentado.
+- SDK moderno de CashDro: evaluar si el fabricante lo provee en una fase posterior.
+
+**Consecuencias:**
+- La integración es compatible con el motor CashDro Legacy sin cambios.
+- El contrato de argumentos debe documentarse si se extiende la integración.
+
+**Fecha:** 2026-08-12
+
+**Evidencia:**
+- `legacy-restaurant/restaurant-vb6/Modulos/modProcedimientoNuevo.bas` — `IniciarMotorCashDrow()`
+
+---
+
+## ADR-012
+
+**Título:** BlueVision — cliente HTTP nativo (no COM)
+
+**Estado:** Accepted
+
+**Contexto:**
+El Legacy se comunica con BlueVision TVS via SDK COM (`BlueVision_Core_TVS.dll`), leyendo credenciales de `BLUEVISION.INI`.
+
+**Problema:**
+Reemplazar la comunicación COM/VB6 con una integración moderna sin la dependencia de la DLL COM legacy.
+
+**Decisión:**
+- `IBlueVisionService` define el contrato de envío de tickets.
+- `BlueVisionHttpClient` implementa la integración via `HttpClient` nativo de .NET 8.
+- Las credenciales (`Login`, `ClearPassword`, `Url`) se leen de `IOptions<BlueVisionOptions>` configurado en `appsettings.json` bajo `Hardware.BlueVision` (ADR-005). No se usa `BLUEVISION.INI`.
+- Los modelos de ticket (`BlueVisionTicket`, `BlueVisionLinea`) son DTOs en Domain, serializados a JSON para la API REST de BlueVision.
+- `NullBlueVisionService` es el default cuando BlueVision está deshabilitado.
+
+**Alternativas consideradas:**
+- COM Interop con `BlueVision_Core_TVS.dll`: crea dependencia en DLL legacy; incompatible con 64 bits.
+- Mantener `BLUEVISION.INI`: inconsistente con la estrategia de configuración centralizada (ADR-005).
+
+**Consecuencias:**
+- La integración requiere verificar el contrato HTTP/REST de la API BlueVision TVS.
+- Si BlueVision expone WebSockets en lugar de REST, ajustar la implementación.
+
+**Fecha:** 2026-08-12
+
+**Evidencia:**
+- `legacy-restaurant/restaurant-vb6/Modulos/modBlueVision.bas` — `TvsClientApi`, `CreateSession`, `SaveTicket`, `SaveTicketLine`

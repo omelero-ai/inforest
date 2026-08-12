@@ -254,3 +254,46 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `IReporteRepository` | Interface | `IReporteRepository` | Interface | COMPLETED | `src/Inforest.Application/Reportes/IReporteRepository.cs` |
 | `ReporteRepository` | — | `ReporteRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `(test etapa 10 application)` | — | `ReportesHandlersTests` (14 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/Reportes/` |
+
+## P3-11 — Periféricos Especializados e Integraciones por País
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `DLL3500.bas` | Module | `IPinPadService` | Interface | IN_PROGRESS | `src/Inforest.Application/Interfaces/Hardware/IPinPadService.cs` |
+| `caja_pinpad.dll` | DLL Win32 | `PinPadService` | P/Invoke | IN_PROGRESS | `src/Inforest.Infrastructure/Hardware/PinPadService.cs` |
+| — | — | `NullPinPadService` | Stub | COMPLETED | `src/Inforest.Infrastructure/Hardware/NullPinPadService.cs` |
+| `modProcedimientoNuevo.bas` (CashDro) | Module | `ICashDroService` | Interface | IN_PROGRESS | `src/Inforest.Application/Interfaces/Hardware/ICashDroService.cs` |
+| `MotorCashDrow.exe` | Process | `CashDroService` | Process.Start | IN_PROGRESS | `src/Inforest.Infrastructure/Hardware/CashDroService.cs` |
+| — | — | `NullCashDroService` | Stub | COMPLETED | `src/Inforest.Infrastructure/Hardware/NullCashDroService.cs` |
+| `modBlueVision.bas` | Module | `IBlueVisionService` | Interface | IN_PROGRESS | `src/Inforest.Application/Interfaces/Hardware/IBlueVisionService.cs` |
+| `BlueVision_Core_TVS.dll` (COM) | COM DLL | `BlueVisionHttpClient` | HttpClient | IN_PROGRESS | `src/Inforest.Infrastructure/Hardware/BlueVisionHttpClient.cs` |
+| — | — | `NullBlueVisionService` | Stub | COMPLETED | `src/Inforest.Infrastructure/Hardware/NullBlueVisionService.cs` |
+| `FpLibX_Const.bas`, `sgfplibx.ocx` | OCX 32-bit | `IBiometriaService` | Interface | BLOCKED | `src/Inforest.Application/Interfaces/Hardware/IBiometriaService.cs` |
+| — | — | `NullBiometriaService` | Stub (GAP) | COMPLETED | `src/Inforest.Infrastructure/Hardware/NullBiometriaService.cs` |
+| `modImpresoraFiscal.bas`, `IFEpson.ocx` | OCX 32-bit | `IImpresoraFiscalService` | Interface | BLOCKED | `src/Inforest.Application/Interfaces/Hardware/IImpresoraFiscalService.cs` |
+| — | — | `NullImpresoraFiscalService` | Stub (GAP) | COMPLETED | `src/Inforest.Infrastructure/Hardware/NullImpresoraFiscalService.cs` |
+| `clsTrama.cls`, `clsxml.cls`, `lFacturacionE` | Class/Vars | `IFacturacionElectronicaGateway` | Interface | IN_PROGRESS | `src/Inforest.Application/Interfaces/Hardware/IFacturacionElectronicaGateway.cs` |
+| — | — | `FacturacionElectronicaFactory` | Factory | COMPLETED | `src/Inforest.Infrastructure/Country/FacturacionElectronicaFactory.cs` |
+| — (SUNAT/OSE Perú) | — | `PeruFEGateway` | Gateway stub | IN_PROGRESS | `src/Inforest.Infrastructure/Country/PeruFEGateway.cs` |
+| — (AFIP Argentina) | — | `ArgentinaFEGateway` | Gateway stub | IN_PROGRESS | `src/Inforest.Infrastructure/Country/ArgentinaFEGateway.cs` |
+| — (SII Chile) | — | `ChileFEGateway` | Gateway stub | IN_PROGRESS | `src/Inforest.Infrastructure/Country/FEGateways.cs` |
+| — (SRI Ecuador) | — | `EcuadorFEGateway` | Gateway stub | IN_PROGRESS | `src/Inforest.Infrastructure/Country/FEGateways.cs` |
+| — (SIAT Bolivia) | — | `BoliviaFEGateway` | Gateway stub | IN_PROGRESS | `src/Inforest.Infrastructure/Country/FEGateways.cs` |
+| — | — | `NullFEGateway` | Stub | COMPLETED | `src/Inforest.Infrastructure/Country/NullFEGateway.cs` |
+| `pais` global + scripts opcionales | Variable/SQL | `IPaisPolicy` | Interface | IN_PROGRESS | `src/Inforest.Application/Interfaces/Country/IPaisPolicy.cs` |
+| — | — | `PeruPaisPolicy` | Policy | COMPLETED | `src/Inforest.Infrastructure/Country/PaisPolicies.cs` |
+| — | — | `ArgentinaPaisPolicy` | Policy | COMPLETED | `src/Inforest.Infrastructure/Country/PaisPolicies.cs` |
+| — | — | `ChilePaisPolicy` | Policy | COMPLETED | `src/Inforest.Infrastructure/Country/PaisPolicies.cs` |
+| — | — | `EcuadorPaisPolicy` | Policy | COMPLETED | `src/Inforest.Infrastructure/Country/PaisPolicies.cs` |
+| — | — | `BoliviaPaisPolicy` | Policy | COMPLETED | `src/Inforest.Infrastructure/Country/PaisPolicies.cs` |
+| — | — | `EspanaPaisPolicy` | Policy | COMPLETED | `src/Inforest.Infrastructure/Country/PaisPolicies.cs` |
+| — | — | `PaisPolicyFactory` | Factory | COMPLETED | `src/Inforest.Infrastructure/Country/PaisPolicies.cs` |
+| `modDeclaracion.bas` (país/FE) | Domain Entity | `ConfiguracionPais` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Hardware/ConfiguracionPais.cs` |
+| `clsTrama.cls` / `clsxml.cls` | Domain | `DocumentoFE` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Hardware/DocumentoFE.cs` |
+| `modBlueVision.bas` (TvsTicket) | Domain | `BlueVisionTicket` / `BlueVisionLinea` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Hardware/BlueVisionTicket.cs` |
+| `modImpresoraFiscal.bas` (zonas) | Domain | `FiscalDocumento` / `FiscalItem` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Hardware/FiscalDocumento.cs` |
+| `frmPago.frm`, `frmPagoPinPad.frm` | Form | `FrmPago` / `FrmPagoPinPad` | WinForm | NOT_STARTED | `src/Inforest.Desktop/Forms/` |
+| (tests P3-11) | — | `NullHardwareServicesTests` (15 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |
+| (tests P3-11) | — | `FacturacionElectronicaFactoryTests` (7 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |
+| (tests P3-11) | — | `PaisPolicyTests` (8 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |
+| (tests P3-11) | — | `DomainHardwareEntityTests` (8 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |

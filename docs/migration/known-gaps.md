@@ -13,8 +13,8 @@
 | GAP-001 | No existe arquitectura .NET 8 definida | CRÍTICO — bloquea toda migración | Alta | OPEN |
 | GAP-002 | No existe código .NET 8 en el repositorio | CRÍTICO | Alta | OPEN |
 | GAP-003 | 206 reportes Crystal Reports — plan de migración definido, implementación en progreso | Alto | Alta | IN_PROGRESS — Etapa 10 |
-| GAP-004 | Hardware POS (PinPad, fiscal, cajón) sin abstracción .NET | Alto | Alta | OPEN |
-| GAP-005 | Multi-país (impuestos, FE) sin arquitectura definida | Alto | Alta | OPEN |
+| GAP-004 | Hardware POS (PinPad, fiscal, cajón) sin abstracción .NET | Alto | Alta | IN_PROGRESS — P3-11: PinPad (P/Invoke), CashDro y BlueVision implementados. Biometría SecuGen y Fiscal Epson BLOCKED (OCX 32-bit sin SDK .NET). |
+| GAP-005 | Multi-país (impuestos, FE) sin arquitectura definida | Alto | Alta | IN_PROGRESS — P3-11: IPaisPolicy + FacturacionElectronicaFactory + 5 gateways FE implementados como stubs. Integración real con SUNAT/AFIP/SII/SRI/SIAT pendiente. |
 | GAP-006 | Base de datos Target no definida | Alto | Alta | OPEN |
 
 ---

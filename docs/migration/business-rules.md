@@ -1147,3 +1147,173 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Destino .NET:** `ObtenerReporteTiempoKdsProductoHandler`, `FrmTiempoKdsReporte.cs`, `RepTiempoKdsProducto.frx`
 
 **Estado:** IN_PROGRESS
+
+---
+
+## Reglas de Periféricos Especializados e Integraciones por País (P3-11)
+
+### BR-PERIPH-001
+
+**Nombre:** PinPad — operaciones de cobro con tarjeta
+
+**Origen:** Legacy/DLL3500.bas
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/DLL3500.bas`
+
+**Procedimiento/Función:** `fiOpenPort`, `fiClosePort`, `fiStartOperation`, `fiGetStatus` via `caja_pinpad.dll`
+
+**Descripción:** El PinPad se comunica via DLL nativa Win32 (`caja_pinpad.dll`). El Legacy declara las funciones con `Declare Function` e invoca por operación (`OP_VENTA`, `OP_ANULACION`, `OP_CIERRE`, `OP_SIMULACION_CUOTAS`, `OP_TEST_COMUNICACIONES`, `OP_DUPLICADO`). El flujo de estados es `RET_RUNNING (1)` → `RET_OK (0)` / `RET_NOK (-1)`. Errores específicos: `ERR_COM`, `ERR_PPAD_NO_RESP`, `ERR_SOCKET`, `ERR_HOST_NO_RESP`, `ERR_PRINTER`, `ERR_NAK_RECEIVED`, `ERR_LRC_PPAD`. El separador de campos es `FS = Chr(28)`.
+
+**Condición:** Se activa al seleccionar pago con tarjeta en `frmPago.frm` / `frmPagoPinPad.frm`.
+
+**Resultado:** Cadena de respuesta parseada con `MensajePinPad()`. Imprime cupón con `ImprimeCabecera()`. El formato de encabezado varía por país: Argentina usa `C.U.I.T.`, Perú usa `R.U.C.`.
+
+**Excepciones:** `ERR_COM (-2)`, `ERR_PPAD_NO_RESP (-3)`, `ERR_SOCKET (-5)`, `ERR_HOST_NO_RESP (-6)`. Se muestra MsgBox al operador.
+
+**Destino .NET:** `IPinPadService`, `PinPadService` (P/Invoke), `NullPinPadService`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-PERIPH-002
+
+**Nombre:** CashDro — cajón automático de dinero
+
+**Origen:** Legacy/modProcedimientoNuevo.bas
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modProcedimientoNuevo.bas`
+
+**Procedimiento/Función:** `IniciarMotorCashDrow(Argumentos As String)`
+
+**Descripción:** El Legacy lanza el proceso externo `CashDrow\MotorCashDrow.exe` mediante `ShellExecute`. La comunicación es por proceso/argumentos, no por DLL directa. Si el ejecutable no existe, muestra MsgBox de error. Los argumentos determinan la operación (abrir, cerrar, estado).
+
+**Condición:** Al procesar un pago o apertura de turno cuando CashDro está habilitado en la configuración de caja.
+
+**Resultado:** El motor CashDro ejecuta la operación de cajón. El Legacy no espera retorno síncrono.
+
+**Excepciones:** Si `MotorCashDrow.exe` no existe, se muestra mensaje al administrador.
+
+**Destino .NET:** `ICashDroService`, `CashDroService` (Process.Start), `NullCashDroService`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-PERIPH-003
+
+**Nombre:** BlueVision/TVS — sistema de visualización de tickets en mesa
+
+**Origen:** Legacy/modBlueVision.bas
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modBlueVision.bas`
+
+**Procedimiento/Función:** `TVS_EnviarTicket(RsImpresion, sArea, sEvento, sPedido)`
+
+**Descripción:** BlueVision TVS es un sistema de visualización de tickets para mesas. El Legacy se comunica via SDK COM (`BlueVision_Core_TVS.dll`) con autenticación por login/password leídos de `BLUEVISION.INI`. El flujo es: 1) CreateSession con TvsLogin, 2) SaveTicket con TvsTicket (id GUID, mode, room, table, total, TPV, evento, mozo), 3) SaveTicketLine por cada ítem de `DPEDIDO`. El total se calcula con `TVS_ObtenerTotal()`. El GUID se genera con `CoCreateGuid` via ole32.dll.
+
+**Condición:** Al guardar/modificar un pedido cuando BlueVision está habilitado en la configuración.
+
+**Resultado:** Ticket y líneas registrados en el servidor BlueVision. El Legacy escribe log con `TVS_EscribirLog()`.
+
+**Excepciones:** Cualquier error COM se captura en `ErrorHandler` y se loguea.
+
+**Destino .NET:** `IBlueVisionService`, `BlueVisionHttpClient` (HttpClient nativo), `NullBlueVisionService`, `BlueVisionOptions`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-PERIPH-004
+
+**Nombre:** Biometría SecuGen — lectura y verificación de huella dactilar
+
+**Origen:** Legacy/FpLibX_Const.bas, sgfplibx.ocx
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/FpLibX_Const.bas`
+
+**Procedimiento/Función:** SDK SecuGen FpLibX via OCX `sgfplibx.ocx`
+
+**Descripción:** El Legacy usa el SDK SecuGen FP (FpLibX) para captura y verificación de huella. Los códigos de error están definidos en `FpLibX_Const.bas`: dispositivo no encontrado (`ERROR_DEVICE_NOT_FOUND = 55`), timeout (`ERROR_TIME_OUT = 54`), ya abierto (`ERROR_DEV_ALREADY_OPEN = 59`), fallo de extracción (`ERROR_EXTRACT_FAIL = 105`), fallo de match (`ERROR_MATCH_FAIL = 106`). El template puede ser ANSI378 (256), SG400 (512) o ISO19794 (768). Se usa en login y en operaciones que requieren autorización biométrica.
+
+**Condición:** Cuando la configuración de biometría está habilitada en `TPARAMETRO`/`TCAJA`.
+
+**Resultado:** Template de huella capturado; verificación con score de coincidencia.
+
+**Excepciones:** Múltiples códigos de error de dispositivo y de algoritmo de matching.
+
+**Destino .NET:** `IBiometriaService`, `BiometriaSecuGenService` (P/Invoke a SDK SecuGen .NET si disponible), `NullBiometriaService`. GAP: OCX sin SDK .NET oficial disponible — usar Null hasta reemplazo de hardware.
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-PERIPH-005
+
+**Nombre:** Impresora Fiscal Epson — emisión de documentos fiscales (Argentina)
+
+**Origen:** Legacy/modImpresoraFiscal.bas, IFEpson.ocx
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modImpresoraFiscal.bas`
+
+**Procedimiento/Función:** `SeteoFactura(PrinterOCX As PrinterFiscal)` via OCX `IFEpson.ocx`
+
+**Descripción:** La impresora fiscal Epson (LX-300 Fiscal, FX-880 Fiscal) se controla via OCX `IFEpson.ocx` (32 bits, propiedad intelectual Epson Argentina). El setup define: 1) `SetPaperSize(cols, filas)` para papel continuo 12"×10", 2) `SetPreference` para estación de emisión Facturas A / documentos no fiscales, 3) `SetZone` para cada zona del formulario (letra comprobante, logo, razón social, datos vendedor, nro factura, CUIT, datos comprador, detalle de venta con ítems). Cada zona tiene posición (col, fila inicial, col final, fila final). Los ítems se dividen en zonas: cantidad (zona 61), descripción (zona 62), precio unitario (zona 63), tasa IVA (zona 64), tasa ajuste (zona 65).
+
+**Condición:** Solo para Argentina (`pais = "003"`). Se activa al emitir documentos fiscales.
+
+**Resultado:** Documento físico impreso con formato fiscal argentino regulado por AFIP.
+
+**Excepciones:** Cada operación retorna booleano `Continuar`; si falsa, se aborta la emisión.
+
+**Destino .NET:** `IImpresoraFiscalService`, `ImpresoraFiscalEpsonService` (protocolo serial RS-232/USB o proceso host 32-bit), `NullImpresoraFiscalService`. GAP: OCX de 32 bits sin SDK .NET oficial — registrado en known-gaps.
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-PERIPH-006
+
+**Nombre:** Facturación Electrónica — emisión de comprobantes electrónicos por país
+
+**Origen:** Legacy/modDeclaracion.bas, clsTrama.cls, clsxml.cls
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modDeclaracion.bas`
+
+**Procedimiento/Función:** Variables globales `lFacturacionE`, `tCodigoFE`, `sRutaFE`, `sMDBFE`, `CnFE`, `lQRFE`, `RutaImgFE`, `clsTramaFE`, `TipoFacturacion`
+
+**Descripción:** La FE en el Legacy se gestiona via base auxiliar MDB (`FACTURACION`). La variable `lFacturacionE` (boolean) habilita el flujo. `tCodigoFE` identifica el tipo de documento electrónico. `sRutaFE` es la ruta a la base MDB. `CnFE` es la conexión ADO a `FACTURACION`. `lQRFE` habilita QR en el comprobante. `clsTramaFE` (clase `clsTrama`) maneja el armado de la trama/XML. `TipoFacturacion` diferencia entre modalidades. La clase `clsxml.cls` arma el XML del comprobante según país. `registroventasunat` (comentario en código) indica integración SUNAT para Perú. La flag `FACTURACION PAPERLEES` indica comprobante sin papel físico.
+
+**Condición:** Cuando `lFacturacionE = True` (configurado en `TPARAMETRO`/`TCAJA`).
+
+**Resultado:** XML de comprobante electrónico generado y enviado al proveedor FE/autoridad fiscal del país.
+
+**Excepciones:** Errores de conexión a base MDB, errores de validación de trama XML, rechazo del proveedor FE.
+
+**Destino .NET:** `IFacturacionElectronicaGateway` (polimórfico por país), `FacturacionElectronicaFactory`, `PeruFEGateway` (SUNAT/OSE), `ArgentinaFEGateway` (AFIP), `ChileFEGateway` (SII), `EcuadorFEGateway` (SRI), `BoliviaFEGateway` (SIAT), `NullFEGateway`
+
+**Estado:** IN_PROGRESS
+
+---
+
+### BR-PERIPH-007
+
+**Nombre:** Multi-país — configuración fiscal y de periféricos por país
+
+**Origen:** Legacy/modDeclaracion.bas, DLL3500.bas, scripts opcionales SQL
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modDeclaracion.bas`, `legacy-restaurant/database-sql-server/opcionales/`
+
+**Procedimiento/Función:** Variable global `pais`, scripts `scriptPeruAlIniciar.sql`, `scriptArgentinaAlIniciar.sql`, etc.
+
+**Descripción:** El país del local está codificado en la variable global `pais`. Valores conocidos: `"003"` = Argentina (usa C.U.I.T., impresora fiscal Epson, AFIP FE); default/vacío = Perú (usa R.U.C., SUNAT FE). Otros países: Chile (`scriptChileAlIniciar.sql`), Bolivia (`scriptBoliviaAlIniciar.sql`), Ecuador (`scriptEcuadorAlIniciar.sql`), España (`scriptEspanaAlIniciar.sql`). Cada script configura parámetros fiscales, tipos de impuestos, formatos de documento y integraciones específicas. El comportamiento de impresión del PinPad también varía por país (cabecera con RUC vs CUIT en `DLL3500.bas`).
+
+**Condición:** Al inicializar el sistema, se lee el código de país y se aplica la configuración correspondiente.
+
+**Resultado:** Comportamiento fiscal, de impresión y de integración adaptado al país del local.
+
+**Excepciones:** País no reconocido → comportamiento por defecto (Perú).
+
+**Destino .NET:** `IPaisPolicy`, `ConfiguracionPais`, `PaisPolicyFactory`, `PeruPaisPolicy`, `ArgentinaPaisPolicy`, `ChilePaisPolicy`, `EcuadorPaisPolicy`, `BoliviaPaisPolicy`, `EspanaPaisPolicy`
+
+**Estado:** IN_PROGRESS

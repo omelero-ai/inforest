@@ -76,6 +76,7 @@
 | M3-P3-03 | Seguridad, sesión, auditoría y licenciamiento | IN_PROGRESS — 2026-08-11 |
 | M3-P3-08 | Cocina, comanda, áreas y KDS | IN_PROGRESS — 2026-08-12 |
 | M3-P3-10 | Reportes, consultas y salidas operativas | IN_PROGRESS — 2026-08-12 |
+| M3-P3-11 | Periféricos especializados e integraciones por país | IN_PROGRESS — 2026-08-12 |
 | M4 | Primer módulo migrado (Maestros) | NOT_STARTED |
 | M5 | Punto de Venta migrado | NOT_STARTED |
 | M6 | Caja y Pagos migrados | NOT_STARTED |

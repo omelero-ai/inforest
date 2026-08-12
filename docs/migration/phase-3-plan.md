@@ -539,7 +539,7 @@ Este plan se construye con evidencia técnica de:
   - smoke tests por país,
   - validación operativa en ambientes reales o equivalentes.
 - **Dependencias con otras etapas:** depende de P3-10; bloquea P3-12.
-- **Estado:** NOT_STARTED
+- **Estado:** IN_PROGRESS — 2026-08-12
 
 ### Etapa P3-12
 
