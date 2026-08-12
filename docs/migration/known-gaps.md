@@ -28,7 +28,7 @@
 | SEC-003 | SQL inline potencialmente vulnerable a injection | Múltiples `*.frm` | Alto | Media |
 | SEC-004 | Variables globales sin control de acceso (543 vars) | `modDeclaracion.bas` | Medio | Media |
 | SEC-005 | Licencia por dongle físico sin alternativa moderna | `License.cls`, `ModuloHardKey.bas` | Bajo | Baja |
-| SEC-006 | `TUSUARIO.tPassword` (`varchar(8)`) no permite persistir BCrypt sin tabla sidecar o cambio de esquema | `TUSUARIO` | Alto | Alta |
+| SEC-006 | `TUSUARIO.tPassword` (`varchar(8)`) no permite persistir BCrypt sin tabla sidecar — **RESUELTO**: tabla sidecar `TUSUARIO_HASH` implementada (ADR-013, script `migrations/001_TUSUARIO_HASH.sql`) | `TUSUARIO` | Alto | Alta — COMPLETED |
 
 ---
 

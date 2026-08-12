@@ -46,7 +46,7 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Servicio de precios por canal
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
 
@@ -69,7 +69,7 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Servicio de cálculo de impuestos
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
 
@@ -92,7 +92,7 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Entidades Pedido, DetallePedido, DetalleCombo
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
 
@@ -115,7 +115,7 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** UNKNOWN — requiere análisis de módulo hotelero
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED (estructura de tabla) / PARTIAL (lógica de uso)
 
@@ -138,7 +138,7 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Servicio de configuración de menú/pantalla POS
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
 
@@ -186,7 +186,7 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Middleware de validación de turno
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
 
@@ -330,7 +330,7 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Servicio de inventario / descargo automático
 
-**Estado:** NOT_STARTED
+**Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
 
@@ -1317,3 +1317,105 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Destino .NET:** `IPaisPolicy`, `ConfiguracionPais`, `PaisPolicyFactory`, `PeruPaisPolicy`, `ArgentinaPaisPolicy`, `ChilePaisPolicy`, `EcuadorPaisPolicy`, `BoliviaPaisPolicy`, `EspanaPaisPolicy`
 
 **Estado:** IN_PROGRESS
+
+---
+
+## Configuración del Sistema
+
+### BR-SQL-003
+**Nombre:** TPARAMETRO — configuración funcional global del sistema
+
+**Origen:** Legacy/modPuntoVenta.bas + TPARAMETRO
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modPuntoVenta.bas`
+
+**Procedimiento/Función:** `SELECT * FROM TPARAMETRO` al inicio del sistema; valores cargados en variables globales de `modDeclaracion.bas`
+
+**Descripción:** La tabla `TPARAMETRO` tiene un único registro con 150+ columnas que controlan el comportamiento global del sistema: impuestos, correlativos, canales, monedas, día contable automático/manual, habilitación de módulos (almacén, KDS, delivery, FE), flags de impresión, configuración de email, integración con SAP, parámetros de país. Todos los módulos leen estas variables globales para determinar su comportamiento.
+
+**Condición:** Al iniciar cualquier módulo (`Sub Main`) se carga `TPARAMETRO`.
+
+**Resultado:** Variables globales disponibles en todo el sistema; comportamiento dinámico según configuración.
+
+**Excepciones:** Si `TPARAMETRO` no existe o está vacía, el sistema no puede iniciar.
+
+**Destino .NET:** `ConfiguracionSistema` (record tipado), `IParametroRepository.ObtenerConfiguracionAsync`, `ParametroService` con cache lazy, `IParametroService.ObtenerBoolAsync/ObtenerNumericoAsync`
+
+**Estado:** IN_PROGRESS
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-SQL-004
+**Nombre:** TCAJA — configuración operativa por caja/terminal
+
+**Origen:** Legacy/modPuntoVenta.bas + TCAJA
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modPuntoVenta.bas`
+
+**Procedimiento/Función:** `SELECT * FROM TCAJA WHERE tCaja = @sCaja` al inicio; valores cargados en variables globales de `modDeclaracion.bas`
+
+**Descripción:** La tabla `TCAJA` tiene una fila por caja física con 100+ columnas que controlan el comportamiento de esa terminal específica: tipo de comanda (wComanda/vComanda), flags de password para cada operación, tipos de consumo habilitados, opciones de preimpresión, modo delivery, acceso a módulos específicos, configuración de balanza, integración móvil. Cada caja puede tener comportamiento diferente dentro del mismo restaurante.
+
+**Condición:** Al iniciar una sesión en una caja determinada, se carga su configuración.
+
+**Resultado:** Comportamiento diferenciado por terminal física; flags disponibles en toda la sesión.
+
+**Excepciones:** Si la caja no existe en `TCAJA` o `lActivo = 0`, la caja no puede operar.
+
+**Destino .NET:** `ConfiguracionCaja` (record tipado), `IParametroRepository.ObtenerConfiguracionCajaAsync`, `ObtenerConfiguracionCajaHandler`
+
+**Estado:** IN_PROGRESS
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-SQL-001
+**Nombre:** spIns_MPEDIDO — inserción de pedido con correlativo automático
+
+**Origen:** Legacy/spIns_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spIns_MPEDIDO`
+
+**Descripción:** El SP inserta una cabecera de pedido en `MPEDIDO` generando un correlativo automático basado en `TPARAMETRO.nCorrelativo` y actualizando `TPEDIDOMESA` (estado de la mesa). El código de pedido (`tCodigoPedido`) se genera como correlativo anual único. El SP garantiza atomicidad.
+
+**Condición:** Al crear un nuevo pedido desde cualquier módulo (POS, Delivery, Adición).
+
+**Resultado:** Registro en `MPEDIDO` + actualización `TPEDIDOMESA` + correlativo incrementado.
+
+**Excepciones:** Si la mesa ya tiene un pedido activo (estado ocupado), error.
+
+**Destino .NET:** `CreatePedidoCommand`, `CreatePedidoHandler` (llama SP Legacy via Dapper)
+
+**Estado:** IN_PROGRESS
+
+**Evidencia:** CONFIRMED
+
+---
+
+### BR-SQL-002
+**Nombre:** spUpd_MPEDIDO — actualización integral del pedido
+
+**Origen:** Legacy/spUpd_MPEDIDO
+
+**Archivo:** `legacy-restaurant/database-sql-server/5. SP.sql`
+
+**Procedimiento/Función:** `spUpd_MPEDIDO`
+
+**Descripción:** El SP actualiza estado, datos y totales del pedido. Puede actualizar mesa, mozo, estado, turno, totales de venta y datos de delivery. Maneja la transacción completa de actualización.
+
+**Condición:** Al modificar cualquier dato del pedido (cambio de mesa, mozo, estado).
+
+**Resultado:** Registro MPEDIDO actualizado consistentemente.
+
+**Excepciones:** Si el pedido está en estado 'AN' (anulado) o 'CO' (cobrado), no se puede actualizar.
+
+**Destino .NET:** `UpdatePedidoCommand`, `UpdatePedidoHandler` (llama SP Legacy via Dapper)
+
+**Estado:** IN_PROGRESS
+
+**Evidencia:** CONFIRMED

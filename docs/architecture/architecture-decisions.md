@@ -435,3 +435,43 @@ Reemplazar la comunicación COM/VB6 con una integración moderna sin la dependen
 
 **Evidencia:**
 - `legacy-restaurant/restaurant-vb6/Modulos/modBlueVision.bas` — `TvsClientApi`, `CreateSession`, `SaveTicket`, `SaveTicketLine`
+
+---
+
+## ADR-013
+
+**Título:** Tabla sidecar TUSUARIO_HASH para BCrypt (SEC-006)
+
+**Estado:** Accepted
+
+**Contexto:**
+La tabla Legacy `TUSUARIO.tPassword` es `varchar(8)`, lo que impide almacenar hashes BCrypt (72 chars). Modificar `TUSUARIO` rompería scripts SQL y SPs existentes que dependen del esquema Legacy.
+
+**Problema:**
+¿Cómo adoptar BCrypt para nuevos passwords sin modificar el esquema Legacy de `TUSUARIO`?
+
+**Decisión:**
+- Se crea una tabla sidecar `TUSUARIO_HASH` en `INFSEGURIDAD` con columnas `tCodigoUsuario VARCHAR(15)`, `tHashBCrypt VARCHAR(72)`, `fActualizacion DATETIME`.
+- `ModernPasswordHashStore` lee/escribe en esta tabla via Dapper (MERGE).
+- El nombre de la tabla es configurable en `appsettings.json` bajo `Inforest.Security.ModernPasswordHashTable` (default: `TUSUARIO_HASH`).
+- `AuthService` prioriza BCrypt (si existe hash en sidecar) sobre el cifrado Legacy XOR+César.
+- Si la tabla sidecar no existe, `ModernPasswordHashStore` retorna `null` y el sistema continúa con el cifrado Legacy (degradación controlada).
+- El script de creación está en `legacy-restaurant/database-sql-server/migrations/001_TUSUARIO_HASH.sql`.
+
+**Alternativas consideradas:**
+- Modificar `TUSUARIO.tPassword` a `varchar(72)`: rompe SPs Legacy y requiere coordinación con tablas dependientes.
+- Almacenar hash en columna auxiliar en `TUSUARIO`: requiere ALTER TABLE sobre tabla Legacy crítica.
+- Columna JSON en tabla existente: no disponible en versiones antiguas de SQL Server soportadas.
+
+**Consecuencias:**
+- La transición es incremental: nuevos logins escriben BCrypt en sidecar; logins Legacy sin sidecar continúan funcionando.
+- La tabla sidecar debe crearse manualmente antes de activar BCrypt (script provisto).
+- No requiere migración de datos existentes.
+
+**Fecha:** 2026-08-12
+
+**Evidencia:**
+- `modern-net8/src/Inforest.Infrastructure/Security/ModernPasswordHashStore.cs`
+- `modern-net8/src/Inforest.Infrastructure/Security/AuthService.cs`
+- `legacy-restaurant/database-sql-server/migrations/001_TUSUARIO_HASH.sql`
+- `legacy-restaurant/restaurant-vb6/Clases/ClsSeguridad.cls` — cifrado Legacy XOR+César

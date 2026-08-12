@@ -7,11 +7,11 @@ namespace Inforest.Desktop.Reportes;
 /// Envoltorio centralizado sobre FastReport .NET para renderizar reportes del sistema.
 /// <para>
 /// ADR-007: FastReport .NET es el motor objetivo de reportes (reemplaza Crystal Reports).
-/// Convención de plantillas: <c>reports/templates/Rep{Nombre}.frx</c>
+/// Convención de plantillas: <c>Reports/Templates/Rep{Nombre}.frx</c>
 /// </para>
 /// Uso típico:
 /// <code>
-/// var viewer = new ReporteViewer(logger, "reports/templates");
+/// var viewer = new ReporteViewer(logger, "Reports/Templates");
 /// viewer.CargarPlantilla("RepPropina.frx");
 /// viewer.AgregarDataSource("Propinas", dataTable);
 /// viewer.Mostrar();
@@ -36,7 +36,7 @@ public sealed class ReporteViewer : IDisposable
     public ReporteViewer(ILogger<ReporteViewer> logger, string rutaPlantillas)
     {
         _logger = logger;
-        _rutaPlantillas = rutaPlantillas;
+        _rutaPlantillas = ResolverRutaPlantillas(rutaPlantillas);
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public sealed class ReporteViewer : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        var rutaCompleta = Path.Combine(_rutaPlantillas, nombrePlantilla);
+        var rutaCompleta = ResolverRutaPlantilla(nombrePlantilla);
         if (!File.Exists(rutaCompleta))
         {
             _logger.LogWarning("Plantilla FastReport no encontrada: {Ruta}", rutaCompleta);
@@ -72,6 +72,9 @@ public sealed class ReporteViewer : IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         EnsureReportCargado();
         _report!.RegisterData(datos, nombreDataSource);
+        if (!string.Equals(nombreDataSource, "Result", StringComparison.OrdinalIgnoreCase))
+            _report!.RegisterData(datos, "Result");
+
         _logger.LogDebug("DataSource '{Nombre}' registrado ({Filas} filas)", nombreDataSource, datos.Rows.Count);
     }
 
@@ -175,6 +178,31 @@ public sealed class ReporteViewer : IDisposable
     {
         if (!_reportCargado || _report is null)
             throw new InvalidOperationException("Debe llamar a CargarPlantilla() antes de usar el reporte.");
+    }
+
+
+    private string ResolverRutaPlantilla(string nombrePlantilla)
+    {
+        var rutaDirecta = Path.Combine(_rutaPlantillas, nombrePlantilla);
+        if (File.Exists(rutaDirecta))
+            return rutaDirecta;
+
+        var rutaCanonica = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Reports", "Templates", nombrePlantilla);
+        return rutaCanonica;
+    }
+
+    private static string ResolverRutaPlantillas(string rutaPlantillas)
+    {
+        var rutaCanonica = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Reports", "Templates");
+        if (string.IsNullOrWhiteSpace(rutaPlantillas))
+            return rutaCanonica;
+
+        if (Path.IsPathRooted(rutaPlantillas))
+            return rutaPlantillas;
+
+        var normalizada = rutaPlantillas.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+        var relativa = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, normalizada);
+        return Directory.Exists(relativa) ? relativa : rutaCanonica;
     }
 
     /// <summary>

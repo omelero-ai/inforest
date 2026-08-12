@@ -97,22 +97,22 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | Legacy (SQL Server) | Tipo | .NET 8 | Tipo | Estado | Notas |
 |---|---|---|---|---|---|
 | `MPEDIDO` | Table | — | — | NOT_STARTED | Cabecera pedido |
-| `DPEDIDO` | Table | — | — | NOT_STARTED | Detalle pedido |
+| `DPEDIDO` | Table | `DetallePedido`, `PedidoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Pedidos/ |
 | `CPEDIDO` | Table | — | — | NOT_STARTED | Combos en pedido |
 | `APEDIDO` | Table | — | — | NOT_STARTED | Auditoría anulados |
-| `MDOCUMENTO` | Table | — | — | NOT_STARTED | Documento de venta |
-| `DDOCUMENTO` | Table | — | — | NOT_STARTED | Detalle documento |
-| `MTURNO` | Table | — | — | NOT_STARTED | Turno de caja |
-| `TCAJA` | Table | — | — | NOT_STARTED | Config caja |
-| `TPRODUCTO` | Table | — | — | NOT_STARTED | Maestro productos |
-| `TGRUPO` | Table | — | — | NOT_STARTED | Grupos productos |
-| `TSUBGRUPO` | Table | — | — | NOT_STARTED | Subgrupos |
-| `TCLIENTE` | Table | — | — | NOT_STARTED | Maestro clientes |
+| `MDOCUMENTO` | Table | `Documento`, `IDocumentoRepository`, `DocumentoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Ventas/ |
+| `DDOCUMENTO` | Table | `DetalleDocumento` | Domain Entity | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Ventas/ |
+| `MTURNO` | Table | `Turno`, `ITurnoRepository`, `TurnoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Turno/ |
+| `TCAJA` | Table | `ConfiguracionCaja`, `IParametroRepository.ObtenerConfiguracionCajaAsync` | Domain Record + Repository | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Configuracion/ |
+| `TPRODUCTO` | Table | `ProductoMaestro`, `IProductoMaestroRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
+| `TGRUPO` | Table | `GrupoProducto`, `IGrupoProductoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
+| `TSUBGRUPO` | Table | `SubGrupoProducto`, `ISubGrupoProductoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
+| `TCLIENTE` | Table | `Cliente`, `IClienteRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
 | `TUSUARIO` | Table | — | — | NOT_STARTED | Usuarios |
-| `TPARAMETRO` | Table | — | — | NOT_STARTED | Config sistema |
-| `DPAGODOCUMENTO` | Table | — | — | NOT_STARTED | Pagos |
+| `TPARAMETRO` | Table | `ConfiguracionSistema`, `IParametroRepository`, `ParametroService` | Domain Record + Repository + Service | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Configuracion/ |
+| `DPAGODOCUMENTO` | Table | `PagoDocumento`, `IPagoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Caja/ |
 | `MCIERRE` | Table | — | — | NOT_STARTED | Cierre contable |
-| `TDIACONTABLE` | Table | — | — | NOT_STARTED | Día contable |
+| `TDIACONTABLE` | Table | `DiaContable`, `IDiaContableService`, `DiaContableService` | Entity + Service | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Turno/ |
 
 > Ver inventario completo: [docs/database/legacy-database.md](../database/legacy-database.md)
 

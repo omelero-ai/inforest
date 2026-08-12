@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\Inforest.Application\Inforest.Application.csproj" />
@@ -22,6 +22,16 @@
     <RootNamespace>Inforest.Desktop</RootNamespace>
     <AssemblyName>Inforest.Desktop</AssemblyName>
   </PropertyGroup>
+
+
+  <ItemGroup>
+    <None Remove="Reports/Templates/*.frx" />
+    <EmbeddedResource Include="Reports/Templates/*.frx" />
+    <Content Include="Reports/Templates/*.frx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Reports/Templates/%(Filename)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="appsettings.json">
