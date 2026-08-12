@@ -1,23 +1,52 @@
 using System.ComponentModel;
+using Inforest.Application.Caja;
+using Inforest.Application.Interfaces;
 using Inforest.Application.Maestros;
+using Inforest.Application.Pedidos;
+using Inforest.Application.Turno;
+using Inforest.Application.Ventas;
+using Inforest.Desktop.Caja;
 using Inforest.Domain.Entities.Maestros;
+using Inforest.Domain.Entities.Ventas;
 
 namespace Inforest.Desktop.CajaRapida;
 
 /// <summary>
 /// Legacy: <c>frmCajaRapida.frm</c>, <c>CajaRapida.exe</c>, <c>modCajaRapida.bas</c>.
+/// Venta rápida sin mesa, con cobro inmediato.
 /// </summary>
 public class FrmCajaRapida : Form
 {
     private readonly IProductoMaestroRepository _productoRepository;
+    private readonly ISessionService _sessionService;
+    private readonly ObtenerTurnoActualHandler _turnoHandler;
+    private readonly CreatePedidoHandler _createPedidoHandler;
+    private readonly EmitirDocumentoHandler _emitirHandler;
+    private readonly ObtenerMediosPagoHandler _mediosPagoHandler;
+    private readonly PagarDocumentoHandler _pagarHandler;
+
     private readonly FlowLayoutPanel _catalogoPanel;
     private readonly BindingList<ItemRapidoRow> _items = [];
     private readonly DataGridView _grid;
     private readonly Label _lblTotal;
 
-    public FrmCajaRapida(IProductoMaestroRepository productoRepository)
+    public FrmCajaRapida(
+        IProductoMaestroRepository productoRepository,
+        ISessionService sessionService,
+        ObtenerTurnoActualHandler turnoHandler,
+        CreatePedidoHandler createPedidoHandler,
+        EmitirDocumentoHandler emitirHandler,
+        ObtenerMediosPagoHandler mediosPagoHandler,
+        PagarDocumentoHandler pagarHandler)
     {
         _productoRepository = productoRepository;
+        _sessionService = sessionService;
+        _turnoHandler = turnoHandler;
+        _createPedidoHandler = createPedidoHandler;
+        _emitirHandler = emitirHandler;
+        _mediosPagoHandler = mediosPagoHandler;
+        _pagarHandler = pagarHandler;
+
         Text = "Caja Rápida";
         WindowState = FormWindowState.Maximized;
 
@@ -52,7 +81,7 @@ public class FrmCajaRapida : Form
         var btnCobrar = new Button { Text = "Cobrar", Width = 100 };
         btnSalir.Click += (_, _) => Close();
         btnLimpiar.Click += (_, _) => { _items.Clear(); ActualizarTotal(); };
-        btnCobrar.Click += (_, _) => Cobrar();
+        btnCobrar.Click += async (_, _) => await CobrarAsync();
         botones.Controls.AddRange([btnSalir, btnLimpiar, btnCobrar]);
 
         Controls.Add(_grid);
@@ -65,28 +94,16 @@ public class FrmCajaRapida : Form
     private async Task CargarProductosAsync()
     {
         IReadOnlyList<ProductoMaestro> productos;
-        try
-        {
-            productos = await _productoRepository.ObtenerTodosAsync();
-        }
-        catch
-        {
+        try { productos = await _productoRepository.ObtenerTodosAsync(); }
+        catch { productos = []; }
+
+        if (productos.Count == 0)
             productos =
             [
                 ProductoMaestro.Crear("P001", "BEB", "Gaseosa", "SISTEMA", 8m),
                 ProductoMaestro.Crear("P002", "COM", "Hamburguesa", "SISTEMA", 18m),
                 ProductoMaestro.Crear("P003", "POS", "Papas fritas", "SISTEMA", 10m)
             ];
-        }
-
-        if (productos.Count == 0)
-        {
-            productos =
-            [
-                ProductoMaestro.Crear("P001", "BEB", "Gaseosa", "SISTEMA", 8m),
-                ProductoMaestro.Crear("P002", "COM", "Hamburguesa", "SISTEMA", 18m)
-            ];
-        }
 
         _catalogoPanel.Controls.Clear();
         foreach (var producto in productos.Take(24))
@@ -107,37 +124,77 @@ public class FrmCajaRapida : Form
     {
         var existente = _items.FirstOrDefault(i => i.CodigoProducto == producto.CodigoProducto);
         if (existente is null)
-        {
             _items.Add(new ItemRapidoRow(producto.CodigoProducto, producto.Detallado, 1, producto.PrecioVenta));
-        }
         else
         {
             var index = _items.IndexOf(existente);
             _items[index] = existente with { Cantidad = existente.Cantidad + 1 };
         }
-
         _grid.Refresh();
         ActualizarTotal();
     }
 
     private void ActualizarTotal() => _lblTotal.Text = $"Total: {_items.Sum(i => i.Total):C}";
 
-    private void Cobrar()
+    private async Task CobrarAsync()
     {
-        using var frmPago = new Form
+        if (_items.Count == 0)
         {
-            Text = "FrmPago",
-            Size = new Size(320, 180),
-            StartPosition = FormStartPosition.CenterParent
-        };
-        frmPago.Controls.Add(new Label
+            MessageBox.Show("Agregue productos antes de cobrar.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var sesion = _sessionService.SesionActual;
+        if (sesion is null)
         {
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Font = new Font("Segoe UI", 16, FontStyle.Bold),
-            Text = $"Cobro inmediato\n{_items.Sum(i => i.Total):C}"
-        });
-        frmPago.ShowDialog(this);
+            MessageBox.Show("No existe sesión activa.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var turnoResult = await _turnoHandler.HandleAsync(new ObtenerTurnoActualQuery(sesion.CodigoCaja));
+        if (!turnoResult.EsExitoso || turnoResult.Valor is null)
+        {
+            MessageBox.Show("No hay turno abierto. Abra un turno primero.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        // Crear pedido rápido
+        var command = new CreatePedidoCommand(
+            CodigoCaja: sesion.CodigoCaja,
+            CodigoTurno: turnoResult.Valor.CodigoTurno,
+            CodigoMesa: "RAPIDA",
+            CodigoMozo: string.Empty,
+            CodigoUsuario: sesion.CodigoUsuario,
+            Canal: CanalVenta.Local,
+            NumeroAdultos: 1,
+            NumeroNinos: 0,
+            Observacion: "Caja Rápida",
+            Items: _items.Select(i => new CreateDetalleItem(i.CodigoProducto, string.Empty, string.Empty, i.Cantidad, i.PrecioUnitario, null, null)).ToList());
+
+        var pedidoResult = await _createPedidoHandler.HandleAsync(command);
+        if (!pedidoResult.EsExitoso)
+        {
+            MessageBox.Show(pedidoResult.MensajeError, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        // Emitir documento
+        var emitirCommand = new EmitirDocumentoCommand(pedidoResult.Valor!.CodigoPedido, "01", null, 0m, 0m);
+        var docResult = await _emitirHandler.HandleAsync(emitirCommand);
+        if (!docResult.EsExitoso)
+        {
+            MessageBox.Show(docResult.MensajeError, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        // Cobrar
+        using var frmPago = new FrmPago(docResult.Valor!.CodigoDocumento, docResult.Valor!.Total, _mediosPagoHandler, _pagarHandler);
+        if (frmPago.ShowDialog(this) == DialogResult.OK)
+        {
+            _items.Clear();
+            ActualizarTotal();
+            MessageBox.Show("Venta registrada correctamente.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
     }
 
     private sealed record ItemRapidoRow(string CodigoProducto, string Descripcion, int Cantidad, decimal PrecioUnitario)

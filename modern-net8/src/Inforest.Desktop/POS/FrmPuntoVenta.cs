@@ -1,7 +1,11 @@
 using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
 using Inforest.Application.Maestros;
+using Inforest.Application.Turno;
+using Inforest.Desktop.Pedidos;
+using Inforest.Desktop.Turno;
 using Inforest.Domain.Entities.Maestros;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Inforest.Desktop.POS;
 
@@ -14,6 +18,10 @@ public class FrmPuntoVenta : Form
     private readonly IMesaRepository _mesaRepository;
     private readonly ISalonRepository _salonRepository;
     private readonly ObtenerConfiguracionSistemaHandler _configuracionHandler;
+    private readonly AbrirTurnoHandler _abrirTurnoHandler;
+    private readonly CerrarTurnoHandler _cerrarTurnoHandler;
+    private readonly IDiaContableService _diaContableService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly FlowLayoutPanel _panelMesas;
     private readonly ComboBox _cmbSalon;
     private readonly Label _lblUsuario;
@@ -28,20 +36,28 @@ public class FrmPuntoVenta : Form
         ISessionService sessionService,
         IMesaRepository mesaRepository,
         ISalonRepository salonRepository,
-        ObtenerConfiguracionSistemaHandler configuracionHandler)
+        ObtenerConfiguracionSistemaHandler configuracionHandler,
+        AbrirTurnoHandler abrirTurnoHandler,
+        CerrarTurnoHandler cerrarTurnoHandler,
+        IDiaContableService diaContableService,
+        IServiceProvider serviceProvider)
     {
         _sessionService = sessionService;
         _mesaRepository = mesaRepository;
         _salonRepository = salonRepository;
         _configuracionHandler = configuracionHandler;
+        _abrirTurnoHandler = abrirTurnoHandler;
+        _cerrarTurnoHandler = cerrarTurnoHandler;
+        _diaContableService = diaContableService;
+        _serviceProvider = serviceProvider;
 
         Text = "Punto de Venta";
         WindowState = FormWindowState.Maximized;
 
         var menu = new MenuStrip();
         var turno = new ToolStripMenuItem("Turno");
-        turno.DropDownItems.Add("Abrir", null, (_, _) => MessageBox.Show("Apertura de turno pendiente de wiring.", Text));
-        turno.DropDownItems.Add("Cerrar", null, (_, _) => MessageBox.Show("Cierre de turno pendiente de wiring.", Text));
+        turno.DropDownItems.Add("Abrir turno", null, (_, _) => AbrirTurno());
+        turno.DropDownItems.Add("Cerrar turno", null, async (_, _) => await CerrarTurnoAsync());
         menu.Items.Add(turno);
         menu.Items.Add(new ToolStripMenuItem("Reportes", null, (_, _) => MessageBox.Show("Navegue al módulo de reportes FastReport.", Text)));
         menu.Items.Add(new ToolStripMenuItem("Administración", null, (_, _) => MessageBox.Show("Abrir FrmAdministracion desde el shell principal.", Text)));
@@ -85,8 +101,25 @@ public class FrmPuntoVenta : Form
         var sesion = _sessionService.SesionActual;
         _lblUsuario.Text = $"Usuario: {sesion?.CodigoUsuario ?? "SIN SESIÓN"}";
         _lblCaja.Text = $"Caja: {sesion?.CodigoCaja ?? "001"}";
-        _lblTurno.Text = $"Turno: {(sesion is null ? "--" : sesion.CorrelativoAcceso.ToString())}";
         _lblHora.Text = $"Hora: {DateTime.Now:HH:mm:ss}";
+
+        // Obtener turno actual
+        if (sesion is not null)
+        {
+            try
+            {
+                var turnoSvc = _serviceProvider.GetRequiredService<ObtenerTurnoActualHandler>();
+                var turnoResult = await turnoSvc.HandleAsync(new ObtenerTurnoActualQuery(sesion.CodigoCaja));
+                _lblTurno.Text = turnoResult.EsExitoso && turnoResult.Valor is not null
+                    ? $"Turno: {turnoResult.Valor.CodigoTurno}"
+                    : "Turno: sin turno";
+            }
+            catch { _lblTurno.Text = "Turno: --"; }
+        }
+        else
+        {
+            _lblTurno.Text = "Turno: --";
+        }
 
         var config = await _configuracionHandler.HandleAsync(new ObtenerConfiguracionSistemaQuery());
         _lblDiaContable.Text = $"Día contable: {(config.Valor?.tHoraCierreDiaContable ?? DateTime.Today.ToShortDateString())}";
@@ -105,12 +138,9 @@ public class FrmPuntoVenta : Form
         try
         {
             var salones = await _salonRepository.ObtenerTodosAsync();
-            if (salones.Count > 0)
-                return salones.ToList();
+            if (salones.Count > 0) return salones.ToList();
         }
-        catch
-        {
-        }
+        catch { }
 
         return
         [
@@ -124,12 +154,9 @@ public class FrmPuntoVenta : Form
         try
         {
             var mesas = await _mesaRepository.ObtenerTodosAsync();
-            if (mesas.Count > 0)
-                return mesas.ToList();
+            if (mesas.Count > 0) return mesas.ToList();
         }
-        catch
-        {
-        }
+        catch { }
 
         return
         [
@@ -164,23 +191,43 @@ public class FrmPuntoVenta : Form
         }
     }
 
+    private void AbrirTurno()
+    {
+        using var frm = new FrmAperturaTurno(_abrirTurnoHandler, _diaContableService);
+        if (frm.ShowDialog(this) == DialogResult.OK)
+            _ = CargarDatosAsync();
+    }
+
+    private async Task CerrarTurnoAsync()
+    {
+        var sesion = _sessionService.SesionActual;
+        if (sesion is null) { MessageBox.Show("Sin sesión activa.", Text); return; }
+
+        try
+        {
+            var turnoSvc = _serviceProvider.GetRequiredService<ObtenerTurnoActualHandler>();
+            var turnoResult = await turnoSvc.HandleAsync(new ObtenerTurnoActualQuery(sesion.CodigoCaja));
+            if (!turnoResult.EsExitoso || turnoResult.Valor is null)
+            {
+                MessageBox.Show("No hay turno abierto en esta caja.", Text);
+                return;
+            }
+
+            using var frm = new FrmCierreTurno(turnoResult.Valor.CodigoTurno, _cerrarTurnoHandler);
+            if (frm.ShowDialog(this) == DialogResult.OK)
+                await CargarDatosAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error al obtener turno: {ex.Message}", Text);
+        }
+    }
+
     private void AbrirPedidoMesa(Mesa mesa)
     {
-        using var pedido = new Form
-        {
-            Text = $"FrmPedido - {mesa.Detallado}",
-            Width = 480,
-            Height = 320,
-            StartPosition = FormStartPosition.CenterParent
-        };
-        pedido.Controls.Add(new Label
-        {
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Text = $"Pedido activo para {mesa.Detallado}\nEstado: {mesa.Estado}",
-            Font = new Font("Segoe UI", 14, FontStyle.Bold)
-        });
+        using var pedido = ActivatorUtilities.CreateInstance<FrmPedido>(_serviceProvider, mesa);
         pedido.ShowDialog(this);
+        _ = CargarDatosAsync();
     }
 
     private static Label CrearBadge() => new()

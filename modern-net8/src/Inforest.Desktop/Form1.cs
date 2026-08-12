@@ -1,6 +1,8 @@
 using Inforest.Application.Interfaces;
+using Inforest.Desktop.POS;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Inforest.Desktop;
 
@@ -13,15 +15,18 @@ public partial class Form1 : Form
     private readonly IAuthService _authService;
     private readonly ILicenseService _licenseService;
     private readonly IConfiguration _configuration;
+    private readonly IServiceProvider _serviceProvider;
 
     public Form1(
         IAuthService authService,
         ILicenseService licenseService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IServiceProvider serviceProvider)
     {
         _authService = authService;
         _licenseService = licenseService;
         _configuration = configuration;
+        _serviceProvider = serviceProvider;
         InitializeComponent();
     }
 
@@ -58,10 +63,28 @@ public partial class Form1 : Form
             lblEstado.Text = $"Sesión activa: {result.Sesion.CodigoUsuario} / Caja {result.Sesion.CodigoCaja}";
             lblSesion.Text = $"Módulo {result.Sesion.Modulo} · {result.Sesion.Permisos.Count} permisos cargados";
             txtPassword.Clear();
+
+            // Navegar al módulo principal tras login exitoso
+            AbrirShellPrincipal();
         }
         finally
         {
             btnIngresar.Enabled = true;
+        }
+    }
+
+    private void AbrirShellPrincipal()
+    {
+        try
+        {
+            var frmPOS = _serviceProvider.GetRequiredService<FrmPuntoVenta>();
+            frmPOS.FormClosed += (_, _) => Show();
+            Hide();
+            frmPOS.Show();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"No se pudo abrir el módulo POS: {ex.Message}", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 

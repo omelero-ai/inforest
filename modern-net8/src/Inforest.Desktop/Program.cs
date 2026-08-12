@@ -3,6 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Inforest.Application;
 using Inforest.Infrastructure;
+using Inforest.Desktop.POS;
+using Inforest.Desktop.CajaRapida;
+using Inforest.Desktop.Adicion;
+using Inforest.Desktop.Caja;
 
 namespace Inforest.Desktop;
 
@@ -45,6 +49,12 @@ static class Program
 
                 // Formulario de acceso registrado en DI.
                 services.AddTransient<Form1>();
+
+                // Módulos principales — resolubles desde DI
+                services.AddTransient<FrmPuntoVenta>();
+                services.AddTransient<FrmCajaRapida>();
+                services.AddTransient<FrmAdicion>();
+                services.AddTransient<FrmCuadreCaja>();
             });
     }
 }
