@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-12
 >
-> Estado general: **Fase 3 COMPLETED — P3-01 a P3-12 cerradas; listo para iniciar workstreams funcionales posteriores**
+> Estado general: **Fase 4 IN_PROGRESS — W1-W13 iniciados; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS**
 
 ---
 
@@ -10,8 +10,8 @@
 
 | Indicador | Valor |
 |---|---|
-| Fase actual | 4 (entrada) — Fase 3 cerrada con baseline transversal, validación integral y backlog residual documentado |
-| Código .NET 8 existente | IN_PROGRESS — baseline ejecutable + contrato SQL + seguridad + KDS/comanda + delivery/reportes/periféricos con 149 tests verdes |
+| Fase actual | 4 (IN_PROGRESS) — W1-W13 implementados: Configuración, Maestros, Turno/DíaContable, Pedidos, Venta/Documentos, Caja/Pagos, SEC-006, Reportes FastReport, Módulos POS/Admin/Consultas/CajaRápida/Adición |
+| Código .NET 8 existente | IN_PROGRESS — 222 archivos .cs, 180 tests verdes: baseline + seguridad + KDS + delivery + configuración + maestros + turno + pedidos + venta + caja + reportes FastReport + WinForms POS/Admin/Consultas/CajaRápida/Adición |
 | Módulos migrados | 0 / 7 |
 | Documentación Legacy | IN_PROGRESS — inventarios base completos; trazabilidad y gaps de Fase 3 actualizados al cierre P3-12 |
 | Arquitectura Target definida | IN_PROGRESS — ADR-001 a ADR-012 aceptados; gaps funcionales posteriores siguen abiertos |
@@ -27,8 +27,8 @@
 | Adición | `Adicion.exe` | Análisis | NOT_STARTED | Flujo auxiliar sobre pedidos en curso |
 | Administración | `Administracion.exe` | Análisis | NOT_STARTED | Maestros, parámetros y catálogos críticos |
 | Consultas | `Consulta.exe` | Análisis | NOT_STARTED | Alta concentración de reportes `spRep_*` + Crystal |
-| Despachador | `Despachador.exe` | Implementación | IN_PROGRESS | Domain+Application+Infrastructure+WinForms base; Rappi HTTP y plantillas FastReport pendientes |
-| Motorizados | `Motorizado.exe` | Implementación | IN_PROGRESS | Domain+Application+Infrastructure+LlegadaSalida+Tarifa; plantillas/reporte y wiring operativo pendientes |
+| Despachador | `Despachador.exe` | Implementación | IN_PROGRESS | Domain+Application+Infrastructure+WinForms completo; plantillas FastReport implementadas; Rappi HTTP real pendiente |
+| Motorizados | `Motorizado.exe` | Implementación | IN_PROGRESS | Domain+Application+Infrastructure+WinForms completo; plantillas FastReport implementadas |
 
 ---
 
@@ -78,8 +78,8 @@
 | M3-P3-10 | Reportes, consultas y salidas operativas | COMPLETED — 2026-08-12 |
 | M3-P3-11 | Periféricos especializados e integraciones por país | COMPLETED — 2026-08-12 |
 | M3-P3-12 | Validación integral, hardening y cierre de Fase 3 | COMPLETED — 2026-08-12 |
-| M4 | Primer módulo migrado (Maestros) | NOT_STARTED |
-| M5 | Punto de Venta migrado | NOT_STARTED |
+| M4 | Primer módulo migrado (Maestros) | IN_PROGRESS — W2 maestros implementados |
+| M5 | Punto de Venta migrado | IN_PROGRESS — W4+W5+W6+W11 base implementada |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
 | M7 | Todos los módulos migrados | NOT_STARTED |
 | M8 | Validación completa | NOT_STARTED |

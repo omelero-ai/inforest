@@ -1,16 +1,28 @@
+using Inforest.Application.Caja;
+using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
 using Inforest.Application.Interfaces.Country;
 using Inforest.Application.Interfaces.Hardware;
+using Inforest.Application.Maestros;
+using Inforest.Application.Pedidos;
 using Inforest.Application.Reportes;
+using Inforest.Application.Turno;
+using Inforest.Application.Ventas;
 using Inforest.Domain.Repositories;
+using Inforest.Infrastructure.Caja;
+using Inforest.Infrastructure.Configuracion;
 using Inforest.Infrastructure.Country;
 using Inforest.Infrastructure.Data;
 using Inforest.Infrastructure.Delivery;
 using Inforest.Infrastructure.Hardware;
 using Inforest.Infrastructure.Kitchen;
+using Inforest.Infrastructure.Maestros;
 using Inforest.Infrastructure.Motorizado;
+using Inforest.Infrastructure.Pedidos;
 using Inforest.Infrastructure.Reportes;
 using Inforest.Infrastructure.Security;
+using Inforest.Infrastructure.Turno;
+using Inforest.Infrastructure.Ventas;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -61,9 +73,33 @@ public static class DependencyInjection
         services.AddScoped<ICentralPedidosRepository, CentralPedidosRepository>();
         services.AddScoped<IRappiOrderService, RappiOrderAdapter>();
 
-        // Registrar repositorios aquí a medida que se implementen
-        // services.AddScoped<IPedidoRepository, PedidoRepository>();
-        // services.AddScoped<IProductoRepository, ProductoRepository>();
+        // W1: Configuración — TPARAMETRO / TCAJA (BR-SQL-003, BR-SQL-004)
+        services.AddScoped<IParametroRepository, ParametroRepository>();
+        services.AddSingleton<IParametroService, ParametroService>();
+
+        // W2: Maestros — Productos, Grupos, Subgrupos, Clientes, Mesas, Salones, Mozos
+        services.AddScoped<IGrupoProductoRepository, GrupoProductoRepository>();
+        services.AddScoped<ISubGrupoProductoRepository, SubGrupoProductoRepository>();
+        services.AddScoped<IClienteRepository, ClienteRepository>();
+        services.AddScoped<IMesaRepository, MesaRepository>();
+        services.AddScoped<ISalonRepository, SalonRepository>();
+        services.AddScoped<IMozoRepository, MozoRepository>();
+        services.AddScoped<IProductoMaestroRepository, ProductoMaestroRepository>();
+
+        // W3: Turno / Día Contable (BR-004, BR-005)
+        services.AddScoped<ITurnoRepository, TurnoRepository>();
+        services.AddScoped<IDiaContableService, DiaContableService>();
+
+        // W4: Pedidos (BR-SQL-001, BR-SQL-002, BR-003)
+        services.AddScoped<IPedidoRepository, PedidoRepository>();
+        services.AddScoped<IPedidoReadRepository, PedidoRepository>();
+
+        // W5: Venta / Documentos (BR-002, BR-013)
+        services.AddScoped<IDocumentoRepository, DocumentoRepository>();
+
+        // W6: Caja / Pagos (BR-007, BR-013)
+        services.AddScoped<IPagoRepository, PagoRepository>();
+        services.AddScoped<IMedioPagoRepository, MedioPagoRepository>();
 
         // P3-10: Reportes — IReporteRepository + ReporteRepository (ADR-007)
         services.AddScoped<IReporteRepository, ReporteRepository>();
