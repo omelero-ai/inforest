@@ -1,5 +1,6 @@
 using Inforest.Domain.Common;
 using Inforest.Domain.Entities.Configuracion;
+using Inforest.Application.Interfaces;
 
 namespace Inforest.Application.Configuracion;
 
@@ -57,4 +58,42 @@ public sealed class ObtenerTodasCajasHandler
 
     public async Task<Result<IReadOnlyList<ConfiguracionCaja>>> HandleAsync(ObtenerTodasCajasQuery _, CancellationToken ct = default)
         => Result.Ok(await _repository.ObtenerTodasCajasAsync(ct));
+}
+
+/// <summary>
+/// Legacy: modPuntoVenta.bas valida TPARAMETRO y TCAJA antes de abrir el POS. BR-POS-002/BR-POS-005/BR-POS-006
+/// </summary>
+public sealed record ValidarInicioPosQuery(string CodigoCaja);
+
+/// <summary>
+/// Resultado de validación de arranque POS.
+/// </summary>
+public sealed record InicioPosValidado(string CodigoCaja, bool RequiereLogin, ConfiguracionCaja ConfiguracionCaja);
+
+/// <summary>Handler de <see cref="ValidarInicioPosQuery"/>.</summary>
+public sealed class ValidarInicioPosHandler
+{
+    private readonly IParametroService _parametroService;
+    private readonly IParametroRepository _repository;
+
+    public ValidarInicioPosHandler(IParametroService parametroService, IParametroRepository repository)
+    {
+        _parametroService = parametroService;
+        _repository = repository;
+    }
+
+    public async Task<Result<InicioPosValidado>> HandleAsync(ValidarInicioPosQuery query, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(query.CodigoCaja))
+            return Result.Fail<InicioPosValidado>("Debe indicar el código de caja para iniciar POS.", "POS_CODIGO_CAJA_REQUERIDO");
+
+        if (!await _parametroService.TieneConfiguracionAsync(ct))
+            return Result.Fail<InicioPosValidado>("No se encontró configuración global en TPARAMETRO.", "CONFIGURACION_SISTEMA_NO_ENCONTRADA");
+
+        var caja = await _repository.ObtenerConfiguracionCajaAsync(query.CodigoCaja, ct);
+        if (caja is null)
+            return Result.Fail<InicioPosValidado>("No se encontró la configuración de la caja solicitada.", "CONFIGURACION_CAJA_NO_ENCONTRADA");
+
+        return Result.Ok(new InicioPosValidado(caja.tCaja!, RequiereLogin: !caja.lMCPV, caja));
+    }
 }

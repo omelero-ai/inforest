@@ -24,5 +24,10 @@ public interface IParametroService
     /// </summary>
     Task<bool> ObtenerBoolAsync(string clave, bool valorDefecto = false, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Verifica si existe configuración global cargable desde TPARAMETRO.
+    /// </summary>
+    Task<bool> TieneConfiguracionAsync(CancellationToken cancellationToken = default);
+
     void InvalidarCache();
 }

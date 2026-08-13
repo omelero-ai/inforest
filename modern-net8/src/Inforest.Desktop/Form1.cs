@@ -1,4 +1,5 @@
 using Inforest.Application.Interfaces;
+using Inforest.Application.Configuracion;
 using Inforest.Desktop.POS;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -14,17 +15,21 @@ public partial class Form1 : Form
 {
     private readonly IAuthService _authService;
     private readonly ILicenseService _licenseService;
+    private readonly ValidarInicioPosHandler _validarInicioPosHandler;
     private readonly IConfiguration _configuration;
     private readonly IServiceProvider _serviceProvider;
+    private InicioPosValidado? _inicioPos;
 
     public Form1(
         IAuthService authService,
         ILicenseService licenseService,
+        ValidarInicioPosHandler validarInicioPosHandler,
         IConfiguration configuration,
         IServiceProvider serviceProvider)
     {
         _authService = authService;
         _licenseService = licenseService;
+        _validarInicioPosHandler = validarInicioPosHandler;
         _configuration = configuration;
         _serviceProvider = serviceProvider;
         InitializeComponent();
@@ -34,6 +39,7 @@ public partial class Form1 : Form
     {
         txtUsuario.Focus();
         await ValidarLicenciaAsync();
+        await ValidarInicioPosAsync();
     }
 
     private async void btnIngresar_Click(object sender, EventArgs e)
@@ -47,7 +53,7 @@ public partial class Form1 : Form
                 txtUsuario.Text,
                 txtPassword.Text,
                 _configuration["Inforest:Modulo"] ?? "INFOREST",
-                _configuration["Inforest:CodigoCaja"] ?? "01",
+                _inicioPos?.CodigoCaja ?? _configuration["Inforest:CodigoCaja"] ?? "01",
                 _configuration["Inforest:CodigoTerminal"] ?? Environment.MachineName,
                 ResolveDatabaseName());
 
@@ -119,6 +125,24 @@ public partial class Form1 : Form
         }
 
         lblEstado.Text = result.Advertencia ?? "Licencia validada.";
+    }
+
+    private async Task ValidarInicioPosAsync()
+    {
+        var codigoCaja = _configuration["Inforest:CodigoCaja"] ?? "01";
+        var inicio = await _validarInicioPosHandler.HandleAsync(new ValidarInicioPosQuery(codigoCaja));
+        if (!inicio.EsExitoso || inicio.Valor is null)
+        {
+            lblEstado.Text = inicio.MensajeError ?? "No se pudo cargar la configuración del POS.";
+            btnIngresar.Enabled = false;
+            return;
+        }
+
+        _inicioPos = inicio.Valor;
+        lblSesion.Text = $"Caja {_inicioPos.CodigoCaja}: {(_inicioPos.RequiereLogin ? "requiere login" : "acceso directo MCPV")}";
+
+        if (btnIngresar.Enabled && !_inicioPos.RequiereLogin)
+            AbrirShellPrincipal();
     }
 
     private string ResolveDatabaseName()

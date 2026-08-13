@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<ObtenerConfiguracionSistemaHandler>();
         services.AddScoped<ObtenerConfiguracionCajaHandler>();
         services.AddScoped<ObtenerTodasCajasHandler>();
+        services.AddScoped<ValidarInicioPosHandler>();
 
         // W2: Maestros — Handlers CQRS
         services.AddScoped<ObtenerGrupoProductoPorCodigoHandler>();

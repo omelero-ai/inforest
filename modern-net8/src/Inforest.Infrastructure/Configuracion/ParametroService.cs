@@ -44,6 +44,9 @@ internal sealed class ParametroService : IParametroService
         return TryConvertToBoolean(valor, out var booleano) ? booleano : valorDefecto;
     }
 
+    public async Task<bool> TieneConfiguracionAsync(CancellationToken cancellationToken = default)
+        => await ObtenerConfiguracionAsync(cancellationToken) is not null;
+
     public void InvalidarCache()
     {
         _cache = null;
