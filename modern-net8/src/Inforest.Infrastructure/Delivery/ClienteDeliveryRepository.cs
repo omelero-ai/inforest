@@ -149,4 +149,16 @@ internal sealed class ClienteDeliveryRepository : IClienteDeliveryRepository
             """;
         await conn.ExecuteAsync(sql, cliente);
     }
+
+    /// <inheritdoc />
+    public async Task ActualizarFotoAsync(string codigoDelivery, byte[] foto, CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+
+        var parameters = new DynamicParameters();
+        parameters.Add("@tCodigo", codigoDelivery, DbType.StringFixedLength, ParameterDirection.Input, 10);
+        parameters.Add("@oFoto", foto, DbType.Binary, ParameterDirection.Input, foto.Length);
+
+        await _spExecutor.ExecuteAsync(conn, "sp_UpdFotoDelivery", parameters, cancellationToken: ct);
+    }
 }

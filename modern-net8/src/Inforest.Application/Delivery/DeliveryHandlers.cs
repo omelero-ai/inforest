@@ -113,6 +113,39 @@ public sealed class ActualizarClienteDeliveryHandler
 }
 
 /// <summary>
+/// Comando para actualizar la foto de un cliente delivery.
+/// <para>
+/// Legacy: <c>frmClienteDeliveryDetalle.frm → GuardarFoto()</c>.
+/// SP: <c>sp_UpdFotoDelivery</c> sobre tabla <c>TDELIVERY.iFoto</c>.
+/// </para>
+/// </summary>
+public sealed record ActualizarFotoClienteDeliveryCommand(
+    string CodigoDelivery,
+    byte[] Foto);
+
+/// <summary>Handler de <see cref="ActualizarFotoClienteDeliveryCommand"/>.</summary>
+public sealed class ActualizarFotoClienteDeliveryHandler
+{
+    private readonly IClienteDeliveryRepository _repo;
+
+    public ActualizarFotoClienteDeliveryHandler(IClienteDeliveryRepository repo)
+        => _repo = repo;
+
+    public async Task<Result> HandleAsync(ActualizarFotoClienteDeliveryCommand cmd, CancellationToken ct = default)
+    {
+        var cliente = await _repo.ObtenerPorCodigoAsync(cmd.CodigoDelivery, ct);
+        if (cliente is null)
+            return Result.Fail("No se encontró el cliente delivery.", "DELIVERY_CLIENTE_NO_ENCONTRADO");
+
+        if (cmd.Foto.Length == 0)
+            return Result.Fail("La foto no puede estar vacía.", "DELIVERY_FOTO_VACIA");
+
+        await _repo.ActualizarFotoAsync(cmd.CodigoDelivery, cmd.Foto, ct);
+        return Result.Ok();
+    }
+}
+
+/// <summary>
 /// Comando para crear un pedido delivery.
 /// <para>
 /// Legacy: <c>frmNuevoDelivery.frm</c> + <c>frmPedido.frm</c> en módulo Despachador.

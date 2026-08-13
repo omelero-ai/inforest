@@ -18,4 +18,5 @@ public interface IClienteDeliveryRepository
     Task<IEnumerable<ClienteDelivery>> ObtenerFrecuentesAsync(int top = 20, CancellationToken cancellationToken = default);
     Task InsertarAsync(ClienteDelivery cliente, CancellationToken cancellationToken = default);
     Task ActualizarAsync(ClienteDelivery cliente, CancellationToken cancellationToken = default);
+    Task ActualizarFotoAsync(string codigoDelivery, byte[] foto, CancellationToken cancellationToken = default);
 }

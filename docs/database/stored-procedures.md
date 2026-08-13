@@ -119,7 +119,7 @@
 | `sp_TraeDatosPagos_SyBase` | Integración | Trae datos pagos (SyBase) | — | NOT_STARTED |
 | `sp_InsUptSocioDelivery_SyBASE` | Delivery | Ins/Upd socio delivery (SyBase) | — | NOT_STARTED |
 | `sp_CreaTemporalSocio_SyBASE` | Delivery | Crea temporal socio (SyBase) | — | NOT_STARTED |
-| `sp_UpdFotoDelivery` | Delivery | Actualiza foto delivery | — | NOT_STARTED |
+| `sp_UpdFotoDelivery` | Delivery | Actualiza foto delivery | `ActualizarFotoClienteDeliveryHandler` + `ClienteDeliveryRepository.ActualizarFotoAsync` | IN_PROGRESS |
 | `sp_UpdFotoProducto` | Productos | Actualiza foto producto | — | NOT_STARTED |
 | `sp_UpdImagenCaja` | Caja | Actualiza imagen caja | — | NOT_STARTED |
 | `usp_Inforest_ObtenerClientesFrecuente` | Clientes | Clientes frecuentes | — | NOT_STARTED |

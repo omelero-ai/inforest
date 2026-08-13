@@ -218,6 +218,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `ICentralPedidosRepository` | Interface | `ICentralPedidosRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/ICentralPedidosRepository.cs` |
 | `sp_Inforest_PedidosCentralPedido` | SP | `CentralPedidosRepository.ObtenerPedidosCentralAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Delivery/CentralPedidosRepository.cs` |
 | `sp_CD_Modificar_EstadoDelivery_Cabecera` | SP | `CentralPedidosRepository.ModificarEstadoDeliveryAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Delivery/CentralPedidosRepository.cs` |
+| `sp_UpdFotoDelivery` | SP | `ActualizarFotoClienteDeliveryHandler` + `ClienteDeliveryRepository.ActualizarFotoAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/ClienteDeliveryRepository.cs` |
 | `spRep_AnaliticoMotorizadoIntegrado` | SP | *(reporte FastReport pendiente)* | Report | NOT_STARTED | — |
 | `frmOrdenesConsola.frm` | Form | `ObtenerOrdenesExternasHandler` + `RappiOrderAdapter` | Handler+Service | IN_PROGRESS | `src/Inforest.Application/Delivery/RappiHandlers.cs` |
 | `(test etapa 9 domain)` | — | `DeliveryDomainTests` (12 tests) + `MotorizadoDomainTests` (11 tests) | xUnit | IN_PROGRESS | `tests/Inforest.Domain.Tests/Delivery/` |

@@ -55,6 +55,37 @@ public class DeliveryHandlersTests
         Assert.Equal("DELIVERY_CLIENTE_YA_EXISTE", result.CodigoError);
     }
 
+    [Fact]
+    public async Task ActualizarFoto_ClienteExistenteYFotoValida_RetornaOk()
+    {
+        var cliente = ClienteDelivery.Crear("DEL001", null, "García", "Juan", "987654321", "Av Lima", null, null);
+        var mockRepo = new Mock<IClienteDeliveryRepository>();
+        mockRepo.Setup(r => r.ObtenerPorCodigoAsync("DEL001", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(cliente);
+        mockRepo.Setup(r => r.ActualizarFotoAsync("DEL001", It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+        var handler = new ActualizarFotoClienteDeliveryHandler(mockRepo.Object);
+        var result = await handler.HandleAsync(new ActualizarFotoClienteDeliveryCommand("DEL001", [1, 2, 3]));
+
+        Assert.True(result.EsExitoso);
+        mockRepo.Verify(r => r.ActualizarFotoAsync("DEL001", It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ActualizarFoto_ClienteInexistente_RetornaFallo()
+    {
+        var mockRepo = new Mock<IClienteDeliveryRepository>();
+        mockRepo.Setup(r => r.ObtenerPorCodigoAsync("DEL404", It.IsAny<CancellationToken>()))
+                .ReturnsAsync((ClienteDelivery?)null);
+
+        var handler = new ActualizarFotoClienteDeliveryHandler(mockRepo.Object);
+        var result = await handler.HandleAsync(new ActualizarFotoClienteDeliveryCommand("DEL404", [1]));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("DELIVERY_CLIENTE_NO_ENCONTRADO", result.CodigoError);
+    }
+
     // ── ActualizarEstadoDeliveryHandler ────────────────────────────────────────
 
     [Fact]

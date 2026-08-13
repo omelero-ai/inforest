@@ -20,3 +20,4 @@
 | BR-SQL-002 | spUpd_MPEDIDO — actualización integral de pedido | Invocado vía `clsComando` / formularios de edición | `spUpd_MPEDIDO`, `TMESA`, `MPEDIDO` | Pedidos | `Application/Commands/UpdatePedidoCommand` | ANALYSIS |
 | BR-SQL-003 | TPARAMETRO flags — configuración funcional global | `modPuntoVenta.bas` carga parámetros al iniciar | `TPARAMETRO` | Configuración global | `Shared/Configuration/RuntimeFlags` | ANALYSIS |
 | BR-SQL-004 | TCAJA flags — configuración operativa por caja | `modPuntoVenta.bas` carga `TCAJA` al iniciar | `TCAJA` | Configuración de caja | `Shared/Configuration/CajaProfile` | ANALYSIS |
+| BR-DEL-011 | Actualización de foto de cliente delivery vía SP | `frmClienteDeliveryDetalle.frm` (`GuardarFoto`) | `sp_UpdFotoDelivery`, `TDELIVERY.iFoto` | Despachador / Delivery | `Application/Delivery/ActualizarFotoClienteDeliveryHandler`, `Infrastructure/Delivery/ClienteDeliveryRepository` | IN_PROGRESS |

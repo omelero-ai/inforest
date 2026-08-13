@@ -916,6 +916,30 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-DEL-011
+
+**Nombre:** Actualización de foto de cliente delivery vía SP
+
+**Origen:** `frmClienteDeliveryDetalle.frm: GuardarFoto()`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmClienteDeliveryDetalle.frm`
+
+**Procedimiento/Función:** `sp_UpdFotoDelivery`
+
+**Descripción:** Cuando se selecciona una foto del cliente de delivery, el formulario construye un parámetro binario y ejecuta `sp_UpdFotoDelivery(@tCodigo, @oFoto)` para persistir `TDELIVERY.iFoto`.
+
+**Condición:** Al guardar la foto del cliente delivery.
+
+**Resultado:** Se actualiza la columna binaria `iFoto` del registro en `TDELIVERY` según `tCodigoDelivery`.
+
+**Excepciones:** Si el cliente no existe, no debe ejecutarse la actualización.
+
+**Destino .NET:** `ActualizarFotoClienteDeliveryHandler`, `IClienteDeliveryRepository.ActualizarFotoAsync`, `ClienteDeliveryRepository.ActualizarFotoAsync`
+
+**Estado:** IN_PROGRESS
+
+---
+
 ## Reglas de Negocio — Etapa 10: Reportes
 
 ---

@@ -120,6 +120,6 @@ Permite visualizar, gestionar y despachar los pedidos de delivery, integra con l
 
 ## Gaps Conocidos
 
-- `sp_UpdFotoDelivery` — migración de foto de delivery pendiente (requiere storage para imágenes)
+- `sp_UpdFotoDelivery` — backend migrado (handler + repositorio con SP legacy); falta formulario dedicado equivalente a `frmClienteDeliveryDetalle.frm`
 - Integración Rappi API HTTP — conector real pendiente (ver docs/migration/known-gaps.md GAP-DEL-004)
 - ADR-009 no resuelto: sincronización multi-local actual mantiene conexión directa a CENTRALDELIVERY

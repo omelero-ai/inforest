@@ -122,7 +122,7 @@
 
 | ID | Gap | Descripción | Archivo Origen | Estado |
 |---|---|---|---|---|
-| GAP-DEL-001 | sp_UpdFotoDelivery | Actualización de foto del cliente delivery — requiere storage de imágenes no definido | `frmClienteDeliveryDetalle.frm` | BLOCKED |
+| GAP-DEL-001 | sp_UpdFotoDelivery | Actualización de foto del cliente delivery migrada a `ActualizarFotoClienteDeliveryHandler` + `ClienteDeliveryRepository.ActualizarFotoAsync` usando SP legacy; pendiente UI dedicada de mantenimiento | `frmClienteDeliveryDetalle.frm` | IN_PROGRESS |
 | GAP-DEL-002 | ADR-009 pendiente | Estrategia de sincronización multi-local: polling actual a CENTRALDELIVERY no escala. Decidir entre polling, Service Bus o SQL replication | `modDespachador.bas` | OPEN |
 | GAP-DEL-003 | ADR-010 pendiente | Integración Rappi: actualmente stub. Definir si se mantiene adaptador embebido o se expone endpoint | `frmOrdenesConsola.frm`, `frmEnvioDatosRappi.frm` | OPEN |
 | GAP-DEL-004 | RappiOrderAdapter HTTP | `RappiOrderAdapter` retorna lista vacía. El conector HTTP real a la API de Rappi no está implementado | `Inforest.Infrastructure/Delivery/RappiOrderAdapter.cs` | NOT_STARTED |
