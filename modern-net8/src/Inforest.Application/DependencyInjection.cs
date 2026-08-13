@@ -11,6 +11,8 @@ using Inforest.Application.Turno;
 using Inforest.Application.Pedidos;
 using Inforest.Application.Ventas;
 using Inforest.Application.Caja;
+using Inforest.Application.Seguridad;
+using Inforest.Application.Impresion;
 using Inforest.Domain.Services;
 
 namespace Inforest.Application;
@@ -29,6 +31,8 @@ public static class DependencyInjection
         services.AddScoped<ObtenerConfiguracionCajaHandler>();
         services.AddScoped<ObtenerTodasCajasHandler>();
         services.AddScoped<ValidarInicioPosHandler>();
+        // POS-FUNC-019: Seguridad / Contraseñas (BR-006)
+        services.AddScoped<CambiarPasswordHandler>();
 
         // W2: Maestros — Handlers CQRS
         services.AddScoped<ObtenerGrupoProductoPorCodigoHandler>();
@@ -76,6 +80,13 @@ public static class DependencyInjection
         services.AddScoped<EmitirDocumentoHandler>();
         services.AddScoped<ObtenerDocumentoHandler>();
         services.AddScoped<AnularDocumentoHandler>();
+        // POS-FUNC-007: Correlativos de comprobante (BR-POS-008)
+        services.AddScoped<ObtenerCorrelativosPorCajaHandler>();
+        services.AddScoped<ObtenerCorrelativoFacturaHandler>();
+        services.AddScoped<ObtenerTodosCorrelativosHandler>();
+        // POS-FUNC-016: Impresión pre-cuenta/comanda (BR-008)
+        services.AddScoped<ImprimirPrecuentaHandler>();
+        services.AddScoped<ObtenerImpresorasPorCajaHandler>();
 
         // W6: Caja / Pagos — Handlers CQRS (BR-007, BR-013)
         services.AddScoped<PagarDocumentoHandler>();

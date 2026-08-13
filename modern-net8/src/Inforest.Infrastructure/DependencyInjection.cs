@@ -1,5 +1,7 @@
 using Inforest.Application.Caja;
+using Inforest.Application.Impresion;
 using Inforest.Infrastructure.Almacen;
+using Inforest.Infrastructure.Impresion;
 using Inforest.Infrastructure.Notifications;
 using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
@@ -98,6 +100,9 @@ public static class DependencyInjection
 
         // W5: Venta / Documentos (BR-002, BR-013)
         services.AddScoped<IDocumentoRepository, DocumentoRepository>();
+        services.AddScoped<ICorrelativoRepository, CorrelativoRepository>();
+        // POS-FUNC-016: Impresión pre-cuenta — TIMPRESORA (BR-008)
+        services.AddScoped<IImpresoraRepository, ImpresoraRepository>();
 
         // W6: Caja / Pagos (BR-007, BR-013)
         services.AddScoped<IPagoRepository, PagoRepository>();

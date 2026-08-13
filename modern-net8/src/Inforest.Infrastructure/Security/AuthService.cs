@@ -1,4 +1,5 @@
 using BCrypt.Net;
+using Dapper;
 using Inforest.Application.Interfaces;
 using Inforest.Domain.Common;
 using Inforest.Domain.Entities.Seguridad;
@@ -111,6 +112,96 @@ internal sealed class AuthService : IAuthService
             return auditResult;
 
         return _sessionService.CerrarSesion(DateTime.UtcNow);
+    }
+
+    public async Task<Result> CambiarPasswordAsync(
+        string loginUsuario,
+        string passwordActual,
+        string passwordNuevo,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var connection = await _connectionFactory.CreateOpenConnectionAsync("Infseguridad", cancellationToken);
+
+            // Legacy: SELECT count(*) FROM tusuario WHERE tResumido=@Login AND lActivo=1
+            var existe = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM TUSUARIO WHERE tResumido = @Login AND lActivo = 1",
+                new { Login = loginUsuario }) > 0;
+
+            if (!existe)
+                return Result.Fail("El usuario no está activo o no está registrado.", "SEGURIDAD_USUARIO_INACTIVO");
+
+            // Obtener código y hash almacenado
+            var codigoUsuario = await connection.ExecuteScalarAsync<string?>(
+                "SELECT tCodigoUsuario FROM TUSUARIO WHERE tResumido = @Login AND lActivo = 1",
+                new { Login = loginUsuario });
+
+            if (codigoUsuario is null)
+                return Result.Fail("No se pudo localizar el usuario.", "SEGURIDAD_USUARIO_NO_ENCONTRADO");
+
+            // Verificar contraseña actual (BCrypt primero, Legacy fallback)
+            var verificado = false;
+            var modernHash = await _modernPasswordHashStore.GetHashAsync(codigoUsuario, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(modernHash))
+                verificado = BCrypt.Net.BCrypt.Verify(passwordActual, modernHash);
+
+            if (!verificado)
+            {
+                var legacyHash = await connection.ExecuteScalarAsync<string?>(
+                    "SELECT tPassword FROM TUSUARIO WHERE tResumido = @Login AND lActivo = 1",
+                    new { Login = loginUsuario });
+
+                if (!string.IsNullOrWhiteSpace(legacyHash))
+                {
+                    if (LooksLikeBcrypt(legacyHash))
+                        verificado = BCrypt.Net.BCrypt.Verify(passwordActual, legacyHash);
+                    else
+                        verificado = string.Equals(
+                            LegacyPasswordCipher.Decrypt(legacyHash).Trim(),
+                            passwordActual.Trim().ToUpperInvariant(),
+                            StringComparison.OrdinalIgnoreCase);
+                }
+            }
+
+            if (!verificado)
+                return Result.Fail("Contraseña actual incorrecta.", "SEGURIDAD_PASSWORD_ACTUAL_INVALIDO");
+
+            // Legacy: "Clave no permitida" — verifica que la nueva no exista ya en la tabla
+            var encriptadoNuevo = LegacyPasswordCipher.Encrypt(passwordNuevo);
+            var claveEnUso = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM TUSUARIO WHERE tPassword = @Password AND tResumido <> @Login",
+                new { Password = encriptadoNuevo, Login = loginUsuario }) > 0;
+
+            if (claveEnUso)
+                return Result.Fail("Clave no permitida, intente de nuevo.", "SEGURIDAD_PASSWORD_NO_PERMITIDO");
+
+            // Actualizar contraseña Legacy en TUSUARIO
+            await connection.ExecuteAsync(
+                """
+                UPDATE TUSUARIO
+                   SET tPassword        = @Password,
+                       fRegistro        = GETDATE(),
+                       tUsuarioModifica = @UsuarioModifica
+                 WHERE tCodigoUsuario = @CodigoUsuario
+                   AND lActivo = 1
+                """,
+                new { Password = encriptadoNuevo, UsuarioModifica = loginUsuario, CodigoUsuario = codigoUsuario });
+
+            // Actualizar hash BCrypt moderno en tabla sidecar TUSUARIO_HASH (ADR-013, SEC-006)
+            await _modernPasswordHashStore.UpsertHashAsync(
+                codigoUsuario,
+                BCrypt.Net.BCrypt.HashPassword(passwordNuevo),
+                cancellationToken);
+
+            _logger.LogInformation("Contraseña cambiada para usuario {Login}.", loginUsuario);
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al cambiar contraseña del usuario {Login}.", loginUsuario);
+            return Result.Fail("Error al cambiar la contraseña. Intente nuevamente.", "SEGURIDAD_ERROR_INTERNO");
+        }
     }
 
     internal static string ResolveModuloCode(string modulo)

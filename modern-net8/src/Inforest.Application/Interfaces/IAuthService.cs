@@ -26,6 +26,17 @@ public interface IAuthService
     /// Cierra la sesión actual y registra la salida de auditoría.
     /// </summary>
     Task<Result> CerrarSesionAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Cambia la contraseña de un usuario validando la actual.
+    /// Legacy: frmCambiarContrasenia.frm CmdAceptar_Click. BR-006.
+    /// Tablas: TUSUARIO + TUSUARIO_HASH (ADR-013, SEC-006).
+    /// </summary>
+    Task<Result> CambiarPasswordAsync(
+        string loginUsuario,
+        string passwordActual,
+        string passwordNuevo,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record AuthRequest(
