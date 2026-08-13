@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-12
 >
-> Estado general: **Fase 4 IN_PROGRESS — W1-W13 iniciados; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS**
+> Estado general: **Fase 4 IN_PROGRESS — W1-W14 iniciados; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email)**
 
 ---
 
@@ -10,8 +10,8 @@
 
 | Indicador | Valor |
 |---|---|
-| Fase actual | 4 (IN_PROGRESS) — W1-W13 implementados: Configuración, Maestros, Turno/DíaContable, Pedidos, Venta/Documentos, Caja/Pagos, SEC-006, Reportes FastReport, Módulos POS/Admin/Consultas/CajaRápida/Adición |
-| Código .NET 8 existente | IN_PROGRESS — 222 archivos .cs, 180 tests verdes: baseline + seguridad + KDS + delivery + configuración + maestros + turno + pedidos + venta + caja + reportes FastReport + WinForms POS/Admin/Consultas/CajaRápida/Adición |
+| Fase actual | 4 (IN_PROGRESS) — W1-W14 implementados: Configuración, Maestros, Turno/DíaContable, Pedidos, Venta/Documentos, Caja/Pagos, SEC-006, Reportes FastReport, Módulos POS/Admin/Consultas/CajaRápida/Adición, TaxPolicy/ProductoVisibilidad/InventoryGateway/Email |
+| Código .NET 8 existente | IN_PROGRESS — 221+ archivos .cs, 211 tests verdes: baseline + seguridad + KDS + delivery + configuración + maestros + turno + pedidos + venta + caja + reportes FastReport + WinForms POS/Admin/Consultas/CajaRápida/Adición + TaxPolicy + ProductoVisibilidad + InventoryGateway + SmtpEmail |
 | Módulos migrados | 0 / 7 |
 | Documentación Legacy | IN_PROGRESS — inventarios base completos; trazabilidad y gaps de Fase 3 actualizados al cierre P3-12 |
 | Arquitectura Target definida | IN_PROGRESS — ADR-001 a ADR-012 aceptados; gaps funcionales posteriores siguen abiertos |
@@ -79,6 +79,7 @@
 | M3-P3-11 | Periféricos especializados e integraciones por país | COMPLETED — 2026-08-12 |
 | M3-P3-12 | Validación integral, hardening y cierre de Fase 3 | COMPLETED — 2026-08-12 |
 | M4 | Primer módulo migrado (Maestros) | IN_PROGRESS — W2 maestros implementados |
+| M4-W14 | Servicios de dominio transversales (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) | COMPLETED — 2026-08-13 |
 | M5 | Punto de Venta migrado | IN_PROGRESS — W4+W5+W6+W11 base implementada |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
 | M7 | Todos los módulos migrados | NOT_STARTED |

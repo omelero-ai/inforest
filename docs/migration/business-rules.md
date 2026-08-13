@@ -1443,3 +1443,103 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Estado:** IN_PROGRESS
 
 **Evidencia:** CONFIRMED
+
+---
+
+### BR-015
+**Nombre:** TaxPolicy — política de impuestos por producto
+
+**Origen:** Legacy/modDeclaracion.bas + TPRODUCTO
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Modulos/modDeclaracion.bas`, `legacy-restaurant/database-sql-server/1. Estructura.sql`
+
+**Procedimiento/Función:** Variables globales `nPorcentaje1/2/3` + flags `lImpuesto1..15` en `TPRODUCTO`
+
+**Descripción:** Cada producto tiene hasta 15 flags de impuesto booleanos (lImpuesto1..lImpuesto15). Los porcentajes globales (Impuesto1/2/3) se cargan desde TPARAMETRO al iniciar el sistema. Para calcular impuestos de una línea: monto = precioVenta × (porcentaje/100) si el flag del producto está activo. El precio neto = precioVenta / (1 + %total/100).
+
+**Condición:** Al emitir documentos y calcular totales de pedido/documento.
+
+**Resultado:** Impuesto1/2/3 calculado por línea de detalle. Precio neto derivado del precio de venta con impuestos.
+
+**Excepciones:** Si ningún flag está activo, impuesto = 0 y precioNeto = precioVenta.
+
+**Destino .NET:** `TaxPolicy` (`Domain/Services/TaxPolicy.cs`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Services/TaxPolicy.cs` + tests en `Inforest.Domain.Tests`
+
+---
+
+### BR-016
+**Nombre:** ProductoVisibilidadService — visibilidad de producto por canal de venta
+
+**Origen:** Legacy/frmProducto.frm + TPRODUCTO
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmProducto.frm`
+
+**Procedimiento/Función:** Flags `lLocal`, `lDelivery`, `lLlevar`, `lCanal4`, `lCanal5` en `TPRODUCTO`
+
+**Descripción:** Cada producto puede estar habilitado o deshabilitado individualmente para cada uno de los 5 canales de venta. Al listar productos en el POS, sólo se muestran los activos y habilitados para el canal activo de la caja.
+
+**Condición:** Al cargar el menú de productos en cualquier módulo de venta.
+
+**Resultado:** Sólo productos activos y visibles en ese canal aparecen en pantalla.
+
+**Excepciones:** Si el producto está inactivo (lActivo = 0), no se muestra en ningún canal.
+
+**Destino .NET:** `ProductoVisibilidadService` (`Domain/Services/ProductoVisibilidadService.cs`); delegado a `ProductoMaestro.DisponibleEnCanal()`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Services/ProductoVisibilidadService.cs` + tests en `Inforest.Domain.Tests`
+
+---
+
+### BR-017
+**Nombre:** InventoryGateway — descargo de almacén sobre ventas
+
+**Origen:** Legacy/clsAlmacen.cls
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Clases/clsAlmacen.cls`
+
+**Procedimiento/Función:** `FunInsertamSubKardex`, `FunInsertamKardex`, `FunInsertaLogDescargo`, `EjecutarDescargoAutomatico`
+
+**Descripción:** Al cerrar/cobrar un pedido de venta, si el sistema tiene almacén activo (lAlmacen = true en TPARAMETRO), se ejecuta el descargo de insumos/recetas contra la base ALMACEN. El SP `usp_Inforest_DescargoVenta` llena una tabla temporal con los ítems del pedido y sus recetas, y luego los descarga del kardex. Soporta descargo por receta directa y por insumos. Se registra un log de descargo por cada proceso.
+
+**Condición:** `TPARAMETRO.lAlmacen = true` y pedido en estado 'CO' (cobrado) o cierre de lote.
+
+**Resultado:** Movimiento en kardex/sub-kardex de almacén por la cantidad vendida × receta.
+
+**Excepciones:** Si lAlmacen = false, se omite el descargo. Errores se registran en log de descargo.
+
+**Destino .NET:** `IInventoryGateway` + `InventoryGateway` (`Infrastructure/Almacen/InventoryGateway.cs`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Interfaces/IInventoryGateway.cs`, `modern-net8/src/Inforest.Infrastructure/Almacen/InventoryGateway.cs`
+
+---
+
+### BR-018
+**Nombre:** NotificacionEmail — envío de correos electrónicos del sistema
+
+**Origen:** Legacy/claCorreoElectronico.cls
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Clases/claCorreoElectronico.cls`
+
+**Procedimiento/Función:** `EnviarCorreo`, `EnviarCorreoProrroga`
+
+**Descripción:** El sistema envía correos vía SMTP (Chilkat COM en Legacy) para: confirmaciones de reserva, recordatorios, agradecimientos y solicitudes de prórroga de licencia. Los parámetros SMTP provienen de configuración. Múltiples destinatarios separados por ";" se normalizan a ",".
+
+**Condición:** Según flags en TPARAMETRO (lEmailConfirmacion, lEmailRecordatorio, lEmailAgradecimiento) o solicitud de prórroga de licencia.
+
+**Resultado:** Correo enviado al destinatario configurado.
+
+**Excepciones:** Error de SMTP es capturado y registrado en log; no corta el flujo principal.
+
+**Destino .NET:** `INotificacionEmailService` + `SmtpEmailService` (`Infrastructure/Notifications/SmtpEmailService.cs`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Interfaces/INotificacionEmailService.cs`, `modern-net8/src/Inforest.Infrastructure/Notifications/SmtpEmailService.cs`

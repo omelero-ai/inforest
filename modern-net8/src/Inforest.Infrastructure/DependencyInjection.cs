@@ -1,4 +1,6 @@
 using Inforest.Application.Caja;
+using Inforest.Infrastructure.Almacen;
+using Inforest.Infrastructure.Notifications;
 using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
 using Inforest.Application.Interfaces.Country;
@@ -100,6 +102,13 @@ public static class DependencyInjection
         // W6: Caja / Pagos (BR-007, BR-013)
         services.AddScoped<IPagoRepository, PagoRepository>();
         services.AddScoped<IMedioPagoRepository, MedioPagoRepository>();
+
+        // W14: Almacén — BR-008 (descargo de inventario en venta)
+        services.AddScoped<IInventoryGateway, InventoryGateway>();
+
+        // W14: Notificaciones email — claCorreoElectronico.cls
+        services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
+        services.AddScoped<INotificacionEmailService, SmtpEmailService>();
 
         // P3-10: Reportes — IReporteRepository + ReporteRepository (ADR-007)
         services.AddScoped<IReporteRepository, ReporteRepository>();

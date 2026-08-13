@@ -81,10 +81,10 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `clsComando.cls` transactions | Data Access | `UnitOfWork` | Class | COMPLETED | `src/Inforest.Infrastructure/Data/UnitOfWork.cs` |
 | `clsComando.cls` MsgBox err | Error handling | `SqlExceptionTranslator` | Class | COMPLETED | `src/Inforest.Infrastructure/Data/SqlExceptionTranslator.cs` |
 | `ClsDocumento.cls` | Domain | — | — | NOT_STARTED | Documentos almacén |
-| `clsAlmacen.cls` | Domain | — | — | NOT_STARTED | Kardex, descargos |
+| `clsAlmacen.cls` | Domain | `IInventoryGateway` + `InventoryGateway` | Interface + Class | MIGRATED | `modern-net8/src/Inforest.Application/Interfaces/IInventoryGateway.cs`, `modern-net8/src/Inforest.Infrastructure/Almacen/InventoryGateway.cs` |
 | `ClsSeguridad.cls` | Security | `IAuthService` + `AuthService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IAuthService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/AuthService.cs` |
 | `clsDiaContable.cls` | Domain | — | — | NOT_STARTED | Día contable |
-| `claCorreoElectronico.cls` | Notification | — | — | NOT_STARTED | Email |
+| `claCorreoElectronico.cls` | Notification | `INotificacionEmailService` + `SmtpEmailService` | Interface + Class | MIGRATED | `modern-net8/src/Inforest.Application/Interfaces/INotificacionEmailService.cs`, `modern-net8/src/Inforest.Infrastructure/Notifications/SmtpEmailService.cs` |
 | `clsxml.cls` | Utility | — | — | NOT_STARTED | XML |
 | `clsTrama.cls` | Integration | — | — | NOT_STARTED | FE Paperlees |
 | `License.cls` | License | `ILicenseService` + `LicenseService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/ILicenseService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/LicenseService.cs` |
