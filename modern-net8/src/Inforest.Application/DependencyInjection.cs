@@ -93,9 +93,12 @@ public static class DependencyInjection
         services.AddScoped<ExportarDespachadorHandler>();
         services.AddScoped<EmitirDespachoPedidoHandler>();
         services.AddScoped<ObtenerMotorizadosActivosHandler>();
+        services.AddScoped<ObtenerPedidosReasignacionHandler>();
         services.AddScoped<ObtenerTarifaMotorizadoHandler>();
         services.AddScoped<AsignarMotorizadoHandler>();
         services.AddScoped<ReasignarMotorizadoHandler>();
+        services.AddScoped<AsignarReasignacionMotorizadoHandler>();
+        services.AddScoped<DesasignarReasignacionMotorizadoHandler>();
         services.AddScoped<RegistrarLlegadaSalidaHandler>();
         services.AddScoped<ActualizarTarifaMotorizadoHandler>();
         services.AddScoped<ObtenerPedidosCentralHandler>();

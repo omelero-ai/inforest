@@ -202,6 +202,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmDespachador.frm` | Form | `DespachadorForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/DespachadorForm.cs` |
 | `frmCentralPedidos.frm` | Form | `CentralPedidosForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/CentralPedidosForm.cs` |
 | `frmLlegadaSalida.frm` | Form | `LlegadaSalidaForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Motorizado/LlegadaSalidaForm.cs` |
+| `frmAsignacionMotorizado.frm` | Form | `AsignacionMotorizadoForm` | WinForm | MIGRATED | `src/Inforest.Desktop/Motorizado/AsignacionMotorizadoForm.cs` |
+| `frmReasignacionMotorizado.frm` | Form | `ReasignacionMotorizadoForm` | WinForm | MIGRATED | `src/Inforest.Desktop/Motorizado/ReasignacionMotorizadoForm.cs` |
 | `frmTarifaMotorizado.frm` | Form | `TarifaMotorizadoForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Motorizado/TarifaMotorizadoForm.cs` |
 | `TDELIVERY` | Table | `ClienteDelivery` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Delivery/ClienteDelivery.cs` |
 | `MPEDIDO` (delivery fields) | Table | `PedidoDelivery` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Delivery/PedidoDelivery.cs` |

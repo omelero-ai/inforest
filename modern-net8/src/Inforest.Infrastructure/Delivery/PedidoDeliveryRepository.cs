@@ -83,6 +83,30 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
     }
 
     /// <inheritdoc />
+    public async Task<IEnumerable<PedidoReasignacionMotorizado>> ObtenerPedidosReasignacionAsync(
+        DateTime fechaInicio, DateTime fechaFin, string? criterioPedido, CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT m.tCodigoPedido AS CodigoPedido,
+                   mz.Descripcion AS MotorizadoDescripcion,
+                   CAST(m.nTarifaMotorizadoN AS decimal(18,2)) AS TarifaMotorizado
+            FROM MPEDIDO m
+            LEFT JOIN vMotorizado mz ON m.tMotorizadoN = mz.Codigo
+            WHERE m.tTipoPedido = '02'
+              AND m.tEstadoPedido = '02'
+              AND ISNULL(m.tMotorizado, '') <> '0000'
+              AND m.fRegistro >= @FechaInicio
+              AND m.fRegistro <= @FechaFin
+              AND (@CriterioPedido = '' OR m.tCodigoPedido LIKE '%' + @CriterioPedido)
+            ORDER BY m.fRegistro, m.tCodigoPedido
+            """;
+        return await conn.QueryAsync<PedidoReasignacionMotorizado>(
+            sql,
+            new { FechaInicio = fechaInicio, FechaFin = fechaFin, CriterioPedido = criterioPedido ?? string.Empty });
+    }
+
+    /// <inheritdoc />
     public async Task<IEnumerable<PedidoDelivery>> ObtenerParaDespachadorAsync(
         DateTime fechaInicio, DateTime fechaFin, CancellationToken ct = default)
     {
@@ -135,5 +159,82 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
         using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
         const string sql = "UPDATE MPEDIDO SET tMotorizado = @Motorizado WHERE tCodigoPedido = @CodigoPedido";
         await conn.ExecuteAsync(sql, new { CodigoPedido = codigoPedido, Motorizado = codigoMotorizado });
+    }
+
+    /// <inheritdoc />
+    public async Task<int> ContarAsignacionesPrincipalesMotorizadoAsync(
+        string codigoMotorizado,
+        DateTime fechaOperacion,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT COUNT(ISNULL(nTarifaMotorizado, 0))
+            FROM MPEDIDO
+            WHERE tMotorizado = @CodigoMotorizado
+              AND ISNULL(nTarifaExtra, 0) = 0
+              AND CONVERT(nvarchar(8), fAsignacion, 112) = @FechaOperacion
+            """;
+        return await conn.ExecuteScalarAsync<int>(
+            sql,
+            new { CodigoMotorizado = codigoMotorizado, FechaOperacion = fechaOperacion.ToString("yyyyMMdd") });
+    }
+
+    /// <inheritdoc />
+    public async Task<int> ContarReasignacionesMotorizadoAsync(
+        string codigoMotorizado,
+        DateTime fechaOperacion,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT COUNT(ISNULL(nTarifaMotorizado, 0))
+            FROM MPEDIDO
+            WHERE tMotorizadoN = @CodigoMotorizado
+              AND ISNULL(nTarifaExtraN, 0) = 0
+              AND CONVERT(nvarchar(8), fAsignacion, 112) = @FechaOperacion
+            """;
+        return await conn.ExecuteScalarAsync<int>(
+            sql,
+            new { CodigoMotorizado = codigoMotorizado, FechaOperacion = fechaOperacion.ToString("yyyyMMdd") });
+    }
+
+    /// <inheritdoc />
+    public async Task ActualizarReasignacionMotorizadoAsync(
+        string codigoPedido,
+        string codigoMotorizado,
+        decimal tarifaMotorizado,
+        bool esTarifaExtra,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            UPDATE MPEDIDO
+            SET nTarifaMotorizadoN = @TarifaMotorizado,
+                tMotorizadoN = @CodigoMotorizado,
+                nTarifaExtraN = @EsTarifaExtra
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+        await conn.ExecuteAsync(sql, new
+        {
+            CodigoPedido = codigoPedido,
+            CodigoMotorizado = codigoMotorizado,
+            TarifaMotorizado = tarifaMotorizado,
+            EsTarifaExtra = esTarifaExtra ? 1 : 0
+        });
+    }
+
+    /// <inheritdoc />
+    public async Task LimpiarReasignacionMotorizadoAsync(string codigoPedido, CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            UPDATE MPEDIDO
+            SET nTarifaMotorizadoN = NULL,
+                nTarifaExtraN = NULL,
+                tMotorizadoN = NULL
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+        await conn.ExecuteAsync(sql, new { CodigoPedido = codigoPedido });
     }
 }

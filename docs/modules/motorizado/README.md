@@ -17,8 +17,8 @@ Permite controlar la llegada y salida de motorizados, ver pedidos asignados, ges
 | `frmLlegadaSalida.frm` | **Startup**: Control de llegada/salida motorizado | .NET: `LlegadaSalidaForm` |
 | `frmMotorizado.frm` | Grilla de motorizados activos | IN_PROGRESS |
 | `frmMotorizadoDetalle.frm` | Detalle de motorizado | IN_PROGRESS |
-| `frmAsignacionMotorizado.frm` | Asignación de motorizado a pedido | IN_PROGRESS |
-| `frmReasignacionMotorizado.frm` | Reasignación de motorizado | IN_PROGRESS |
+| `frmAsignacionMotorizado.frm` | Asignación de motorizado a pedido | .NET: `AsignacionMotorizadoForm` |
+| `frmReasignacionMotorizado.frm` | Reasignación de motorizado | .NET: `ReasignacionMotorizadoForm` |
 | `frmTarifaMotorizado.frm` | Gestión tarifa activa (requiere supervisión) | .NET: `TarifaMotorizadoForm` |
 | `fmrPedidosEntregado.frm` | Registro de pedidos entregados | IN_PROGRESS |
 | `frmRepAnaliticoMotorizado.frm` | Reporte analítico | NOT_STARTED |
@@ -65,6 +65,8 @@ Sub Main() →
 | Interfaces repositorio | COMPLETED |
 | Application handlers | COMPLETED |
 | Infrastructure MotorizadoRepository | COMPLETED |
+| AsignacionMotorizadoForm | COMPLETED |
+| ReasignacionMotorizadoForm | COMPLETED |
 | LlegadaSalidaForm | COMPLETED |
 | TarifaMotorizadoForm | COMPLETED |
 | Reportes FastReport | NOT_STARTED |

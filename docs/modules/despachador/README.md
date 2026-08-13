@@ -25,8 +25,8 @@ Permite visualizar, gestionar y despachar los pedidos de delivery, integra con l
 | `frmBusquedaDelivery.frm` | Búsqueda de delivery | IN_PROGRESS |
 | `frmOrdenesConsola.frm` | Panel de órdenes externas (Rappi) | IN_PROGRESS |
 | `frmEnvioDatosRappi.frm` | Envío de datos a Rappi | IN_PROGRESS |
-| `frmAsignacionMotorizado.frm` | Asignación de motorizado | IN_PROGRESS |
-| `frmReasignacionMotorizado.frm` | Reasignación de motorizado | IN_PROGRESS |
+| `frmAsignacionMotorizado.frm` | Asignación de motorizado | .NET: `AsignacionMotorizadoForm` |
+| `frmReasignacionMotorizado.frm` | Reasignación de motorizado | .NET: `ReasignacionMotorizadoForm` |
 | `frmTarifaMotorizado.frm` | Gestión tarifa activa | .NET: `TarifaMotorizadoForm` |
 | `frmPedido.frm` | Pedido en contexto Despachador | IN_PROGRESS |
 | `frmDetallePedido.frm` | Detalle de pedido | IN_PROGRESS |

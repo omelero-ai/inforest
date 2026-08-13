@@ -1,6 +1,9 @@
 using Inforest.Domain.Common;
+using Inforest.Domain.Entities.Configuracion;
+using Inforest.Domain.Entities.Delivery;
 using Inforest.Domain.Entities.Motorizado;
 using Inforest.Domain.Repositories;
+using Inforest.Application.Configuracion;
 using MotorizadoEntity = Inforest.Domain.Entities.Motorizado.Motorizado;
 
 namespace Inforest.Application.Motorizado;
@@ -30,6 +33,41 @@ public sealed class ObtenerMotorizadosActivosHandler
     {
         var motorizados = await _repo.ObtenerTodosAsync(ct);
         return Result.Ok(motorizados);
+    }
+}
+
+/// <summary>
+/// Query para obtener pedidos disponibles en la pantalla de reasignación.
+/// <para>
+/// Legacy: <c>frmReasignacionMotorizado.frm → Form_Load/cmdBuscar_Click</c>.
+/// </para>
+/// </summary>
+public sealed record ObtenerPedidosReasignacionQuery(DateTime FechaInicio, DateTime FechaFin, string? CriterioPedido);
+
+/// <summary>Handler de <see cref="ObtenerPedidosReasignacionQuery"/>.</summary>
+public sealed class ObtenerPedidosReasignacionHandler
+{
+    private readonly IPedidoDeliveryRepository _repo;
+
+    public ObtenerPedidosReasignacionHandler(IPedidoDeliveryRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<IEnumerable<PedidoReasignacionMotorizado>>> HandleAsync(
+        ObtenerPedidosReasignacionQuery query,
+        CancellationToken ct = default)
+    {
+        if (query.FechaInicio > query.FechaFin)
+            return Result.Fail<IEnumerable<PedidoReasignacionMotorizado>>(
+                "Error en rango de fechas.",
+                "REASIGNACION_RANGO_FECHAS_INVALIDO");
+
+        var pedidos = await _repo.ObtenerPedidosReasignacionAsync(
+            query.FechaInicio,
+            query.FechaFin,
+            query.CriterioPedido,
+            ct);
+
+        return Result.Ok(pedidos);
     }
 }
 
@@ -142,6 +180,109 @@ public sealed class ReasignarMotorizadoHandler
         var nuevaAsignacion = asignacionActual.Reasignar(cmd.NuevoCodigoMotorizado, cmd.UsuarioReasignacion);
         await _repo.RegistrarAsignacionAsync(nuevaAsignacion, ct);
         await _pedidoRepo.AsignarMotorizadoAsync(cmd.CodigoPedido, cmd.NuevoCodigoMotorizado, ct);
+        return Result.Ok();
+    }
+}
+
+/// <summary>
+/// Comando para asignar motorizado en el flujo de reasignación delivery.
+/// <para>
+/// Legacy: <c>frmReasignacionMotorizado.frm → cmdOpcion_Click(Case 1)</c>.
+/// Actualiza <c>tMotorizadoN</c>, <c>nTarifaMotorizadoN</c> y
+/// <c>nTarifaExtraN</c> respetando <c>TPARAMETRO.nAsignacionMotorizado</c>.
+/// </para>
+/// </summary>
+public sealed record AsignarReasignacionMotorizadoCommand(
+    string CodigoPedido,
+    string CodigoMotorizado,
+    string UsuarioAsignacion,
+    bool AutorizarTarifaExtra = false);
+
+/// <summary>Handler de <see cref="AsignarReasignacionMotorizadoCommand"/>.</summary>
+public sealed class AsignarReasignacionMotorizadoHandler
+{
+    private readonly IMotorizadoRepository _motorizadoRepo;
+    private readonly IPedidoDeliveryRepository _pedidoRepo;
+    private readonly IParametroRepository _parametroRepository;
+
+    public AsignarReasignacionMotorizadoHandler(
+        IMotorizadoRepository motorizadoRepo,
+        IPedidoDeliveryRepository pedidoRepo,
+        IParametroRepository parametroRepository)
+    {
+        _motorizadoRepo = motorizadoRepo;
+        _pedidoRepo = pedidoRepo;
+        _parametroRepository = parametroRepository;
+    }
+
+    public async Task<Result> HandleAsync(AsignarReasignacionMotorizadoCommand cmd, CancellationToken ct = default)
+    {
+        var motorizado = await _motorizadoRepo.ObtenerPorCodigoAsync(cmd.CodigoMotorizado, ct);
+        if (motorizado is null)
+            return Result.Fail("Motorizado no encontrado.", "MOTORIZADO_NO_ENCONTRADO");
+
+        var pedido = await _pedidoRepo.ObtenerPorCodigoAsync(cmd.CodigoPedido, ct);
+        if (pedido is null)
+            return Result.Fail("Pedido no encontrado.", "PEDIDO_NO_ENCONTRADO");
+
+        var configuracion = await _parametroRepository.ObtenerConfiguracionAsync(ct);
+        var tarifaDiaria = ObtenerTarifaReasignacion(configuracion, motorizado);
+
+        var asignacionesPrincipales = await _pedidoRepo.ContarAsignacionesPrincipalesMotorizadoAsync(cmd.CodigoMotorizado, DateTime.Today, ct);
+        var reasignaciones = await _pedidoRepo.ContarReasignacionesMotorizadoAsync(cmd.CodigoMotorizado, DateTime.Today, ct);
+        var montoAsignado = decimal.Round((tarifaDiaria * (asignacionesPrincipales + reasignaciones)) + tarifaDiaria, 2, MidpointRounding.AwayFromZero);
+
+        var superaMaximo = configuracion is not null &&
+                           configuracion.nAsignacionMotorizado > 0 &&
+                           montoAsignado > Convert.ToDecimal(configuracion.nAsignacionMotorizado);
+
+        if (superaMaximo && !cmd.AutorizarTarifaExtra)
+            return Result.Fail(
+                "La asignación supera el monto máximo permitido por motorizado.",
+                "REASIGNACION_SUPERA_MONTO_MAXIMO");
+
+        await _pedidoRepo.ActualizarReasignacionMotorizadoAsync(
+            cmd.CodigoPedido,
+            cmd.CodigoMotorizado,
+            tarifaDiaria,
+            superaMaximo,
+            ct);
+
+        return Result.Ok();
+    }
+
+    private static decimal ObtenerTarifaReasignacion(ConfiguracionSistema? configuracion, MotorizadoEntity motorizado)
+        => configuracion?.tTarifaActualMotorizado switch
+        {
+            "Tarifa Dom" => motorizado.TarifaSabadoDomingo,
+            "Tarifa Especial" => motorizado.TarifaEspecial,
+            _ => motorizado.TarifaLunesViernes
+        };
+}
+
+/// <summary>
+/// Comando para limpiar la reasignación de motorizado de un pedido.
+/// <para>
+/// Legacy: <c>frmReasignacionMotorizado.frm → cmdOpcion_Click(Case 2)</c>.
+/// </para>
+/// </summary>
+public sealed record DesasignarReasignacionMotorizadoCommand(string CodigoPedido);
+
+/// <summary>Handler de <see cref="DesasignarReasignacionMotorizadoCommand"/>.</summary>
+public sealed class DesasignarReasignacionMotorizadoHandler
+{
+    private readonly IPedidoDeliveryRepository _pedidoRepo;
+
+    public DesasignarReasignacionMotorizadoHandler(IPedidoDeliveryRepository pedidoRepo)
+        => _pedidoRepo = pedidoRepo;
+
+    public async Task<Result> HandleAsync(DesasignarReasignacionMotorizadoCommand cmd, CancellationToken ct = default)
+    {
+        var pedido = await _pedidoRepo.ObtenerPorCodigoAsync(cmd.CodigoPedido, ct);
+        if (pedido is null)
+            return Result.Fail("Pedido no encontrado.", "PEDIDO_NO_ENCONTRADO");
+
+        await _pedidoRepo.LimpiarReasignacionMotorizadoAsync(cmd.CodigoPedido, ct);
         return Result.Ok();
     }
 }
