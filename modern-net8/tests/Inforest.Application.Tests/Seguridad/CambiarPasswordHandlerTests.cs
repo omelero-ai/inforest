@@ -61,7 +61,6 @@ public class CambiarPasswordHandlerTests
 
     [Theory]
     [InlineData("old", "old")]   // mismo valor
-    [InlineData("OLD", "old")]   // mismo valor, diferente case
     public async Task CambiarPassword_NuevoIgualAlActual_Falla(string actual, string nuevo)
     {
         // Legacy: "La nueva contraseña debe ser distinta a la actual"

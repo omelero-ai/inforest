@@ -45,11 +45,11 @@ public sealed class CambiarPasswordHandler
             return Result.Fail("Confirme la nueva contraseña.", "SEGURIDAD_PASSWORD_CONFIRMACION_REQUERIDA");
 
         // Legacy: "La nueva contraseña debe ser distinta a la actual"
-        if (string.Equals(command.PasswordActual.Trim(), command.PasswordNuevo.Trim(), StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(command.PasswordActual.Trim(), command.PasswordNuevo.Trim(), StringComparison.Ordinal))
             return Result.Fail("La nueva contraseña debe ser distinta a la actual.", "SEGURIDAD_PASSWORD_IGUAL_A_ACTUAL");
 
         // Legacy: "Nueva contraseña no coincide con la confirmación"
-        if (!string.Equals(command.PasswordNuevo.Trim(), command.PasswordNuevoConfirmacion.Trim(), StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(command.PasswordNuevo.Trim(), command.PasswordNuevoConfirmacion.Trim(), StringComparison.Ordinal))
             return Result.Fail("Nueva contraseña no coincide con la confirmación.", "SEGURIDAD_PASSWORD_CONFIRMACION_NO_COINCIDE");
 
         return await _authService.CambiarPasswordAsync(
