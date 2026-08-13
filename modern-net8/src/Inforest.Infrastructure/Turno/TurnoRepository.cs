@@ -2,6 +2,7 @@ using System.Reflection;
 using Dapper;
 using Inforest.Application.Interfaces;
 using Inforest.Application.Turno;
+using Inforest.Domain.Entities.Caja;
 using Inforest.Domain.Entities.Configuracion;
 using TurnoEntity = Inforest.Domain.Entities.Configuracion.Turno;
 
@@ -61,18 +62,71 @@ internal sealed class TurnoRepository : ITurnoRepository
         return affected > 0;
     }
 
-    public async Task<bool> CerrarAsync(string codigoTurno, decimal montoFinal, CancellationToken ct = default)
+    public async Task<bool> CerrarAsync(string codigoTurno, decimal montoFinal, CierreTurnoBreakdown breakdown, CancellationToken ct = default)
     {
         using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+
+        // BR-CAJA-004: UPDATE MTURNO con desglose completo de montos.
+        // Legacy: frmLiquidacionDetalle.frm — Isql = "Update MTURNO Set lCierre=1, fFinal=getdate(), ..."
         const string sql = """
             UPDATE MTURNO
-            SET lCierre = 1,
-                fFinal = GETDATE(),
-                nMontoFN = @monto
+            SET
+                lCierre    = 1,
+                fFinal     = GETDATE(),
+                nMontoEN   = @EfectivoMN,
+                nMontoEE   = @EfectivoME,
+                nMontoEE2  = @EfectivoME2,
+                nMontoEE3  = @EfectivoME3,
+                nMontoCN   = @ChequesMN,
+                nMontoCE   = @ChequesME,
+                nMontoPN   = @PuntosMN,
+                nMontoPE   = @PuntosME,
+                nMontoFN   = @MontoFinalMN,
+                nMontoFE   = @MontoFinalME,
+                nMontoFE2  = @EfectivoME2,
+                nMontoFE3  = @EfectivoME3,
+                nTarjeta1  = @Tarjeta1,
+                nTarjeta2  = @Tarjeta2,
+                nTarjeta3  = @Tarjeta3,
+                nTarjeta4  = @Tarjeta4,
+                nTarjeta5  = @Tarjeta5,
+                nTarjeta6  = @Tarjeta6,
+                nTarjeta7  = @Tarjeta7,
+                nTarjeta8  = @Tarjeta8,
+                nIngresoN  = @IngresosMN,
+                nIngresoE  = @IngresosME,
+                nEgresoN   = @EgresosMN,
+                nEgresoE   = @EgresosME
             WHERE tTurno = @codigo AND ISNULL(lCierre, 0) = 0
             """;
 
-        var affected = await connection.ExecuteAsync(sql, new { codigo = codigoTurno, monto = montoFinal });
+        var affected = await connection.ExecuteAsync(sql, new
+        {
+            breakdown.EfectivoMN,
+            breakdown.EfectivoME,
+            breakdown.EfectivoME2,
+            breakdown.EfectivoME3,
+            breakdown.ChequesMN,
+            breakdown.ChequesME,
+            breakdown.PuntosMN,
+            breakdown.PuntosME,
+            breakdown.MontoFinalMN,
+            breakdown.MontoFinalME,
+            Tarjeta1 = breakdown.ObtenerTarjeta(1),
+            Tarjeta2 = breakdown.ObtenerTarjeta(2),
+            Tarjeta3 = breakdown.ObtenerTarjeta(3),
+            Tarjeta4 = breakdown.ObtenerTarjeta(4),
+            Tarjeta5 = breakdown.ObtenerTarjeta(5),
+            Tarjeta6 = breakdown.ObtenerTarjeta(6),
+            Tarjeta7 = breakdown.ObtenerTarjeta(7),
+            Tarjeta8 = breakdown.ObtenerTarjeta(8),
+            breakdown.IngresosMN,
+            breakdown.IngresosME,
+            breakdown.EgresosMN,
+            breakdown.EgresosME,
+            codigo = codigoTurno
+        });
+
         return affected > 0;
     }
 

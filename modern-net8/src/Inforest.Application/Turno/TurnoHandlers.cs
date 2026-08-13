@@ -1,4 +1,6 @@
+using Inforest.Application.Configuracion;
 using Inforest.Domain.Common;
+using Inforest.Domain.Entities.Caja;
 using TurnoEntity = Inforest.Domain.Entities.Configuracion.Turno;
 
 namespace Inforest.Application.Turno;
@@ -55,21 +57,54 @@ public sealed class AbrirTurnoHandler
         => DateTime.Now.ToString("yyMMddHHmmss");
 }
 
-public sealed record CerrarTurnoCommand(string CodigoTurno, decimal MontoFinal);
+public sealed record CerrarTurnoCommand(
+    string CodigoTurno,
+    string CodigoCaja,
+    decimal MontoFinal,
+    CierreTurnoBreakdown? Breakdown = null,
+    bool SupervisorAutorizado = false,
+    bool DescargoPendienteConfirmado = false);
 
+/// <summary>
+/// Cierra el turno de caja aplicando las reglas de negocio:
+/// - BR-CAJA-001: si lObligaCierre=true y no hay autorización de supervisor → retorna REQUIERE_SUPERVISOR
+/// - BR-CAJA-002: si lActivaConsultaDescargo=true y no confirmado → retorna REQUIERE_CONFIRMACION_DESCARGO
+/// - BR-CAJA-004: actualiza MTURNO con desglose completo de montos.
+/// Legacy: frmLiquidacionDetalle.frm, cmdOpcion_Click(0).
+/// </summary>
 public sealed class CerrarTurnoHandler
 {
     private readonly ITurnoRepository _turnoRepository;
+    private readonly IParametroRepository _configuracionRepository;
 
-    public CerrarTurnoHandler(ITurnoRepository turnoRepository)
-        => _turnoRepository = turnoRepository;
+    public CerrarTurnoHandler(
+        ITurnoRepository turnoRepository,
+        IParametroRepository configuracionRepository)
+    {
+        _turnoRepository = turnoRepository;
+        _configuracionRepository = configuracionRepository;
+    }
 
     public async Task<Result> HandleAsync(CerrarTurnoCommand command, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(command.CodigoTurno))
             return Result.Fail("El código del turno es obligatorio.", "TURNO_CODIGO_REQUERIDO");
 
-        var closed = await _turnoRepository.CerrarAsync(command.CodigoTurno, command.MontoFinal, ct);
+        if (string.IsNullOrWhiteSpace(command.CodigoCaja))
+            return Result.Fail("El código de caja es obligatorio.", "TURNO_CAJA_REQUERIDA");
+
+        // BR-CAJA-001: lObligaCierre — requiere supervisor autorizado
+        var configCaja = await _configuracionRepository.ObtenerConfiguracionCajaAsync(command.CodigoCaja, ct);
+        if (configCaja?.lObligaCierre == true && !command.SupervisorAutorizado)
+            return Result.Fail("Se requiere autorización de supervisor para cerrar el turno.", "REQUIERE_SUPERVISOR");
+
+        // BR-CAJA-002: lActivaConsultaDescargo — requiere confirmación de que el descargo fue realizado
+        var configSistema = await _configuracionRepository.ObtenerConfiguracionAsync(ct);
+        if (configSistema?.lActivaConsultaDescargo == true && !command.DescargoPendienteConfirmado)
+            return Result.Fail("Debe confirmar que realizó el descargo de ventas antes de cerrar el turno.", "REQUIERE_CONFIRMACION_DESCARGO");
+
+        var breakdown = command.Breakdown ?? CierreTurnoBreakdown.Vacio();
+        var closed = await _turnoRepository.CerrarAsync(command.CodigoTurno, command.MontoFinal, breakdown, ct);
         return closed
             ? Result.Ok()
             : Result.Fail("No se pudo cerrar el turno solicitado.", "TURNO_CIERRE_FALLIDO");

@@ -6,15 +6,17 @@ namespace Inforest.Desktop.Turno;
     {
         private readonly CerrarTurnoHandler? _cerrarTurnoHandler;
         private readonly string _codigoTurno;
+        private readonly string _codigoCaja;
 
         private Label lblResumen = null!;
         private TextBox txtMontoFinal = null!;
         private Button btnCerrar = null!;
         private Button btnCancelar = null!;
 
-        public FrmCierreTurno(string codigoTurno, CerrarTurnoHandler? cerrarTurnoHandler = null)
+        public FrmCierreTurno(string codigoTurno, string codigoCaja, CerrarTurnoHandler? cerrarTurnoHandler = null)
         {
             _codigoTurno = codigoTurno;
+            _codigoCaja = codigoCaja;
             _cerrarTurnoHandler = cerrarTurnoHandler;
             InitializeComponent();
         }
@@ -61,7 +63,7 @@ namespace Inforest.Desktop.Turno;
                 return;
             }
 
-            var result = await _cerrarTurnoHandler.HandleAsync(new CerrarTurnoCommand(_codigoTurno, montoFinal));
+            var result = await _cerrarTurnoHandler.HandleAsync(new CerrarTurnoCommand(_codigoTurno, _codigoCaja, montoFinal));
             if (!result.EsExitoso)
             {
                 MessageBox.Show(result.MensajeError, "Turno", MessageBoxButtons.OK, MessageBoxIcon.Warning);

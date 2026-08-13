@@ -133,7 +133,11 @@ public class FrmCuadreCaja : Form
             return;
         }
 
-        var result = await _cerrarHandler.HandleAsync(new CerrarTurnoCommand(_codigoTurnoActual, montoFinal));
+        var result = await _cerrarHandler.HandleAsync(
+            new CerrarTurnoCommand(
+                _codigoTurnoActual,
+                _sessionService?.SesionActual?.CodigoCaja ?? string.Empty,
+                montoFinal));
         if (!result.EsExitoso)
         {
             MessageBox.Show(result.MensajeError, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);

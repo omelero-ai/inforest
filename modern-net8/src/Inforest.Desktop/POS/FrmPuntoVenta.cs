@@ -213,7 +213,7 @@ public class FrmPuntoVenta : Form
                 return;
             }
 
-            using var frm = new FrmCierreTurno(turnoResult.Valor.CodigoTurno, _cerrarTurnoHandler);
+            using var frm = new FrmCierreTurno(turnoResult.Valor.CodigoTurno, sesion.CodigoCaja, _cerrarTurnoHandler);
             if (frm.ShowDialog(this) == DialogResult.OK)
                 await CargarDatosAsync();
         }
