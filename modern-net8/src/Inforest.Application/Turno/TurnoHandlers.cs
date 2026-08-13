@@ -52,7 +52,7 @@ public sealed class AbrirTurnoHandler
     }
 
     private static string GenerarCodigoTurno()
-        => DateTime.Now.ToString("yyMMddHHmm");
+        => DateTime.Now.ToString("yyMMddHHmmss");
 }
 
 public sealed record CerrarTurnoCommand(string CodigoTurno, decimal MontoFinal);
