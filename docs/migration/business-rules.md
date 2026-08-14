@@ -1801,3 +1801,180 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Estado:** MIGRATED
 
 **Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Ventas/NotaCredito.cs`
+
+---
+
+## POS-FUNC-010 — Cliente y cuentas corrientes
+
+### BR-CLIENTE-001
+**Nombre:** Unicidad de código de cliente
+
+**Origen:** Legacy/frmNuevoCliente.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNuevoCliente.frm`
+
+**Procedimiento/Función:** `cmdGuardar_Click` / `RegistrarNuevoClientePosHandler`
+
+**Descripción:** El código de cliente (tCodigoCliente) debe ser único en TCLIENTE.
+
+**Condición:** Al insertar un nuevo cliente desde `FrmNuevoCliente`
+
+**Resultado:** Si el código ya existe → Error "CLIENTE_YA_EXISTE"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `RegistrarNuevoClientePosHandler`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs`
+
+---
+
+### BR-CLIENTE-002
+**Nombre:** Validación de formato de identidad tributaria
+
+**Origen:** Legacy/frmNuevoCliente.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNuevoCliente.frm`
+
+**Procedimiento/Función:** `cmdValidaDNI_Click` / `Cliente.Crear`
+
+**Descripción:** RUC debe tener 11 dígitos numéricos; DNI debe tener 8 dígitos numéricos. Otros tipos requieren al menos 4 caracteres.
+
+**Condición:** Al crear o actualizar cliente
+
+**Resultado:** Error con código `CLIENTE_RUC_INVALIDO` o `CLIENTE_DNI_INVALIDO` o `CLIENTE_IDENTIDAD_INVALIDA`
+
+**Excepciones:** Tipos distintos de RUC/DNI usan validación mínima de longitud
+
+**Destino .NET:** `Cliente.Crear` / `Cliente.Actualizar`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Cliente.cs`
+
+---
+
+### BR-CLIENTE-003
+**Nombre:** Razón social obligatoria
+
+**Origen:** Legacy/frmNuevoCliente.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNuevoCliente.frm`
+
+**Procedimiento/Función:** Validación previa a guardado
+
+**Descripción:** El campo razón social / empresa es obligatorio para crear o actualizar un cliente.
+
+**Condición:** Al crear o actualizar cliente
+
+**Resultado:** Error "CLIENTE_EMPRESA_REQUERIDA"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Cliente.Crear`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Cliente.cs`
+
+---
+
+### BR-CLIENTE-004
+**Nombre:** Edición requiere cliente existente
+
+**Origen:** Legacy/frmNuevoCliente.frm (modo edición)
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNuevoCliente.frm`
+
+**Procedimiento/Función:** `ActualizarClientePosHandler`
+
+**Descripción:** Solo se puede actualizar un cliente que ya existe en TCLIENTE.
+
+**Condición:** Al actualizar cliente desde `FrmNuevoCliente` en modo edición
+
+**Resultado:** Error "CLIENTE_NO_ENCONTRADO" si no existe
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `ActualizarClientePosHandler`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs`
+
+---
+
+### BR-CTACTE-001
+**Nombre:** Consumo no puede superar línea de crédito
+
+**Origen:** Legacy/frmCtaCte.frm + vCompania
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCtaCte.frm`
+
+**Procedimiento/Función:** `CuentaCorriente.AplicarConsumo`
+
+**Descripción:** El consumo acumulado en cuenta corriente no puede superar la línea de crédito asignada (TDELIVERY.nLinea).
+
+**Condición:** Al aplicar consumo a una cuenta corriente
+
+**Resultado:** Error "CTACTE_SALDO_INSUFICIENTE"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `CuentaCorriente.AplicarConsumo`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/CuentaCorriente.cs`
+
+---
+
+### BR-CTACTE-002
+**Nombre:** Estado '03' = documento ctacte pendiente de cobro
+
+**Origen:** Legacy/frmCuentaCobrar.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCuentaCobrar.frm`
+
+**Procedimiento/Función:** `cmdProcesa_Click` — filtra `vDocumentoGrilla WHERE tEstadoDocumento='03'`
+
+**Descripción:** Los documentos con estado '03' representan deuda por cuenta corriente pendiente de cobro.
+
+**Condición:** Al consultar documentos pendientes de cobro en `FrmCuentaCobrar`
+
+**Resultado:** Lista de documentos en estado '03' en el rango de fechas indicado
+
+**Excepciones:** FechaFin no puede ser anterior a FechaInicio → error "CTACTE_FECHA_INVALIDA"
+
+**Destino .NET:** `ObtenerDocumentosPendientesCobroHandler` + `CuentaCorrienteRepository`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/CuentaCorrienteRepository.cs`
+
+---
+
+### BR-CTACTE-003
+**Nombre:** Solo clientes con ctacte habilitada aparecen en correlativo
+
+**Origen:** Legacy/frmCtaCte.frm + vCompania
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCtaCte.frm`
+
+**Procedimiento/Función:** `Form_Load` — carga `vCompania` (TDELIVERY WHERE lActivo=1 AND lClienteCtaCte=1)
+
+**Descripción:** El correlativo de cuentas corrientes solo muestra registros activos con ctacte habilitada.
+
+**Condición:** Al cargar `FrmCtaCte`
+
+**Resultado:** Solo se retornan registros de TDELIVERY con lActivo=1 y lClienteCtaCte=1
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `ObtenerCuentasCorrientesHandler` + `CuentaCorrienteRepository`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/CuentaCorrienteRepository.cs`

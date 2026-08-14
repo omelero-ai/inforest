@@ -21,3 +21,15 @@ public interface IMesaRepository : IMaestroRepository<Mesa>;
 public interface ISalonRepository : IMaestroRepository<Salon>;
 public interface IMozoRepository : IMaestroRepository<Mozo>;
 public interface IProductoMaestroRepository : IMaestroRepository<ProductoMaestro>;
+
+/// <summary>
+/// Contrato de cuentas corrientes (vCompania / TDELIVERY lClienteCtaCte=1).
+/// Legacy: frmCtaCte.frm, frmCuentaCobrar.frm. BR-CTACTE-001/002/003.
+/// </summary>
+public interface ICuentaCorrienteRepository
+{
+    Task<IReadOnlyList<CuentaCorriente>> ObtenerTodosAsync(CancellationToken ct = default);
+    Task<CuentaCorriente?> ObtenerPorCodigoAsync(string codigo, CancellationToken ct = default);
+    Task<IReadOnlyList<DocumentoPendienteCobro>> ObtenerDocumentosPendientesCobroAsync(
+        DateTime fechaInicio, DateTime fechaFin, CancellationToken ct = default);
+}

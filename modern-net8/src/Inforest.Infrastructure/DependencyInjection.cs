@@ -87,6 +87,7 @@ public static class DependencyInjection
         services.AddScoped<IGrupoProductoRepository, GrupoProductoRepository>();
         services.AddScoped<ISubGrupoProductoRepository, SubGrupoProductoRepository>();
         services.AddScoped<IClienteRepository, ClienteRepository>();
+        services.AddScoped<ICuentaCorrienteRepository, CuentaCorrienteRepository>();
         services.AddScoped<IMesaRepository, MesaRepository>();
         services.AddScoped<ISalonRepository, SalonRepository>();
         services.AddScoped<IMozoRepository, MozoRepository>();

@@ -327,3 +327,15 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmDocumento.frm` (Generación) | Form | `FrmDocumento` (visualización + anulación) | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmDocumento.cs` |
 | `frmFactura.frm` | Form | Cubierto por `CorrelativoDocumento` + `FrmDocumentoCorrelativo` | Domain Entity + WinForm | NOT_APPLICABLE | POS-FUNC-007 — ya implementado |
 | (tests BR-NC-001..006) | — | `NotaCreditoTests` (9 tests) + `NotaCreditoHandlersTests` (10 tests) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/Ventas/NotaCreditoTests.cs` + `tests/Inforest.Application.Tests/Ventas/NotaCreditoHandlersTests.cs` |
+
+## Componentes POS-FUNC-010 — Cliente y cuentas corrientes
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmNuevoCliente.frm` | Form | `FrmNuevoCliente` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmNuevoCliente.cs` |
+| `frmCtaCte.frm` | Form | `FrmCtaCte` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmCtaCte.cs` |
+| `frmCuentaCobrar.frm` | Form | `FrmCuentaCobrar` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmCuentaCobrar.cs` |
+| `TCLIENTE` | Table | `Cliente` + `IClienteRepository` + `ClienteRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Maestros/Cliente.cs` + `src/Inforest.Infrastructure/Maestros/ClienteRepository.cs` |
+| `TDELIVERY` (lClienteCtaCte=1) / `vCompania` | Table/View | `CuentaCorriente` + `ICuentaCorrienteRepository` + `CuentaCorrienteRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Maestros/CuentaCorriente.cs` + `src/Inforest.Infrastructure/Maestros/CuentaCorrienteRepository.cs` |
+| `vDocumentoGrilla` (tEstadoDocumento='03') | View | `DocumentoPendienteCobro` + `ObtenerDocumentosPendientesCobroHandler` | Record + Handler | MIGRATED | `src/Inforest.Domain/Entities/Maestros/DocumentoPendienteCobro.cs` + `src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs` |
+| (BR-CLIENTE-001..004, BR-CTACTE-001..003 tests) | — | `CuentaCorrienteHandlerTests` (7 tests) + `CuentaCorrienteTests` (8 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Maestros/CuentaCorrienteHandlerTests.cs` + `tests/Inforest.Domain.Tests/Maestros/CuentaCorrienteTests.cs` |
