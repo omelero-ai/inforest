@@ -27,6 +27,7 @@ using Inforest.Infrastructure.Reportes;
 using Inforest.Infrastructure.Security;
 using Inforest.Infrastructure.Turno;
 using Inforest.Infrastructure.Ventas;
+using Inforest.Infrastructure.Runtime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -58,6 +59,7 @@ public static class DependencyInjection
         services.AddSingleton<ISpExecutor, SpExecutor>();
         services.AddSingleton<IModernPasswordHashStore, ModernPasswordHashStore>();
         services.AddSingleton<ISessionService, SessionService>();
+        services.AddSingleton<IAppInstanceGuard, AppInstanceGuard>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddSingleton<IRbacService, RbacService>();
         services.AddScoped<IAuditoriaService, AuditoriaService>();

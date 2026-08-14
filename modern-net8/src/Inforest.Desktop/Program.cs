@@ -8,6 +8,7 @@ using Inforest.Desktop.CajaRapida;
 using Inforest.Desktop.Adicion;
 using Inforest.Desktop.Caja;
 using Inforest.Desktop.Motorizado;
+using Inforest.Application.Interfaces;
 
 namespace Inforest.Desktop;
 
@@ -25,11 +26,21 @@ static class Program
     {
         ApplicationConfiguration.Initialize();
 
-        var host = CreateHostBuilder().Build();
+        using var host = CreateHostBuilder().Build();
 
-        // Formulario de acceso resuelto desde DI.
-        var form = host.Services.GetRequiredService<Form1>();
-        System.Windows.Forms.Application.Run(form);
+        var appInstanceGuard = host.Services.GetRequiredService<IAppInstanceGuard>();
+        if (!appInstanceGuard.TryAcquire("InfoRest.POS", out var instanceLease))
+        {
+            MessageBox.Show("Ya se está ejecutando el Aplicativo!", "Atención!!!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        using (instanceLease)
+        {
+            // Formulario de acceso resuelto desde DI.
+            var form = host.Services.GetRequiredService<Form1>();
+            System.Windows.Forms.Application.Run(form);
+        }
     }
 
     static IHostBuilder CreateHostBuilder()
