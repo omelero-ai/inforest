@@ -17,6 +17,7 @@ public class FrmNotaCreditoDetalle : Form
 {
     private readonly NotaCredito? _nc;
     private readonly AnularNotaCreditoHandler _anularHandler;
+    private readonly EmitirNotaCreditoHandler? _emitirHandler;
     private readonly string _usuarioActual;
     private readonly Func<NotaCredito, Task>? _onSaved;
 
@@ -36,10 +37,12 @@ public class FrmNotaCreditoDetalle : Form
         NotaCredito? nc,
         AnularNotaCreditoHandler anularHandler,
         string usuarioActual,
-        Func<NotaCredito, Task>? onSaved)
+        Func<NotaCredito, Task>? onSaved,
+        EmitirNotaCreditoHandler? emitirHandler = null)
     {
         _nc = nc;
         _anularHandler = anularHandler;
+        _emitirHandler = emitirHandler;
         _usuarioActual = usuarioActual;
         _onSaved = onSaved;
 
@@ -183,6 +186,12 @@ public class FrmNotaCreditoDetalle : Form
             return;
         }
 
+        if (_emitirHandler is null)
+        {
+            MessageBox.Show("Handler de emisión no disponible.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var command = new EmitirNotaCreditoCommand(
             _txtCodigo.Text.Trim(),
             _dtpFecha.Value.Date,
@@ -193,10 +202,18 @@ public class FrmNotaCreditoDetalle : Form
             imp3,
             _txtObservacion.Text.Trim());
 
-        // Note: handler is injected separately; form shows usage pattern.
-        // Actual persistence is handled by EmitirNotaCreditoHandler injected at startup.
-        MessageBox.Show("Para grabar use el handler EmitirNotaCreditoHandler con los datos ingresados.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
-        _ = command;
-        await Task.CompletedTask;
+        var result = await _emitirHandler.HandleAsync(command);
+        if (!result.EsExitoso)
+        {
+            MessageBox.Show(result.MensajeError, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        MessageBox.Show("Nota de crédito registrada correctamente.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        if (_onSaved is not null)
+            await _onSaved(result.Valor!);
+
+        Close();
     }
 }

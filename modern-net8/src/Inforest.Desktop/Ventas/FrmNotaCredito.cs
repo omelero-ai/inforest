@@ -12,6 +12,7 @@ public class FrmNotaCredito : Form
 {
     private readonly ObtenerNotasCreditoPorFechaHandler _obtenerHandler;
     private readonly AnularNotaCreditoHandler _anularHandler;
+    private readonly EmitirNotaCreditoHandler _emitirHandler;
     private readonly string _usuarioActual;
 
     private readonly DateTimePicker _dtpDesde;
@@ -23,10 +24,12 @@ public class FrmNotaCredito : Form
     public FrmNotaCredito(
         ObtenerNotasCreditoPorFechaHandler obtenerHandler,
         AnularNotaCreditoHandler anularHandler,
+        EmitirNotaCreditoHandler emitirHandler,
         string usuarioActual)
     {
         _obtenerHandler = obtenerHandler;
         _anularHandler = anularHandler;
+        _emitirHandler = emitirHandler;
         _usuarioActual = usuarioActual;
 
         Text = "Notas de Crédito";
@@ -115,7 +118,7 @@ public class FrmNotaCredito : Form
 
     private void NuevaNotaCredito()
     {
-        using var frm = new FrmNotaCreditoDetalle(null, _anularHandler, _usuarioActual, onSaved: async _ => await CargarAsync());
+        using var frm = new FrmNotaCreditoDetalle(null, _anularHandler, _usuarioActual, onSaved: async _ => await CargarAsync(), emitirHandler: _emitirHandler);
         frm.ShowDialog(this);
     }
 
