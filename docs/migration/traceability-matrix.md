@@ -23,7 +23,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
 |---|---|---|---|---|---|
-| `InfoRest.vbp` / `InfoRest.exe` | VBP Project | — | — | NOT_STARTED | — |
+| `InfoRest.vbp` / `InfoRest.exe` | VBP Project | `Inforest.Desktop` (POS module) | WinForms Module | IN_PROGRESS | modern-net8/src/Inforest.Desktop/POS/, Pedidos/, Ventas/, Caja/, Turno/ |
 | `CajaRapida.vbp` / `CajaRapida.exe` | VBP Project | — | — | NOT_STARTED | — |
 | `Adicion.vbp` / `Adicion.exe` | VBP Project | — | — | NOT_STARTED | — |
 | `Administracion.vbp` / `Administracion.exe` | VBP Project | — | — | NOT_STARTED | — |
@@ -96,8 +96,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | Legacy (SQL Server) | Tipo | .NET 8 | Tipo | Estado | Notas |
 |---|---|---|---|---|---|
-| `MPEDIDO` | Table | — | — | NOT_STARTED | Cabecera pedido |
-| `DPEDIDO` | Table | `DetallePedido`, `PedidoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Pedidos/ |
+| `MPEDIDO` | Table | `Pedido`, `IPedidoRepository`, `PedidoRepository` | Entity + Repository | MIGRATED | modern-net8/src/Inforest.Domain/Entities/Ventas/Pedido.cs, modern-net8/src/Inforest.Infrastructure/Pedidos/ |
+| `DPEDIDO` | Table | `DetallePedido`, `PedidoRepository` | Entity + Repository | MIGRATED | modern-net8/src/Inforest.Infrastructure/Pedidos/ |
 | `CPEDIDO` | Table | — | — | NOT_STARTED | Combos en pedido |
 | `APEDIDO` | Table | — | — | NOT_STARTED | Auditoría anulados |
 | `MDOCUMENTO` | Table | `Documento`, `IDocumentoRepository`, `DocumentoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Ventas/ |
@@ -188,6 +188,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmAcceso.frm` | Form | `src/Inforest.Desktop/Form1.cs` | WinForms Form | IN_PROGRESS | `modern-net8/src/Inforest.Desktop/Form1.cs`, `modern-net8/src/Inforest.Desktop/Form1.Designer.cs` |
 | `frmAcceso.frm` / `USUARIO.INI` | Session bootstrap | `ISessionService` + `SessionService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/ISessionService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/SessionService.cs` |
 | `frmAcceso.frm` — bloqueo intentos (BR-POS-006-LOCK) | Business Rule | `FrmLoginPOS` (`_intentosFallidos` + `LoginPolicy.MaxIntentosFallidos`) | UI guard | MIGRATED | `src/Inforest.Desktop/POS/FrmLoginPOS.cs`, `src/Inforest.Application/Seguridad/LoginPolicy.cs` |
+| `frmPedido.frm` (POS-FUNC-003) | Form | `FrmPedido` + `Pedido` + `DetallePedido` + `CreatePedidoHandler` + `UpdatePedidoHandler` + `ObtenerPedidoHandlers` + `PedidoRepository` | WinForm + Domain + Handlers + Repository | MIGRATED | `modern-net8/src/Inforest.Desktop/Pedidos/FrmPedido.cs`, `modern-net8/src/Inforest.Domain/Entities/Ventas/Pedido.cs`, `modern-net8/src/Inforest.Application/Pedidos/`, `modern-net8/src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` — Tests: `CreatePedidoHandlerTests` + `UpdatePedidoHandlerTests` + `ObtenerPedidoHandlerTests` + `PedidoTests` + `PedidoExtendidoTests` |
 | `TACCESO` / `TGRUPOACCESO` | RBAC | `IRbacService` + `RbacService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IRbacService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/RbacService.cs` |
 | `clsComando.cls` ADODB errors | DB errors | `Inforest.Infrastructure.Exceptions.DatabaseException` | Class | COMPLETED | `src/Inforest.Infrastructure/Exceptions/InfrastructureException.cs` |
 | `Sub Main()` modPuntoVenta.bas | Startup | `Inforest.Desktop.Program` (DI-corrected bootstrap) | Class | COMPLETED | `src/Inforest.Desktop/Program.cs` |
