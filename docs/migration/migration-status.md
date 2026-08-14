@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-14
 >
-> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001 (Login) y POS-FUNC-002 (Apertura MDI) MIGRATED; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) + POS-FUNC-007/016/019 + POS-FUNC-008 (Caja/Cierre COMPLETED) + POS-FUNC-003 (Gestión pedidos salón MIGRATED con tests UpdatePedidoHandler + ObtenerPedidoHandlers + BRs documentados)**
+> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001 (Login) y POS-FUNC-002 (Apertura MDI) MIGRATED; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) + POS-FUNC-007/016/019 + POS-FUNC-008 (Caja/Cierre COMPLETED) + POS-FUNC-003 (Gestión pedidos salón MIGRATED) + POS-FUNC-004 (Registro de venta MIGRATED) + POS-FUNC-005 (Cobro y pagos MIGRATED) + POS-FUNC-006 (Notas de Crédito MIGRATED) + POS-FUNC-010 (Cliente y cuentas corrientes MIGRATED) + POS-FUNC-011 (Reservas MIGRATED) + POS-FUNC-012 (Delivery dependiente POS MIGRATED) + POS-FUNC-013 (Insumos/descargo MIGRATED) + **POS-FUNC-014 (Importación de pedidos externos MIGRATED: RequerimientoAlmacen entity + DetalleRequerimientoAlmacen + IRequerimientoAlmacenRepository + RequerimientoAlmacenRepository + IImportacionPedidoGateway + ImportacionPedidoGateway + 3 handlers + FrmImportacionRequerimientos + FrmImportacionRequerimientoDetalle + BR-IMPORT-001..004 + 17 tests)**
 
 ---
 
@@ -10,8 +10,8 @@
 
 | Indicador | Valor |
 |---|---|
-| Fase actual | 4 (IN_PROGRESS) — W1-W15 completados: Configuración, Maestros, Turno/DíaContable, Pedidos, Venta/Documentos, Caja/Pagos, SEC-006, Reportes FastReport, Módulos POS/Admin/Consultas/CajaRápida/Adición, TaxPolicy/ProductoVisibilidad/InventoryGateway/Email, Caja/Cierre(POS-FUNC-008 COMPLETED) |
-| Código .NET 8 existente | IN_PROGRESS — 221+ archivos .cs, 211 tests verdes: baseline + seguridad + KDS + delivery + configuración + maestros + turno + pedidos + venta + caja + reportes FastReport + WinForms POS/Admin/Consultas/CajaRápida/Adición + TaxPolicy + ProductoVisibilidad + InventoryGateway + SmtpEmail |
+| Fase actual | 4 (IN_PROGRESS) — W1-W15 completados: Configuración, Maestros, Turno/DíaContable, Pedidos, Venta/Documentos, Caja/Pagos, SEC-006, Reportes FastReport, Módulos POS/Admin/Consultas/CajaRápida/Adición, TaxPolicy/ProductoVisibilidad/InventoryGateway/Email, Caja/Cierre(POS-FUNC-008 COMPLETED) + **POS-FUNC-006 (Notas de Crédito MIGRATED) + **POS-FUNC-010 (Cliente y cuentas corrientes MIGRATED)** |
+| Código .NET 8 existente | IN_PROGRESS — 240+ archivos .cs, 411 tests verdes: baseline + seguridad + KDS + delivery + configuración + maestros + turno + pedidos + venta + caja + reportes FastReport + WinForms POS/Admin/Consultas/CajaRápida/Adición + TaxPolicy + ProductoVisibilidad + InventoryGateway + SmtpEmail + RegistrarPagosMultiplesHandler + DocumentoTests (13) + NotaCredito (19 tests) + CuentaCorrienteHandlerTests (7) + CuentaCorrienteTests (8) + CentralPedidosHandlersTests (10) + RequerimientoAlmacenTests (8) + ImportacionRequerimientoHandlerTests (9) |
 | Módulos migrados | 0 / 7 |
 | Documentación Legacy | IN_PROGRESS — inventarios base completos; trazabilidad y gaps de Fase 3 actualizados al cierre P3-12 |
 | Arquitectura Target definida | IN_PROGRESS — ADR-001 a ADR-012 aceptados; gaps funcionales posteriores siguen abiertos |
@@ -43,7 +43,7 @@
 | Reportes | 206 Crystal Reports | 12 SPs + handlers + formularios base + plantillas pendientes | IN_PROGRESS |
 | Integraciones | COM/DLL/OCX + hardware POS | KDS XML/directorio + PinPad/CashDro/BlueVision + FE por país (stubs controlados) | IN_PROGRESS |
 | Seguridad/Auth | `INFSEGURIDAD` + cifrado débil Legacy | `AuthService` + `RbacService` + `SessionService` + `AuditoriaService` + `LicenseService` | IN_PROGRESS |
-| Configuración | INI + `TPARAMETRO` + `TCAJA` | feature flags base de hardware/país; `TPARAMETRO`/`TCAJA` completos pendientes | IN_PROGRESS |
+| Configuración | INI + `TPARAMETRO` + `TCAJA` | lectura tipada de `TPARAMETRO`/`TCAJA`, cache lazy y validación de arranque POS cubiertas por tests; edición administrativa sigue fuera de este corte | COMPLETED |
 
 ---
 
@@ -79,12 +79,22 @@
 | M3-P3-11 | Periféricos especializados e integraciones por país | COMPLETED — 2026-08-12 |
 | M3-P3-12 | Validación integral, hardening y cierre de Fase 3 | COMPLETED — 2026-08-12 |
 | M4 | Primer módulo migrado (Maestros) | IN_PROGRESS — W2 maestros implementados |
+| M4-W1 | Configuración (`TPARAMETRO`/`TCAJA`): `ConfiguracionSistema` + `ConfiguracionCaja` + `ParametroRepository` + `ParametroService` + `ValidarInicioPosHandler` validados con tests | COMPLETED — 2026-08-14 |
 | M4-W14 | Servicios de dominio transversales (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) | COMPLETED — 2026-08-13 |
 | M4-W15 | Caja/Cierre completo (POS-FUNC-008): CierreTurnoBreakdown + CerrarTurnoHandler (BR-CAJA-001/002) + TurnoRepository full MTURNO update + FrmLiquidacionCierre + confirmación previa al cierre | COMPLETED — 2026-08-14 |
 | M4-POS-FUNC-007 | Correlativos de comprobante (CorrelativoDocumento + CorrelativoHandlers + CorrelativoRepository + FrmDocumentoCorrelativo) | COMPLETED — 2026-08-13 |
 | M4-POS-FUNC-016 | Impresión pre-cuenta (ImprimirPrecuentaHandler + ImpresoraRepository + FrmPrecuentaImpresora) | COMPLETED — 2026-08-13 |
 | M4-POS-FUNC-019 | Control seguridad/contraseñas (CambiarPasswordHandler + AuthService.CambiarPasswordAsync + FrmCambiarContrasenia + FrmPassword) | COMPLETED — 2026-08-13 |
 | M4-POS-FUNC-003 | Gestión de pedidos salón — stage MIGRATED: UpdatePedidoHandlerTests (6) + ObtenerPedidoHandlerTests (6) + BR-PEDIDO-001/002/003/004 documentados. Pendiente: VALIDATING vs Legacy + frmDetallePedido + frmJuntarMesas | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-004 | Registro de venta MIGRATED: EmitirDocumentoHandler + AnularDocumentoHandler + Documento domain entity + 13 DocumentoTests (PE/CO/AN estados, total fórmula, propina, descuento, validaciones) + 5+3 VentaHandlerTests + BR-VENTA-001/002/003 documentados | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-006 | Facturación y Notas de Crédito (POS-FUNC-006): NotaCredito entity + EmitirNotaCreditoHandler + AnularNotaCreditoHandler + ObtenerNotaCreditoHandler + ObtenerNotasCreditoPorFechaHandler + NotaCreditoRepository + FrmNotaCredito + FrmNotaCreditoDetalle + BR-NC-001..006 documentados + 19 tests | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-010 | Cliente y cuentas corrientes (POS-FUNC-010): CuentaCorriente entity + ICuentaCorrienteRepository + CuentaCorrienteRepository + FrmNuevoCliente + FrmCtaCte + FrmCuentaCobrar + BR-CLIENTE-001..004 + BR-CTACTE-001..003 + 7+8 tests | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-011 | Reservas (POS-FUNC-011): Reserva entity + EstadoReserva enum + IReservaRepository + ReservaRepository + FrmReserva + FrmReservaDetalle + CrearReservaHandler + ModificarReservaHandler + AnularReservaHandler + ObtenerReservaHandler + ObtenerReservasPorFechaHandler + ConvertirReservaAPedidoHandler (spIns_MPEDIDO_RESERVA) + BR-RESERVA-001..004 + 18 tests | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-012 | Delivery dependiente POS (POS-FUNC-012): FrmPedidoDelivery (seguimiento vDespachador) + CentralPedidosForm extendido (ConfirmarEntrega + RevertirEntrega + ModificarFecha) + ConfirmarEntregaCentralHandler + RevertirEntregaCentralHandler + ModificarFechaProgramadaDeliveryHandler + ObtenerPedidosSeguimientoDeliveryHandler + 5 nuevos métodos IPedidoDeliveryRepository + BR-DEL-012/013/014 + 10 tests | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-013 | Insumos/descargo (POS-FUNC-013): Insumo entity + IInsumoRepository + InsumoRepository (USP_LISTARINSUMOS/usp_agregarinsumos/USP_MODIFICARINSUMOS/USP_ELIMINARINSUMOS) + FrmInsumo + FrmInsumoDetalle + ListarInsumosHandler + AgregarInsumoHandler + ModificarInsumoHandler + EliminarInsumoHandler + BR-INSUMO-001..004 + 18 tests (8 domain + 10 handler) | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-014 | Importación de pedidos externos (POS-FUNC-014): RequerimientoAlmacen + DetalleRequerimientoAlmacen (Domain) + IRequerimientoAlmacenRepository + IImportacionPedidoGateway (Application) + RequerimientoAlmacenRepository + ImportacionPedidoGateway (Infrastructure, ALMACEN DB) + ObtenerRequerimientosPendientesHandler + ObtenerDetalleRequerimientoHandler + ImportarRequerimientoHandler + FrmImportacionRequerimientos + FrmImportacionRequerimientoDetalle + BR-IMPORT-001..004 + 17 tests (8 domain + 9 handler) — 411 tests en verde | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-018 | Recibo Ingresos/Egresos (POS-FUNC-018): ReciboIngreso + ReciboEgreso (Domain, BR-RECIBO-001..012) + IReciboIngresoRepository + IReciboEgresoRepository + ReciboIngresoRepository + ReciboEgresoRepository (direct SQL, MINGRESO/MEGRESO) + ObtenerIngresosHandler + RegistrarIngresoHandler + AnularIngresoHandler + ObtenerEgresosHandler + RegistrarEgresoHandler + AnularEgresoHandler + FrmReciboIngreso + FrmReciboIngresoDetalle + FrmReciboEgreso + FrmReciboEgresoDetalle + 33 tests (9+8 domain + 8+8 handler) | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-009 | Turno/Día Contable (POS-FUNC-009): FrmDiaContable + AperturarDiaContableHandler + CerrarDiaContableHandler + ObtenerDiaContableHandler + IDiaContableService extendido (CerrarDiaContableAsync + ObtenerFechaMaximaDiaContableAsync) + BR-DC-001/002/003/004 documentados + 10 tests | COMPLETED — 2026-08-14 |
 | M5 | Punto de Venta migrado | IN_PROGRESS — W4+W5+W6+W11+POS-FUNC-002/007/016/019 implementados; POS-FUNC-003 MIGRATED (tests completos) |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
 | M7 | Todos los módulos migrados | NOT_STARTED |
@@ -107,11 +117,11 @@
 
 ## Próximos Pasos
 
-1. **Iniciar Configuración (`TPARAMETRO` / `TCAJA`)** como primer workstream funcional posterior al cierre de Fase 3.
-2. **Iniciar Maestros operativos** (productos, grupos, clientes) sobre la base transversal ya validada.
-3. Resolver gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
+1. **COMPLETED:** POS-FUNC-018 Recibo de Ingresos/Egresos validado (`frmReciboIngreso.frm`, `frmReciboIngresoDetalle.frm`, `frmReciboEgreso.frm`, `frmReciboEgresoDetalle.frm`, MINGRESO/MEGRESO, BR-RECIBO-001..012, 33 tests en verde, 221 application tests en verde, 154 domain tests en verde).
+2. **Pendiente de aprobación:** iniciar siguiente elemento de `InfoRest.vbp`.
+3. Mantener seguimiento de gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
 4. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 puedan operar extremo a extremo.
-5. Continuar con Turno / Día Contable / Pedido base respetando el orden de migración documentado.
+5. No avanzar al siguiente elemento hasta recibir aprobación explícita.
 
 ---
 

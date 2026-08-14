@@ -2,6 +2,7 @@ using Inforest.Application.Caja;
 using Inforest.Application.Impresion;
 using Inforest.Infrastructure.Almacen;
 using Inforest.Infrastructure.Impresion;
+using Inforest.Application.Kitchen;
 using Inforest.Infrastructure.Notifications;
 using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
@@ -27,6 +28,7 @@ using Inforest.Infrastructure.Reportes;
 using Inforest.Infrastructure.Security;
 using Inforest.Infrastructure.Turno;
 using Inforest.Infrastructure.Ventas;
+using Inforest.Infrastructure.Reservas;
 using Inforest.Infrastructure.Runtime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -67,6 +69,7 @@ public static class DependencyInjection
         services.AddSingleton<IImpresoraService, NullImpresoraService>();
         services.AddScoped<IKitchenConfigurationProvider, KitchenConfigurationProvider>();
         services.AddScoped<IProduccionCocinaService, ProduccionCocinaService>();
+        services.AddScoped<IMensajeCocinaRepository, MensajeCocinaRepository>();
         services.AddScoped<IKdsLegacyGateway, KdsLegacyGateway>();
         services.AddScoped<IComandaAreaDispatcher, ComandaAreaDispatcher>();
         services.AddScoped<IKdsDispatcher, KdsXmlDispatcher>();
@@ -87,10 +90,12 @@ public static class DependencyInjection
         services.AddScoped<IGrupoProductoRepository, GrupoProductoRepository>();
         services.AddScoped<ISubGrupoProductoRepository, SubGrupoProductoRepository>();
         services.AddScoped<IClienteRepository, ClienteRepository>();
+        services.AddScoped<ICuentaCorrienteRepository, CuentaCorrienteRepository>();
         services.AddScoped<IMesaRepository, MesaRepository>();
         services.AddScoped<ISalonRepository, SalonRepository>();
         services.AddScoped<IMozoRepository, MozoRepository>();
         services.AddScoped<IProductoMaestroRepository, ProductoMaestroRepository>();
+        services.AddScoped<IInsumoRepository, InsumoRepository>();
 
         // W3: Turno / Día Contable (BR-004, BR-005)
         services.AddScoped<ITurnoRepository, TurnoRepository>();
@@ -103,6 +108,8 @@ public static class DependencyInjection
         // W5: Venta / Documentos (BR-002, BR-013)
         services.AddScoped<IDocumentoRepository, DocumentoRepository>();
         services.AddScoped<ICorrelativoRepository, CorrelativoRepository>();
+        // POS-FUNC-006: Notas de Crédito (BR-NC-001..006)
+        services.AddScoped<INotaCreditoRepository, NotaCreditoRepository>();
         // POS-FUNC-016: Impresión pre-cuenta — TIMPRESORA (BR-008)
         services.AddScoped<IImpresoraRepository, ImpresoraRepository>();
 
@@ -110,8 +117,19 @@ public static class DependencyInjection
         services.AddScoped<IPagoRepository, PagoRepository>();
         services.AddScoped<IMedioPagoRepository, MedioPagoRepository>();
 
+        // POS-FUNC-018: Recibo Ingresos / Egresos — MINGRESO / MEGRESO (BR-RECIBO-001..012)
+        services.AddScoped<IReciboIngresoRepository, ReciboIngresoRepository>();
+        services.AddScoped<IReciboEgresoRepository, ReciboEgresoRepository>();
+
+        // POS-FUNC-011: Reservas — TRESERVA
+        services.AddScoped<IReservaRepository, ReservaRepository>();
+
         // W14: Almacén — BR-008 (descargo de inventario en venta)
         services.AddScoped<IInventoryGateway, InventoryGateway>();
+
+        // POS-FUNC-014: Importación de requerimientos de almacén al POS
+        services.AddScoped<IRequerimientoAlmacenRepository, RequerimientoAlmacenRepository>();
+        services.AddScoped<IImportacionPedidoGateway, ImportacionPedidoGateway>();
 
         // W14: Notificaciones email — claCorreoElectronico.cls
         services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));

@@ -237,4 +237,76 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
             """;
         await conn.ExecuteAsync(sql, new { CodigoPedido = codigoPedido });
     }
+
+    // ── CentralPedidos / frmCentralPedidos.frm ────────────────────────────────
+
+    /// <inheritdoc />
+    public async Task ConfirmarEntregaAsync(string codigoPedido, string usuario, CancellationToken ct = default)
+    {
+        // Legacy: Update MPEDIDO Set lEntregado='1', tusuarioentregado=@sUsuario, fregentregado=getdate()
+        //         frmCentralPedidos.frm Case 3 — BR-DEL-012
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            UPDATE MPEDIDO
+            SET lEntregado = 1,
+                tusuarioentregado = @Usuario,
+                fregentregado = GETDATE()
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+        await conn.ExecuteAsync(sql, new { CodigoPedido = codigoPedido, Usuario = usuario });
+    }
+
+    /// <inheritdoc />
+    public async Task RevertirEntregaAsync(string codigoPedido, string usuario, CancellationToken ct = default)
+    {
+        // Legacy: Update MPEDIDO Set lEntregado='0', tusuarioentregado=@sUsuario, fregentregado=getdate()
+        //         frmCentralPedidos.frm Case 5 — BR-DEL-012
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            UPDATE MPEDIDO
+            SET lEntregado = 0,
+                tusuarioentregado = @Usuario,
+                fregentregado = GETDATE()
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+        await conn.ExecuteAsync(sql, new { CodigoPedido = codigoPedido, Usuario = usuario });
+    }
+
+    /// <inheritdoc />
+    public async Task ModificarFechaProgramadaAsync(string codigoPedido, DateTime nuevaFecha, CancellationToken ct = default)
+    {
+        // Legacy: Update MPEDIDO set fregistro=@fecha, fProgramacion=@fecha where tCodigoPedido=@sPedido
+        //         frmCentralPedidos.frm Case 2 — BR-DEL-014
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            UPDATE MPEDIDO
+            SET fregistro = @NuevaFecha,
+                fProgramacion = @NuevaFecha
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+        await conn.ExecuteAsync(sql, new { CodigoPedido = codigoPedido, NuevaFecha = nuevaFecha });
+    }
+
+    /// <inheritdoc />
+    public async Task<string?> ObtenerEstadoPagoAsync(string codigoPedido, CancellationToken ct = default)
+    {
+        // Legacy: Select * From vDocumentoAgrupado Where tCodigoPedido=@sPedido
+        //         frmCentralPedidos.frm Case 3 — detecta 'POR COBRAR' / 'ANTICIPO' — BR-DEL-013
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT TOP 1 ISNULL(Estado, 'PAGADO')
+            FROM vDocumentoAgrupado
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+        return await conn.ExecuteScalarAsync<string?>(sql, new { CodigoPedido = codigoPedido });
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> EstaEntregadoAsync(string codigoPedido, CancellationToken ct = default)
+    {
+        // Legacy: grdGrilla.Columns(6).Text = "ENTREGADO" from MPEDIDO.lEntregado
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = "SELECT ISNULL(lEntregado, 0) FROM MPEDIDO WHERE tCodigoPedido = @CodigoPedido";
+        return await conn.ExecuteScalarAsync<bool>(sql, new { CodigoPedido = codigoPedido });
+    }
 }

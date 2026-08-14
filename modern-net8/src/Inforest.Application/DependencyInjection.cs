@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Inforest.Application.Interfaces;
+using Inforest.Application.Almacen;
 using Inforest.Application.Delivery;
 using Inforest.Application.Despacho;
 using Inforest.Application.Motorizado;
@@ -13,6 +14,7 @@ using Inforest.Application.Ventas;
 using Inforest.Application.Caja;
 using Inforest.Application.Seguridad;
 using Inforest.Application.Impresion;
+using Inforest.Application.Reservas;
 using Inforest.Domain.Services;
 
 namespace Inforest.Application;
@@ -80,6 +82,11 @@ public static class DependencyInjection
         services.AddScoped<EmitirDocumentoHandler>();
         services.AddScoped<ObtenerDocumentoHandler>();
         services.AddScoped<AnularDocumentoHandler>();
+        // POS-FUNC-006: Notas de Crédito (BR-NC-001..006)
+        services.AddScoped<EmitirNotaCreditoHandler>();
+        services.AddScoped<AnularNotaCreditoHandler>();
+        services.AddScoped<ObtenerNotaCreditoHandler>();
+        services.AddScoped<ObtenerNotasCreditoPorFechaHandler>();
         // POS-FUNC-007: Correlativos de comprobante (BR-POS-008)
         services.AddScoped<ObtenerCorrelativosPorCajaHandler>();
         services.AddScoped<ObtenerCorrelativoFacturaHandler>();
@@ -87,6 +94,14 @@ public static class DependencyInjection
         // POS-FUNC-016: Impresión pre-cuenta/comanda (BR-008)
         services.AddScoped<ImprimirPrecuentaHandler>();
         services.AddScoped<ObtenerImpresorasPorCajaHandler>();
+
+        // POS-FUNC-011: Reservas (BR-RESERVA-001..004)
+        services.AddScoped<CrearReservaHandler>();
+        services.AddScoped<ModificarReservaHandler>();
+        services.AddScoped<AnularReservaHandler>();
+        services.AddScoped<ObtenerReservaHandler>();
+        services.AddScoped<ObtenerReservasPorFechaHandler>();
+        services.AddScoped<ConvertirReservaAPedidoHandler>();
 
         // W6: Caja / Pagos — Handlers CQRS (BR-007, BR-013)
         services.AddScoped<PagarDocumentoHandler>();
@@ -119,6 +134,15 @@ public static class DependencyInjection
         services.AddScoped<SincronizarPedidoCentralHandler>();
         services.AddScoped<ObtenerOrdenesExternasHandler>();
         services.AddScoped<EnviarDatosRappiHandler>();
+        services.AddScoped<ConfirmarEntregaCentralHandler>();
+        services.AddScoped<RevertirEntregaCentralHandler>();
+        services.AddScoped<ModificarFechaProgramadaDeliveryHandler>();
+        services.AddScoped<ObtenerPedidosSeguimientoDeliveryHandler>();
+
+        // POS-FUNC-014: Importación de pedidos externos desde ALMACEN
+        services.AddScoped<ObtenerRequerimientosPendientesHandler>();
+        services.AddScoped<ObtenerDetalleRequerimientoHandler>();
+        services.AddScoped<ImportarRequerimientoHandler>();
 
         // P3-10: Reportes — Handlers (ADR-007)
         services.AddScoped<ObtenerReporteComandaHandler>();
@@ -133,6 +157,14 @@ public static class DependencyInjection
         services.AddScoped<ObtenerReporteAnaliticoMotorizadoIntegradoHandler>();
         services.AddScoped<ObtenerReporteTiempoKdsPedidoHandler>();
         services.AddScoped<ObtenerReporteTiempoKdsProductoHandler>();
+
+        // POS-FUNC-018: Recibo Ingresos/Egresos — MINGRESO / MEGRESO
+        services.AddScoped<ObtenerIngresosHandler>();
+        services.AddScoped<RegistrarIngresoHandler>();
+        services.AddScoped<AnularIngresoHandler>();
+        services.AddScoped<ObtenerEgresosHandler>();
+        services.AddScoped<RegistrarEgresoHandler>();
+        services.AddScoped<AnularEgresoHandler>();
 
         return services;
     }

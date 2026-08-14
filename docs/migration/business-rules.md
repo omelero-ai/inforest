@@ -46,9 +46,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Servicio de precios por canal
 
-**Estado:** IN_PROGRESS
+**Estado:** MIGRATED
 
-**Evidencia:** CONFIRMED
+**Evidencia:** `modern-net8/src/Inforest.Domain/Services/TaxPolicy.cs`, `modern-net8/tests/Inforest.Domain.Tests/Services/TaxPolicyAndVisibilidadTests.cs`
 
 ---
 
@@ -69,9 +69,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Servicio de cálculo de impuestos
 
-**Estado:** IN_PROGRESS
+**Estado:** MIGRATED
 
-**Evidencia:** CONFIRMED
+**Evidencia:** `modern-net8/src/Inforest.Domain/Services/TaxPolicy.cs`, `modern-net8/tests/Inforest.Domain.Tests/Services/TaxPolicyAndVisibilidadTests.cs`
 
 ---
 
@@ -940,7 +940,84 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
-## Reglas de Negocio — Etapa 10: Reportes
+### BR-DEL-012
+
+**Nombre:** Confirmar y revertir entrega de pedido (lEntregado) — frmCentralPedidos
+
+**Origen:** `frmCentralPedidos.frm: Case 3 (confirmar) / Case 5 (revertir)`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCentralPedidos.frm`
+
+**Procedimiento/Función:** SQL directo sobre MPEDIDO
+
+**Descripción:** El formulario de Central de Pedidos permite confirmar que un pedido fue entregado al cliente y también revertir dicha confirmación. La confirmación actualiza los campos `lEntregado=1`, `tusuarioentregado` y `fregentregado=GETDATE()`. La reversión actualiza `lEntregado=0`. Ambas operaciones actualizan el usuario responsable.
+
+**Condición:** Al ejecutar "Confirmar Entrega" (Case 3) o "Revertir Entrega" (Case 5) sobre un pedido seleccionado.
+
+**Resultado:**
+- Confirmar: `MPEDIDO.lEntregado=1`, `tusuarioentregado=@sUsuario`, `fregentregado=GETDATE()`
+- Revertir: `MPEDIDO.lEntregado=0`, `tusuarioentregado=@sUsuario`, `fregentregado=GETDATE()`
+
+**Excepciones:**
+- No se puede confirmar entrega si el pedido ya tiene `lEntregado=1`.
+- No se puede revertir si el pedido no está en estado `lEntregado=1`.
+- La reversión siempre requiere supervisor (ver BR-DEL-013).
+
+**Destino .NET:** `ConfirmarEntregaCentralHandler`, `RevertirEntregaCentralHandler`, `IPedidoDeliveryRepository.ConfirmarEntregaAsync`, `IPedidoDeliveryRepository.RevertirEntregaAsync`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-013
+
+**Nombre:** Supervisor requerido para entrega sin pago y para revertir entrega
+
+**Origen:** `frmCentralPedidos.frm: Case 3 (Supervisor("22")), Case 5 (Supervisor("22"))`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCentralPedidos.frm`
+
+**Procedimiento/Función:** `Supervisor("22")` en `modProcedimiento.bas`
+
+**Descripción:** Cuando se intenta confirmar la entrega de un pedido que no ha sido cancelado (estado pago = "NO PAGADO", "POR COBRAR" o "ANTICIPO"), el sistema exige autorización de supervisor mediante el código de acción "22". Asimismo, cualquier reversión de entrega también requiere autorización de supervisor con el mismo código "22".
+
+**Condición:**
+- Confirmar entrega con pedido en estado "NO PAGADO", "POR COBRAR" o "ANTICIPO" sin supervisor → muestra pregunta y pide clave.
+- Revertir entrega siempre → pide clave de supervisor.
+
+**Resultado:** Si el supervisor no autoriza, la operación se cancela. Si autoriza, la operación procede.
+
+**Excepciones:** Si el pedido está pagado, la confirmación procede sin supervisor.
+
+**Destino .NET:** `ConfirmarEntregaCentralHandler` (campo `SupervisorAutorizado`), `RevertirEntregaCentralHandler` (campo `SupervisorAutorizado`), `CentralPedidosForm.PromptSupervisor()`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-014
+
+**Nombre:** Modificar fecha programada de entrega (fProgramacion / fRegistro)
+
+**Origen:** `frmCentralPedidos.frm: Case 2`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCentralPedidos.frm`
+
+**Procedimiento/Función:** SQL directo sobre MPEDIDO
+
+**Descripción:** El formulario de Central de Pedidos permite cambiar la fecha y hora programada de entrega de un pedido. Actualiza simultáneamente los campos `fregistro` y `fProgramacion` de MPEDIDO con la nueva fecha seleccionada.
+
+**Condición:** Al ejecutar "Modificar Fecha" sobre un pedido seleccionado que no haya sido entregado.
+
+**Resultado:** `MPEDIDO.fregistro = @nuevaFecha`, `MPEDIDO.fProgramacion = @nuevaFecha`
+
+**Excepciones:** No se puede modificar la fecha de un pedido ya entregado (`lEntregado=1`). La nueva fecha no puede ser vacía (`default`).
+
+**Destino .NET:** `ModificarFechaProgramadaDeliveryHandler`, `IPedidoDeliveryRepository.ModificarFechaProgramadaAsync`, `CentralPedidosForm` (Case 2)
+
+**Estado:** MIGRATED
+
+---
 
 ---
 
@@ -1365,9 +1442,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** `ConfiguracionSistema` (record tipado), `IParametroRepository.ObtenerConfiguracionAsync`, `ParametroService` con cache lazy, `IParametroService.ObtenerBoolAsync/ObtenerNumericoAsync`
 
-**Estado:** IN_PROGRESS
+**Estado:** COMPLETED
 
-**Evidencia:** CONFIRMED
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Configuracion/ConfiguracionSistema.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroService.cs`, `modern-net8/tests/Inforest.Infrastructure.Tests/Configuracion/ParametroRepositoryTests.cs`
 
 ---
 
@@ -1390,9 +1467,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** `ConfiguracionCaja` (record tipado), `IParametroRepository.ObtenerConfiguracionCajaAsync`, `ObtenerConfiguracionCajaHandler`
 
-**Estado:** IN_PROGRESS
+**Estado:** COMPLETED
 
-**Evidencia:** CONFIRMED
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Configuracion/ConfiguracionCaja.cs`, `modern-net8/src/Inforest.Application/Configuracion/ConfiguracionHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs`, `modern-net8/tests/Inforest.Application.Tests/Configuracion/ValidarInicioPosHandlerTests.cs`, `modern-net8/tests/Inforest.Infrastructure.Tests/Configuracion/ConfiguracionCajaTests.cs`
 
 ---
 
@@ -1543,3 +1620,1042 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Estado:** MIGRATED
 
 **Evidencia:** `modern-net8/src/Inforest.Application/Interfaces/INotificacionEmailService.cs`, `modern-net8/src/Inforest.Infrastructure/Notifications/SmtpEmailService.cs`
+
+---
+
+### BR-DC-001
+**Nombre:** No se puede vender sin aperturar el Día Contable
+
+**Origen:** Legacy/frmDiaContable.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDiaContable.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click`
+
+**Descripción:** Si el usuario intenta salir del formulario de día contable sin haber aperturado ninguno, el sistema muestra el mensaje "No puede Iniciar Venta sin Aperturar Dia Contable" y bloquea el inicio del POS (`lIniciaPorDiaContable = False`).
+
+**Condición:** Usuario hace clic en "Salir" sin haber aperturado el día contable.
+
+**Resultado:** Mensaje de error. El flag `lIniciaPorDiaContable` permanece `False`, bloqueando el POS.
+
+**Excepciones:** Si ya existe un día contable activo (modo apertura con fecha ≠ sentinel), el flag se establece en `True` automáticamente.
+
+**Destino .NET:** `FrmDiaContable.OnSalirClick` → `IniciaPorDiaContable` property
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Desktop/Turno/FrmDiaContable.cs`
+
+---
+
+### BR-DC-002
+**Nombre:** No se puede aperturar un nuevo Día Contable si ya existe uno activo
+
+**Origen:** Legacy/frmDiaContable.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDiaContable.frm`
+
+**Procedimiento/Función:** `Form_Load` modo="Apertura"
+
+**Descripción:** Si `obtieneDiaContable()` retorna una fecha distinta al sentinel (1900/01/01), existe un día contable activo. El formulario muestra el mensaje "Para cerrar este Dia Contable se debe cerrar el turno" y deshabilita el botón de apertura.
+
+**Condición:** `fdiacontable ≠ "19000101"` en modo "Apertura".
+
+**Resultado:** Botón apertura oculto. Mensaje informativo. `lIniciaPorDiaContable = True`, `lDiaContableAperturado = True`.
+
+**Excepciones:** —
+
+**Destino .NET:** `FrmDiaContable.OnLoadAsync` modo `Apertura`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Desktop/Turno/FrmDiaContable.cs`
+
+---
+
+### BR-DC-003
+**Nombre:** La fecha de apertura del Día Contable no puede ser menor al último registrado
+
+**Origen:** Legacy/frmDiaContable.frm + clsDiaContable.cls
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDiaContable.frm`, `legacy-restaurant/restaurant-vb6/Clases/clsDiaContable.cls`
+
+**Procedimiento/Función:** `cmdApertura_Click` → `validaFechaIngreso()`
+
+**Descripción:** `validaFechaIngreso()` consulta `SELECT max(fdiacontable) FROM tdiacontable`. Si la fecha seleccionada es menor a esa máxima, la apertura es rechazada con el mensaje "La fecha seleccionada es menor al último Día Contable registrado".
+
+**Condición:** `Format(dtpDiaContable.value,"yyyyMMdd") < Format(fechaMaxima,"yyyyMMdd")`.
+
+**Resultado:** Apertura rechazada. Foco vuelve al DateTimePicker.
+
+**Excepciones:** Si no hay registros previos (`max = NULL`), la validación pasa.
+
+**Destino .NET:** `AperturarDiaContableHandler` + `IDiaContableService.ObtenerFechaMaximaDiaContableAsync`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Turno/DiaContableHandlers.cs`, `modern-net8/tests/Inforest.Application.Tests/Turno/DiaContableHandlerTests.cs`
+
+---
+
+### BR-DC-004
+**Nombre:** El cierre del Día Contable actualiza directamente TDIACONTABLE
+
+**Origen:** Legacy/frmDiaContable.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDiaContable.frm`
+
+**Procedimiento/Función:** `cmdCerrar_Click`
+
+**Descripción:** El cierre ejecuta directamente: `UPDATE TDIACONTABLE SET lcierre=1, tusuariocierre=<usuario>, fregistrocierre=GETDATE() WHERE fdiacontable=<fecha>`. No llama a un SP dedicado. Requiere confirmación del usuario (MsgBox Sí/No).
+
+**Condición:** Usuario confirma el cierre.
+
+**Resultado:** `lcierre=1` en el registro de TDIACONTABLE correspondiente.
+
+**Excepciones:** Si el usuario cancela el diálogo, no se realiza ninguna operación.
+
+**Destino .NET:** `CerrarDiaContableHandler` + `IDiaContableService.CerrarDiaContableAsync` (SQL directo parametrizado)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Turno/DiaContableHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Turno/DiaContableService.cs`, `modern-net8/tests/Inforest.Application.Tests/Turno/DiaContableHandlerTests.cs`
+
+---
+
+## Reglas de Negocio — Notas de Crédito (POS-FUNC-006)
+
+### BR-NC-001
+
+**Nombre:** Total de nota de crédito mayor a cero
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(1)` — Grabar
+
+**Descripción:** El total calculado (neto + impuesto1 + impuesto2 + impuesto3) de la nota de crédito debe ser estrictamente mayor a cero.
+
+**Condición:** `nNCTotal <= 0`
+
+**Resultado:** Error — "El valor de la Nota de crédito debe ser mayor a cero"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `NotaCredito.Emitir` (lanza `DomainException` `NC_TOTAL_INVALIDO`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Ventas/NotaCredito.cs`, `modern-net8/tests/Inforest.Domain.Tests/Ventas/NotaCreditoTests.cs`
+
+---
+
+### BR-NC-002
+
+**Nombre:** Impuestos de nota de crédito no negativos
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(1)` — Grabar
+
+**Descripción:** Los tres campos de impuesto de la nota de crédito no pueden tomar valores negativos.
+
+**Condición:** `nNCImp1 < 0 OR nNCImp2 < 0 OR nNCImp3 < 0`
+
+**Resultado:** Error — "El valor Impuesto de la Nota de crédito no debe ser negativo"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `NotaCredito.Emitir` (lanza `DomainException` `NC_IMPUESTO_NEGATIVO`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Ventas/NotaCredito.cs`
+
+---
+
+### BR-NC-003
+
+**Nombre:** Total acumulado de notas de crédito no supera el total del documento
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(1)` — Grabar (verificación vía `MNOTACREDITO SUM`)
+
+**Descripción:** La suma de todas las notas de crédito activas emitidas contra un documento (campo `nVenta`) más la nueva nota de crédito no puede exceder el total (`nVenta`) del documento origen.
+
+**Condición:** `totalNCPrevio + totalNCNueva > documento.Total`
+
+**Resultado:** Error — "El valor de la nota de crédito supera el saldo disponible del documento"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `EmitirNotaCreditoHandler` (retorna `NC_EXCEDE_DOCUMENTO`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Ventas/NotaCreditoHandlers.cs`, `modern-net8/tests/Inforest.Application.Tests/Ventas/NotaCreditoHandlersTests.cs`
+
+---
+
+### BR-NC-004
+
+**Nombre:** Observación/motivo de nota de crédito obligatoria
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(1)` — Grabar
+
+**Descripción:** El campo de observación/motivo de la nota de crédito no puede estar vacío.
+
+**Condición:** `txtObservacion.Text = ""`
+
+**Resultado:** Error — "Ingrese el Motivo de la Nota de Crédito"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `NotaCredito.Emitir` (lanza `DomainException` `NC_OBSERVACION_REQUERIDA`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Ventas/NotaCredito.cs`
+
+---
+
+### BR-NC-005
+
+**Nombre:** Autorización de supervisor para emitir nota de crédito
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(0)` — Agregar; verifica `Supervisor("27")`
+
+**Descripción:** La emisión de una nota de crédito requiere autorización de un supervisor (permiso "27" en `TACCESO`).
+
+**Condición:** `Supervisor("27") = False`
+
+**Resultado:** Error — "Clave no permitida"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** Delegado a `IRbacService` — pendiente integración en `EmitirNotaCreditoHandler` (gap controlado)
+
+**Estado:** IN_PROGRESS
+
+**Evidencia:** `modern-net8/src/Inforest.Infrastructure/Security/RbacService.cs`
+
+---
+
+### BR-NC-006
+
+**Nombre:** No se puede anular una nota de crédito ya anulada
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** Estado "ANULADO" deshabilita botones de edición/anulación
+
+**Descripción:** Una nota de crédito con estado "AN" (anulado) no puede ser anulada nuevamente.
+
+**Condición:** `Estado == "AN"`
+
+**Resultado:** Error — "La nota de crédito ya se encuentra anulada"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `NotaCredito.Anular` (lanza `DomainException` `NC_YA_ANULADA`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Ventas/NotaCredito.cs`
+
+---
+
+## POS-FUNC-015 — Mensajería cocina/KDS
+
+### BR-MSGCOC-001
+
+**Nombre:** Mensaje de cocina obligatorio, sin caracteres prohibidos y en mayúsculas
+
+**Origen:** Legacy/frmMensajeCocinaDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocinaDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(0)`, `ValidaStr`
+
+**Descripción:** El mensaje a cocina es obligatorio, se trimmea, se almacena en mayúsculas y bloquea los caracteres `&`, `'` y `"`.
+
+**Condición:** Mensaje vacío, longitud mayor a 95 o contiene `&`, `'` o `"`.
+
+**Resultado:** Error de validación; no se inserta ni actualiza `TMENSAJECOCINA`.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `MensajeCocina.Crear/Actualizar`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Cocina/MensajeCocina.cs`
+
+---
+
+### BR-MSGCOC-002
+
+**Nombre:** Correlativo anual de 8 caracteres para mensajes de cocina
+
+**Origen:** Legacy/frmMensajeCocinaDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocinaDetalle.frm`
+
+**Procedimiento/Función:** Alta de mensaje nuevo
+
+**Descripción:** El código del mensaje se genera como `yy + 6 dígitos`, reiniciando el correlativo por año.
+
+**Condición:** Inserción de un nuevo mensaje de cocina.
+
+**Resultado:** Se genera el siguiente código disponible antes de grabar.
+
+**Excepciones:** Si no existen mensajes del año, inicia en `yy000001`.
+
+**Destino .NET:** `MensajeCocinaRepository.ObtenerProximoCodigoAsync` + `AgregarMensajeCocinaHandler`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs`, `modern-net8/src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs`
+
+---
+
+### BR-MSGCOC-003
+
+**Nombre:** Máximo 30 mensajes activos de cocina
+
+**Origen:** Legacy/frmMensajeCocinaDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocinaDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(0)`
+
+**Descripción:** El sistema no permite registrar o reactivar más de 30 mensajes activos simultáneamente.
+
+**Condición:** `lActivo = True` y el conteo de activos alcanza 30.
+
+**Resultado:** Se bloquea la operación y se informa el máximo permitido.
+
+**Excepciones:** Al modificar, el mensaje actual se excluye del conteo.
+
+**Destino .NET:** `AgregarMensajeCocinaHandler`, `ModificarMensajeCocinaHandler`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs`
+
+---
+
+### BR-MSGCOC-004
+
+**Nombre:** Listado y mantenimiento de mensajes por caja/rango
+
+**Origen:** Legacy/frmMensajeCocina.frm, Legacy/frmMensajeCocinaDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocina.frm`, `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocinaDetalle.frm`
+
+**Procedimiento/Función:** `cmdProcesa_Click`, `cmdOpcion_Click(0..2)`
+
+**Descripción:** El listado usa `USP_LISTARMENSAJES`; con caja informada filtra por caja y sin caja usa rango de fechas. Desde el mantenimiento se puede agregar, editar y eliminar mensajes.
+
+**Condición:** Consulta, edición o eliminación desde los formularios de mensajería.
+
+**Resultado:** Se refleja el estado actual de `TMENSAJECOCINA` y se ejecutan los SPs legacy correspondientes.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `FrmMensajeCocina`, `FrmMensajeCocinaDetalle`, `MensajeCocinaRepository`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Desktop/Kitchen/FrmMensajeCocina.cs`, `modern-net8/src/Inforest.Desktop/Kitchen/FrmMensajeCocinaDetalle.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs`
+
+---
+
+### BR-MSGCOC-005
+
+**Nombre:** Cierre de mensajes activos al cerrar turno
+
+**Origen:** Legacy/frmLiquidacionDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmLiquidacionDetalle.frm`
+
+**Procedimiento/Función:** Flujo de cierre de turno
+
+**Descripción:** Al cerrar turno, los mensajes activos de la caja se cierran con usuario y fecha final mediante `USP_CERRAR_MENSAJES_CIERRETURNO`.
+
+**Condición:** Cierre exitoso de turno para una caja.
+
+**Resultado:** Los mensajes activos de `TMENSAJECOCINA` quedan inactivos con trazabilidad de cierre.
+
+**Excepciones:** Si no hay mensajes activos en la caja, el SP no realiza cambios.
+
+**Destino .NET:** `CerrarTurnoHandler` + `MensajeCocinaRepository.CerrarActivosPorCajaAsync`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Turno/TurnoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs`
+
+---
+
+## POS-FUNC-010 — Cliente y cuentas corrientes
+
+### BR-CLIENTE-001
+**Nombre:** Unicidad de código de cliente
+
+**Origen:** Legacy/frmNuevoCliente.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNuevoCliente.frm`
+
+**Procedimiento/Función:** `cmdGuardar_Click` / `RegistrarNuevoClientePosHandler`
+
+**Descripción:** El código de cliente (tCodigoCliente) debe ser único en TCLIENTE.
+
+**Condición:** Al insertar un nuevo cliente desde `FrmNuevoCliente`
+
+**Resultado:** Si el código ya existe → Error "CLIENTE_YA_EXISTE"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `RegistrarNuevoClientePosHandler`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs`
+
+---
+
+### BR-CLIENTE-002
+**Nombre:** Validación de formato de identidad tributaria
+
+**Origen:** Legacy/frmNuevoCliente.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNuevoCliente.frm`
+
+**Procedimiento/Función:** `cmdValidaDNI_Click` / `Cliente.Crear`
+
+**Descripción:** RUC debe tener 11 dígitos numéricos; DNI debe tener 8 dígitos numéricos. Otros tipos requieren al menos 4 caracteres.
+
+**Condición:** Al crear o actualizar cliente
+
+**Resultado:** Error con código `CLIENTE_RUC_INVALIDO` o `CLIENTE_DNI_INVALIDO` o `CLIENTE_IDENTIDAD_INVALIDA`
+
+**Excepciones:** Tipos distintos de RUC/DNI usan validación mínima de longitud
+
+**Destino .NET:** `Cliente.Crear` / `Cliente.Actualizar`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Cliente.cs`
+
+---
+
+### BR-CLIENTE-003
+**Nombre:** Razón social obligatoria
+
+**Origen:** Legacy/frmNuevoCliente.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNuevoCliente.frm`
+
+**Procedimiento/Función:** Validación previa a guardado
+
+**Descripción:** El campo razón social / empresa es obligatorio para crear o actualizar un cliente.
+
+**Condición:** Al crear o actualizar cliente
+
+**Resultado:** Error "CLIENTE_EMPRESA_REQUERIDA"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Cliente.Crear`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Cliente.cs`
+
+---
+
+### BR-CLIENTE-004
+**Nombre:** Edición requiere cliente existente
+
+**Origen:** Legacy/frmNuevoCliente.frm (modo edición)
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNuevoCliente.frm`
+
+**Procedimiento/Función:** `ActualizarClientePosHandler`
+
+**Descripción:** Solo se puede actualizar un cliente que ya existe en TCLIENTE.
+
+**Condición:** Al actualizar cliente desde `FrmNuevoCliente` en modo edición
+
+**Resultado:** Error "CLIENTE_NO_ENCONTRADO" si no existe
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `ActualizarClientePosHandler`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs`
+
+---
+
+### BR-CTACTE-001
+**Nombre:** Consumo no puede superar línea de crédito
+
+**Origen:** Legacy/frmCtaCte.frm + vCompania
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCtaCte.frm`
+
+**Procedimiento/Función:** `CuentaCorriente.AplicarConsumo`
+
+**Descripción:** El consumo acumulado en cuenta corriente no puede superar la línea de crédito asignada (TDELIVERY.nLinea).
+
+**Condición:** Al aplicar consumo a una cuenta corriente
+
+**Resultado:** Error "CTACTE_SALDO_INSUFICIENTE"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `CuentaCorriente.AplicarConsumo`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/CuentaCorriente.cs`
+
+---
+
+### BR-CTACTE-002
+**Nombre:** Estado '03' = documento ctacte pendiente de cobro
+
+**Origen:** Legacy/frmCuentaCobrar.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCuentaCobrar.frm`
+
+**Procedimiento/Función:** `cmdProcesa_Click` — filtra `vDocumentoGrilla WHERE tEstadoDocumento='03'`
+
+**Descripción:** Los documentos con estado '03' representan deuda por cuenta corriente pendiente de cobro.
+
+**Condición:** Al consultar documentos pendientes de cobro en `FrmCuentaCobrar`
+
+**Resultado:** Lista de documentos en estado '03' en el rango de fechas indicado
+
+**Excepciones:** FechaFin no puede ser anterior a FechaInicio → error "CTACTE_FECHA_INVALIDA"
+
+**Destino .NET:** `ObtenerDocumentosPendientesCobroHandler` + `CuentaCorrienteRepository`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/CuentaCorrienteRepository.cs`
+
+---
+
+### BR-CTACTE-003
+**Nombre:** Solo clientes con ctacte habilitada aparecen en correlativo
+
+**Origen:** Legacy/frmCtaCte.frm + vCompania
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCtaCte.frm`
+
+**Procedimiento/Función:** `Form_Load` — carga `vCompania` (TDELIVERY WHERE lActivo=1 AND lClienteCtaCte=1)
+
+**Descripción:** El correlativo de cuentas corrientes solo muestra registros activos con ctacte habilitada.
+
+**Condición:** Al cargar `FrmCtaCte`
+
+**Resultado:** Solo se retornan registros de TDELIVERY con lActivo=1 y lClienteCtaCte=1
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `ObtenerCuentasCorrientesHandler` + `CuentaCorrienteRepository`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/CuentaCorrienteRepository.cs`
+
+---
+
+## BR-RESERVA-001
+**Nombre:** Estado inicial de reserva = Pendiente
+
+**Origen:** Legacy/frmReservaDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmReservaDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (Sw=True)
+
+**Descripción:** Al crear una reserva, el campo tEstadoReserva se inicializa a '01' (Pendiente).
+
+**Condición:** INSERT INTO TRESERVA con tEstadoReserva='01'
+
+**Resultado:** Reserva creada con estado Pendiente
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Reserva.Crear()` — `EstadoReserva.Pendiente`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Reservas/Reserva.cs`
+
+---
+
+## BR-RESERVA-002
+**Nombre:** Cliente requerido en reserva
+
+**Origen:** Legacy/frmReservaDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmReservaDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 — validación previa
+
+**Descripción:** No se puede crear ni modificar una reserva sin indicar el cliente.
+
+**Condición:** `If txtCliente.Text = "" Then MsgBox "Ingrese el Cliente"`
+
+**Resultado:** Error si el cliente no fue indicado
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Reserva.Crear()` — DomainException RESERVA_CLIENTE_REQUERIDO
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Reservas/Reserva.cs`
+
+---
+
+## BR-RESERVA-003
+**Nombre:** PAX requerido y mayor a cero
+
+**Origen:** Legacy/frmReservaDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmReservaDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 — validación previa
+
+**Descripción:** El número de PAX debe ser mayor a cero al crear o modificar una reserva.
+
+**Condición:** `If txtPax.Text = "" Then MsgBox "Ingrese el N° de Pax"`
+
+**Resultado:** Error si PAX es vacío o cero
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Reserva.Crear()` / `Reserva.Modificar()` — DomainException RESERVA_PAX_INVALIDO
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Reservas/Reserva.cs`
+
+---
+
+## BR-RESERVA-004
+**Nombre:** Estado controla modificación/anulación/atención de reservas
+
+**Origen:** Legacy/frmReservaDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmReservaDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (verificación EstadoReserva2), Case 2, Case 4
+
+**Descripción:** No se puede modificar ni atender una reserva que ya fue Atendida ('02') o Anulada ('03'). No se puede anular una reserva ya Anulada. Solo se puede convertir a pedido una reserva Pendiente ('01').
+
+**Condición:** EstadoReserva='02' → bloqueado para modificar y atender. EstadoReserva='03' → bloqueado para todo. EstadoReserva='01' → permitido atender via spIns_MPEDIDO_RESERVA.
+
+**Resultado:** DomainException con código según la transición inválida
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Reserva.Modificar()`, `Reserva.Anular()`, `Reserva.MarcarAtendida()` — DomainException RESERVA_YA_ATENDIDA / RESERVA_YA_ANULADA / RESERVA_NO_PENDIENTE
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Reservas/Reserva.cs`, `modern-net8/src/Inforest.Application/Reservas/ReservaHandlers.cs`
+
+---
+
+## BR-INSUMO-001
+**Nombre:** Descripción requerida y no duplicada para insumo
+
+**Origen:** Legacy/frmInsumoDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmInsumoDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (Grabar)
+
+**Descripción:** Al agregar o modificar un insumo, la descripción no puede estar vacía. Al agregar, no puede existir ya un insumo con la misma descripción (comparación con UPPER).
+
+**Condición:** txtMensaje.Text = "" → error. Descripcion duplicada → error.
+
+**Resultado:** MsgBox de error, no se ejecuta el SP.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Insumo.Crear()` — DomainException INSUMO_DESCRIPCION_REQUERIDA. `AgregarInsumoHandler` — Result.Fail INSUMO_DESCRIPCION_DUPLICADA.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Insumo.cs`, `modern-net8/src/Inforest.Application/Maestros/InsumoHandlers.cs`
+
+---
+
+## BR-INSUMO-002
+**Nombre:** Descripción de insumo en mayúsculas
+
+**Origen:** Legacy/frmInsumoDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmInsumoDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (txtMensaje.Text = UCase(txtMensaje.Text))
+
+**Descripción:** La descripción del insumo se normaliza a mayúsculas antes de guardar.
+
+**Condición:** Siempre al agregar.
+
+**Resultado:** La descripción queda almacenada en mayúsculas en TINSUMO.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Inforest.Crear()` llama `.ToUpperInvariant()` en la descripción.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Insumo.cs`
+
+---
+
+## BR-INSUMO-003
+**Nombre:** Modificación de insumo actualiza descripción, stock, tipo, activo
+
+**Origen:** Legacy/frmInsumoDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmInsumoDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (Sw = False → USP_MODIFICARINSUMOS)
+
+**Descripción:** Al modificar, se actualizan: descripción, usuario, caja, activo, nstock (solo si modulo=INFOREST), LINSUMO y fecha de modificación.
+
+**Condición:** Insumo ya existe. Sw=False (edición).
+
+**Resultado:** SP USP_MODIFICARINSUMOS ejecutado con los nuevos valores.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Insumo.Actualizar()` + `ModificarInsumoHandler` → `InsumoRepository.ModificarAsync` → USP_MODIFICARINSUMOS.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Insumo.cs`, `modern-net8/src/Inforest.Application/Maestros/InsumoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/InsumoRepository.cs`
+
+---
+
+## BR-INSUMO-004
+**Nombre:** Eliminación de insumo previa confirmación
+
+**Origen:** Legacy/frmInsumoDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmInsumoDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 2 (USP_ELIMINARINSUMOS)
+
+**Descripción:** Se solicita confirmación del usuario antes de eliminar un insumo mediante USP_ELIMINARINSUMOS.
+
+**Condición:** Registro existe.
+
+**Resultado:** SP USP_ELIMINARINSUMOS ejecutado. Grilla recargada.
+
+**Excepciones:** Si no existe, no se elimina.
+
+**Destino .NET:** `EliminarInsumoHandler` → `IInsumoRepository.EliminarAsync` → USP_ELIMINARINSUMOS. WinForm muestra MessageBox de confirmación.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/InsumoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/InsumoRepository.cs`, `modern-net8/src/Inforest.Desktop/Maestros/FrmInsumo.cs`
+
+---
+
+## BR-IMPORT-001
+
+**Nombre:** Solo requerimientos aprobados de áreas habilitadas pueden importarse
+
+**Origen:** Legacy/frmImportacionRequerimientos.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmImportacionRequerimientos.frm
+
+**Procedimiento/Función:** cmdProcesa_Click
+
+**Descripción:** Solo se muestran/importan requerimientos con `CodEstado='02'` (aprobado) cuya área esté habilitada para el punto de venta (`TRUTAAREA.lImportarPV=1`).
+
+**Condición:** vRequerimiento.CodEstado = '02' AND TRUTAAREA.lImportarPV = 1
+
+**Resultado:** Lista de requerimientos disponibles para importación.
+
+**Excepciones:** Requerimientos en otros estados o de áreas no habilitadas no aparecen.
+
+**Destino .NET:** `ObtenerRequerimientosPendientesHandler` → `IRequerimientoAlmacenRepository.ObtenerPendientesAsync`. Entidad `RequerimientoAlmacen.PuedeImportarse()`.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs`, `modern-net8/src/Inforest.Domain/Entities/Almacen/RequerimientoAlmacen.cs`
+
+---
+
+## BR-IMPORT-002
+
+**Nombre:** Un requerimiento no puede importarse dos veces
+
+**Origen:** Legacy/frmImportacionRequerimientos.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmImportacionRequerimientos.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 2
+
+**Descripción:** Antes de crear el pedido, se verifica que `MREQUERIMIENTO.tPedido` esté vacío. Si ya tiene un código de pedido, se muestra error y se cancela la operación.
+
+**Condición:** ISNULL(tPedido,'') = ''
+
+**Resultado:** Si ya existe pedido: error y cancelación. Si no: continúa el flujo de importación.
+
+**Excepciones:** Ninguna.
+
+**Destino .NET:** `ImportarRequerimientoHandler` verifica `ObtenerPedidoAsociadoAsync` antes de crear el pedido. Retorna `REQ_YA_IMPORTADO` si ya existe.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs`
+
+---
+
+## BR-IMPORT-003
+
+**Nombre:** Todos los artículos del requerimiento deben tener enlace con INFOREST
+
+**Origen:** Legacy/frmImportacionRequerimientos.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmImportacionRequerimientos.frm
+
+**Procedimiento/Función:** InsertaProducto / cmdOpcion_Click Case 2
+
+**Descripción:** Para cada artículo del requerimiento (CodArt), se busca el código de producto INFOREST mediante `TPRODUCTO.tEnlace`. Si un artículo no tiene enlace (`codProducto = ""` o `"0"`), el pedido ya creado se cancela (estado '03') y se notifica el error.
+
+**Condición:** codProducto de vProducto WHERE tEnlace = CodArt
+
+**Resultado:** Si todos tienen enlace: pedido creado con todos los ítems. Si alguno no tiene: pedido cancelado.
+
+**Excepciones:** Si el pedido ya fue creado (spIns_MPEDIDO ejecutado), se cancela con estado '03'.
+
+**Destino .NET:** `ImportarRequerimientoHandler` valida enlaces antes de crear el pedido (retorna `REQ_PRODUCTO_SIN_ENLACE`). `ImportacionPedidoGateway` cancela el pedido si el producto no existe en BD.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Almacen/ImportacionPedidoGateway.cs`
+
+---
+
+## BR-IMPORT-004
+
+**Nombre:** El requerimiento debe marcarse como importado tras generar el pedido
+
+**Origen:** Legacy/frmImportacionRequerimientos.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmImportacionRequerimientos.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 2 (tras éxito de inserción)
+
+**Descripción:** Tras crear exitosamente el pedido y todos sus ítems, se actualiza `MREQUERIMIENTO` con `lPedido=1` y `tPedido=<código pedido>` para bloquear re-importaciones.
+
+**Condición:** Importación exitosa de todos los ítems.
+
+**Resultado:** `MREQUERIMIENTO.lPedido = 1`, `MREQUERIMIENTO.tPedido = <código>`.
+
+**Excepciones:** Si la creación de ítems falla, no se marca (el pedido se cancela y se retorna error).
+
+**Destino .NET:** `ImportarRequerimientoHandler` llama `IRequerimientoAlmacenRepository.MarcarImportadoAsync` solo si el gateway retorna éxito.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs`
+
+---
+
+## BR-RECIBO-001
+**Nombre:** Correlativo de ingreso (formato año + secuencia)
+**Origen:** Legacy/frmReciboIngresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngresoDetalle.frm`
+**Procedimiento/Función:** Botón Guardar / generación de tCodigoIngreso
+**Descripción:** El correlativo de ingreso se forma concatenando el año de 2 dígitos + número de secuencia en 8 dígitos con padding de ceros (ej: `2600000001`).
+**Condición:** Al registrar un nuevo ingreso.
+**Resultado:** `tCodigoIngreso` = Right(Year(Date),2) + Format(secuencia,"00000000")
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Registrar()` + `ReciboIngresoRepository.ObtenerSiguienteSecuenciaAsync()`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-002
+**Nombre:** Estado inicial de ingreso = EMITIDO
+**Origen:** Legacy/frmReciboIngresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngresoDetalle.frm`
+**Procedimiento/Función:** INSERT INTO MINGRESO
+**Descripción:** Todo ingreso se crea con estado `01` (EMITIDO).
+**Condición:** Al crear el registro.
+**Resultado:** `tEstado = '01'`
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Registrar()` fija `Estado = "01"`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-003
+**Nombre:** Fecha y hora de registro = ahora
+**Origen:** Legacy/frmReciboIngresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngresoDetalle.frm`
+**Procedimiento/Función:** INSERT INTO MINGRESO
+**Descripción:** `dFechaIngreso` y `tHoraIngreso` se toman del momento de la operación.
+**Condición:** Siempre al registrar.
+**Resultado:** Campos de fecha/hora = DateTime.Now del sistema.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Registrar()` asigna `FechaIngreso = DateTime.Now`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-004
+**Nombre:** Monto de ingreso > 0
+**Origen:** Legacy/frmReciboIngresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngresoDetalle.frm`
+**Procedimiento/Función:** Validación antes del INSERT
+**Descripción:** No se permite registrar un ingreso con monto cero o negativo.
+**Condición:** `dMontoIngreso <= 0`
+**Resultado:** Error de validación, registro no persiste.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Registrar()` lanza `DomainException` si monto ≤ 0
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-005
+**Nombre:** Anulación de ingreso cambia estado a 04
+**Origen:** Legacy/frmReciboIngreso.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngreso.frm`
+**Procedimiento/Función:** Botón Anular
+**Descripción:** Al anular un ingreso, su estado cambia de `01` (EMITIDO) a `04` (ANULADO). No se permite anular si ya está en `04`.
+**Condición:** `tEstado = '01'` → puede anular; `tEstado = '04'` → ya anulado.
+**Resultado:** `UPDATE MINGRESO SET tEstado='04'`
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Anular()` + `AnularIngresoHandler`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-006
+**Nombre:** Filtro multi-caja por usuario (lMCPV)
+**Origen:** Legacy/frmReciboIngreso.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngreso.frm`
+**Procedimiento/Función:** Carga de grilla (SELECT FROM MINGRESO)
+**Descripción:** Cuando el flag `lMCPV` (multi-caja punto de venta) está activo, la consulta filtra ingresos por el usuario de la sesión (`tUsuario`). Sin el flag se muestran todos.
+**Condición:** `lMCPV = True` → añade `WHERE tUsuario = @usuario`
+**Resultado:** Lista de ingresos filtrada.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ObtenerIngresosQuery.CodigoUsuario` opcional en `ReciboIngresoRepository.ObtenerAsync()`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-007
+**Nombre:** Correlativo de egreso (formato año + secuencia)
+**Origen:** Legacy/frmReciboEgresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgresoDetalle.frm`
+**Procedimiento/Función:** Botón Guardar / generación de tCodigoEgreso
+**Descripción:** El correlativo de egreso se forma igual que el de ingreso: año 2 dígitos + secuencia 8 dígitos.
+**Condición:** Al registrar un nuevo egreso.
+**Resultado:** `tCodigoEgreso` = Right(Year(Date),2) + Format(secuencia,"00000000")
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboEgreso.Registrar()` + `ReciboEgresoRepository.ObtenerSiguienteSecuenciaAsync()`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-008
+**Nombre:** Estado inicial de egreso = EMITIDO
+**Origen:** Legacy/frmReciboEgresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgresoDetalle.frm`
+**Procedimiento/Función:** INSERT INTO MEGRESO
+**Descripción:** Todo egreso se crea con estado `01` (EMITIDO). No existe estado PAGADO para egresos.
+**Condición:** Al crear el registro.
+**Resultado:** `tEstado = '01'`
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboEgreso.Registrar()` fija `Estado = "01"`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-009
+**Nombre:** Solicitud de clave supervisor para egresos
+**Origen:** Legacy/frmReciboEgreso.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgreso.frm`
+**Procedimiento/Función:** Botón Nuevo/Editar → `lSolicitaClaveEgreso`
+**Descripción:** Si el parámetro `lSolicitaClaveEgreso` está activo, antes de abrir el formulario de detalle de egreso se solicita contraseña de supervisor.
+**Condición:** `lSolicitaClaveEgreso = True`
+**Resultado:** Se solicita contraseña; si es correcta, se abre el detalle.
+**Excepciones:** Si la contraseña es incorrecta, se cancela la acción.
+**Destino .NET:** Verificación delegada a la capa de presentación (`FrmReciboEgreso`) antes de abrir `FrmReciboEgresoDetalle`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-010
+**Nombre:** Modo de egreso: VARIOS / NOTACREDITO / MERCADERIA
+**Origen:** Legacy/frmReciboEgresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgresoDetalle.frm`
+**Procedimiento/Función:** Combo `cboModoEgreso`
+**Descripción:** El egreso puede ser de tipo `VARIOS` (general), `NOTACREDITO` (requiere referencia) o `MERCADERIA` (compra de mercadería).
+**Condición:** `tModoEgreso IN ('VARIOS','NOTACREDITO','MERCADERIA')`
+**Resultado:** Permite registrar el egreso con el modo seleccionado.
+**Excepciones:** Valor fuera de rango → error de validación.
+**Destino .NET:** `ModoEgreso` enum + validación en `ReciboEgreso.Registrar()`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-011
+**Nombre:** Anulación de egreso cambia estado a 04
+**Origen:** Legacy/frmReciboEgreso.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgreso.frm`
+**Procedimiento/Función:** Botón Anular
+**Descripción:** Al anular un egreso su estado pasa a `04` (ANULADO). No se permite anular un egreso ya anulado.
+**Condición:** `tEstado = '01'` → puede anular.
+**Resultado:** `UPDATE MEGRESO SET tEstado='04'`
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboEgreso.Anular()` + `AnularEgresoHandler`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-012
+**Nombre:** NotaCredito requiere campo dReferencia
+**Origen:** Legacy/frmReciboEgresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgresoDetalle.frm`
+**Procedimiento/Función:** Validación antes del INSERT cuando tModoEgreso = 'NOTACREDITO'
+**Descripción:** Cuando el modo de egreso es `NOTACREDITO`, el campo `dReferencia` (número de la nota de crédito) es obligatorio.
+**Condición:** `tModoEgreso = 'NOTACREDITO' AND IsEmpty(dReferencia)`
+**Resultado:** Error de validación; no se persiste.
+**Excepciones:** Ninguna.
+**Destino .NET:** Validación en `ReciboEgreso.Registrar()` — lanza `DomainException` si modo es NOTACREDITO y referencia vacía.
+**Estado:** MIGRATED

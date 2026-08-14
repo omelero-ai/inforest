@@ -2,7 +2,7 @@
 
 > Status: IN_PROGRESS — baseline transversal de Fase 3 validado; la matriz refleja equivalencias parciales y gaps controlados.
 >
-> Última actualización: 2026-08-12
+> Última actualización: 2026-08-14
 
 ---
 
@@ -48,7 +48,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `modConsultaIntregrada.bas` | Multi-local | — | — | NOT_STARTED | Consulta multi-local |
 | `modDespachador.bas` | App Entry | `Program.cs` (DespachadorModule) + `DespachadorForm` | WinForms + DI | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Delivery/ |
 | `modMotorizado.bas` | App Entry | `Program.cs` (MotorizadoModule) + `LlegadaSalidaForm` | WinForms + DI | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Motorizado/ |
-| `modKDS.bas` | Integration | `IProduccionCocinaService` + `KdsXmlDispatcher` + `KdsLegacyGateway` | Interface + Classes | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IProduccionCocinaService.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsXmlDispatcher.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsLegacyGateway.cs` |
+| `modKDS.bas` | Integration | `IProduccionCocinaService` + `KdsXmlDispatcher` + `KdsLegacyGateway` + `MensajeCocinaRepository` | Interface + Classes | MIGRATED | `modern-net8/src/Inforest.Application/Interfaces/IProduccionCocinaService.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsXmlDispatcher.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsLegacyGateway.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
 | `modBlueVision.bas` | Integration | `IBlueVisionService` + `BlueVisionHttpClient` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/Hardware/IBlueVisionService.cs`, `modern-net8/src/Inforest.Infrastructure/Hardware/BlueVisionHttpClient.cs` |
 | `modImpresoraFiscal.bas` | Integration | `IImpresoraFiscalService` + `NullImpresoraFiscalService` | Interface + Stub | BLOCKED | OCX 32-bit sin SDK .NET; ver `modern-net8/src/Inforest.Infrastructure/Hardware/NullImpresoraFiscalService.cs` |
 | `modAuditoria.bas` | Audit | — | — | NOT_STARTED | Auditoría |
@@ -103,13 +103,13 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `MDOCUMENTO` | Table | `Documento`, `IDocumentoRepository`, `DocumentoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Ventas/ |
 | `DDOCUMENTO` | Table | `DetalleDocumento` | Domain Entity | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Ventas/ |
 | `MTURNO` | Table | `Turno`, `ITurnoRepository`, `TurnoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Turno/ |
-| `TCAJA` | Table | `ConfiguracionCaja`, `IParametroRepository.ObtenerConfiguracionCajaAsync` | Domain Record + Repository | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Configuracion/ |
+| `TCAJA` | Table | `ConfiguracionCaja`, `IParametroRepository.ObtenerConfiguracionCajaAsync`, `ValidarInicioPosHandler` | Domain Record + Repository + Handler | COMPLETED | `modern-net8/src/Inforest.Domain/Entities/Configuracion/ConfiguracionCaja.cs`, `modern-net8/src/Inforest.Application/Configuracion/ConfiguracionHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs`, `modern-net8/tests/Inforest.Application.Tests/Configuracion/ValidarInicioPosHandlerTests.cs`, `modern-net8/tests/Inforest.Infrastructure.Tests/Configuracion/ConfiguracionCajaTests.cs` |
 | `TPRODUCTO` | Table | `ProductoMaestro`, `IProductoMaestroRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
 | `TGRUPO` | Table | `GrupoProducto`, `IGrupoProductoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
 | `TSUBGRUPO` | Table | `SubGrupoProducto`, `ISubGrupoProductoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
 | `TCLIENTE` | Table | `Cliente`, `IClienteRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
 | `TUSUARIO` | Table | — | — | NOT_STARTED | Usuarios |
-| `TPARAMETRO` | Table | `ConfiguracionSistema`, `IParametroRepository`, `ParametroService` | Domain Record + Repository + Service | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Configuracion/ |
+| `TPARAMETRO` | Table | `ConfiguracionSistema`, `IParametroRepository`, `ParametroService`, `ValidarInicioPosHandler` | Domain Record + Repository + Service + Handler | COMPLETED | `modern-net8/src/Inforest.Domain/Entities/Configuracion/ConfiguracionSistema.cs`, `modern-net8/src/Inforest.Application/Configuracion/ConfiguracionHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroService.cs`, `modern-net8/tests/Inforest.Application.Tests/Configuracion/ValidarInicioPosHandlerTests.cs`, `modern-net8/tests/Inforest.Infrastructure.Tests/Configuracion/ParametroRepositoryTests.cs` |
 | `DPAGODOCUMENTO` | Table | `PagoDocumento`, `IPagoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Caja/ |
 | `MCIERRE` | Table | — | — | NOT_STARTED | Cierre contable |
 | `TDIACONTABLE` | Table | `DiaContable`, `IDiaContableService`, `DiaContableService` | Entity + Service | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Turno/ |
@@ -187,7 +187,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 |---|---|---|---|---|---|
 | `frmAcceso.frm` | Form | `src/Inforest.Desktop/Form1.cs` | WinForms Form | IN_PROGRESS | `modern-net8/src/Inforest.Desktop/Form1.cs`, `modern-net8/src/Inforest.Desktop/Form1.Designer.cs` |
 | `frmAcceso.frm` / `USUARIO.INI` | Session bootstrap | `ISessionService` + `SessionService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/ISessionService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/SessionService.cs` |
-| `frmAcceso.frm` — bloqueo intentos (BR-POS-006-LOCK) | Business Rule | `FrmLoginPOS` (`_intentosFallidos` + `LoginPolicy.MaxIntentosFallidos`) | UI guard | MIGRATED | `src/Inforest.Desktop/POS/FrmLoginPOS.cs`, `src/Inforest.Application/Seguridad/LoginPolicy.cs` |
+| `frmDiaContable.frm` / `clsDiaContable.cls` (POS-FUNC-009) | Form + Class | `FrmDiaContable` + `AperturarDiaContableHandler` + `CerrarDiaContableHandler` + `ObtenerDiaContableHandler` + `IDiaContableService` (extendido: `CerrarDiaContableAsync`, `ObtenerFechaMaximaDiaContableAsync`) | WinForm + Handlers + Interface | MIGRATED | `src/Inforest.Desktop/Turno/FrmDiaContable.cs`, `src/Inforest.Application/Turno/DiaContableHandlers.cs`, `src/Inforest.Infrastructure/Turno/DiaContableService.cs` — Tests: `DiaContableHandlerTests` (10) |
 | `frmPedido.frm` (POS-FUNC-003) | Form | `FrmPedido` + `Pedido` + `DetallePedido` + `CreatePedidoHandler` + `UpdatePedidoHandler` + `ObtenerPedidoHandlers` + `PedidoRepository` | WinForm + Domain + Handlers + Repository | MIGRATED | `modern-net8/src/Inforest.Desktop/Pedidos/FrmPedido.cs`, `modern-net8/src/Inforest.Domain/Entities/Ventas/Pedido.cs`, `modern-net8/src/Inforest.Application/Pedidos/`, `modern-net8/src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` — Tests: `CreatePedidoHandlerTests` + `UpdatePedidoHandlerTests` + `ObtenerPedidoHandlerTests` + `PedidoTests` + `PedidoExtendidoTests` |
 | `TACCESO` / `TGRUPOACCESO` | RBAC | `IRbacService` + `RbacService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IRbacService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/RbacService.cs` |
 | `clsComando.cls` ADODB errors | DB errors | `Inforest.Infrastructure.Exceptions.DatabaseException` | Class | COMPLETED | `src/Inforest.Infrastructure/Exceptions/InfrastructureException.cs` |
@@ -203,7 +203,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 |---|---|---|---|---|---|
 | `frmNuevoDelivery.frm` | Form | `NuevoDeliveryForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/NuevoDeliveryForm.cs` |
 | `frmDespachador.frm` | Form | `DespachadorForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/DespachadorForm.cs` |
-| `frmCentralPedidos.frm` | Form | `CentralPedidosForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/CentralPedidosForm.cs` |
+| `frmCentralPedidos.frm` | Form | `CentralPedidosForm` (extendido: ConfirmarEntrega + RevertirEntrega + ModificarFecha) | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/CentralPedidosForm.cs` |
+| `frmPedidoDelivery.frm` | Form | `FrmPedidoDelivery` | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/FrmPedidoDelivery.cs` |
 | `frmLlegadaSalida.frm` | Form | `LlegadaSalidaForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Motorizado/LlegadaSalidaForm.cs` |
 | `frmAsignacionMotorizado.frm` | Form | `AsignacionMotorizadoForm` | WinForm | MIGRATED | `src/Inforest.Desktop/Motorizado/AsignacionMotorizadoForm.cs` |
 | `frmReasignacionMotorizado.frm` | Form | `ReasignacionMotorizadoForm` | WinForm | MIGRATED | `src/Inforest.Desktop/Motorizado/ReasignacionMotorizadoForm.cs` |
@@ -215,17 +216,20 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `TMOTORIZADODATOS` | Table | `Motorizado` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Motorizado/Motorizado.cs` |
 | `(asignacion pedido-motorizado)` | Logic | `AsignacionMotorizado` | Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Motorizado/AsignacionMotorizado.cs` |
 | `IClienteDeliveryRepository` | Interface | `IClienteDeliveryRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/IClienteDeliveryRepository.cs` |
-| `IPedidoDeliveryRepository` | Interface | `IPedidoDeliveryRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/IPedidoDeliveryRepository.cs` |
+| `IPedidoDeliveryRepository` | Interface | `IPedidoDeliveryRepository` (extendido: ConfirmarEntregaAsync + RevertirEntregaAsync + ModificarFechaProgramadaAsync + ObtenerEstadoPagoAsync + EstaEntregadoAsync) | Interface | MIGRATED | `src/Inforest.Domain/Repositories/IPedidoDeliveryRepository.cs` |
 | `IMotorizadoRepository` | Interface | `IMotorizadoRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/IMotorizadoRepository.cs` |
 | `ILocalRepository` | Interface | `ILocalRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/ILocalRepository.cs` |
 | `ICentralPedidosRepository` | Interface | `ICentralPedidosRepository` | Interface | COMPLETED | `src/Inforest.Domain/Repositories/ICentralPedidosRepository.cs` |
 | `sp_Inforest_PedidosCentralPedido` | SP | `CentralPedidosRepository.ObtenerPedidosCentralAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Delivery/CentralPedidosRepository.cs` |
 | `sp_CD_Modificar_EstadoDelivery_Cabecera` | SP | `CentralPedidosRepository.ModificarEstadoDeliveryAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Delivery/CentralPedidosRepository.cs` |
 | `sp_UpdFotoDelivery` | SP | `ActualizarFotoClienteDeliveryHandler` + `ClienteDeliveryRepository.ActualizarFotoAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/ClienteDeliveryRepository.cs` |
+| `MPEDIDO.lEntregado / tusuarioentregado / fregentregado` | Field | `ConfirmarEntregaCentralHandler` + `RevertirEntregaCentralHandler` + `PedidoDeliveryRepository.ConfirmarEntregaAsync/RevertirEntregaAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/PedidoDeliveryRepository.cs` |
+| `MPEDIDO.fProgramacion / fregistro` (Central) | Field | `ModificarFechaProgramadaDeliveryHandler` + `PedidoDeliveryRepository.ModificarFechaProgramadaAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/PedidoDeliveryRepository.cs` |
+| `vDespachador` (seguimiento) | View | `ObtenerPedidosSeguimientoDeliveryHandler` + `FrmPedidoDelivery` | Handler + WinForm | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Desktop/Delivery/FrmPedidoDelivery.cs` |
 | `spRep_AnaliticoMotorizadoIntegrado` | SP | *(reporte FastReport pendiente)* | Report | NOT_STARTED | — |
 | `frmOrdenesConsola.frm` | Form | `ObtenerOrdenesExternasHandler` + `RappiOrderAdapter` | Handler+Service | IN_PROGRESS | `src/Inforest.Application/Delivery/RappiHandlers.cs` |
 | `(test etapa 9 domain)` | — | `DeliveryDomainTests` (12 tests) + `MotorizadoDomainTests` (11 tests) | xUnit | IN_PROGRESS | `tests/Inforest.Domain.Tests/Delivery/` |
-| `(test etapa 9 application)` | — | `DeliveryHandlersTests` (4 tests) + `MotorizadoHandlersTests` (5 tests) | xUnit | IN_PROGRESS | `tests/Inforest.Application.Tests/` |
+| `(test etapa 9 application)` | — | `DeliveryHandlersTests` (4 tests) + `MotorizadoHandlersTests` (5 tests) + `CentralPedidosHandlersTests` (10 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/` |
 
 | **Etapa 10 — Reportes, Consultas y Salidas Operativas** | | | | | |
 | `spRep_Comanda` | SP | `ReporteRepository.ObtenerComandaAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
@@ -303,9 +307,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | (tests P3-11) | — | `FacturacionElectronicaFactoryTests` (7 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |
 | (tests P3-11) | — | `PaisPolicyTests` (8 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |
 | (tests P3-11) | — | `DomainHardwareEntityTests` (8 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |
-| `frmDocumentoCorrelativo.frm` + `modPuntoVenta.bas` | Form/Module | `CorrelativoDocumento` | Domain Entity | IN_PROGRESS | `src/Inforest.Domain/Entities/Ventas/CorrelativoDocumento.cs` |
-| `TTIPODOCUMENTOIMPRESORA` | Table | `ICorrelativoRepository` / `CorrelativoRepository` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Ventas/CorrelativoRepository.cs` |
-| `frmDocumentoCorrelativo.frm` | Form | `FrmDocumentoCorrelativo` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Ventas/FrmDocumentoCorrelativo.cs` |
+| `frmDocumentoCorrelativo.frm` + `modPuntoVenta.bas` | Form/Module | `CorrelativoDocumento` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Ventas/CorrelativoDocumento.cs` |
+| `TTIPODOCUMENTOIMPRESORA` | Table | `ICorrelativoRepository` / `CorrelativoRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Ventas/CorrelativoRepository.cs` |
+| `frmDocumentoCorrelativo.frm` | Form | `FrmDocumentoCorrelativo` | WinForm | COMPLETED | `src/Inforest.Desktop/Ventas/FrmDocumentoCorrelativo.cs` |
 | `frmPrecuentaImpresora.frm` | Form | `ImprimirPrecuentaHandler` / `FrmPrecuentaImpresora` | Handler + WinForm | IN_PROGRESS | `src/Inforest.Application/Impresion/ImprimirPrecuentaHandler.cs` + `src/Inforest.Desktop/Impresion/FrmPrecuentaImpresora.cs` |
 | `TIMPRESORA` | Table | `IImpresoraRepository` / `ImpresoraRepository` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Impresion/ImpresoraRepository.cs` |
 | `frmCambiarContrasenia.frm` | Form | `CambiarPasswordHandler` + `FrmCambiarContrasenia` | Handler + WinForm | IN_PROGRESS | `src/Inforest.Application/Seguridad/CambiarPasswordHandler.cs` + `src/Inforest.Desktop/POS/FrmCambiarContrasenia.cs` |
@@ -316,3 +320,112 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `UPDATE MTURNO (cierre completo)` | SQL | `TurnoRepository.CerrarAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Turno/TurnoRepository.cs` |
 | `TCAJA.lObligaCierre` | Flag | `CerrarTurnoHandler` (BR-CAJA-001) | Business Rule | MIGRATED | `src/Inforest.Application/Turno/TurnoHandlers.cs` |
 | `TPARAMETRO.lActivaConsultaDescargo` | Flag | `CerrarTurnoHandler` (BR-CAJA-002) | Business Rule | MIGRATED | `src/Inforest.Application/Turno/TurnoHandlers.cs` |
+
+## Componentes POS-FUNC-006 — Facturación y Notas de Crédito
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmNotaCredito.frm` | Form | `FrmNotaCredito` | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmNotaCredito.cs` |
+| `frmNotaCreditoDetalle.frm` | Form | `FrmNotaCreditoDetalle` + `EmitirNotaCreditoHandler` + `AnularNotaCreditoHandler` | WinForm + Handlers | MIGRATED | `src/Inforest.Desktop/Ventas/FrmNotaCreditoDetalle.cs` + `src/Inforest.Application/Ventas/NotaCreditoHandlers.cs` |
+| `MNOTACREDITO` | Table | `NotaCredito` + `INotaCreditoRepository` + `NotaCreditoRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Ventas/NotaCredito.cs` + `src/Inforest.Infrastructure/Ventas/NotaCreditoRepository.cs` |
+| `frmDocumento.frm` (Generación) | Form | `FrmDocumento` (visualización + anulación) | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmDocumento.cs` |
+| `frmFactura.frm` | Form | Cubierto por `CorrelativoDocumento` + `FrmDocumentoCorrelativo` | Domain Entity + WinForm | NOT_APPLICABLE | POS-FUNC-007 — ya implementado |
+| (tests BR-NC-001..006) | — | `NotaCreditoTests` (9 tests) + `NotaCreditoHandlersTests` (10 tests) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/Ventas/NotaCreditoTests.cs` + `tests/Inforest.Application.Tests/Ventas/NotaCreditoHandlersTests.cs` |
+
+## Componentes POS-FUNC-010 — Cliente y cuentas corrientes
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmNuevoCliente.frm` | Form | `FrmNuevoCliente` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmNuevoCliente.cs` |
+| `frmCtaCte.frm` | Form | `FrmCtaCte` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmCtaCte.cs` |
+| `frmCuentaCobrar.frm` | Form | `FrmCuentaCobrar` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmCuentaCobrar.cs` |
+| `TCLIENTE` | Table | `Cliente` + `IClienteRepository` + `ClienteRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Maestros/Cliente.cs` + `src/Inforest.Infrastructure/Maestros/ClienteRepository.cs` |
+| `TDELIVERY` (lClienteCtaCte=1) / `vCompania` | Table/View | `CuentaCorriente` + `ICuentaCorrienteRepository` + `CuentaCorrienteRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Maestros/CuentaCorriente.cs` + `src/Inforest.Infrastructure/Maestros/CuentaCorrienteRepository.cs` |
+| `vDocumentoGrilla` (tEstadoDocumento='03') | View | `DocumentoPendienteCobro` + `ObtenerDocumentosPendientesCobroHandler` | Record + Handler | MIGRATED | `src/Inforest.Domain/Entities/Maestros/DocumentoPendienteCobro.cs` + `src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs` |
+| (BR-CLIENTE-001..004, BR-CTACTE-001..003 tests) | — | `CuentaCorrienteHandlerTests` (7 tests) + `CuentaCorrienteTests` (8 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Maestros/CuentaCorrienteHandlerTests.cs` + `tests/Inforest.Domain.Tests/Maestros/CuentaCorrienteTests.cs` |
+
+## Componentes POS-FUNC-011 — Reservas
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmReserva.frm` | Form | `FrmReserva` | WinForm | MIGRATED | `src/Inforest.Desktop/Reservas/FrmReserva.cs` |
+| `frmReservaDetalle.frm` | Form | `FrmReservaDetalle` + `CrearReservaHandler` + `ModificarReservaHandler` + `AnularReservaHandler` | WinForm + Handlers | MIGRATED | `src/Inforest.Desktop/Reservas/FrmReservaDetalle.cs` + `src/Inforest.Application/Reservas/ReservaHandlers.cs` |
+| `TRESERVA` | Table | `Reserva` + `IReservaRepository` + `ReservaRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Reservas/Reserva.cs` + `src/Inforest.Infrastructure/Reservas/ReservaRepository.cs` |
+| `spIns_MPEDIDO_RESERVA` | SP | `ConvertirReservaAPedidoHandler` + `IReservaRepository.ConvertirAPedidoAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Reservas/ReservaHandlers.cs` + `src/Inforest.Infrastructure/Reservas/ReservaRepository.cs` |
+| (BR-RESERVA-001..004 tests) | — | `ReservaTests` (9 tests domain) + `CrearReservaHandlerTests` (2) + `AnularReservaHandlerTests` (3) + `ModificarReservaHandlerTests` (1) + `ObtenerReservasPorFechaHandlerTests` (2) = 17 tests | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Reservas/ReservaTests.cs` |
+
+## Componentes POS-FUNC-012 — Delivery dependiente POS
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmPedidoDelivery.frm` | Form | `FrmPedidoDelivery` | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/FrmPedidoDelivery.cs` |
+| `frmCentralPedidos.frm` (extendido) | Form | `CentralPedidosForm` (ConfirmarEntrega + RevertirEntrega + ModificarFecha) | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/CentralPedidosForm.cs` |
+| (DeliveryHandlers) | — | `ConfirmarEntregaCentralHandler` + `RevertirEntregaCentralHandler` + `ModificarFechaProgramadaDeliveryHandler` + `ObtenerPedidosSeguimientoDeliveryHandler` | Handlers | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs` |
+| (IPedidoDeliveryRepository ext.) | — | 5 nuevos métodos `IPedidoDeliveryRepository` + `PedidoDeliveryRepository` | Interface + Repository | MIGRATED | `src/Inforest.Infrastructure/Delivery/PedidoDeliveryRepository.cs` |
+| (tests BR-DEL-012..014) | — | `CentralPedidosHandlersTests` (10 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Delivery/CentralPedidosHandlersTests.cs` |
+
+## Componentes POS-FUNC-013 — Insumos/descargo
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmInsumo.frm` | Form | `FrmInsumo` | WinForm | MIGRATED | `src/Inforest.Desktop/Maestros/FrmInsumo.cs` |
+| `frmInsumoDetalle.frm` | Form | `FrmInsumoDetalle` + `AgregarInsumoHandler` + `ModificarInsumoHandler` + `EliminarInsumoHandler` | WinForm + Handlers | MIGRATED | `src/Inforest.Desktop/Maestros/FrmInsumoDetalle.cs` + `src/Inforest.Application/Maestros/InsumoHandlers.cs` |
+| `TINSUMO` | Table | `Insumo` + `IInsumoRepository` + `InsumoRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Maestros/Insumo.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `USP_LISTARINSUMOS` | SP | `ListarInsumosHandler` + `IInsumoRepository.ObtenerTodosAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/InsumoHandlers.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `usp_agregarinsumos` | SP | `AgregarInsumoHandler` + `IInsumoRepository.AgregarAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/InsumoHandlers.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `USP_MODIFICARINSUMOS` | SP | `ModificarInsumoHandler` + `IInsumoRepository.ModificarAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/InsumoHandlers.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `USP_ELIMINARINSUMOS` | SP | `EliminarInsumoHandler` + `IInsumoRepository.EliminarAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/InsumoHandlers.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `clsAlmacen.cls` (descargo automatico) | Class | `IInventoryGateway` + `InventoryGateway` (existente — BR-008) | Interface + Class | MIGRATED | `src/Inforest.Infrastructure/Almacen/InventoryGateway.cs` |
+| (tests BR-INSUMO-001..004) | — | `InsumoTests` (8 tests domain) + `InsumoHandlerTests` (10 tests handler) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/InsumoTests.cs` + `tests/Inforest.Application.Tests/Maestros/InsumoHandlerTests.cs` |
+
+## Componentes POS-FUNC-014 — Importación de pedidos externos
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmImportacionRequerimientos.frm` | Form | `FrmImportacionRequerimientos` | WinForm | MIGRATED | `src/Inforest.Desktop/Almacen/FrmImportacionRequerimientos.cs` |
+| `frmImportacionRequerimientoDetalle.frm` | Form | `FrmImportacionRequerimientoDetalle` | WinForm | MIGRATED | `src/Inforest.Desktop/Almacen/FrmImportacionRequerimientoDetalle.cs` |
+| `vRequerimiento` (ALMACEN DB) | View | `RequerimientoAlmacen` + `IRequerimientoAlmacenRepository` + `RequerimientoAlmacenRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Almacen/RequerimientoAlmacen.cs` + `src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs` |
+| `vRequerimiento` (detalle) | View | `DetalleRequerimientoAlmacen` | Domain Entity | MIGRATED | `src/Inforest.Domain/Entities/Almacen/DetalleRequerimientoAlmacen.cs` |
+| `MREQUERIMIENTO.tPedido` / `lPedido` | Field | `IRequerimientoAlmacenRepository.MarcarImportadoAsync` | Repository Method | MIGRATED | `src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs` |
+| `TRUTAAREA.lImportarPV` | Flag | `RequerimientoAlmacenRepository.ObtenerPendientesAsync` (BR-IMPORT-001) | Business Rule | MIGRATED | `src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs` |
+| `spIns_MPEDIDO` (importación) | SP | `ImportacionPedidoGateway.CrearPedidoDesdeRequerimientoAsync` | Gateway | MIGRATED | `src/Inforest.Infrastructure/Almacen/ImportacionPedidoGateway.cs` |
+| `InsertaProducto()` (DPEDIDO insert) | Function | `ImportacionPedidoGateway` (precio por canal + INSERT DPEDIDO) | Gateway | MIGRATED | `src/Inforest.Infrastructure/Almacen/ImportacionPedidoGateway.cs` |
+| `MPEDIDO` update estado '03' (cancelar) | SQL | `ImportacionPedidoGateway.CancelarPedidoAsync` (BR-IMPORT-003) | Business Rule | MIGRATED | `src/Inforest.Infrastructure/Almacen/ImportacionPedidoGateway.cs` |
+| Query buscar pedidos pendientes | Logic | `ObtenerRequerimientosPendientesHandler` | Handler | MIGRATED | `src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs` |
+| Ver detalle requerimiento | Logic | `ObtenerDetalleRequerimientoHandler` | Handler | MIGRATED | `src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs` |
+| Importar requerimiento como pedido | Logic | `ImportarRequerimientoHandler` (BR-IMPORT-001..004) | Handler | MIGRATED | `src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs` |
+| `IImportacionPedidoGateway` | Interface | `IImportacionPedidoGateway` | Interface | MIGRATED | `src/Inforest.Application/Interfaces/IImportacionPedidoGateway.cs` |
+| (tests BR-IMPORT-001..004) | — | `RequerimientoAlmacenTests` (8 tests domain) + `ImportacionRequerimientoHandlerTests` (9 tests handler) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/RequerimientoAlmacenTests.cs` + `tests/Inforest.Application.Tests/Almacen/ImportacionRequerimientoHandlerTests.cs` |
+
+## Componentes POS-FUNC-015 — Mensajería cocina/KDS
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmMensajeCocina.frm` | Form | `FrmMensajeCocina` | WinForm | COMPLETED | `src/Inforest.Desktop/Kitchen/FrmMensajeCocina.cs` |
+| `frmMensajeCocinaDetalle.frm` | Form | `FrmMensajeCocinaDetalle` + `AgregarMensajeCocinaHandler` + `ModificarMensajeCocinaHandler` + `EliminarMensajeCocinaHandler` | WinForm + Handlers | COMPLETED | `src/Inforest.Desktop/Kitchen/FrmMensajeCocinaDetalle.cs` + `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` |
+| `TMENSAJECOCINA` | Table | `MensajeCocina` + `IMensajeCocinaRepository` + `MensajeCocinaRepository` | Entity + Interface + Repository | COMPLETED | `src/Inforest.Domain/Entities/Cocina/MensajeCocina.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_LISTARMENSAJES` | SP | `ObtenerMensajesCocinaHandler` + `IMensajeCocinaRepository.ObtenerMensajesAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_AGREGARMENSAJE` | SP | `AgregarMensajeCocinaHandler` + `IMensajeCocinaRepository.AgregarAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_MODIFICARMENSAJE` | SP | `ModificarMensajeCocinaHandler` + `IMensajeCocinaRepository.ModificarAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_ELIMINARRMENSAJES` | SP | `EliminarMensajeCocinaHandler` + `IMensajeCocinaRepository.EliminarAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_CERRAR_MENSAJES_CIERRETURNO` | SP | `CerrarTurnoHandler` + `IMensajeCocinaRepository.CerrarActivosPorCajaAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Turno/TurnoHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `frmLiquidacionDetalle.frm` (cierre mensajes cocina) | Form rule | `FrmLiquidacionCierre` + `CerrarTurnoHandler` | WinForm + Handler | COMPLETED | `src/Inforest.Desktop/Caja/FrmLiquidacionCierre.cs` + `src/Inforest.Application/Turno/TurnoHandlers.cs` |
+| (tests BR-MSGCOC-001..005) | — | `MensajeCocinaTests` + `MensajeCocinaHandlerTests` + `MensajeCocinaRepositoryTests` + `CerrarTurnoHandlerTests` | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Cocina/MensajeCocinaTests.cs`, `tests/Inforest.Application.Tests/Kitchen/MensajeCocinaHandlerTests.cs`, `tests/Inforest.Infrastructure.Tests/Kitchen/MensajeCocinaRepositoryTests.cs`, `tests/Inforest.Application.Tests/Turno/CerrarTurnoHandlerTests.cs` |
+
+## Componentes POS-FUNC-018 — Recibo de Ingresos/Egresos
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmReciboIngreso.frm` | Form | `FrmReciboIngreso` | WinForm | COMPLETED | `src/Inforest.Desktop/Caja/Recibos/FrmReciboIngreso.cs` |
+| `frmReciboIngresoDetalle.frm` | Form | `FrmReciboIngresoDetalle` | WinForm | COMPLETED | `src/Inforest.Desktop/Caja/Recibos/FrmReciboIngresoDetalle.cs` |
+| `frmReciboEgreso.frm` | Form | `FrmReciboEgreso` | WinForm | COMPLETED | `src/Inforest.Desktop/Caja/Recibos/FrmReciboEgreso.cs` |
+| `frmReciboEgresoDetalle.frm` | Form | `FrmReciboEgresoDetalle` | WinForm | COMPLETED | `src/Inforest.Desktop/Caja/Recibos/FrmReciboEgresoDetalle.cs` |
+| `MINGRESO` | Table | `ReciboIngreso` + `IReciboIngresoRepository` + `ReciboIngresoRepository` | Entity + Interface + Repository | COMPLETED | `src/Inforest.Domain/Entities/Caja/ReciboIngreso.cs` + `src/Inforest.Infrastructure/Caja/ReciboIngresoRepository.cs` |
+| `MEGRESO` | Table | `ReciboEgreso` + `IReciboEgresoRepository` + `ReciboEgresoRepository` | Entity + Interface + Repository | COMPLETED | `src/Inforest.Domain/Entities/Caja/ReciboEgreso.cs` + `src/Inforest.Infrastructure/Caja/ReciboEgresoRepository.cs` |
+| `frmReciboIngreso.frm` / lógica registrar | Business rule | `RegistrarIngresoHandler` (BR-RECIBO-001..006) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboIngresoHandlers.cs` |
+| `frmReciboIngreso.frm` / lógica anular | Business rule | `AnularIngresoHandler` (BR-RECIBO-005) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboIngresoHandlers.cs` |
+| `frmReciboEgreso.frm` / lógica registrar | Business rule | `RegistrarEgresoHandler` (BR-RECIBO-007..012) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` |
+| `frmReciboEgreso.frm` / lógica anular | Business rule | `AnularEgresoHandler` (BR-RECIBO-011) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` |
+| `spRep_ReciboEgreso` | SP (report) | `ObtenerEgresosHandler` (reutiliza SP via Dapper) | Handler + Repository | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` + `src/Inforest.Infrastructure/Caja/ReciboEgresoRepository.cs` |
+| (tests BR-RECIBO-001..012) | — | `ReciboIngresoTests` (9) + `ReciboEgresoTests` (8) + `ReciboIngresoHandlerTests` (8) + `ReciboEgresoHandlerTests` (8) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Caja/ReciboIngresoTests.cs`, `tests/Inforest.Domain.Tests/Caja/ReciboEgresoTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboIngresoHandlerTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboEgresoHandlerTests.cs` |
+

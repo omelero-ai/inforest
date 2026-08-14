@@ -99,6 +99,32 @@ public class CorrelativoHandlersTests
         Assert.Equal("Sin Correlativo", result.Valor);
     }
 
+    [Fact]
+    public async Task ObtenerCorrelativoFactura_TipoEmisionVacio_Falla()
+    {
+        var repo = new Mock<ICorrelativoRepository>();
+        var handler = new ObtenerCorrelativoFacturaHandler(repo.Object);
+
+        var result = await handler.HandleAsync(new ObtenerCorrelativoFacturaQuery("001", ""));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("CORRELATIVO_TIPO_EMISION_REQUERIDO", result.CodigoError);
+    }
+
+    [Fact]
+    public async Task ObtenerTodosCorrelativos_RetornaLista()
+    {
+        var repo = new Mock<ICorrelativoRepository>();
+        repo.Setup(r => r.ObtenerTodosAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { BuildCorrelativo("001", "01"), BuildCorrelativo("002", "03") });
+
+        var handler = new ObtenerTodosCorrelativosHandler(repo.Object);
+        var result = await handler.HandleAsync(new ObtenerTodosCorrelativosQuery());
+
+        Assert.True(result.EsExitoso);
+        Assert.Equal(2, result.Valor!.Count);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Domain entity — CorrelativoDocumento
     // ─────────────────────────────────────────────────────────────────────────
