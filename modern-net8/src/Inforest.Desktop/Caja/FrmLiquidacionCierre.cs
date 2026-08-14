@@ -157,6 +157,12 @@ public sealed class FrmLiquidacionCierre : Form
             return;
         }
 
+        // Confirmación final antes de cerrar — Legacy: MsgBox("Seguro de Cerrar el Turno " & sTurno & "?")
+        var confirmar = MessageBox.Show(
+            $"¿Seguro que desea cerrar el turno {_codigoTurno}?",
+            Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+        if (confirmar == DialogResult.Cancel) return;
+
         var efecMN = ParseDecimal(_txtEfectivoMN);
         var retiroMN = ParseDecimal(_txtRetiroMN);
         if (retiroMN > efecMN)
@@ -207,7 +213,8 @@ public sealed class FrmLiquidacionCierre : Form
             result = await _cerrarHandler.HandleAsync(command with { SupervisorAutorizado = true });
         }
 
-        // BR-CAJA-002: lActivaConsultaDescargo → pedir confirmación
+        // BR-CAJA-002: lActivaConsultaDescargo → pedir confirmación.
+        // Legacy: si el usuario dice "No", ofrece abrir frmDescargo (GAP-CAJA-002: frmDescargo aún no migrado).
         if (!result.EsExitoso && result.CodigoError == "REQUIERE_CONFIRMACION_DESCARGO")
         {
             var resp = MessageBox.Show(
@@ -216,6 +223,7 @@ public sealed class FrmLiquidacionCierre : Form
 
             if (resp == DialogResult.No)
             {
+                // Legacy ofrece abrir frmDescargo aquí; pendiente de migración (GAP-CAJA-002).
                 MessageBox.Show("Operación cancelada. Realice el descargo antes de cerrar.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }

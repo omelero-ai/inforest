@@ -118,6 +118,15 @@
 
 ---
 
+## Etapa POS-FUNC-008 — Caja y Cierre (frmLiquidacionDetalle.frm)
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-CAJA-001 | frmDescargo navigation | Al responder "No" en la confirmación de descargo (BR-CAJA-002, lActivaConsultaDescargo), el Legacy abre `frmDescargo` para ejecutar el descargo inmediatamente. En .NET esta navegación está pendiente hasta que `frmDescargo` sea migrado. | `frmLiquidacionDetalle.frm` línea 6062 | OPEN — depende de migración de `frmDescargo` |
+| GAP-CAJA-002 | Integración Niubiz/Izipay al cierre (BR-CAJA-005) | Al cerrar el turno con `lActivaIntegracionNiubiz=1` o `lActivaIntegracionIzipay=1`, el Legacy inserta en `MCIERREPOST` y llama `SP_EJECUTA_MOTOR_INALAMBRICO`. Pendiente de decisión de hardware/integración de terminal POS externo. | `frmLiquidacionDetalle.frm` líneas 6076-6169 | BLOCKED — requiere decisión de integración terminal POS |
+
+---
+
 ## Etapa 9 — Delivery, Despacho, Motorizados
 
 | ID | Gap | Descripción | Archivo Origen | Estado |

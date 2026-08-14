@@ -9,7 +9,7 @@
 | POS-FUNC-005 | Cobro y pagos | `frmPago.frm / frmPagoMasivo.frm / frmPagoPinPad.frm` | Registrar pagos por distintos medios | IN_PROGRESS |
 | POS-FUNC-006 | Facturación y documentos | `frmDocumento.frm / frmFactura.frm / frmNotaCredito*.frm` | Emitir comprobantes y NC | ANALYSIS |
 | POS-FUNC-007 | Correlativos de comprobante | `frmDocumentoCorrelativo*.frm / modPuntoVenta.bas` | Control numeración por caja/tipo | ANALYSIS |
-| POS-FUNC-008 | Caja y cierre | `frmCajaRapida.frm / frmLiquidacionDetalle.frm` | Control de caja y liquidaciones | ANALYSIS |
+| POS-FUNC-008 | Caja y cierre | `frmCajaRapida.frm / frmLiquidacionDetalle.frm` | Control de caja y liquidaciones | MIGRATED |
 | POS-FUNC-009 | Turno/Día contable | `frmDiaContable.frm / clsDiaContable.cls` | Apertura/cierre día operativo | IN_PROGRESS |
 | POS-FUNC-010 | Cliente y cuentas corrientes | `frmNuevoCliente.frm / frmCtaCte*.frm / frmCuentaCobrar*.frm` | Gestión de clientes y deuda | ANALYSIS |
 | POS-FUNC-011 | Reservas | `frmReserva.frm / frmReservaDetalle.frm` | Registro y seguimiento de reservas | ANALYSIS |

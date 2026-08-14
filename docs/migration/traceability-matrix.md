@@ -308,7 +308,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmCambiarContrasenia.frm` | Form | `CambiarPasswordHandler` + `FrmCambiarContrasenia` | Handler + WinForm | IN_PROGRESS | `src/Inforest.Application/Seguridad/CambiarPasswordHandler.cs` + `src/Inforest.Desktop/POS/FrmCambiarContrasenia.cs` |
 | `frmPassword.frm` | Form | `FrmPassword` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/POS/FrmPassword.cs` |
 | `AuthService` (cambio password) | Service | `IAuthService.CambiarPasswordAsync` | Service method | IN_PROGRESS | `src/Inforest.Infrastructure/Security/AuthService.cs` |
-| `frmLiquidacionDetalle.frm` | Form | `FrmLiquidacionCierre` + `CerrarTurnoHandler` | WinForm + Handler | IN_PROGRESS | `src/Inforest.Desktop/Caja/FrmLiquidacionCierre.cs` + `src/Inforest.Application/Turno/TurnoHandlers.cs` |
+| `frmLiquidacionDetalle.frm` | Form | `FrmLiquidacionCierre` + `CerrarTurnoHandler` | WinForm + Handler | MIGRATED | `src/Inforest.Desktop/Caja/FrmLiquidacionCierre.cs` + `src/Inforest.Application/Turno/TurnoHandlers.cs` |
 | `CierreTurnoBreakdown` (domain) | — | `CierreTurnoBreakdown` | Value Object | MIGRATED | `src/Inforest.Domain/Entities/Caja/CierreTurnoBreakdown.cs` |
 | `UPDATE MTURNO (cierre completo)` | SQL | `TurnoRepository.CerrarAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Turno/TurnoRepository.cs` |
 | `TCAJA.lObligaCierre` | Flag | `CerrarTurnoHandler` (BR-CAJA-001) | Business Rule | MIGRATED | `src/Inforest.Application/Turno/TurnoHandlers.cs` |
