@@ -2,6 +2,7 @@ using Inforest.Application.Caja;
 using Inforest.Application.Impresion;
 using Inforest.Infrastructure.Almacen;
 using Inforest.Infrastructure.Impresion;
+using Inforest.Application.Kitchen;
 using Inforest.Infrastructure.Notifications;
 using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
@@ -68,6 +69,7 @@ public static class DependencyInjection
         services.AddSingleton<IImpresoraService, NullImpresoraService>();
         services.AddScoped<IKitchenConfigurationProvider, KitchenConfigurationProvider>();
         services.AddScoped<IProduccionCocinaService, ProduccionCocinaService>();
+        services.AddScoped<IMensajeCocinaRepository, MensajeCocinaRepository>();
         services.AddScoped<IKdsLegacyGateway, KdsLegacyGateway>();
         services.AddScoped<IComandaAreaDispatcher, ComandaAreaDispatcher>();
         services.AddScoped<IKdsDispatcher, KdsXmlDispatcher>();
