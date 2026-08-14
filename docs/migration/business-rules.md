@@ -940,7 +940,84 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
-## Reglas de Negocio — Etapa 10: Reportes
+### BR-DEL-012
+
+**Nombre:** Confirmar y revertir entrega de pedido (lEntregado) — frmCentralPedidos
+
+**Origen:** `frmCentralPedidos.frm: Case 3 (confirmar) / Case 5 (revertir)`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCentralPedidos.frm`
+
+**Procedimiento/Función:** SQL directo sobre MPEDIDO
+
+**Descripción:** El formulario de Central de Pedidos permite confirmar que un pedido fue entregado al cliente y también revertir dicha confirmación. La confirmación actualiza los campos `lEntregado=1`, `tusuarioentregado` y `fregentregado=GETDATE()`. La reversión actualiza `lEntregado=0`. Ambas operaciones actualizan el usuario responsable.
+
+**Condición:** Al ejecutar "Confirmar Entrega" (Case 3) o "Revertir Entrega" (Case 5) sobre un pedido seleccionado.
+
+**Resultado:**
+- Confirmar: `MPEDIDO.lEntregado=1`, `tusuarioentregado=@sUsuario`, `fregentregado=GETDATE()`
+- Revertir: `MPEDIDO.lEntregado=0`, `tusuarioentregado=@sUsuario`, `fregentregado=GETDATE()`
+
+**Excepciones:**
+- No se puede confirmar entrega si el pedido ya tiene `lEntregado=1`.
+- No se puede revertir si el pedido no está en estado `lEntregado=1`.
+- La reversión siempre requiere supervisor (ver BR-DEL-013).
+
+**Destino .NET:** `ConfirmarEntregaCentralHandler`, `RevertirEntregaCentralHandler`, `IPedidoDeliveryRepository.ConfirmarEntregaAsync`, `IPedidoDeliveryRepository.RevertirEntregaAsync`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-013
+
+**Nombre:** Supervisor requerido para entrega sin pago y para revertir entrega
+
+**Origen:** `frmCentralPedidos.frm: Case 3 (Supervisor("22")), Case 5 (Supervisor("22"))`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCentralPedidos.frm`
+
+**Procedimiento/Función:** `Supervisor("22")` en `modProcedimiento.bas`
+
+**Descripción:** Cuando se intenta confirmar la entrega de un pedido que no ha sido cancelado (estado pago = "NO PAGADO", "POR COBRAR" o "ANTICIPO"), el sistema exige autorización de supervisor mediante el código de acción "22". Asimismo, cualquier reversión de entrega también requiere autorización de supervisor con el mismo código "22".
+
+**Condición:**
+- Confirmar entrega con pedido en estado "NO PAGADO", "POR COBRAR" o "ANTICIPO" sin supervisor → muestra pregunta y pide clave.
+- Revertir entrega siempre → pide clave de supervisor.
+
+**Resultado:** Si el supervisor no autoriza, la operación se cancela. Si autoriza, la operación procede.
+
+**Excepciones:** Si el pedido está pagado, la confirmación procede sin supervisor.
+
+**Destino .NET:** `ConfirmarEntregaCentralHandler` (campo `SupervisorAutorizado`), `RevertirEntregaCentralHandler` (campo `SupervisorAutorizado`), `CentralPedidosForm.PromptSupervisor()`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-014
+
+**Nombre:** Modificar fecha programada de entrega (fProgramacion / fRegistro)
+
+**Origen:** `frmCentralPedidos.frm: Case 2`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCentralPedidos.frm`
+
+**Procedimiento/Función:** SQL directo sobre MPEDIDO
+
+**Descripción:** El formulario de Central de Pedidos permite cambiar la fecha y hora programada de entrega de un pedido. Actualiza simultáneamente los campos `fregistro` y `fProgramacion` de MPEDIDO con la nueva fecha seleccionada.
+
+**Condición:** Al ejecutar "Modificar Fecha" sobre un pedido seleccionado que no haya sido entregado.
+
+**Resultado:** `MPEDIDO.fregistro = @nuevaFecha`, `MPEDIDO.fProgramacion = @nuevaFecha`
+
+**Excepciones:** No se puede modificar la fecha de un pedido ya entregado (`lEntregado=1`). La nueva fecha no puede ser vacía (`default`).
+
+**Destino .NET:** `ModificarFechaProgramadaDeliveryHandler`, `IPedidoDeliveryRepository.ModificarFechaProgramadaAsync`, `CentralPedidosForm` (Case 2)
+
+**Estado:** MIGRATED
+
+---
 
 ---
 

@@ -152,3 +152,162 @@ public class DeliveryHandlersTests
         mockCentral.Verify(r => r.ModificarEstadoDeliveryAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }
+
+/// <summary>
+/// Tests de handlers de Central de Pedidos — frmCentralPedidos.frm.
+/// Reglas: BR-DEL-012, BR-DEL-013, BR-DEL-014.
+/// </summary>
+public class CentralPedidosHandlersTests
+{
+    // ── ConfirmarEntregaCentralHandler ────────────────────────────────────────
+
+    [Fact]
+    public async Task ConfirmarEntrega_PedidoPendiente_SinPago_SinSupervisor_RetornaRequiereSupervisor()
+    {
+        // BR-DEL-013: pedido con estado POR COBRAR sin autorización → REQUIERE_SUPERVISOR_22
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        mock.Setup(r => r.EstaEntregadoAsync("PED001", It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        mock.Setup(r => r.ObtenerEstadoPagoAsync("PED001", It.IsAny<CancellationToken>())).ReturnsAsync("NO PAGADO");
+
+        var handler = new ConfirmarEntregaCentralHandler(mock.Object);
+        var result = await handler.HandleAsync(new ConfirmarEntregaCentralCommand("PED001", "USR001"));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("REQUIERE_SUPERVISOR_22", result.CodigoError);
+        mock.Verify(r => r.ConfirmarEntregaAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ConfirmarEntrega_PedidoPendiente_SinPago_ConSupervisor_RetornaOk()
+    {
+        // BR-DEL-013: con SupervisorAutorizado = true → confirma igual
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        mock.Setup(r => r.EstaEntregadoAsync("PED001", It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        mock.Setup(r => r.ObtenerEstadoPagoAsync("PED001", It.IsAny<CancellationToken>())).ReturnsAsync("NO PAGADO");
+        mock.Setup(r => r.ConfirmarEntregaAsync("PED001", "USR001", It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        var handler = new ConfirmarEntregaCentralHandler(mock.Object);
+        var result = await handler.HandleAsync(new ConfirmarEntregaCentralCommand("PED001", "USR001", SupervisorAutorizado: true));
+
+        Assert.True(result.EsExitoso);
+        mock.Verify(r => r.ConfirmarEntregaAsync("PED001", "USR001", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ConfirmarEntrega_PedidoPagado_RetornaOk()
+    {
+        // Pedido pagado → no requiere supervisor
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        mock.Setup(r => r.EstaEntregadoAsync("PED002", It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        mock.Setup(r => r.ObtenerEstadoPagoAsync("PED002", It.IsAny<CancellationToken>())).ReturnsAsync("PAGADO");
+        mock.Setup(r => r.ConfirmarEntregaAsync("PED002", "USR001", It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        var handler = new ConfirmarEntregaCentralHandler(mock.Object);
+        var result = await handler.HandleAsync(new ConfirmarEntregaCentralCommand("PED002", "USR001"));
+
+        Assert.True(result.EsExitoso);
+        mock.Verify(r => r.ConfirmarEntregaAsync("PED002", "USR001", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ConfirmarEntrega_PedidoYaEntregado_RetornaFallo()
+    {
+        // BR-DEL-012: pedido ya entregado → no se puede confirmar de nuevo
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        mock.Setup(r => r.EstaEntregadoAsync("PED003", It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+        var handler = new ConfirmarEntregaCentralHandler(mock.Object);
+        var result = await handler.HandleAsync(new ConfirmarEntregaCentralCommand("PED003", "USR001"));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("DELIVERY_YA_ENTREGADO", result.CodigoError);
+        mock.Verify(r => r.ConfirmarEntregaAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // ── RevertirEntregaCentralHandler ─────────────────────────────────────────
+
+    [Fact]
+    public async Task RevertirEntrega_SinSupervisor_RetornaRequiereSupervisor()
+    {
+        // Siempre requiere supervisor para revertir
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        var handler = new RevertirEntregaCentralHandler(mock.Object);
+
+        var result = await handler.HandleAsync(new RevertirEntregaCentralCommand("PED001", "USR001"));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("REQUIERE_SUPERVISOR_22", result.CodigoError);
+        mock.Verify(r => r.RevertirEntregaAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RevertirEntrega_ConSupervisor_PedidoEntregado_RetornaOk()
+    {
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        mock.Setup(r => r.EstaEntregadoAsync("PED001", It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        mock.Setup(r => r.RevertirEntregaAsync("PED001", "USR001", It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        var handler = new RevertirEntregaCentralHandler(mock.Object);
+        var result = await handler.HandleAsync(new RevertirEntregaCentralCommand("PED001", "USR001", SupervisorAutorizado: true));
+
+        Assert.True(result.EsExitoso);
+        mock.Verify(r => r.RevertirEntregaAsync("PED001", "USR001", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task RevertirEntrega_ConSupervisor_PedidoNoEntregado_RetornaFallo()
+    {
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        mock.Setup(r => r.EstaEntregadoAsync("PED001", It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+        var handler = new RevertirEntregaCentralHandler(mock.Object);
+        var result = await handler.HandleAsync(new RevertirEntregaCentralCommand("PED001", "USR001", SupervisorAutorizado: true));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("DELIVERY_NO_ENTREGADO", result.CodigoError);
+    }
+
+    // ── ModificarFechaProgramadaDeliveryHandler ────────────────────────────────
+
+    [Fact]
+    public async Task ModificarFecha_PedidoPendiente_RetornaOk()
+    {
+        // BR-DEL-014: pedido no entregado → puede modificar fecha
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        mock.Setup(r => r.EstaEntregadoAsync("PED001", It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        mock.Setup(r => r.ModificarFechaProgramadaAsync("PED001", It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        var handler = new ModificarFechaProgramadaDeliveryHandler(mock.Object);
+        var result = await handler.HandleAsync(new ModificarFechaProgramadaDeliveryCommand("PED001", DateTime.Now.AddHours(2)));
+
+        Assert.True(result.EsExitoso);
+        mock.Verify(r => r.ModificarFechaProgramadaAsync("PED001", It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ModificarFecha_PedidoEntregado_RetornaFallo()
+    {
+        // BR-DEL-014: pedido entregado → no se puede modificar
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        mock.Setup(r => r.EstaEntregadoAsync("PED001", It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+        var handler = new ModificarFechaProgramadaDeliveryHandler(mock.Object);
+        var result = await handler.HandleAsync(new ModificarFechaProgramadaDeliveryCommand("PED001", DateTime.Now.AddHours(2)));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("DELIVERY_YA_ENTREGADO", result.CodigoError);
+    }
+
+    [Fact]
+    public async Task ModificarFecha_FechaVacia_RetornaFallo()
+    {
+        var mock = new Mock<IPedidoDeliveryRepository>();
+        mock.Setup(r => r.EstaEntregadoAsync("PED001", It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+        var handler = new ModificarFechaProgramadaDeliveryHandler(mock.Object);
+        var result = await handler.HandleAsync(new ModificarFechaProgramadaDeliveryCommand("PED001", default));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("DELIVERY_FECHA_REQUERIDA", result.CodigoError);
+    }
+}

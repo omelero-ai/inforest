@@ -133,6 +133,10 @@ public static class DependencyInjection
         services.AddScoped<SincronizarPedidoCentralHandler>();
         services.AddScoped<ObtenerOrdenesExternasHandler>();
         services.AddScoped<EnviarDatosRappiHandler>();
+        services.AddScoped<ConfirmarEntregaCentralHandler>();
+        services.AddScoped<RevertirEntregaCentralHandler>();
+        services.AddScoped<ModificarFechaProgramadaDeliveryHandler>();
+        services.AddScoped<ObtenerPedidosSeguimientoDeliveryHandler>();
 
         // P3-10: Reportes — Handlers (ADR-007)
         services.AddScoped<ObtenerReporteComandaHandler>();

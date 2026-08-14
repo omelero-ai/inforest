@@ -323,3 +323,166 @@ public sealed class ObtenerDeliveryPendientesHandler
         return Result.Ok(pedidos);
     }
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// CENTRAL PEDIDOS — frmCentralPedidos.frm
+// ──────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Comando para confirmar la entrega de un pedido desde el Central de Pedidos.
+/// <para>
+/// Legacy: <c>frmCentralPedidos.frm Case 3</c>.
+/// SQL: <c>Update MPEDIDO Set lEntregado='1', tusuarioentregado=@usuario, fregentregado=getdate()</c>.
+/// </para>
+/// Reglas: BR-DEL-012, BR-DEL-013.
+/// </summary>
+public sealed record ConfirmarEntregaCentralCommand(
+    string CodigoPedido,
+    string Usuario,
+    bool SupervisorAutorizado = false);
+
+/// <summary>Handler de <see cref="ConfirmarEntregaCentralCommand"/>.</summary>
+public sealed class ConfirmarEntregaCentralHandler
+{
+    private readonly IPedidoDeliveryRepository _repo;
+
+    public ConfirmarEntregaCentralHandler(IPedidoDeliveryRepository repo)
+        => _repo = repo;
+
+    /// <summary>
+    /// Confirma la entrega del pedido.
+    /// <list type="bullet">
+    ///   <item>BR-DEL-012: no se puede confirmar entrega si ya fue entregado.</item>
+    ///   <item>BR-DEL-013: si el pedido no ha sido pagado (POR COBRAR/ANTICIPO) se requiere
+    ///     autorización de supervisor (acción "22") para proceder.</item>
+    /// </list>
+    /// </summary>
+    public async Task<Result> HandleAsync(ConfirmarEntregaCentralCommand cmd, CancellationToken ct = default)
+    {
+        // BR-DEL-012: verificar si ya fue entregado
+        var yaEntregado = await _repo.EstaEntregadoAsync(cmd.CodigoPedido, ct);
+        if (yaEntregado)
+            return Result.Fail("El pedido ya se encuentra Entregado.", "DELIVERY_YA_ENTREGADO");
+
+        // BR-DEL-013: verificar estado de pago
+        var estadoPago = await _repo.ObtenerEstadoPagoAsync(cmd.CodigoPedido, ct);
+        if (estadoPago is "NO PAGADO" or "POR COBRAR" or "ANTICIPO")
+        {
+            if (!cmd.SupervisorAutorizado)
+                return Result.Fail(
+                    "El pedido no ha sido Cancelado. Se requiere autorización de supervisor (acción 22).",
+                    "REQUIERE_SUPERVISOR_22");
+        }
+
+        await _repo.ConfirmarEntregaAsync(cmd.CodigoPedido, cmd.Usuario, ct);
+        return Result.Ok();
+    }
+}
+
+/// <summary>
+/// Comando para revertir la confirmación de entrega de un pedido.
+/// <para>
+/// Legacy: <c>frmCentralPedidos.frm Case 5</c> — requiere supervisor acción "22".
+/// SQL: <c>Update MPEDIDO Set lEntregado='0', tusuarioentregado=@usuario, fregentregado=getdate()</c>.
+/// </para>
+/// Regla: BR-DEL-012.
+/// </summary>
+public sealed record RevertirEntregaCentralCommand(
+    string CodigoPedido,
+    string Usuario,
+    bool SupervisorAutorizado = false);
+
+/// <summary>Handler de <see cref="RevertirEntregaCentralCommand"/>.</summary>
+public sealed class RevertirEntregaCentralHandler
+{
+    private readonly IPedidoDeliveryRepository _repo;
+
+    public RevertirEntregaCentralHandler(IPedidoDeliveryRepository repo)
+        => _repo = repo;
+
+    /// <summary>
+    /// Revierte la entrega del pedido. Requiere autorización de supervisor (acción "22").
+    /// BR-DEL-012: el pedido debe estar previamente entregado para poder revertir.
+    /// </summary>
+    public async Task<Result> HandleAsync(RevertirEntregaCentralCommand cmd, CancellationToken ct = default)
+    {
+        // Legacy: Supervisor("22") — siempre requerido para revertir (Case 5)
+        if (!cmd.SupervisorAutorizado)
+            return Result.Fail(
+                "Se requiere autorización de supervisor (acción 22) para revertir la entrega.",
+                "REQUIERE_SUPERVISOR_22");
+
+        var yaEntregado = await _repo.EstaEntregadoAsync(cmd.CodigoPedido, ct);
+        if (!yaEntregado)
+            return Result.Fail("El pedido no ha sido Entregado.", "DELIVERY_NO_ENTREGADO");
+
+        await _repo.RevertirEntregaAsync(cmd.CodigoPedido, cmd.Usuario, ct);
+        return Result.Ok();
+    }
+}
+
+/// <summary>
+/// Comando para modificar la fecha programada de entrega de un pedido.
+/// <para>
+/// Legacy: <c>frmCentralPedidos.frm Case 2</c>.
+/// SQL: <c>Update MPEDIDO set fregistro=@fecha, fProgramacion=@fecha where tCodigoPedido=@sPedido</c>.
+/// </para>
+/// Regla: BR-DEL-014.
+/// </summary>
+public sealed record ModificarFechaProgramadaDeliveryCommand(
+    string CodigoPedido,
+    DateTime NuevaFecha);
+
+/// <summary>Handler de <see cref="ModificarFechaProgramadaDeliveryCommand"/>.</summary>
+public sealed class ModificarFechaProgramadaDeliveryHandler
+{
+    private readonly IPedidoDeliveryRepository _repo;
+
+    public ModificarFechaProgramadaDeliveryHandler(IPedidoDeliveryRepository repo)
+        => _repo = repo;
+
+    /// <summary>
+    /// Modifica la fecha programada de entrega.
+    /// BR-DEL-014: no se puede modificar fecha de un pedido ya entregado.
+    /// </summary>
+    public async Task<Result> HandleAsync(ModificarFechaProgramadaDeliveryCommand cmd, CancellationToken ct = default)
+    {
+        // BR-DEL-014: verificar que no fue entregado
+        var yaEntregado = await _repo.EstaEntregadoAsync(cmd.CodigoPedido, ct);
+        if (yaEntregado)
+            return Result.Fail("No se puede modificar la fecha de un pedido ya Entregado.", "DELIVERY_YA_ENTREGADO");
+
+        if (cmd.NuevaFecha == default)
+            return Result.Fail("La nueva fecha programada es obligatoria.", "DELIVERY_FECHA_REQUERIDA");
+
+        await _repo.ModificarFechaProgramadaAsync(cmd.CodigoPedido, cmd.NuevaFecha, ct);
+        return Result.Ok();
+    }
+}
+
+/// <summary>
+/// Query para obtener pedidos pendientes de delivery desde la vista <c>vDespachador</c>.
+/// <para>
+/// Legacy: <c>frmPedidoDelivery.frm Form_Load</c>.
+/// SQL: <c>select * from vDespachador where tTipoPedido='02' and tEstadoPedido='02' and isnull(fLlegada,0)=0</c>.
+/// </para>
+/// Regla: BR-DEL-009.
+/// </summary>
+public sealed record ObtenerPedidosSeguimientoDeliveryQuery;
+
+/// <summary>Handler de <see cref="ObtenerPedidosSeguimientoDeliveryQuery"/>.</summary>
+public sealed class ObtenerPedidosSeguimientoDeliveryHandler
+{
+    private readonly IPedidoDeliveryRepository _repo;
+
+    public ObtenerPedidosSeguimientoDeliveryHandler(IPedidoDeliveryRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<IEnumerable<PedidoDelivery>>> HandleAsync(
+        ObtenerPedidosSeguimientoDeliveryQuery _, CancellationToken ct = default)
+    {
+        var hoy = DateTime.Today;
+        var pedidos = await _repo.ObtenerParaDespachadorAsync(hoy, hoy.AddDays(1).AddSeconds(-1), ct);
+        return Result.Ok(pedidos);
+    }
+}
