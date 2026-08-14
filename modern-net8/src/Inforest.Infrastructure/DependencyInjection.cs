@@ -93,6 +93,7 @@ public static class DependencyInjection
         services.AddScoped<ISalonRepository, SalonRepository>();
         services.AddScoped<IMozoRepository, MozoRepository>();
         services.AddScoped<IProductoMaestroRepository, ProductoMaestroRepository>();
+        services.AddScoped<IInsumoRepository, InsumoRepository>();
 
         // W3: Turno / Día Contable (BR-004, BR-005)
         services.AddScoped<ITurnoRepository, TurnoRepository>();

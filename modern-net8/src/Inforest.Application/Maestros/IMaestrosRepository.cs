@@ -23,6 +23,22 @@ public interface IMozoRepository : IMaestroRepository<Mozo>;
 public interface IProductoMaestroRepository : IMaestroRepository<ProductoMaestro>;
 
 /// <summary>
+/// Contrato del repositorio de insumos / platos de stock crítico (TINSUMO).
+/// Legacy: frmInsumo.frm, frmInsumoDetalle.frm. BR-INSUMO-001..004.
+/// SPs: USP_LISTARINSUMOS, usp_agregarinsumos, USP_MODIFICARINSUMOS, USP_ELIMINARINSUMOS.
+/// </summary>
+public interface IInsumoRepository
+{
+    Task<IReadOnlyList<Insumo>> ObtenerTodosAsync(bool moduloInforRest = true, CancellationToken ct = default);
+    Task<Insumo?> ObtenerPorCodigoAsync(string codigo, CancellationToken ct = default);
+    Task<bool> ExisteDescripcionAsync(string descripcion, CancellationToken ct = default);
+    Task<string> ObtenerProximoCodigoAsync(CancellationToken ct = default);
+    Task AgregarAsync(Insumo insumo, string caja, bool moduloInforRest = true, CancellationToken ct = default);
+    Task ModificarAsync(Insumo insumo, string caja, bool moduloInforRest = true, CancellationToken ct = default);
+    Task EliminarAsync(string codigo, CancellationToken ct = default);
+}
+
+/// <summary>
 /// Contrato de cuentas corrientes (vCompania / TDELIVERY lClienteCtaCte=1).
 /// Legacy: frmCtaCte.frm, frmCuentaCobrar.frm. BR-CTACTE-001/002/003.
 /// </summary>

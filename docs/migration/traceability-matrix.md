@@ -353,3 +353,27 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `TRESERVA` | Table | `Reserva` + `IReservaRepository` + `ReservaRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Reservas/Reserva.cs` + `src/Inforest.Infrastructure/Reservas/ReservaRepository.cs` |
 | `spIns_MPEDIDO_RESERVA` | SP | `ConvertirReservaAPedidoHandler` + `IReservaRepository.ConvertirAPedidoAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Reservas/ReservaHandlers.cs` + `src/Inforest.Infrastructure/Reservas/ReservaRepository.cs` |
 | (BR-RESERVA-001..004 tests) | — | `ReservaTests` (9 tests domain) + `CrearReservaHandlerTests` (2) + `AnularReservaHandlerTests` (3) + `ModificarReservaHandlerTests` (1) + `ObtenerReservasPorFechaHandlerTests` (2) = 17 tests | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Reservas/ReservaTests.cs` |
+
+## Componentes POS-FUNC-012 — Delivery dependiente POS
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmPedidoDelivery.frm` | Form | `FrmPedidoDelivery` | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/FrmPedidoDelivery.cs` |
+| `frmCentralPedidos.frm` (extendido) | Form | `CentralPedidosForm` (ConfirmarEntrega + RevertirEntrega + ModificarFecha) | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/CentralPedidosForm.cs` |
+| (DeliveryHandlers) | — | `ConfirmarEntregaCentralHandler` + `RevertirEntregaCentralHandler` + `ModificarFechaProgramadaDeliveryHandler` + `ObtenerPedidosSeguimientoDeliveryHandler` | Handlers | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs` |
+| (IPedidoDeliveryRepository ext.) | — | 5 nuevos métodos `IPedidoDeliveryRepository` + `PedidoDeliveryRepository` | Interface + Repository | MIGRATED | `src/Inforest.Infrastructure/Delivery/PedidoDeliveryRepository.cs` |
+| (tests BR-DEL-012..014) | — | `CentralPedidosHandlersTests` (10 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Delivery/CentralPedidosHandlersTests.cs` |
+
+## Componentes POS-FUNC-013 — Insumos/descargo
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmInsumo.frm` | Form | `FrmInsumo` | WinForm | MIGRATED | `src/Inforest.Desktop/Maestros/FrmInsumo.cs` |
+| `frmInsumoDetalle.frm` | Form | `FrmInsumoDetalle` + `AgregarInsumoHandler` + `ModificarInsumoHandler` + `EliminarInsumoHandler` | WinForm + Handlers | MIGRATED | `src/Inforest.Desktop/Maestros/FrmInsumoDetalle.cs` + `src/Inforest.Application/Maestros/InsumoHandlers.cs` |
+| `TINSUMO` | Table | `Insumo` + `IInsumoRepository` + `InsumoRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Maestros/Insumo.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `USP_LISTARINSUMOS` | SP | `ListarInsumosHandler` + `IInsumoRepository.ObtenerTodosAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/InsumoHandlers.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `usp_agregarinsumos` | SP | `AgregarInsumoHandler` + `IInsumoRepository.AgregarAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/InsumoHandlers.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `USP_MODIFICARINSUMOS` | SP | `ModificarInsumoHandler` + `IInsumoRepository.ModificarAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/InsumoHandlers.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `USP_ELIMINARINSUMOS` | SP | `EliminarInsumoHandler` + `IInsumoRepository.EliminarAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/InsumoHandlers.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
+| `clsAlmacen.cls` (descargo automatico) | Class | `IInventoryGateway` + `InventoryGateway` (existente — BR-008) | Interface + Class | MIGRATED | `src/Inforest.Infrastructure/Almacen/InventoryGateway.cs` |
+| (tests BR-INSUMO-001..004) | — | `InsumoTests` (8 tests domain) + `InsumoHandlerTests` (10 tests handler) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/InsumoTests.cs` + `tests/Inforest.Application.Tests/Maestros/InsumoHandlerTests.cs` |

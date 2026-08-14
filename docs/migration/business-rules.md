@@ -2155,3 +2155,103 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Estado:** MIGRATED
 
 **Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Reservas/Reserva.cs`, `modern-net8/src/Inforest.Application/Reservas/ReservaHandlers.cs`
+
+---
+
+## BR-INSUMO-001
+**Nombre:** Descripción requerida y no duplicada para insumo
+
+**Origen:** Legacy/frmInsumoDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmInsumoDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (Grabar)
+
+**Descripción:** Al agregar o modificar un insumo, la descripción no puede estar vacía. Al agregar, no puede existir ya un insumo con la misma descripción (comparación con UPPER).
+
+**Condición:** txtMensaje.Text = "" → error. Descripcion duplicada → error.
+
+**Resultado:** MsgBox de error, no se ejecuta el SP.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Insumo.Crear()` — DomainException INSUMO_DESCRIPCION_REQUERIDA. `AgregarInsumoHandler` — Result.Fail INSUMO_DESCRIPCION_DUPLICADA.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Insumo.cs`, `modern-net8/src/Inforest.Application/Maestros/InsumoHandlers.cs`
+
+---
+
+## BR-INSUMO-002
+**Nombre:** Descripción de insumo en mayúsculas
+
+**Origen:** Legacy/frmInsumoDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmInsumoDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (txtMensaje.Text = UCase(txtMensaje.Text))
+
+**Descripción:** La descripción del insumo se normaliza a mayúsculas antes de guardar.
+
+**Condición:** Siempre al agregar.
+
+**Resultado:** La descripción queda almacenada en mayúsculas en TINSUMO.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Inforest.Crear()` llama `.ToUpperInvariant()` en la descripción.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Insumo.cs`
+
+---
+
+## BR-INSUMO-003
+**Nombre:** Modificación de insumo actualiza descripción, stock, tipo, activo
+
+**Origen:** Legacy/frmInsumoDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmInsumoDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (Sw = False → USP_MODIFICARINSUMOS)
+
+**Descripción:** Al modificar, se actualizan: descripción, usuario, caja, activo, nstock (solo si modulo=INFOREST), LINSUMO y fecha de modificación.
+
+**Condición:** Insumo ya existe. Sw=False (edición).
+
+**Resultado:** SP USP_MODIFICARINSUMOS ejecutado con los nuevos valores.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Insumo.Actualizar()` + `ModificarInsumoHandler` → `InsumoRepository.ModificarAsync` → USP_MODIFICARINSUMOS.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Maestros/Insumo.cs`, `modern-net8/src/Inforest.Application/Maestros/InsumoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/InsumoRepository.cs`
+
+---
+
+## BR-INSUMO-004
+**Nombre:** Eliminación de insumo previa confirmación
+
+**Origen:** Legacy/frmInsumoDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmInsumoDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 2 (USP_ELIMINARINSUMOS)
+
+**Descripción:** Se solicita confirmación del usuario antes de eliminar un insumo mediante USP_ELIMINARINSUMOS.
+
+**Condición:** Registro existe.
+
+**Resultado:** SP USP_ELIMINARINSUMOS ejecutado. Grilla recargada.
+
+**Excepciones:** Si no existe, no se elimina.
+
+**Destino .NET:** `EliminarInsumoHandler` → `IInsumoRepository.EliminarAsync` → USP_ELIMINARINSUMOS. WinForm muestra MessageBox de confirmación.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Maestros/InsumoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/InsumoRepository.cs`, `modern-net8/src/Inforest.Desktop/Maestros/FrmInsumo.cs`
