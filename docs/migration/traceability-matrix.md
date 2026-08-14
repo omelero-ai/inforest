@@ -316,3 +316,14 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `UPDATE MTURNO (cierre completo)` | SQL | `TurnoRepository.CerrarAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Turno/TurnoRepository.cs` |
 | `TCAJA.lObligaCierre` | Flag | `CerrarTurnoHandler` (BR-CAJA-001) | Business Rule | MIGRATED | `src/Inforest.Application/Turno/TurnoHandlers.cs` |
 | `TPARAMETRO.lActivaConsultaDescargo` | Flag | `CerrarTurnoHandler` (BR-CAJA-002) | Business Rule | MIGRATED | `src/Inforest.Application/Turno/TurnoHandlers.cs` |
+
+## Componentes POS-FUNC-006 — Facturación y Notas de Crédito
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmNotaCredito.frm` | Form | `FrmNotaCredito` | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmNotaCredito.cs` |
+| `frmNotaCreditoDetalle.frm` | Form | `FrmNotaCreditoDetalle` + `EmitirNotaCreditoHandler` + `AnularNotaCreditoHandler` | WinForm + Handlers | MIGRATED | `src/Inforest.Desktop/Ventas/FrmNotaCreditoDetalle.cs` + `src/Inforest.Application/Ventas/NotaCreditoHandlers.cs` |
+| `MNOTACREDITO` | Table | `NotaCredito` + `INotaCreditoRepository` + `NotaCreditoRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Ventas/NotaCredito.cs` + `src/Inforest.Infrastructure/Ventas/NotaCreditoRepository.cs` |
+| `frmDocumento.frm` (Generación) | Form | `FrmDocumento` (visualización + anulación) | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmDocumento.cs` |
+| `frmFactura.frm` | Form | Cubierto por `CorrelativoDocumento` + `FrmDocumentoCorrelativo` | Domain Entity + WinForm | NOT_APPLICABLE | POS-FUNC-007 — ya implementado |
+| (tests BR-NC-001..006) | — | `NotaCreditoTests` (9 tests) + `NotaCreditoHandlersTests` (10 tests) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/Ventas/NotaCreditoTests.cs` + `tests/Inforest.Application.Tests/Ventas/NotaCreditoHandlersTests.cs` |

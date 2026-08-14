@@ -10,8 +10,8 @@
 
 | Indicador | Valor |
 |---|---|
-| Fase actual | 4 (IN_PROGRESS) — W1-W15 completados: Configuración, Maestros, Turno/DíaContable, Pedidos, Venta/Documentos, Caja/Pagos, SEC-006, Reportes FastReport, Módulos POS/Admin/Consultas/CajaRápida/Adición, TaxPolicy/ProductoVisibilidad/InventoryGateway/Email, Caja/Cierre(POS-FUNC-008 COMPLETED) |
-| Código .NET 8 existente | IN_PROGRESS — 221+ archivos .cs, 226+ tests verdes: baseline + seguridad + KDS + delivery + configuración + maestros + turno + pedidos + venta + caja + reportes FastReport + WinForms POS/Admin/Consultas/CajaRápida/Adición + TaxPolicy + ProductoVisibilidad + InventoryGateway + SmtpEmail + RegistrarPagosMultiplesHandler + DocumentoTests (13) |
+| Fase actual | 4 (IN_PROGRESS) — W1-W15 completados: Configuración, Maestros, Turno/DíaContable, Pedidos, Venta/Documentos, Caja/Pagos, SEC-006, Reportes FastReport, Módulos POS/Admin/Consultas/CajaRápida/Adición, TaxPolicy/ProductoVisibilidad/InventoryGateway/Email, Caja/Cierre(POS-FUNC-008 COMPLETED) + **POS-FUNC-006 (Notas de Crédito MIGRATED)** |
+| Código .NET 8 existente | IN_PROGRESS — 232+ archivos .cs, 246+ tests verdes: baseline + seguridad + KDS + delivery + configuración + maestros + turno + pedidos + venta + caja + reportes FastReport + WinForms POS/Admin/Consultas/CajaRápida/Adición + TaxPolicy + ProductoVisibilidad + InventoryGateway + SmtpEmail + RegistrarPagosMultiplesHandler + DocumentoTests (13) + NotaCredito (19 tests) |
 | Módulos migrados | 0 / 7 |
 | Documentación Legacy | IN_PROGRESS — inventarios base completos; trazabilidad y gaps de Fase 3 actualizados al cierre P3-12 |
 | Arquitectura Target definida | IN_PROGRESS — ADR-001 a ADR-012 aceptados; gaps funcionales posteriores siguen abiertos |
@@ -86,6 +86,7 @@
 | M4-POS-FUNC-019 | Control seguridad/contraseñas (CambiarPasswordHandler + AuthService.CambiarPasswordAsync + FrmCambiarContrasenia + FrmPassword) | COMPLETED — 2026-08-13 |
 | M4-POS-FUNC-003 | Gestión de pedidos salón — stage MIGRATED: UpdatePedidoHandlerTests (6) + ObtenerPedidoHandlerTests (6) + BR-PEDIDO-001/002/003/004 documentados. Pendiente: VALIDATING vs Legacy + frmDetallePedido + frmJuntarMesas | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-004 | Registro de venta MIGRATED: EmitirDocumentoHandler + AnularDocumentoHandler + Documento domain entity + 13 DocumentoTests (PE/CO/AN estados, total fórmula, propina, descuento, validaciones) + 5+3 VentaHandlerTests + BR-VENTA-001/002/003 documentados | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-006 | Facturación y Notas de Crédito (POS-FUNC-006): NotaCredito entity + EmitirNotaCreditoHandler + AnularNotaCreditoHandler + ObtenerNotaCreditoHandler + ObtenerNotasCreditoPorFechaHandler + NotaCreditoRepository + FrmNotaCredito + FrmNotaCreditoDetalle + BR-NC-001..006 documentados + 19 tests | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-009 | Turno/Día Contable (POS-FUNC-009): FrmDiaContable + AperturarDiaContableHandler + CerrarDiaContableHandler + ObtenerDiaContableHandler + IDiaContableService extendido (CerrarDiaContableAsync + ObtenerFechaMaximaDiaContableAsync) + BR-DC-001/002/003/004 documentados + 10 tests | COMPLETED — 2026-08-14 |
 | M5 | Punto de Venta migrado | IN_PROGRESS — W4+W5+W6+W11+POS-FUNC-002/007/016/019 implementados; POS-FUNC-003 MIGRATED (tests completos) |
 | M6 | Caja y Pagos migrados | NOT_STARTED |

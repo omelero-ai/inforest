@@ -103,6 +103,8 @@ public static class DependencyInjection
         // W5: Venta / Documentos (BR-002, BR-013)
         services.AddScoped<IDocumentoRepository, DocumentoRepository>();
         services.AddScoped<ICorrelativoRepository, CorrelativoRepository>();
+        // POS-FUNC-006: Notas de Crédito (BR-NC-001..006)
+        services.AddScoped<INotaCreditoRepository, NotaCreditoRepository>();
         // POS-FUNC-016: Impresión pre-cuenta — TIMPRESORA (BR-008)
         services.AddScoped<IImpresoraRepository, ImpresoraRepository>();
 

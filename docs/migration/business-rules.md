@@ -1643,3 +1643,161 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Estado:** MIGRATED
 
 **Evidencia:** `modern-net8/src/Inforest.Application/Turno/DiaContableHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Turno/DiaContableService.cs`, `modern-net8/tests/Inforest.Application.Tests/Turno/DiaContableHandlerTests.cs`
+
+---
+
+## Reglas de Negocio — Notas de Crédito (POS-FUNC-006)
+
+### BR-NC-001
+
+**Nombre:** Total de nota de crédito mayor a cero
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(1)` — Grabar
+
+**Descripción:** El total calculado (neto + impuesto1 + impuesto2 + impuesto3) de la nota de crédito debe ser estrictamente mayor a cero.
+
+**Condición:** `nNCTotal <= 0`
+
+**Resultado:** Error — "El valor de la Nota de crédito debe ser mayor a cero"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `NotaCredito.Emitir` (lanza `DomainException` `NC_TOTAL_INVALIDO`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Ventas/NotaCredito.cs`, `modern-net8/tests/Inforest.Domain.Tests/Ventas/NotaCreditoTests.cs`
+
+---
+
+### BR-NC-002
+
+**Nombre:** Impuestos de nota de crédito no negativos
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(1)` — Grabar
+
+**Descripción:** Los tres campos de impuesto de la nota de crédito no pueden tomar valores negativos.
+
+**Condición:** `nNCImp1 < 0 OR nNCImp2 < 0 OR nNCImp3 < 0`
+
+**Resultado:** Error — "El valor Impuesto de la Nota de crédito no debe ser negativo"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `NotaCredito.Emitir` (lanza `DomainException` `NC_IMPUESTO_NEGATIVO`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Ventas/NotaCredito.cs`
+
+---
+
+### BR-NC-003
+
+**Nombre:** Total acumulado de notas de crédito no supera el total del documento
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(1)` — Grabar (verificación vía `MNOTACREDITO SUM`)
+
+**Descripción:** La suma de todas las notas de crédito activas emitidas contra un documento (campo `nVenta`) más la nueva nota de crédito no puede exceder el total (`nVenta`) del documento origen.
+
+**Condición:** `totalNCPrevio + totalNCNueva > documento.Total`
+
+**Resultado:** Error — "El valor de la nota de crédito supera el saldo disponible del documento"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `EmitirNotaCreditoHandler` (retorna `NC_EXCEDE_DOCUMENTO`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Ventas/NotaCreditoHandlers.cs`, `modern-net8/tests/Inforest.Application.Tests/Ventas/NotaCreditoHandlersTests.cs`
+
+---
+
+### BR-NC-004
+
+**Nombre:** Observación/motivo de nota de crédito obligatoria
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(1)` — Grabar
+
+**Descripción:** El campo de observación/motivo de la nota de crédito no puede estar vacío.
+
+**Condición:** `txtObservacion.Text = ""`
+
+**Resultado:** Error — "Ingrese el Motivo de la Nota de Crédito"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `NotaCredito.Emitir` (lanza `DomainException` `NC_OBSERVACION_REQUERIDA`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Ventas/NotaCredito.cs`
+
+---
+
+### BR-NC-005
+
+**Nombre:** Autorización de supervisor para emitir nota de crédito
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(0)` — Agregar; verifica `Supervisor("27")`
+
+**Descripción:** La emisión de una nota de crédito requiere autorización de un supervisor (permiso "27" en `TACCESO`).
+
+**Condición:** `Supervisor("27") = False`
+
+**Resultado:** Error — "Clave no permitida"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** Delegado a `IRbacService` — pendiente integración en `EmitirNotaCreditoHandler` (gap controlado)
+
+**Estado:** IN_PROGRESS
+
+**Evidencia:** `modern-net8/src/Inforest.Infrastructure/Security/RbacService.cs`
+
+---
+
+### BR-NC-006
+
+**Nombre:** No se puede anular una nota de crédito ya anulada
+
+**Origen:** Legacy/frmNotaCreditoDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNotaCreditoDetalle.frm`
+
+**Procedimiento/Función:** Estado "ANULADO" deshabilita botones de edición/anulación
+
+**Descripción:** Una nota de crédito con estado "AN" (anulado) no puede ser anulada nuevamente.
+
+**Condición:** `Estado == "AN"`
+
+**Resultado:** Error — "La nota de crédito ya se encuentra anulada"
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `NotaCredito.Anular` (lanza `DomainException` `NC_YA_ANULADA`)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Ventas/NotaCredito.cs`

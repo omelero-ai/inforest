@@ -80,6 +80,11 @@ public static class DependencyInjection
         services.AddScoped<EmitirDocumentoHandler>();
         services.AddScoped<ObtenerDocumentoHandler>();
         services.AddScoped<AnularDocumentoHandler>();
+        // POS-FUNC-006: Notas de Crédito (BR-NC-001..006)
+        services.AddScoped<EmitirNotaCreditoHandler>();
+        services.AddScoped<AnularNotaCreditoHandler>();
+        services.AddScoped<ObtenerNotaCreditoHandler>();
+        services.AddScoped<ObtenerNotasCreditoPorFechaHandler>();
         // POS-FUNC-007: Correlativos de comprobante (BR-POS-008)
         services.AddScoped<ObtenerCorrelativosPorCajaHandler>();
         services.AddScoped<ObtenerCorrelativoFacturaHandler>();
