@@ -1978,3 +1978,103 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Estado:** MIGRATED
 
 **Evidencia:** `modern-net8/src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/CuentaCorrienteRepository.cs`
+
+---
+
+## BR-RESERVA-001
+**Nombre:** Estado inicial de reserva = Pendiente
+
+**Origen:** Legacy/frmReservaDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmReservaDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (Sw=True)
+
+**Descripción:** Al crear una reserva, el campo tEstadoReserva se inicializa a '01' (Pendiente).
+
+**Condición:** INSERT INTO TRESERVA con tEstadoReserva='01'
+
+**Resultado:** Reserva creada con estado Pendiente
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Reserva.Crear()` — `EstadoReserva.Pendiente`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Reservas/Reserva.cs`
+
+---
+
+## BR-RESERVA-002
+**Nombre:** Cliente requerido en reserva
+
+**Origen:** Legacy/frmReservaDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmReservaDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 — validación previa
+
+**Descripción:** No se puede crear ni modificar una reserva sin indicar el cliente.
+
+**Condición:** `If txtCliente.Text = "" Then MsgBox "Ingrese el Cliente"`
+
+**Resultado:** Error si el cliente no fue indicado
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Reserva.Crear()` — DomainException RESERVA_CLIENTE_REQUERIDO
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Reservas/Reserva.cs`
+
+---
+
+## BR-RESERVA-003
+**Nombre:** PAX requerido y mayor a cero
+
+**Origen:** Legacy/frmReservaDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmReservaDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 — validación previa
+
+**Descripción:** El número de PAX debe ser mayor a cero al crear o modificar una reserva.
+
+**Condición:** `If txtPax.Text = "" Then MsgBox "Ingrese el N° de Pax"`
+
+**Resultado:** Error si PAX es vacío o cero
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Reserva.Crear()` / `Reserva.Modificar()` — DomainException RESERVA_PAX_INVALIDO
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Reservas/Reserva.cs`
+
+---
+
+## BR-RESERVA-004
+**Nombre:** Estado controla modificación/anulación/atención de reservas
+
+**Origen:** Legacy/frmReservaDetalle.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmReservaDetalle.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 1 (verificación EstadoReserva2), Case 2, Case 4
+
+**Descripción:** No se puede modificar ni atender una reserva que ya fue Atendida ('02') o Anulada ('03'). No se puede anular una reserva ya Anulada. Solo se puede convertir a pedido una reserva Pendiente ('01').
+
+**Condición:** EstadoReserva='02' → bloqueado para modificar y atender. EstadoReserva='03' → bloqueado para todo. EstadoReserva='01' → permitido atender via spIns_MPEDIDO_RESERVA.
+
+**Resultado:** DomainException con código según la transición inválida
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `Reserva.Modificar()`, `Reserva.Anular()`, `Reserva.MarcarAtendida()` — DomainException RESERVA_YA_ATENDIDA / RESERVA_YA_ANULADA / RESERVA_NO_PENDIENTE
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Reservas/Reserva.cs`, `modern-net8/src/Inforest.Application/Reservas/ReservaHandlers.cs`

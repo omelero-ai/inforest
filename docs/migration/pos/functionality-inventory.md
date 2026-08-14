@@ -12,7 +12,7 @@
 | POS-FUNC-008 | Caja y cierre | `frmCajaRapida.frm / frmLiquidacionDetalle.frm` | Control de caja y liquidaciones | MIGRATED |
 | POS-FUNC-009 | Turno/Día contable | `frmDiaContable.frm / clsDiaContable.cls` | Apertura/cierre día operativo | IN_PROGRESS |
 | POS-FUNC-010 | Cliente y cuentas corrientes | `frmNuevoCliente.frm / frmCtaCte*.frm / frmCuentaCobrar*.frm` | Gestión de clientes y deuda | MIGRATED |
-| POS-FUNC-011 | Reservas | `frmReserva.frm / frmReservaDetalle.frm` | Registro y seguimiento de reservas | ANALYSIS |
+| POS-FUNC-011 | Reservas | `frmReserva.frm / frmReservaDetalle.frm` | Registro y seguimiento de reservas | MIGRATED |
 | POS-FUNC-012 | Delivery dependiente POS | `frmPedidoDelivery*.frm / frmCentralPedidos.frm` | Pedidos delivery vinculados al POS | IN_PROGRESS |
 | POS-FUNC-013 | Insumos/descargo | `frmInsumo*.frm / clsAlmacen.cls` | Ajustes/descargo de insumos | IN_PROGRESS |
 | POS-FUNC-014 | Importación de pedidos externos | `frmImportacionRequerimientos*.frm` | Integración pedidos externos | ANALYSIS |

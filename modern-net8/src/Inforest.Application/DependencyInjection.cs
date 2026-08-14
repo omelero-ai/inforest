@@ -13,6 +13,7 @@ using Inforest.Application.Ventas;
 using Inforest.Application.Caja;
 using Inforest.Application.Seguridad;
 using Inforest.Application.Impresion;
+using Inforest.Application.Reservas;
 using Inforest.Domain.Services;
 
 namespace Inforest.Application;
@@ -92,6 +93,14 @@ public static class DependencyInjection
         // POS-FUNC-016: Impresión pre-cuenta/comanda (BR-008)
         services.AddScoped<ImprimirPrecuentaHandler>();
         services.AddScoped<ObtenerImpresorasPorCajaHandler>();
+
+        // POS-FUNC-011: Reservas (BR-RESERVA-001..004)
+        services.AddScoped<CrearReservaHandler>();
+        services.AddScoped<ModificarReservaHandler>();
+        services.AddScoped<AnularReservaHandler>();
+        services.AddScoped<ObtenerReservaHandler>();
+        services.AddScoped<ObtenerReservasPorFechaHandler>();
+        services.AddScoped<ConvertirReservaAPedidoHandler>();
 
         // W6: Caja / Pagos — Handlers CQRS (BR-007, BR-013)
         services.AddScoped<PagarDocumentoHandler>();

@@ -27,6 +27,7 @@ using Inforest.Infrastructure.Reportes;
 using Inforest.Infrastructure.Security;
 using Inforest.Infrastructure.Turno;
 using Inforest.Infrastructure.Ventas;
+using Inforest.Infrastructure.Reservas;
 using Inforest.Infrastructure.Runtime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -112,6 +113,9 @@ public static class DependencyInjection
         // W6: Caja / Pagos (BR-007, BR-013)
         services.AddScoped<IPagoRepository, PagoRepository>();
         services.AddScoped<IMedioPagoRepository, MedioPagoRepository>();
+
+        // POS-FUNC-011: Reservas — TRESERVA
+        services.AddScoped<IReservaRepository, ReservaRepository>();
 
         // W14: Almacén — BR-008 (descargo de inventario en venta)
         services.AddScoped<IInventoryGateway, InventoryGateway>();

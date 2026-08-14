@@ -339,3 +339,13 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `TDELIVERY` (lClienteCtaCte=1) / `vCompania` | Table/View | `CuentaCorriente` + `ICuentaCorrienteRepository` + `CuentaCorrienteRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Maestros/CuentaCorriente.cs` + `src/Inforest.Infrastructure/Maestros/CuentaCorrienteRepository.cs` |
 | `vDocumentoGrilla` (tEstadoDocumento='03') | View | `DocumentoPendienteCobro` + `ObtenerDocumentosPendientesCobroHandler` | Record + Handler | MIGRATED | `src/Inforest.Domain/Entities/Maestros/DocumentoPendienteCobro.cs` + `src/Inforest.Application/Maestros/CuentaCorrienteHandlers.cs` |
 | (BR-CLIENTE-001..004, BR-CTACTE-001..003 tests) | — | `CuentaCorrienteHandlerTests` (7 tests) + `CuentaCorrienteTests` (8 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Maestros/CuentaCorrienteHandlerTests.cs` + `tests/Inforest.Domain.Tests/Maestros/CuentaCorrienteTests.cs` |
+
+## Componentes POS-FUNC-011 — Reservas
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmReserva.frm` | Form | `FrmReserva` | WinForm | MIGRATED | `src/Inforest.Desktop/Reservas/FrmReserva.cs` |
+| `frmReservaDetalle.frm` | Form | `FrmReservaDetalle` + `CrearReservaHandler` + `ModificarReservaHandler` + `AnularReservaHandler` | WinForm + Handlers | MIGRATED | `src/Inforest.Desktop/Reservas/FrmReservaDetalle.cs` + `src/Inforest.Application/Reservas/ReservaHandlers.cs` |
+| `TRESERVA` | Table | `Reserva` + `IReservaRepository` + `ReservaRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Reservas/Reserva.cs` + `src/Inforest.Infrastructure/Reservas/ReservaRepository.cs` |
+| `spIns_MPEDIDO_RESERVA` | SP | `ConvertirReservaAPedidoHandler` + `IReservaRepository.ConvertirAPedidoAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Reservas/ReservaHandlers.cs` + `src/Inforest.Infrastructure/Reservas/ReservaRepository.cs` |
+| (BR-RESERVA-001..004 tests) | — | `ReservaTests` (9 tests domain) + `CrearReservaHandlerTests` (2) + `AnularReservaHandlerTests` (3) + `ModificarReservaHandlerTests` (1) + `ObtenerReservasPorFechaHandlerTests` (2) = 17 tests | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Reservas/ReservaTests.cs` |

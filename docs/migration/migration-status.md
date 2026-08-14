@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-14
 >
-> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001 (Login) y POS-FUNC-002 (Apertura MDI) MIGRATED; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) + POS-FUNC-007/016/019 + POS-FUNC-008 (Caja/Cierre COMPLETED) + POS-FUNC-003 (Gestión pedidos salón MIGRATED con tests UpdatePedidoHandler + ObtenerPedidoHandlers + BRs documentados) + POS-FUNC-004 (Registro de venta MIGRATED: BR-VENTA-001/002/003 + 13 tests dominio + 5+3 handler tests) + POS-FUNC-005 (Cobro y pagos MIGRATED: BR-PAGO-001/002/003 + RegistrarPagosMultiplesHandler + 8+1 tests)**
+> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001 (Login) y POS-FUNC-002 (Apertura MDI) MIGRATED; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) + POS-FUNC-007/016/019 + POS-FUNC-008 (Caja/Cierre COMPLETED) + POS-FUNC-003 (Gestión pedidos salón MIGRATED) + POS-FUNC-004 (Registro de venta MIGRATED) + POS-FUNC-005 (Cobro y pagos MIGRATED) + POS-FUNC-006 (Notas de Crédito MIGRATED) + POS-FUNC-010 (Cliente y cuentas corrientes MIGRATED) + **POS-FUNC-011 (Reservas MIGRATED: Reserva entity + 6 handlers + FrmReserva + FrmReservaDetalle + spIns_MPEDIDO_RESERVA + 18 tests)**
 
 ---
 
@@ -89,6 +89,7 @@
 | M4-POS-FUNC-004 | Registro de venta MIGRATED: EmitirDocumentoHandler + AnularDocumentoHandler + Documento domain entity + 13 DocumentoTests (PE/CO/AN estados, total fórmula, propina, descuento, validaciones) + 5+3 VentaHandlerTests + BR-VENTA-001/002/003 documentados | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-006 | Facturación y Notas de Crédito (POS-FUNC-006): NotaCredito entity + EmitirNotaCreditoHandler + AnularNotaCreditoHandler + ObtenerNotaCreditoHandler + ObtenerNotasCreditoPorFechaHandler + NotaCreditoRepository + FrmNotaCredito + FrmNotaCreditoDetalle + BR-NC-001..006 documentados + 19 tests | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-010 | Cliente y cuentas corrientes (POS-FUNC-010): CuentaCorriente entity + ICuentaCorrienteRepository + CuentaCorrienteRepository + FrmNuevoCliente + FrmCtaCte + FrmCuentaCobrar + BR-CLIENTE-001..004 + BR-CTACTE-001..003 + 7+8 tests | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-011 | Reservas (POS-FUNC-011): Reserva entity + EstadoReserva enum + IReservaRepository + ReservaRepository + FrmReserva + FrmReservaDetalle + CrearReservaHandler + ModificarReservaHandler + AnularReservaHandler + ObtenerReservaHandler + ObtenerReservasPorFechaHandler + ConvertirReservaAPedidoHandler (spIns_MPEDIDO_RESERVA) + BR-RESERVA-001..004 + 18 tests | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-009 | Turno/Día Contable (POS-FUNC-009): FrmDiaContable + AperturarDiaContableHandler + CerrarDiaContableHandler + ObtenerDiaContableHandler + IDiaContableService extendido (CerrarDiaContableAsync + ObtenerFechaMaximaDiaContableAsync) + BR-DC-001/002/003/004 documentados + 10 tests | COMPLETED — 2026-08-14 |
 | M5 | Punto de Venta migrado | IN_PROGRESS — W4+W5+W6+W11+POS-FUNC-002/007/016/019 implementados; POS-FUNC-003 MIGRATED (tests completos) |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
@@ -112,12 +113,11 @@
 
 ## Próximos Pasos
 
-1. **MIGRATED:** POS-FUNC-010 Cliente y cuentas corrientes completado (CuentaCorriente + FrmNuevoCliente + FrmCtaCte + FrmCuentaCobrar + 15 tests).
-2. **Pendiente de aprobación:** iniciar **POS-FUNC-011 Reservas** (`frmReserva.frm`, `frmReservaDetalle.frm`) como siguiente elemento de `InfoRest.vbp`.
-2. **Continuar Maestros operativos** (productos, grupos, clientes) sobre la base transversal ya validada.
-3. Resolver gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
-4. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 puedan operar extremo a extremo.
-5. Continuar con Turno / Día Contable / Pedido base respetando el orden de migración documentado.
+1. **MIGRATED:** POS-FUNC-011 Reservas completado (Reserva + IReservaRepository + ReservaRepository + FrmReserva + FrmReservaDetalle + 6 handlers + spIns_MPEDIDO_RESERVA + 18 tests).
+2. **Pendiente de aprobación:** iniciar **POS-FUNC-012 Delivery dependiente POS** (`frmPedidoDelivery*.frm`, `frmCentralPedidos.frm`) como siguiente elemento de `InfoRest.vbp`.
+3. **Continuar Maestros operativos** (productos, grupos, clientes) sobre la base transversal ya validada.
+4. Resolver gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
+5. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 puedan operar extremo a extremo.
 
 ---
 
