@@ -43,7 +43,7 @@
 | Reportes | 206 Crystal Reports | 12 SPs + handlers + formularios base + plantillas pendientes | IN_PROGRESS |
 | Integraciones | COM/DLL/OCX + hardware POS | KDS XML/directorio + PinPad/CashDro/BlueVision + FE por país (stubs controlados) | IN_PROGRESS |
 | Seguridad/Auth | `INFSEGURIDAD` + cifrado débil Legacy | `AuthService` + `RbacService` + `SessionService` + `AuditoriaService` + `LicenseService` | IN_PROGRESS |
-| Configuración | INI + `TPARAMETRO` + `TCAJA` | feature flags base de hardware/país; `TPARAMETRO`/`TCAJA` completos pendientes | IN_PROGRESS |
+| Configuración | INI + `TPARAMETRO` + `TCAJA` | lectura tipada de `TPARAMETRO`/`TCAJA`, cache lazy y validación de arranque POS cubiertas por tests; edición administrativa sigue fuera de este corte | COMPLETED |
 
 ---
 
@@ -79,6 +79,7 @@
 | M3-P3-11 | Periféricos especializados e integraciones por país | COMPLETED — 2026-08-12 |
 | M3-P3-12 | Validación integral, hardening y cierre de Fase 3 | COMPLETED — 2026-08-12 |
 | M4 | Primer módulo migrado (Maestros) | IN_PROGRESS — W2 maestros implementados |
+| M4-W1 | Configuración (`TPARAMETRO`/`TCAJA`): `ConfiguracionSistema` + `ConfiguracionCaja` + `ParametroRepository` + `ParametroService` + `ValidarInicioPosHandler` validados con tests | COMPLETED — 2026-08-14 |
 | M4-W14 | Servicios de dominio transversales (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) | COMPLETED — 2026-08-13 |
 | M4-W15 | Caja/Cierre completo (POS-FUNC-008): CierreTurnoBreakdown + CerrarTurnoHandler (BR-CAJA-001/002) + TurnoRepository full MTURNO update + FrmLiquidacionCierre + confirmación previa al cierre | COMPLETED — 2026-08-14 |
 | M4-POS-FUNC-007 | Correlativos de comprobante (CorrelativoDocumento + CorrelativoHandlers + CorrelativoRepository + FrmDocumentoCorrelativo) | COMPLETED — 2026-08-13 |
@@ -110,8 +111,8 @@
 
 ## Próximos Pasos
 
-1. **Iniciar Configuración (`TPARAMETRO` / `TCAJA`)** como primer workstream funcional posterior al cierre de Fase 3.
-2. **Iniciar Maestros operativos** (productos, grupos, clientes) sobre la base transversal ya validada.
+1. **Pendiente de aprobación:** iniciar **POS-FUNC-010 Cliente y cuentas corrientes** (`frmNuevoCliente.frm`, `frmCtaCte*.frm`, `frmCuentaCobrar*.frm`) como siguiente elemento de `InfoRest.vbp`.
+2. **Continuar Maestros operativos** (productos, grupos, clientes) sobre la base transversal ya validada.
 3. Resolver gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
 4. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 puedan operar extremo a extremo.
 5. Continuar con Turno / Día Contable / Pedido base respetando el orden de migración documentado.

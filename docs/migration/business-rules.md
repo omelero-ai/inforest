@@ -46,9 +46,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Servicio de precios por canal
 
-**Estado:** IN_PROGRESS
+**Estado:** MIGRATED
 
-**Evidencia:** CONFIRMED
+**Evidencia:** `modern-net8/src/Inforest.Domain/Services/TaxPolicy.cs`, `modern-net8/tests/Inforest.Domain.Tests/Services/TaxPolicyAndVisibilidadTests.cs`
 
 ---
 
@@ -69,9 +69,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Servicio de cálculo de impuestos
 
-**Estado:** IN_PROGRESS
+**Estado:** MIGRATED
 
-**Evidencia:** CONFIRMED
+**Evidencia:** `modern-net8/src/Inforest.Domain/Services/TaxPolicy.cs`, `modern-net8/tests/Inforest.Domain.Tests/Services/TaxPolicyAndVisibilidadTests.cs`
 
 ---
 
@@ -1365,9 +1365,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** `ConfiguracionSistema` (record tipado), `IParametroRepository.ObtenerConfiguracionAsync`, `ParametroService` con cache lazy, `IParametroService.ObtenerBoolAsync/ObtenerNumericoAsync`
 
-**Estado:** IN_PROGRESS
+**Estado:** COMPLETED
 
-**Evidencia:** CONFIRMED
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Configuracion/ConfiguracionSistema.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroService.cs`, `modern-net8/tests/Inforest.Infrastructure.Tests/Configuracion/ParametroRepositoryTests.cs`
 
 ---
 
@@ -1390,9 +1390,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** `ConfiguracionCaja` (record tipado), `IParametroRepository.ObtenerConfiguracionCajaAsync`, `ObtenerConfiguracionCajaHandler`
 
-**Estado:** IN_PROGRESS
+**Estado:** COMPLETED
 
-**Evidencia:** CONFIRMED
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Configuracion/ConfiguracionCaja.cs`, `modern-net8/src/Inforest.Application/Configuracion/ConfiguracionHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs`, `modern-net8/tests/Inforest.Application.Tests/Configuracion/ValidarInicioPosHandlerTests.cs`, `modern-net8/tests/Inforest.Infrastructure.Tests/Configuracion/ConfiguracionCajaTests.cs`
 
 ---
 
