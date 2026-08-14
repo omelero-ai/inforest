@@ -412,3 +412,20 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmLiquidacionDetalle.frm` (cierre mensajes cocina) | Form rule | `FrmLiquidacionCierre` + `CerrarTurnoHandler` | WinForm + Handler | COMPLETED | `src/Inforest.Desktop/Caja/FrmLiquidacionCierre.cs` + `src/Inforest.Application/Turno/TurnoHandlers.cs` |
 | (tests BR-MSGCOC-001..005) | — | `MensajeCocinaTests` + `MensajeCocinaHandlerTests` + `MensajeCocinaRepositoryTests` + `CerrarTurnoHandlerTests` | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Cocina/MensajeCocinaTests.cs`, `tests/Inforest.Application.Tests/Kitchen/MensajeCocinaHandlerTests.cs`, `tests/Inforest.Infrastructure.Tests/Kitchen/MensajeCocinaRepositoryTests.cs`, `tests/Inforest.Application.Tests/Turno/CerrarTurnoHandlerTests.cs` |
 
+## Componentes POS-FUNC-018 — Recibo de Ingresos/Egresos
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmReciboIngreso.frm` | Form | `FrmReciboIngreso` | WinForm | COMPLETED | `src/Inforest.Desktop/Caja/Recibos/FrmReciboIngreso.cs` |
+| `frmReciboIngresoDetalle.frm` | Form | `FrmReciboIngresoDetalle` | WinForm | COMPLETED | `src/Inforest.Desktop/Caja/Recibos/FrmReciboIngresoDetalle.cs` |
+| `frmReciboEgreso.frm` | Form | `FrmReciboEgreso` | WinForm | COMPLETED | `src/Inforest.Desktop/Caja/Recibos/FrmReciboEgreso.cs` |
+| `frmReciboEgresoDetalle.frm` | Form | `FrmReciboEgresoDetalle` | WinForm | COMPLETED | `src/Inforest.Desktop/Caja/Recibos/FrmReciboEgresoDetalle.cs` |
+| `MINGRESO` | Table | `ReciboIngreso` + `IReciboIngresoRepository` + `ReciboIngresoRepository` | Entity + Interface + Repository | COMPLETED | `src/Inforest.Domain/Entities/Caja/ReciboIngreso.cs` + `src/Inforest.Infrastructure/Caja/ReciboIngresoRepository.cs` |
+| `MEGRESO` | Table | `ReciboEgreso` + `IReciboEgresoRepository` + `ReciboEgresoRepository` | Entity + Interface + Repository | COMPLETED | `src/Inforest.Domain/Entities/Caja/ReciboEgreso.cs` + `src/Inforest.Infrastructure/Caja/ReciboEgresoRepository.cs` |
+| `frmReciboIngreso.frm` / lógica registrar | Business rule | `RegistrarIngresoHandler` (BR-RECIBO-001..006) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboIngresoHandlers.cs` |
+| `frmReciboIngreso.frm` / lógica anular | Business rule | `AnularIngresoHandler` (BR-RECIBO-005) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboIngresoHandlers.cs` |
+| `frmReciboEgreso.frm` / lógica registrar | Business rule | `RegistrarEgresoHandler` (BR-RECIBO-007..012) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` |
+| `frmReciboEgreso.frm` / lógica anular | Business rule | `AnularEgresoHandler` (BR-RECIBO-011) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` |
+| `spRep_ReciboEgreso` | SP (report) | `ObtenerEgresosHandler` (reutiliza SP via Dapper) | Handler + Repository | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` + `src/Inforest.Infrastructure/Caja/ReciboEgresoRepository.cs` |
+| (tests BR-RECIBO-001..012) | — | `ReciboIngresoTests` (9) + `ReciboEgresoTests` (8) + `ReciboIngresoHandlerTests` (8) + `ReciboEgresoHandlerTests` (8) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Caja/ReciboIngresoTests.cs`, `tests/Inforest.Domain.Tests/Caja/ReciboEgresoTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboIngresoHandlerTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboEgresoHandlerTests.cs` |
+

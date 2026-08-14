@@ -93,6 +93,7 @@
 | M4-POS-FUNC-012 | Delivery dependiente POS (POS-FUNC-012): FrmPedidoDelivery (seguimiento vDespachador) + CentralPedidosForm extendido (ConfirmarEntrega + RevertirEntrega + ModificarFecha) + ConfirmarEntregaCentralHandler + RevertirEntregaCentralHandler + ModificarFechaProgramadaDeliveryHandler + ObtenerPedidosSeguimientoDeliveryHandler + 5 nuevos métodos IPedidoDeliveryRepository + BR-DEL-012/013/014 + 10 tests | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-013 | Insumos/descargo (POS-FUNC-013): Insumo entity + IInsumoRepository + InsumoRepository (USP_LISTARINSUMOS/usp_agregarinsumos/USP_MODIFICARINSUMOS/USP_ELIMINARINSUMOS) + FrmInsumo + FrmInsumoDetalle + ListarInsumosHandler + AgregarInsumoHandler + ModificarInsumoHandler + EliminarInsumoHandler + BR-INSUMO-001..004 + 18 tests (8 domain + 10 handler) | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-014 | Importación de pedidos externos (POS-FUNC-014): RequerimientoAlmacen + DetalleRequerimientoAlmacen (Domain) + IRequerimientoAlmacenRepository + IImportacionPedidoGateway (Application) + RequerimientoAlmacenRepository + ImportacionPedidoGateway (Infrastructure, ALMACEN DB) + ObtenerRequerimientosPendientesHandler + ObtenerDetalleRequerimientoHandler + ImportarRequerimientoHandler + FrmImportacionRequerimientos + FrmImportacionRequerimientoDetalle + BR-IMPORT-001..004 + 17 tests (8 domain + 9 handler) — 411 tests en verde | MIGRATED — 2026-08-14 |
+| M4-POS-FUNC-018 | Recibo Ingresos/Egresos (POS-FUNC-018): ReciboIngreso + ReciboEgreso (Domain, BR-RECIBO-001..012) + IReciboIngresoRepository + IReciboEgresoRepository + ReciboIngresoRepository + ReciboEgresoRepository (direct SQL, MINGRESO/MEGRESO) + ObtenerIngresosHandler + RegistrarIngresoHandler + AnularIngresoHandler + ObtenerEgresosHandler + RegistrarEgresoHandler + AnularEgresoHandler + FrmReciboIngreso + FrmReciboIngresoDetalle + FrmReciboEgreso + FrmReciboEgresoDetalle + 33 tests (9+8 domain + 8+8 handler) | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-009 | Turno/Día Contable (POS-FUNC-009): FrmDiaContable + AperturarDiaContableHandler + CerrarDiaContableHandler + ObtenerDiaContableHandler + IDiaContableService extendido (CerrarDiaContableAsync + ObtenerFechaMaximaDiaContableAsync) + BR-DC-001/002/003/004 documentados + 10 tests | COMPLETED — 2026-08-14 |
 | M5 | Punto de Venta migrado | IN_PROGRESS — W4+W5+W6+W11+POS-FUNC-002/007/016/019 implementados; POS-FUNC-003 MIGRATED (tests completos) |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
@@ -116,8 +117,8 @@
 
 ## Próximos Pasos
 
-1. **COMPLETED:** POS-FUNC-015 Mensajería cocina/KDS validado (`frmMensajeCocina.frm`, `frmMensajeCocinaDetalle.frm`, `TMENSAJECOCINA`, `USP_LISTARMENSAJES`, `USP_AGREGARMENSAJE`, `USP_MODIFICARMENSAJE`, `USP_ELIMINARRMENSAJES`, `USP_CERRAR_MENSAJES_CIERRETURNO` + integración con cierre de turno + 434 tests en verde).
-2. **Pendiente de aprobación:** iniciar **POS-FUNC-016 Impresión pre-cuenta/comanda** (`frmPrecuentaImpresora.frm / frmRepPaloteoTicket.frm`) como siguiente elemento de `InfoRest.vbp`.
+1. **COMPLETED:** POS-FUNC-018 Recibo de Ingresos/Egresos validado (`frmReciboIngreso.frm`, `frmReciboIngresoDetalle.frm`, `frmReciboEgreso.frm`, `frmReciboEgresoDetalle.frm`, MINGRESO/MEGRESO, BR-RECIBO-001..012, 33 tests en verde, 221 application tests en verde, 154 domain tests en verde).
+2. **Pendiente de aprobación:** iniciar siguiente elemento de `InfoRest.vbp`.
 3. Mantener seguimiento de gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
 4. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 puedan operar extremo a extremo.
 5. No avanzar al siguiente elemento hasta recibir aprobación explícita.

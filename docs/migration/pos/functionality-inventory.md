@@ -19,7 +19,7 @@
 | POS-FUNC-015 | Mensajería cocina/KDS | `frmMensajeCocina*.frm / modKDS.bas` | Envío y control de producción | COMPLETED |
 | POS-FUNC-016 | Impresión pre-cuenta/comanda | `frmPrecuentaImpresora.frm / frmRepPaloteoTicket.frm` | Salida térmica operativa | ANALYSIS |
 | POS-FUNC-017 | Reportería operativa POS | `frmRep*.frm + Designers DSR` | Consultas y reportes de operación | ANALYSIS |
-| POS-FUNC-018 | Recibo de ingresos/egresos | `frmReciboIngreso*.frm / frmReciboEgreso*.frm` | Movimientos de caja adicionales | ANALYSIS |
+| POS-FUNC-018 | Recibo de ingresos/egresos | `frmReciboIngreso*.frm / frmReciboEgreso*.frm` | Movimientos de caja adicionales | MIGRATED |
 | POS-FUNC-019 | Control de seguridad y contraseñas | `frmPassword.frm / frmCambiarContrasenia.frm` | Validaciones sensibles de operación | ANALYSIS |
 | POS-FUNC-020 | Biometría huella | `frmVerificacionHuella*.frm + OCX` | Autenticación biométrica opcional | BLOCKED |
 | POS-FUNC-021 | Tarjetas RFID / proximidad | `FrmTarjetaAproximidad*.frm / FrmRecargarTarjeta*.frm` | Saldo y consumo con tarjetas | ANALYSIS |

@@ -2491,3 +2491,171 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Estado:** MIGRATED
 
 **Evidencia:** `modern-net8/src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs`
+
+---
+
+## BR-RECIBO-001
+**Nombre:** Correlativo de ingreso (formato año + secuencia)
+**Origen:** Legacy/frmReciboIngresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngresoDetalle.frm`
+**Procedimiento/Función:** Botón Guardar / generación de tCodigoIngreso
+**Descripción:** El correlativo de ingreso se forma concatenando el año de 2 dígitos + número de secuencia en 8 dígitos con padding de ceros (ej: `2600000001`).
+**Condición:** Al registrar un nuevo ingreso.
+**Resultado:** `tCodigoIngreso` = Right(Year(Date),2) + Format(secuencia,"00000000")
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Registrar()` + `ReciboIngresoRepository.ObtenerSiguienteSecuenciaAsync()`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-002
+**Nombre:** Estado inicial de ingreso = EMITIDO
+**Origen:** Legacy/frmReciboIngresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngresoDetalle.frm`
+**Procedimiento/Función:** INSERT INTO MINGRESO
+**Descripción:** Todo ingreso se crea con estado `01` (EMITIDO).
+**Condición:** Al crear el registro.
+**Resultado:** `tEstado = '01'`
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Registrar()` fija `Estado = "01"`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-003
+**Nombre:** Fecha y hora de registro = ahora
+**Origen:** Legacy/frmReciboIngresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngresoDetalle.frm`
+**Procedimiento/Función:** INSERT INTO MINGRESO
+**Descripción:** `dFechaIngreso` y `tHoraIngreso` se toman del momento de la operación.
+**Condición:** Siempre al registrar.
+**Resultado:** Campos de fecha/hora = DateTime.Now del sistema.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Registrar()` asigna `FechaIngreso = DateTime.Now`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-004
+**Nombre:** Monto de ingreso > 0
+**Origen:** Legacy/frmReciboIngresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngresoDetalle.frm`
+**Procedimiento/Función:** Validación antes del INSERT
+**Descripción:** No se permite registrar un ingreso con monto cero o negativo.
+**Condición:** `dMontoIngreso <= 0`
+**Resultado:** Error de validación, registro no persiste.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Registrar()` lanza `DomainException` si monto ≤ 0
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-005
+**Nombre:** Anulación de ingreso cambia estado a 04
+**Origen:** Legacy/frmReciboIngreso.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngreso.frm`
+**Procedimiento/Función:** Botón Anular
+**Descripción:** Al anular un ingreso, su estado cambia de `01` (EMITIDO) a `04` (ANULADO). No se permite anular si ya está en `04`.
+**Condición:** `tEstado = '01'` → puede anular; `tEstado = '04'` → ya anulado.
+**Resultado:** `UPDATE MINGRESO SET tEstado='04'`
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboIngreso.Anular()` + `AnularIngresoHandler`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-006
+**Nombre:** Filtro multi-caja por usuario (lMCPV)
+**Origen:** Legacy/frmReciboIngreso.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboIngreso.frm`
+**Procedimiento/Función:** Carga de grilla (SELECT FROM MINGRESO)
+**Descripción:** Cuando el flag `lMCPV` (multi-caja punto de venta) está activo, la consulta filtra ingresos por el usuario de la sesión (`tUsuario`). Sin el flag se muestran todos.
+**Condición:** `lMCPV = True` → añade `WHERE tUsuario = @usuario`
+**Resultado:** Lista de ingresos filtrada.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ObtenerIngresosQuery.CodigoUsuario` opcional en `ReciboIngresoRepository.ObtenerAsync()`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-007
+**Nombre:** Correlativo de egreso (formato año + secuencia)
+**Origen:** Legacy/frmReciboEgresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgresoDetalle.frm`
+**Procedimiento/Función:** Botón Guardar / generación de tCodigoEgreso
+**Descripción:** El correlativo de egreso se forma igual que el de ingreso: año 2 dígitos + secuencia 8 dígitos.
+**Condición:** Al registrar un nuevo egreso.
+**Resultado:** `tCodigoEgreso` = Right(Year(Date),2) + Format(secuencia,"00000000")
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboEgreso.Registrar()` + `ReciboEgresoRepository.ObtenerSiguienteSecuenciaAsync()`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-008
+**Nombre:** Estado inicial de egreso = EMITIDO
+**Origen:** Legacy/frmReciboEgresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgresoDetalle.frm`
+**Procedimiento/Función:** INSERT INTO MEGRESO
+**Descripción:** Todo egreso se crea con estado `01` (EMITIDO). No existe estado PAGADO para egresos.
+**Condición:** Al crear el registro.
+**Resultado:** `tEstado = '01'`
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboEgreso.Registrar()` fija `Estado = "01"`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-009
+**Nombre:** Solicitud de clave supervisor para egresos
+**Origen:** Legacy/frmReciboEgreso.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgreso.frm`
+**Procedimiento/Función:** Botón Nuevo/Editar → `lSolicitaClaveEgreso`
+**Descripción:** Si el parámetro `lSolicitaClaveEgreso` está activo, antes de abrir el formulario de detalle de egreso se solicita contraseña de supervisor.
+**Condición:** `lSolicitaClaveEgreso = True`
+**Resultado:** Se solicita contraseña; si es correcta, se abre el detalle.
+**Excepciones:** Si la contraseña es incorrecta, se cancela la acción.
+**Destino .NET:** Verificación delegada a la capa de presentación (`FrmReciboEgreso`) antes de abrir `FrmReciboEgresoDetalle`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-010
+**Nombre:** Modo de egreso: VARIOS / NOTACREDITO / MERCADERIA
+**Origen:** Legacy/frmReciboEgresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgresoDetalle.frm`
+**Procedimiento/Función:** Combo `cboModoEgreso`
+**Descripción:** El egreso puede ser de tipo `VARIOS` (general), `NOTACREDITO` (requiere referencia) o `MERCADERIA` (compra de mercadería).
+**Condición:** `tModoEgreso IN ('VARIOS','NOTACREDITO','MERCADERIA')`
+**Resultado:** Permite registrar el egreso con el modo seleccionado.
+**Excepciones:** Valor fuera de rango → error de validación.
+**Destino .NET:** `ModoEgreso` enum + validación en `ReciboEgreso.Registrar()`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-011
+**Nombre:** Anulación de egreso cambia estado a 04
+**Origen:** Legacy/frmReciboEgreso.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgreso.frm`
+**Procedimiento/Función:** Botón Anular
+**Descripción:** Al anular un egreso su estado pasa a `04` (ANULADO). No se permite anular un egreso ya anulado.
+**Condición:** `tEstado = '01'` → puede anular.
+**Resultado:** `UPDATE MEGRESO SET tEstado='04'`
+**Excepciones:** Ninguna.
+**Destino .NET:** `ReciboEgreso.Anular()` + `AnularEgresoHandler`
+**Estado:** MIGRATED
+
+---
+
+## BR-RECIBO-012
+**Nombre:** NotaCredito requiere campo dReferencia
+**Origen:** Legacy/frmReciboEgresoDetalle.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmReciboEgresoDetalle.frm`
+**Procedimiento/Función:** Validación antes del INSERT cuando tModoEgreso = 'NOTACREDITO'
+**Descripción:** Cuando el modo de egreso es `NOTACREDITO`, el campo `dReferencia` (número de la nota de crédito) es obligatorio.
+**Condición:** `tModoEgreso = 'NOTACREDITO' AND IsEmpty(dReferencia)`
+**Resultado:** Error de validación; no se persiste.
+**Excepciones:** Ninguna.
+**Destino .NET:** Validación en `ReciboEgreso.Registrar()` — lanza `DomainException` si modo es NOTACREDITO y referencia vacía.
+**Estado:** MIGRATED

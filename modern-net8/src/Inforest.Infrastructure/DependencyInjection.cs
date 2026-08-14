@@ -117,6 +117,10 @@ public static class DependencyInjection
         services.AddScoped<IPagoRepository, PagoRepository>();
         services.AddScoped<IMedioPagoRepository, MedioPagoRepository>();
 
+        // POS-FUNC-018: Recibo Ingresos / Egresos — MINGRESO / MEGRESO (BR-RECIBO-001..012)
+        services.AddScoped<IReciboIngresoRepository, ReciboIngresoRepository>();
+        services.AddScoped<IReciboEgresoRepository, ReciboEgresoRepository>();
+
         // POS-FUNC-011: Reservas — TRESERVA
         services.AddScoped<IReservaRepository, ReservaRepository>();
 
