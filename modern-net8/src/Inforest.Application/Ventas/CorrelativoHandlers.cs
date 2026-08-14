@@ -53,6 +53,8 @@ public sealed class ObtenerCorrelativoFacturaHandler
     {
         if (string.IsNullOrWhiteSpace(query.CodigoCaja))
             return Result.Fail<string>("El código de caja es requerido.", "CORRELATIVO_CAJA_REQUERIDA");
+        if (string.IsNullOrWhiteSpace(query.TipoEmision))
+            return Result.Fail<string>("El tipo de emisión es requerido.", "CORRELATIVO_TIPO_EMISION_REQUERIDO");
 
         var correlativo = await _repository.ObtenerPorCajaYTipoAsync(query.CodigoCaja, query.TipoEmision, ct);
         var numero = correlativo?.ObtenerNumeroActual() ?? "Sin Correlativo";
