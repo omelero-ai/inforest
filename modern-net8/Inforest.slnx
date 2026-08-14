@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Inforest.Application/Inforest.Application.csproj" />
+    <Project Path="src/Inforest.Desktop/Inforest.Desktop.csproj" />
+    <Project Path="src/Inforest.Domain/Inforest.Domain.csproj" />
+    <Project Path="src/Inforest.Infrastructure/Inforest.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Inforest.Application.Tests/Inforest.Application.Tests.csproj" />
+    <Project Path="tests/Inforest.Domain.Tests/Inforest.Domain.Tests.csproj" />
+    <Project Path="tests/Inforest.Infrastructure.Tests/Inforest.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
