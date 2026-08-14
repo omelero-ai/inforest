@@ -2255,3 +2255,107 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Estado:** MIGRATED
 
 **Evidencia:** `modern-net8/src/Inforest.Application/Maestros/InsumoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Maestros/InsumoRepository.cs`, `modern-net8/src/Inforest.Desktop/Maestros/FrmInsumo.cs`
+
+---
+
+## BR-IMPORT-001
+
+**Nombre:** Solo requerimientos aprobados de áreas habilitadas pueden importarse
+
+**Origen:** Legacy/frmImportacionRequerimientos.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmImportacionRequerimientos.frm
+
+**Procedimiento/Función:** cmdProcesa_Click
+
+**Descripción:** Solo se muestran/importan requerimientos con `CodEstado='02'` (aprobado) cuya área esté habilitada para el punto de venta (`TRUTAAREA.lImportarPV=1`).
+
+**Condición:** vRequerimiento.CodEstado = '02' AND TRUTAAREA.lImportarPV = 1
+
+**Resultado:** Lista de requerimientos disponibles para importación.
+
+**Excepciones:** Requerimientos en otros estados o de áreas no habilitadas no aparecen.
+
+**Destino .NET:** `ObtenerRequerimientosPendientesHandler` → `IRequerimientoAlmacenRepository.ObtenerPendientesAsync`. Entidad `RequerimientoAlmacen.PuedeImportarse()`.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs`, `modern-net8/src/Inforest.Domain/Entities/Almacen/RequerimientoAlmacen.cs`
+
+---
+
+## BR-IMPORT-002
+
+**Nombre:** Un requerimiento no puede importarse dos veces
+
+**Origen:** Legacy/frmImportacionRequerimientos.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmImportacionRequerimientos.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 2
+
+**Descripción:** Antes de crear el pedido, se verifica que `MREQUERIMIENTO.tPedido` esté vacío. Si ya tiene un código de pedido, se muestra error y se cancela la operación.
+
+**Condición:** ISNULL(tPedido,'') = ''
+
+**Resultado:** Si ya existe pedido: error y cancelación. Si no: continúa el flujo de importación.
+
+**Excepciones:** Ninguna.
+
+**Destino .NET:** `ImportarRequerimientoHandler` verifica `ObtenerPedidoAsociadoAsync` antes de crear el pedido. Retorna `REQ_YA_IMPORTADO` si ya existe.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs`
+
+---
+
+## BR-IMPORT-003
+
+**Nombre:** Todos los artículos del requerimiento deben tener enlace con INFOREST
+
+**Origen:** Legacy/frmImportacionRequerimientos.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmImportacionRequerimientos.frm
+
+**Procedimiento/Función:** InsertaProducto / cmdOpcion_Click Case 2
+
+**Descripción:** Para cada artículo del requerimiento (CodArt), se busca el código de producto INFOREST mediante `TPRODUCTO.tEnlace`. Si un artículo no tiene enlace (`codProducto = ""` o `"0"`), el pedido ya creado se cancela (estado '03') y se notifica el error.
+
+**Condición:** codProducto de vProducto WHERE tEnlace = CodArt
+
+**Resultado:** Si todos tienen enlace: pedido creado con todos los ítems. Si alguno no tiene: pedido cancelado.
+
+**Excepciones:** Si el pedido ya fue creado (spIns_MPEDIDO ejecutado), se cancela con estado '03'.
+
+**Destino .NET:** `ImportarRequerimientoHandler` valida enlaces antes de crear el pedido (retorna `REQ_PRODUCTO_SIN_ENLACE`). `ImportacionPedidoGateway` cancela el pedido si el producto no existe en BD.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Almacen/ImportacionPedidoGateway.cs`
+
+---
+
+## BR-IMPORT-004
+
+**Nombre:** El requerimiento debe marcarse como importado tras generar el pedido
+
+**Origen:** Legacy/frmImportacionRequerimientos.frm
+
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmImportacionRequerimientos.frm
+
+**Procedimiento/Función:** cmdOpcion_Click Case 2 (tras éxito de inserción)
+
+**Descripción:** Tras crear exitosamente el pedido y todos sus ítems, se actualiza `MREQUERIMIENTO` con `lPedido=1` y `tPedido=<código pedido>` para bloquear re-importaciones.
+
+**Condición:** Importación exitosa de todos los ítems.
+
+**Resultado:** `MREQUERIMIENTO.lPedido = 1`, `MREQUERIMIENTO.tPedido = <código>`.
+
+**Excepciones:** Si la creación de ítems falla, no se marca (el pedido se cancela y se retorna error).
+
+**Destino .NET:** `ImportarRequerimientoHandler` llama `IRequerimientoAlmacenRepository.MarcarImportadoAsync` solo si el gateway retorna éxito.
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs`

@@ -377,3 +377,22 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `USP_ELIMINARINSUMOS` | SP | `EliminarInsumoHandler` + `IInsumoRepository.EliminarAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/InsumoHandlers.cs` + `src/Inforest.Infrastructure/Maestros/InsumoRepository.cs` |
 | `clsAlmacen.cls` (descargo automatico) | Class | `IInventoryGateway` + `InventoryGateway` (existente — BR-008) | Interface + Class | MIGRATED | `src/Inforest.Infrastructure/Almacen/InventoryGateway.cs` |
 | (tests BR-INSUMO-001..004) | — | `InsumoTests` (8 tests domain) + `InsumoHandlerTests` (10 tests handler) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/InsumoTests.cs` + `tests/Inforest.Application.Tests/Maestros/InsumoHandlerTests.cs` |
+
+## Componentes POS-FUNC-014 — Importación de pedidos externos
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmImportacionRequerimientos.frm` | Form | `FrmImportacionRequerimientos` | WinForm | MIGRATED | `src/Inforest.Desktop/Almacen/FrmImportacionRequerimientos.cs` |
+| `frmImportacionRequerimientoDetalle.frm` | Form | `FrmImportacionRequerimientoDetalle` | WinForm | MIGRATED | `src/Inforest.Desktop/Almacen/FrmImportacionRequerimientoDetalle.cs` |
+| `vRequerimiento` (ALMACEN DB) | View | `RequerimientoAlmacen` + `IRequerimientoAlmacenRepository` + `RequerimientoAlmacenRepository` | Entity + Interface + Repository | MIGRATED | `src/Inforest.Domain/Entities/Almacen/RequerimientoAlmacen.cs` + `src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs` |
+| `vRequerimiento` (detalle) | View | `DetalleRequerimientoAlmacen` | Domain Entity | MIGRATED | `src/Inforest.Domain/Entities/Almacen/DetalleRequerimientoAlmacen.cs` |
+| `MREQUERIMIENTO.tPedido` / `lPedido` | Field | `IRequerimientoAlmacenRepository.MarcarImportadoAsync` | Repository Method | MIGRATED | `src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs` |
+| `TRUTAAREA.lImportarPV` | Flag | `RequerimientoAlmacenRepository.ObtenerPendientesAsync` (BR-IMPORT-001) | Business Rule | MIGRATED | `src/Inforest.Infrastructure/Almacen/RequerimientoAlmacenRepository.cs` |
+| `spIns_MPEDIDO` (importación) | SP | `ImportacionPedidoGateway.CrearPedidoDesdeRequerimientoAsync` | Gateway | MIGRATED | `src/Inforest.Infrastructure/Almacen/ImportacionPedidoGateway.cs` |
+| `InsertaProducto()` (DPEDIDO insert) | Function | `ImportacionPedidoGateway` (precio por canal + INSERT DPEDIDO) | Gateway | MIGRATED | `src/Inforest.Infrastructure/Almacen/ImportacionPedidoGateway.cs` |
+| `MPEDIDO` update estado '03' (cancelar) | SQL | `ImportacionPedidoGateway.CancelarPedidoAsync` (BR-IMPORT-003) | Business Rule | MIGRATED | `src/Inforest.Infrastructure/Almacen/ImportacionPedidoGateway.cs` |
+| Query buscar pedidos pendientes | Logic | `ObtenerRequerimientosPendientesHandler` | Handler | MIGRATED | `src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs` |
+| Ver detalle requerimiento | Logic | `ObtenerDetalleRequerimientoHandler` | Handler | MIGRATED | `src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs` |
+| Importar requerimiento como pedido | Logic | `ImportarRequerimientoHandler` (BR-IMPORT-001..004) | Handler | MIGRATED | `src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs` |
+| `IImportacionPedidoGateway` | Interface | `IImportacionPedidoGateway` | Interface | MIGRATED | `src/Inforest.Application/Interfaces/IImportacionPedidoGateway.cs` |
+| (tests BR-IMPORT-001..004) | — | `RequerimientoAlmacenTests` (8 tests domain) + `ImportacionRequerimientoHandlerTests` (9 tests handler) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/RequerimientoAlmacenTests.cs` + `tests/Inforest.Application.Tests/Almacen/ImportacionRequerimientoHandlerTests.cs` |

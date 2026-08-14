@@ -121,6 +121,10 @@ public static class DependencyInjection
         // W14: Almacén — BR-008 (descargo de inventario en venta)
         services.AddScoped<IInventoryGateway, InventoryGateway>();
 
+        // POS-FUNC-014: Importación de requerimientos de almacén al POS
+        services.AddScoped<IRequerimientoAlmacenRepository, RequerimientoAlmacenRepository>();
+        services.AddScoped<IImportacionPedidoGateway, ImportacionPedidoGateway>();
+
         // W14: Notificaciones email — claCorreoElectronico.cls
         services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
         services.AddScoped<INotificacionEmailService, SmtpEmailService>();

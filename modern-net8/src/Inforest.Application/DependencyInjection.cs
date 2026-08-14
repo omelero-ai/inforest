@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Inforest.Application.Interfaces;
+using Inforest.Application.Almacen;
 using Inforest.Application.Delivery;
 using Inforest.Application.Despacho;
 using Inforest.Application.Motorizado;
@@ -137,6 +138,11 @@ public static class DependencyInjection
         services.AddScoped<RevertirEntregaCentralHandler>();
         services.AddScoped<ModificarFechaProgramadaDeliveryHandler>();
         services.AddScoped<ObtenerPedidosSeguimientoDeliveryHandler>();
+
+        // POS-FUNC-014: Importación de pedidos externos desde ALMACEN
+        services.AddScoped<ObtenerRequerimientosPendientesHandler>();
+        services.AddScoped<ObtenerDetalleRequerimientoHandler>();
+        services.AddScoped<ImportarRequerimientoHandler>();
 
         // P3-10: Reportes — Handlers (ADR-007)
         services.AddScoped<ObtenerReporteComandaHandler>();
