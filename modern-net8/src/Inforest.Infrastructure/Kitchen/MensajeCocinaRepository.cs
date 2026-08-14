@@ -195,7 +195,7 @@ internal sealed class MensajeCocinaRepository : IMensajeCocinaRepository
         string Mensaje,
         DateTime FechaRegistro,
         DateTime FechaModificacion,
-        string UsuarioModificacion,
+        string? UsuarioModificacion,
         string Caja,
         bool Activo,
         bool ActivarAlerta);

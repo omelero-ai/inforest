@@ -38,9 +38,9 @@ public sealed class FrmLiquidacionCierre : Form
     public FrmLiquidacionCierre(
         string codigoTurno,
         string codigoCaja,
-        string codigoUsuario = "",
         CerrarTurnoHandler? cerrarHandler = null,
-        ObtenerResumenTurnoHandler? resumenHandler = null)
+        ObtenerResumenTurnoHandler? resumenHandler = null,
+        string codigoUsuario = "")
     {
         _codigoTurno = codigoTurno;
         _codigoCaja = codigoCaja;

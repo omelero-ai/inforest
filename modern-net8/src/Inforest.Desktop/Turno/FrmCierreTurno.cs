@@ -13,7 +13,7 @@ namespace Inforest.Desktop.Turno;
         private Button btnCerrar = null!;
         private Button btnCancelar = null!;
 
-        public FrmCierreTurno(string codigoTurno, string codigoCaja, string codigoUsuario = "", CerrarTurnoHandler? cerrarTurnoHandler = null)
+        public FrmCierreTurno(string codigoTurno, string codigoCaja, CerrarTurnoHandler? cerrarTurnoHandler = null, string codigoUsuario = "")
         {
             _codigoTurno = codigoTurno;
             _codigoCaja = codigoCaja;
