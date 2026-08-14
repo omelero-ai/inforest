@@ -1543,3 +1543,103 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Estado:** MIGRATED
 
 **Evidencia:** `modern-net8/src/Inforest.Application/Interfaces/INotificacionEmailService.cs`, `modern-net8/src/Inforest.Infrastructure/Notifications/SmtpEmailService.cs`
+
+---
+
+### BR-DC-001
+**Nombre:** No se puede vender sin aperturar el Día Contable
+
+**Origen:** Legacy/frmDiaContable.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDiaContable.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click`
+
+**Descripción:** Si el usuario intenta salir del formulario de día contable sin haber aperturado ninguno, el sistema muestra el mensaje "No puede Iniciar Venta sin Aperturar Dia Contable" y bloquea el inicio del POS (`lIniciaPorDiaContable = False`).
+
+**Condición:** Usuario hace clic en "Salir" sin haber aperturado el día contable.
+
+**Resultado:** Mensaje de error. El flag `lIniciaPorDiaContable` permanece `False`, bloqueando el POS.
+
+**Excepciones:** Si ya existe un día contable activo (modo apertura con fecha ≠ sentinel), el flag se establece en `True` automáticamente.
+
+**Destino .NET:** `FrmDiaContable.OnSalirClick` → `IniciaPorDiaContable` property
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Desktop/Turno/FrmDiaContable.cs`
+
+---
+
+### BR-DC-002
+**Nombre:** No se puede aperturar un nuevo Día Contable si ya existe uno activo
+
+**Origen:** Legacy/frmDiaContable.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDiaContable.frm`
+
+**Procedimiento/Función:** `Form_Load` modo="Apertura"
+
+**Descripción:** Si `obtieneDiaContable()` retorna una fecha distinta al sentinel (1900/01/01), existe un día contable activo. El formulario muestra el mensaje "Para cerrar este Dia Contable se debe cerrar el turno" y deshabilita el botón de apertura.
+
+**Condición:** `fdiacontable ≠ "19000101"` en modo "Apertura".
+
+**Resultado:** Botón apertura oculto. Mensaje informativo. `lIniciaPorDiaContable = True`, `lDiaContableAperturado = True`.
+
+**Excepciones:** —
+
+**Destino .NET:** `FrmDiaContable.OnLoadAsync` modo `Apertura`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Desktop/Turno/FrmDiaContable.cs`
+
+---
+
+### BR-DC-003
+**Nombre:** La fecha de apertura del Día Contable no puede ser menor al último registrado
+
+**Origen:** Legacy/frmDiaContable.frm + clsDiaContable.cls
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDiaContable.frm`, `legacy-restaurant/restaurant-vb6/Clases/clsDiaContable.cls`
+
+**Procedimiento/Función:** `cmdApertura_Click` → `validaFechaIngreso()`
+
+**Descripción:** `validaFechaIngreso()` consulta `SELECT max(fdiacontable) FROM tdiacontable`. Si la fecha seleccionada es menor a esa máxima, la apertura es rechazada con el mensaje "La fecha seleccionada es menor al último Día Contable registrado".
+
+**Condición:** `Format(dtpDiaContable.value,"yyyyMMdd") < Format(fechaMaxima,"yyyyMMdd")`.
+
+**Resultado:** Apertura rechazada. Foco vuelve al DateTimePicker.
+
+**Excepciones:** Si no hay registros previos (`max = NULL`), la validación pasa.
+
+**Destino .NET:** `AperturarDiaContableHandler` + `IDiaContableService.ObtenerFechaMaximaDiaContableAsync`
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Turno/DiaContableHandlers.cs`, `modern-net8/tests/Inforest.Application.Tests/Turno/DiaContableHandlerTests.cs`
+
+---
+
+### BR-DC-004
+**Nombre:** El cierre del Día Contable actualiza directamente TDIACONTABLE
+
+**Origen:** Legacy/frmDiaContable.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDiaContable.frm`
+
+**Procedimiento/Función:** `cmdCerrar_Click`
+
+**Descripción:** El cierre ejecuta directamente: `UPDATE TDIACONTABLE SET lcierre=1, tusuariocierre=<usuario>, fregistrocierre=GETDATE() WHERE fdiacontable=<fecha>`. No llama a un SP dedicado. Requiere confirmación del usuario (MsgBox Sí/No).
+
+**Condición:** Usuario confirma el cierre.
+
+**Resultado:** `lcierre=1` en el registro de TDIACONTABLE correspondiente.
+
+**Excepciones:** Si el usuario cancela el diálogo, no se realiza ninguna operación.
+
+**Destino .NET:** `CerrarDiaContableHandler` + `IDiaContableService.CerrarDiaContableAsync` (SQL directo parametrizado)
+
+**Estado:** MIGRATED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Turno/DiaContableHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Turno/DiaContableService.cs`, `modern-net8/tests/Inforest.Application.Tests/Turno/DiaContableHandlerTests.cs`

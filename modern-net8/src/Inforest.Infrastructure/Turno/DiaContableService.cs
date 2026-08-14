@@ -46,4 +46,39 @@ internal sealed class DiaContableService : IDiaContableService
             new { tUsuario = usuario, fDiaContable = fecha.Date },
             cancellationToken: ct);
     }
+
+    /// <inheritdoc/>
+    public async Task CerrarDiaContableAsync(DateTime fecha, string usuario, CancellationToken ct = default)
+    {
+        // Legacy: frmDiaContable.frm cmdCerrar_Click
+        // UPDATE tdiacontable SET lcierre=1, tusuariocierre=@usuario, fregistrocierre=GETDATE()
+        // WHERE fdiacontable=@fecha
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        const string sql = """
+            UPDATE TDIACONTABLE
+            SET lcierre = 1,
+                tusuariocierre = @tusuariocierre,
+                fregistrocierre = GETDATE()
+            WHERE CONVERT(varchar(8), fdiacontable, 112) = @fdiacontable
+            """;
+        await connection.ExecuteAsync(new CommandDefinition(
+            sql,
+            new
+            {
+                tusuariocierre = usuario,
+                fdiacontable = fecha.ToString("yyyyMMdd")
+            },
+            cancellationToken: ct));
+    }
+
+    /// <inheritdoc/>
+    public async Task<DateTime?> ObtenerFechaMaximaDiaContableAsync(CancellationToken ct = default)
+    {
+        // Legacy: clsDiaContable.validaFechaIngreso → SELECT max(fdiacontable) FROM tdiacontable
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        const string sql = "SELECT MAX(fdiacontable) AS codigo FROM TDIACONTABLE";
+        var result = await connection.QueryFirstOrDefaultAsync<DateTime?>(
+            new CommandDefinition(sql, cancellationToken: ct));
+        return result;
+    }
 }
