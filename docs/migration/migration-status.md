@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-12
 >
-> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) + POS-FUNC-007/016/019 + POS-FUNC-008 (Caja/Cierre COMPLETED)**
+> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001 (Login) MIGRATED; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) + POS-FUNC-007/016/019 + POS-FUNC-008 (Caja/Cierre COMPLETED)**
 
 ---
 

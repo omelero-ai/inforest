@@ -1,10 +1,12 @@
 using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
+using Inforest.Application.Seguridad;
 
 namespace Inforest.Desktop.POS;
 
 /// <summary>
 /// Legacy: <c>frmAcceso.frm</c> para el flujo del POS.
+/// Reglas: BR-POS-006 (autenticación previa al MDI POS), BR-POS-006-LOCK (bloqueo por intentos fallidos).
 /// </summary>
 public class FrmLoginPOS : Form
 {
@@ -14,6 +16,9 @@ public class FrmLoginPOS : Form
     private readonly TextBox _txtPassword;
     private readonly ComboBox _cmbCaja;
     private readonly Label _lblEstado;
+
+    // BR-POS-006-LOCK: equivalente al contador `i` de frmAcceso.frm.
+    private int _intentosFallidos;
 
     public FrmLoginPOS(IAuthService authService, ObtenerTodasCajasHandler cajasHandler)
     {
@@ -74,11 +79,23 @@ public class FrmLoginPOS : Form
             Environment.MachineName,
             "INFOREST"));
 
-        _lblEstado.Text = result.Exitoso ? "Autenticación correcta." : result.MensajeError ?? "Error de autenticación.";
         if (result.Exitoso)
         {
+            _lblEstado.Text = "Autenticación correcta.";
             DialogResult = DialogResult.OK;
             Close();
+            return;
         }
+
+        // Intento fallido: limpiar password y acumular contador.
+        _txtPassword.Text = string.Empty;
+        _txtPassword.Focus();
+        _intentosFallidos++;
+        _lblEstado.Text = result.MensajeError ?? "Error de autenticación.";
+
+        // BR-POS-006-LOCK: equivalente a `If i = 4 Then End` en frmAcceso.frm.
+        // El legacy inicia i=1 e incrementa en fallo, por lo que termina en el 3er fallo.
+        if (_intentosFallidos >= LoginPolicy.MaxIntentosFallidos)
+            System.Windows.Forms.Application.Exit();
     }
 }

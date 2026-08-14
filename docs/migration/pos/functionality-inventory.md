@@ -2,7 +2,7 @@
 
 | ID | Funcionalidad | Evidencia Legacy | Descripción | Estado |
 |---|---|---|---|---|
-| POS-FUNC-001 | Inicio de sesión POS | `frmAcceso.frm + modPuntoVenta.bas` | Autenticar usuario y habilitar MDI POS | IN_PROGRESS |
+| POS-FUNC-001 | Inicio de sesión POS | `frmAcceso.frm + modPuntoVenta.bas` | Autenticar usuario y habilitar MDI POS | MIGRATED |
 | POS-FUNC-002 | Apertura MDI Punto de Venta | `mdiPuntoVenta.frm` | Contenedor principal de operaciones POS | IN_PROGRESS |
 | POS-FUNC-003 | Gestión de pedidos salón | `frmPedido.frm / frmDetallePedido.frm / frmJuntarMesas.frm` | Crear/editar/agrupar pedidos | ANALYSIS |
 | POS-FUNC-004 | Registro de venta | `frmVenta.frm` | Emitir venta desde pedido/canal | IN_PROGRESS |
