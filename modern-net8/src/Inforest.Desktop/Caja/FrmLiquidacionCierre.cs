@@ -16,6 +16,7 @@ public sealed class FrmLiquidacionCierre : Form
     private readonly ObtenerResumenTurnoHandler? _resumenHandler;
     private readonly string _codigoTurno;
     private readonly string _codigoCaja;
+    private readonly string _codigoUsuario;
 
     // ── campos de desglose ──
     private readonly TextBox _txtEfectivoMN = new() { Text = "0.00", Width = 120 };
@@ -37,11 +38,13 @@ public sealed class FrmLiquidacionCierre : Form
     public FrmLiquidacionCierre(
         string codigoTurno,
         string codigoCaja,
+        string codigoUsuario = "",
         CerrarTurnoHandler? cerrarHandler = null,
         ObtenerResumenTurnoHandler? resumenHandler = null)
     {
         _codigoTurno = codigoTurno;
         _codigoCaja = codigoCaja;
+        _codigoUsuario = codigoUsuario;
         _cerrarHandler = cerrarHandler;
         _resumenHandler = resumenHandler;
 
@@ -201,7 +204,7 @@ public sealed class FrmLiquidacionCierre : Form
             CodigoCaja: _codigoCaja,
             MontoFinal: montoFinal,
             Breakdown: breakdown,
-            CodigoUsuario: Environment.UserName);
+            CodigoUsuario: _codigoUsuario);
 
         var result = await _cerrarHandler.HandleAsync(command);
 
