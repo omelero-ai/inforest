@@ -116,11 +116,11 @@
 
 ## Próximos Pasos
 
-1. **MIGRATED:** POS-FUNC-014 Importación de pedidos externos completado (RequerimientoAlmacen entity + DetalleRequerimientoAlmacen + IRequerimientoAlmacenRepository + RequerimientoAlmacenRepository + IImportacionPedidoGateway + ImportacionPedidoGateway + 3 handlers + FrmImportacionRequerimientos + FrmImportacionRequerimientoDetalle + BR-IMPORT-001..004 + 17 tests — 411 tests en verde).
-2. **Pendiente de aprobación:** iniciar **POS-FUNC-015 Mensajería cocina/KDS** (`frmMensajeCocina*.frm / modKDS.bas`) como siguiente elemento de `InfoRest.vbp`.
-3. **Continuar Maestros operativos** (productos, grupos, clientes) sobre la base transversal ya validada.
-4. Resolver gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
-5. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 puedan operar extremo a extremo.
+1. **COMPLETED:** POS-FUNC-015 Mensajería cocina/KDS validado (`frmMensajeCocina.frm`, `frmMensajeCocinaDetalle.frm`, `TMENSAJECOCINA`, `USP_LISTARMENSAJES`, `USP_AGREGARMENSAJE`, `USP_MODIFICARMENSAJE`, `USP_ELIMINARRMENSAJES`, `USP_CERRAR_MENSAJES_CIERRETURNO` + integración con cierre de turno + 434 tests en verde).
+2. **Pendiente de aprobación:** iniciar **POS-FUNC-016 Impresión pre-cuenta/comanda** (`frmPrecuentaImpresora.frm / frmRepPaloteoTicket.frm`) como siguiente elemento de `InfoRest.vbp`.
+3. Mantener seguimiento de gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
+4. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 puedan operar extremo a extremo.
+5. No avanzar al siguiente elemento hasta recibir aprobación explícita.
 
 ---
 

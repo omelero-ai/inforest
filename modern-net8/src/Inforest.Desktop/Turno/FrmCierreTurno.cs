@@ -63,7 +63,7 @@ namespace Inforest.Desktop.Turno;
                 return;
             }
 
-            var result = await _cerrarTurnoHandler.HandleAsync(new CerrarTurnoCommand(_codigoTurno, _codigoCaja, montoFinal));
+            var result = await _cerrarTurnoHandler.HandleAsync(new CerrarTurnoCommand(_codigoTurno, _codigoCaja, montoFinal, CodigoUsuario: Environment.UserName));
             if (!result.EsExitoso)
             {
                 MessageBox.Show(result.MensajeError, "Turno", MessageBoxButtons.OK, MessageBoxIcon.Warning);

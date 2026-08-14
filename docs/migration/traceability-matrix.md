@@ -48,7 +48,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `modConsultaIntregrada.bas` | Multi-local | — | — | NOT_STARTED | Consulta multi-local |
 | `modDespachador.bas` | App Entry | `Program.cs` (DespachadorModule) + `DespachadorForm` | WinForms + DI | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Delivery/ |
 | `modMotorizado.bas` | App Entry | `Program.cs` (MotorizadoModule) + `LlegadaSalidaForm` | WinForms + DI | IN_PROGRESS | modern-net8/src/Inforest.Desktop/Motorizado/ |
-| `modKDS.bas` | Integration | `IProduccionCocinaService` + `KdsXmlDispatcher` + `KdsLegacyGateway` | Interface + Classes | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IProduccionCocinaService.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsXmlDispatcher.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsLegacyGateway.cs` |
+| `modKDS.bas` | Integration | `IProduccionCocinaService` + `KdsXmlDispatcher` + `KdsLegacyGateway` + `MensajeCocinaRepository` | Interface + Classes | MIGRATED | `modern-net8/src/Inforest.Application/Interfaces/IProduccionCocinaService.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsXmlDispatcher.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/KdsLegacyGateway.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
 | `modBlueVision.bas` | Integration | `IBlueVisionService` + `BlueVisionHttpClient` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/Hardware/IBlueVisionService.cs`, `modern-net8/src/Inforest.Infrastructure/Hardware/BlueVisionHttpClient.cs` |
 | `modImpresoraFiscal.bas` | Integration | `IImpresoraFiscalService` + `NullImpresoraFiscalService` | Interface + Stub | BLOCKED | OCX 32-bit sin SDK .NET; ver `modern-net8/src/Inforest.Infrastructure/Hardware/NullImpresoraFiscalService.cs` |
 | `modAuditoria.bas` | Audit | — | — | NOT_STARTED | Auditoría |
@@ -396,3 +396,19 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | Importar requerimiento como pedido | Logic | `ImportarRequerimientoHandler` (BR-IMPORT-001..004) | Handler | MIGRATED | `src/Inforest.Application/Almacen/ImportacionRequerimientoHandlers.cs` |
 | `IImportacionPedidoGateway` | Interface | `IImportacionPedidoGateway` | Interface | MIGRATED | `src/Inforest.Application/Interfaces/IImportacionPedidoGateway.cs` |
 | (tests BR-IMPORT-001..004) | — | `RequerimientoAlmacenTests` (8 tests domain) + `ImportacionRequerimientoHandlerTests` (9 tests handler) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/RequerimientoAlmacenTests.cs` + `tests/Inforest.Application.Tests/Almacen/ImportacionRequerimientoHandlerTests.cs` |
+
+## Componentes POS-FUNC-015 — Mensajería cocina/KDS
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmMensajeCocina.frm` | Form | `FrmMensajeCocina` | WinForm | COMPLETED | `src/Inforest.Desktop/Kitchen/FrmMensajeCocina.cs` |
+| `frmMensajeCocinaDetalle.frm` | Form | `FrmMensajeCocinaDetalle` + `AgregarMensajeCocinaHandler` + `ModificarMensajeCocinaHandler` + `EliminarMensajeCocinaHandler` | WinForm + Handlers | COMPLETED | `src/Inforest.Desktop/Kitchen/FrmMensajeCocinaDetalle.cs` + `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` |
+| `TMENSAJECOCINA` | Table | `MensajeCocina` + `IMensajeCocinaRepository` + `MensajeCocinaRepository` | Entity + Interface + Repository | COMPLETED | `src/Inforest.Domain/Entities/Cocina/MensajeCocina.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_LISTARMENSAJES` | SP | `ObtenerMensajesCocinaHandler` + `IMensajeCocinaRepository.ObtenerMensajesAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_AGREGARMENSAJE` | SP | `AgregarMensajeCocinaHandler` + `IMensajeCocinaRepository.AgregarAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_MODIFICARMENSAJE` | SP | `ModificarMensajeCocinaHandler` + `IMensajeCocinaRepository.ModificarAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_ELIMINARRMENSAJES` | SP | `EliminarMensajeCocinaHandler` + `IMensajeCocinaRepository.EliminarAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `USP_CERRAR_MENSAJES_CIERRETURNO` | SP | `CerrarTurnoHandler` + `IMensajeCocinaRepository.CerrarActivosPorCajaAsync` | Handler + Repository | COMPLETED | `src/Inforest.Application/Turno/TurnoHandlers.cs` + `src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs` |
+| `frmLiquidacionDetalle.frm` (cierre mensajes cocina) | Form rule | `FrmLiquidacionCierre` + `CerrarTurnoHandler` | WinForm + Handler | COMPLETED | `src/Inforest.Desktop/Caja/FrmLiquidacionCierre.cs` + `src/Inforest.Application/Turno/TurnoHandlers.cs` |
+| (tests BR-MSGCOC-001..005) | — | `MensajeCocinaTests` + `MensajeCocinaHandlerTests` + `MensajeCocinaRepositoryTests` + `CerrarTurnoHandlerTests` | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Cocina/MensajeCocinaTests.cs`, `tests/Inforest.Application.Tests/Kitchen/MensajeCocinaHandlerTests.cs`, `tests/Inforest.Infrastructure.Tests/Kitchen/MensajeCocinaRepositoryTests.cs`, `tests/Inforest.Application.Tests/Turno/CerrarTurnoHandlerTests.cs` |
+

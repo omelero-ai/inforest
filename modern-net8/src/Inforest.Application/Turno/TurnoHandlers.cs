@@ -1,4 +1,5 @@
 using Inforest.Application.Configuracion;
+using Inforest.Application.Kitchen;
 using Inforest.Domain.Common;
 using Inforest.Domain.Entities.Caja;
 using TurnoEntity = Inforest.Domain.Entities.Configuracion.Turno;
@@ -63,26 +64,31 @@ public sealed record CerrarTurnoCommand(
     decimal MontoFinal,
     CierreTurnoBreakdown? Breakdown = null,
     bool SupervisorAutorizado = false,
-    bool DescargoPendienteConfirmado = false);
+    bool DescargoPendienteConfirmado = false,
+    string? CodigoUsuario = null);
 
 /// <summary>
 /// Cierra el turno de caja aplicando las reglas de negocio:
 /// - BR-CAJA-001: si lObligaCierre=true y no hay autorización de supervisor → retorna REQUIERE_SUPERVISOR
 /// - BR-CAJA-002: si lActivaConsultaDescargo=true y no confirmado → retorna REQUIERE_CONFIRMACION_DESCARGO
 /// - BR-CAJA-004: actualiza MTURNO con desglose completo de montos.
+/// - BR-MSGCOC-005: cierra mensajes activos de cocina para la caja al finalizar el turno.
 /// Legacy: frmLiquidacionDetalle.frm, cmdOpcion_Click(0).
 /// </summary>
 public sealed class CerrarTurnoHandler
 {
     private readonly ITurnoRepository _turnoRepository;
     private readonly IParametroRepository _configuracionRepository;
+    private readonly IMensajeCocinaRepository? _mensajeCocinaRepository;
 
     public CerrarTurnoHandler(
         ITurnoRepository turnoRepository,
-        IParametroRepository configuracionRepository)
+        IParametroRepository configuracionRepository,
+        IMensajeCocinaRepository? mensajeCocinaRepository = null)
     {
         _turnoRepository = turnoRepository;
         _configuracionRepository = configuracionRepository;
+        _mensajeCocinaRepository = mensajeCocinaRepository;
     }
 
     public async Task<Result> HandleAsync(CerrarTurnoCommand command, CancellationToken ct = default)
@@ -105,9 +111,13 @@ public sealed class CerrarTurnoHandler
 
         var breakdown = command.Breakdown ?? CierreTurnoBreakdown.Vacio();
         var closed = await _turnoRepository.CerrarAsync(command.CodigoTurno, command.MontoFinal, breakdown, ct);
-        return closed
-            ? Result.Ok()
-            : Result.Fail("No se pudo cerrar el turno solicitado.", "TURNO_CIERRE_FALLIDO");
+        if (!closed)
+            return Result.Fail("No se pudo cerrar el turno solicitado.", "TURNO_CIERRE_FALLIDO");
+
+        if (_mensajeCocinaRepository is not null && !string.IsNullOrWhiteSpace(command.CodigoUsuario))
+            await _mensajeCocinaRepository.CerrarActivosPorCajaAsync(command.CodigoUsuario, command.CodigoCaja, ct);
+
+        return Result.Ok();
     }
 }
 

@@ -85,7 +85,7 @@ public sealed class MensajeCocina
             throw new DomainException("Caracter (') no permitido, favor corregir.", "MENSAJE_COCINA_CARACTER_INVALIDO");
 
         if (valor.Contains('"'))
-            throw new DomainException("Caracter ("") no permitido, favor corregir.", "MENSAJE_COCINA_CARACTER_INVALIDO");
+            throw new DomainException("Caracter (\") no permitido, favor corregir.", "MENSAJE_COCINA_CARACTER_INVALIDO");
 
         return valor.ToUpperInvariant();
     }

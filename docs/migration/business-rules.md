@@ -1881,6 +1881,138 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+## POS-FUNC-015 — Mensajería cocina/KDS
+
+### BR-MSGCOC-001
+
+**Nombre:** Mensaje de cocina obligatorio, sin caracteres prohibidos y en mayúsculas
+
+**Origen:** Legacy/frmMensajeCocinaDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocinaDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(0)`, `ValidaStr`
+
+**Descripción:** El mensaje a cocina es obligatorio, se trimmea, se almacena en mayúsculas y bloquea los caracteres `&`, `'` y `"`.
+
+**Condición:** Mensaje vacío, longitud mayor a 95 o contiene `&`, `'` o `"`.
+
+**Resultado:** Error de validación; no se inserta ni actualiza `TMENSAJECOCINA`.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `MensajeCocina.Crear/Actualizar`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Domain/Entities/Cocina/MensajeCocina.cs`
+
+---
+
+### BR-MSGCOC-002
+
+**Nombre:** Correlativo anual de 8 caracteres para mensajes de cocina
+
+**Origen:** Legacy/frmMensajeCocinaDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocinaDetalle.frm`
+
+**Procedimiento/Función:** Alta de mensaje nuevo
+
+**Descripción:** El código del mensaje se genera como `yy + 6 dígitos`, reiniciando el correlativo por año.
+
+**Condición:** Inserción de un nuevo mensaje de cocina.
+
+**Resultado:** Se genera el siguiente código disponible antes de grabar.
+
+**Excepciones:** Si no existen mensajes del año, inicia en `yy000001`.
+
+**Destino .NET:** `MensajeCocinaRepository.ObtenerProximoCodigoAsync` + `AgregarMensajeCocinaHandler`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs`, `modern-net8/src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs`
+
+---
+
+### BR-MSGCOC-003
+
+**Nombre:** Máximo 30 mensajes activos de cocina
+
+**Origen:** Legacy/frmMensajeCocinaDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocinaDetalle.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(0)`
+
+**Descripción:** El sistema no permite registrar o reactivar más de 30 mensajes activos simultáneamente.
+
+**Condición:** `lActivo = True` y el conteo de activos alcanza 30.
+
+**Resultado:** Se bloquea la operación y se informa el máximo permitido.
+
+**Excepciones:** Al modificar, el mensaje actual se excluye del conteo.
+
+**Destino .NET:** `AgregarMensajeCocinaHandler`, `ModificarMensajeCocinaHandler`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Kitchen/MensajeCocinaHandlers.cs`
+
+---
+
+### BR-MSGCOC-004
+
+**Nombre:** Listado y mantenimiento de mensajes por caja/rango
+
+**Origen:** Legacy/frmMensajeCocina.frm, Legacy/frmMensajeCocinaDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocina.frm`, `legacy-restaurant/restaurant-vb6/Formularios/frmMensajeCocinaDetalle.frm`
+
+**Procedimiento/Función:** `cmdProcesa_Click`, `cmdOpcion_Click(0..2)`
+
+**Descripción:** El listado usa `USP_LISTARMENSAJES`; con caja informada filtra por caja y sin caja usa rango de fechas. Desde el mantenimiento se puede agregar, editar y eliminar mensajes.
+
+**Condición:** Consulta, edición o eliminación desde los formularios de mensajería.
+
+**Resultado:** Se refleja el estado actual de `TMENSAJECOCINA` y se ejecutan los SPs legacy correspondientes.
+
+**Excepciones:** Ninguna
+
+**Destino .NET:** `FrmMensajeCocina`, `FrmMensajeCocinaDetalle`, `MensajeCocinaRepository`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Desktop/Kitchen/FrmMensajeCocina.cs`, `modern-net8/src/Inforest.Desktop/Kitchen/FrmMensajeCocinaDetalle.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs`
+
+---
+
+### BR-MSGCOC-005
+
+**Nombre:** Cierre de mensajes activos al cerrar turno
+
+**Origen:** Legacy/frmLiquidacionDetalle.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmLiquidacionDetalle.frm`
+
+**Procedimiento/Función:** Flujo de cierre de turno
+
+**Descripción:** Al cerrar turno, los mensajes activos de la caja se cierran con usuario y fecha final mediante `USP_CERRAR_MENSAJES_CIERRETURNO`.
+
+**Condición:** Cierre exitoso de turno para una caja.
+
+**Resultado:** Los mensajes activos de `TMENSAJECOCINA` quedan inactivos con trazabilidad de cierre.
+
+**Excepciones:** Si no hay mensajes activos en la caja, el SP no realiza cambios.
+
+**Destino .NET:** `CerrarTurnoHandler` + `MensajeCocinaRepository.CerrarActivosPorCajaAsync`
+
+**Estado:** COMPLETED
+
+**Evidencia:** `modern-net8/src/Inforest.Application/Turno/TurnoHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Kitchen/MensajeCocinaRepository.cs`
+
+---
+
 ## POS-FUNC-010 — Cliente y cuentas corrientes
 
 ### BR-CLIENTE-001

@@ -200,7 +200,8 @@ public sealed class FrmLiquidacionCierre : Form
             CodigoTurno: _codigoTurno,
             CodigoCaja: _codigoCaja,
             MontoFinal: montoFinal,
-            Breakdown: breakdown);
+            Breakdown: breakdown,
+            CodigoUsuario: Environment.UserName);
 
         var result = await _cerrarHandler.HandleAsync(command);
 

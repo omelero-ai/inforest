@@ -16,7 +16,7 @@
 | POS-FUNC-012 | Delivery dependiente POS | `frmPedidoDelivery*.frm / frmCentralPedidos.frm` | Pedidos delivery vinculados al POS | IN_PROGRESS |
 | POS-FUNC-013 | Insumos/descargo | `frmInsumo*.frm / frmInsumoDetalle.frm / clsAlmacen.cls` | Ajustes/descargo de insumos | MIGRATED |
 | POS-FUNC-014 | Importación de pedidos externos | `frmImportacionRequerimientos*.frm` | Integración pedidos externos | MIGRATED |
-| POS-FUNC-015 | Mensajería cocina/KDS | `frmMensajeCocina*.frm / modKDS.bas` | Envío y control de producción | IN_PROGRESS |
+| POS-FUNC-015 | Mensajería cocina/KDS | `frmMensajeCocina*.frm / modKDS.bas` | Envío y control de producción | COMPLETED |
 | POS-FUNC-016 | Impresión pre-cuenta/comanda | `frmPrecuentaImpresora.frm / frmRepPaloteoTicket.frm` | Salida térmica operativa | ANALYSIS |
 | POS-FUNC-017 | Reportería operativa POS | `frmRep*.frm + Designers DSR` | Consultas y reportes de operación | ANALYSIS |
 | POS-FUNC-018 | Recibo de ingresos/egresos | `frmReciboIngreso*.frm / frmReciboEgreso*.frm` | Movimientos de caja adicionales | ANALYSIS |

@@ -23,11 +23,11 @@
 | 6 | `SP_NOTICIAS_INFOREST` | `mdiPuntoVenta.frm` | SQL_ONLY | ANALYSIS |
 | 7 | `USP_ADD_MARCACION` | `frmVerificarHuellaMarcacion.frm` | SQL_ONLY | ANALYSIS |
 | 8 | `USP_AGREGARINSUMOS` | `frmInsumoDetalle.frm` | SQL_ONLY | ANALYSIS |
-| 9 | `USP_AGREGARMENSAJE` | `frmMensajeCocinaDetalle.frm` | SQL_ONLY | ANALYSIS |
+| 9 | `USP_AGREGARMENSAJE` | `frmMensajeCocinaDetalle.frm` | SQL_ONLY | MIGRATED |
 | 10 | `USP_CALCULA_PRECIO` | `frmDivision.frm` | SQL_ONLY | ANALYSIS |
-| 11 | `USP_CERRAR_MENSAJES_CIERRETURNO` | `frmLiquidacionDetalle.frm` | SQL_ONLY | ANALYSIS |
+| 11 | `USP_CERRAR_MENSAJES_CIERRETURNO` | `frmLiquidacionDetalle.frm` | SQL_ONLY | MIGRATED |
 | 12 | `USP_ELIMINARINSUMOS` | `frmInsumoDetalle.frm` | SQL_ONLY | ANALYSIS |
-| 13 | `USP_ELIMINARRMENSAJES` | `frmMensajeCocinaDetalle.frm` | SQL_ONLY | ANALYSIS |
+| 13 | `USP_ELIMINARRMENSAJES` | `frmMensajeCocinaDetalle.frm` | SQL_ONLY | MIGRATED |
 | 14 | `USP_INF_verificaProductoAreaPantalla` | `modProcedimiento.bas` | SQL_ONLY | ANALYSIS |
 | 15 | `USP_KDS_GrabarTiempoSalidaDPedido` | `modKDS.bas` | SQL_ONLY | ANALYSIS |
 | 16 | `USP_KDS_ObtenerArea` | `modKDS.bas` | SQL_ONLY | ANALYSIS |
@@ -46,9 +46,9 @@
 | 29 | `USP_KDS_ObtenerTipoPedido` | `modKDS.bas` | SQL_ONLY | ANALYSIS |
 | 30 | `USP_LISTADOMENSAJES` | `frmMozoUsuario.frm` | SQL_ONLY | ANALYSIS |
 | 31 | `USP_LISTARINSUMOS` | `frmInsumo.frm` | SQL_ONLY | ANALYSIS |
-| 32 | `USP_LISTARMENSAJES` | `frmLiquidacionDetalle.frm`, `frmMensajeCocina.frm` | SQL_ONLY | ANALYSIS |
+| 32 | `USP_LISTARMENSAJES` | `frmLiquidacionDetalle.frm`, `frmMensajeCocina.frm` | SQL_ONLY | MIGRATED |
 | 33 | `USP_MODIFICARINSUMOS` | `frmInsumoDetalle.frm` | SQL_ONLY | ANALYSIS |
-| 34 | `USP_MODIFICARMENSAJE` | `frmMensajeCocinaDetalle.frm` | SQL_ONLY | ANALYSIS |
+| 34 | `USP_MODIFICARMENSAJE` | `frmMensajeCocinaDetalle.frm` | SQL_ONLY | MIGRATED |
 | 35 | `Usp_ActualizarPreciosTransferenciaAlmacen` | `frmAcceso.frm`, `frmFlash.frm` | SQL_ONLY | ANALYSIS |
 | 36 | `Usp_GuiaTransporteXml` | `clsxml.cls` | SQL_ONLY | ANALYSIS |
 | 37 | `spIns_DPEDIDO` | `frmCargoMozo.frm` | SQL_ONLY | ANALYSIS |
@@ -227,7 +227,7 @@
 | 53 | `TLOG_IMPRESION` | `frmCajaRapida.frm`, `modProcedimiento.bas` | ANALYSIS |
 | 54 | `TLOG_MODPRECIO` | `frmPreciosDetalle.frm` | ANALYSIS |
 | 55 | `TMENSAJE` | `frmDescargo.frm`, `frmMensaje.frm`, `frmPedido.frm` | ANALYSIS |
-| 56 | `TMENSAJECOCINA` | `frmMensajeCocinaDetalle.frm` | ANALYSIS |
+| 56 | `TMENSAJECOCINA` | `frmMensajeCocinaDetalle.frm` | MIGRATED |
 | 57 | `TMENSAJEUSUARIO` | `frmPedido.frm` | ANALYSIS |
 | 58 | `TMESA` | `FrmRecargarTarjetaDetalle.frm`, `frmCajaRapida.frm`, `frmCargoMozo.frm`… | ANALYSIS |
 | 59 | `TMODULO` | `modAuditoriaIntegral.bas`, `modProcedimiento.bas` | ANALYSIS |

@@ -1,4 +1,5 @@
 using Inforest.Application.Configuracion;
+using Inforest.Application.Kitchen;
 using Inforest.Application.Turno;
 using Inforest.Domain.Entities.Caja;
 using Inforest.Domain.Entities.Configuracion;
@@ -23,6 +24,14 @@ public class CerrarTurnoHandlerTests
         mock.Setup(r => r.CerrarAsync(
                 It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<CierreTurnoBreakdown>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
+        return mock.Object;
+    }
+
+    private static IMensajeCocinaRepository MensajeRepoNoop()
+    {
+        var mock = new Mock<IMensajeCocinaRepository>();
+        mock.Setup(r => r.CerrarActivosPorCajaAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
         return mock.Object;
     }
 
@@ -134,8 +143,8 @@ public class CerrarTurnoHandlerTests
     [Fact]
     public async Task CerrarTurno_Normal_Exitoso()
     {
-        var handler = new CerrarTurnoHandler(TurnoRepoOk(), ConfigRepoNullDefaults());
-        var result = await handler.HandleAsync(new CerrarTurnoCommand("TUR001", "CA1", 500m));
+        var handler = new CerrarTurnoHandler(TurnoRepoOk(), ConfigRepoNullDefaults(), MensajeRepoNoop());
+        var result = await handler.HandleAsync(new CerrarTurnoCommand("TUR001", "CA1", 500m, CodigoUsuario: "USR1"));
         Assert.True(result.EsExitoso);
     }
 
@@ -196,8 +205,8 @@ public class CerrarTurnoHandlerTests
     [Fact]
     public async Task CerrarTurno_ObligaCierre_False_SinSupervisor_Exitoso()
     {
-        var handler = new CerrarTurnoHandler(TurnoRepoOk(), ConfigRepoNullDefaults());
-        var result = await handler.HandleAsync(new CerrarTurnoCommand("TUR001", "CA1", 500m));
+        var handler = new CerrarTurnoHandler(TurnoRepoOk(), ConfigRepoNullDefaults(), MensajeRepoNoop());
+        var result = await handler.HandleAsync(new CerrarTurnoCommand("TUR001", "CA1", 500m, CodigoUsuario: "USR1"));
         Assert.True(result.EsExitoso);
     }
 
@@ -286,4 +295,25 @@ public class CerrarTurnoHandlerTests
         Assert.Equal(0m, captured.MontoFinalMN);
         Assert.Empty(captured.Tarjetas);
     }
+
+
+    [Fact]
+    public async Task CerrarTurno_Exitoso_CierraMensajesActivosPorCaja()
+    {
+        var turnoRepo = new Mock<ITurnoRepository>();
+        turnoRepo.Setup(r => r.CerrarAsync(
+                It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<CierreTurnoBreakdown>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var mensajeRepo = new Mock<IMensajeCocinaRepository>();
+        mensajeRepo.Setup(r => r.CerrarActivosPorCajaAsync("USR1", "CA1", It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var handler = new CerrarTurnoHandler(turnoRepo.Object, ConfigRepoNullDefaults(), mensajeRepo.Object);
+        var result = await handler.HandleAsync(new CerrarTurnoCommand("TUR001", "CA1", 500m, CodigoUsuario: "USR1"));
+
+        Assert.True(result.EsExitoso);
+        mensajeRepo.Verify(r => r.CerrarActivosPorCajaAsync("USR1", "CA1", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
 }

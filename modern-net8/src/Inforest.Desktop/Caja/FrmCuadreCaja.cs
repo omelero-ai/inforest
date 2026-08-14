@@ -137,7 +137,8 @@ public class FrmCuadreCaja : Form
             new CerrarTurnoCommand(
                 _codigoTurnoActual,
                 _sessionService?.SesionActual?.CodigoCaja ?? string.Empty,
-                montoFinal));
+                montoFinal,
+                CodigoUsuario: _sessionService?.SesionActual?.CodigoUsuario ?? Environment.UserName));
         if (!result.EsExitoso)
         {
             MessageBox.Show(result.MensajeError, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
