@@ -242,6 +242,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `dsrPrincipalD.Dsr` / `dsrPrincipalR.Dsr` | Crystal | `RepPrincipalClienteDetalle.frx` / `ResumenRepPrincipalCliente.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |
 | `spRep_PaloteoComparativo` | SP | `ReporteRepository.ObtenerPaloteoComparativoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrPaloteoComparativo.Dsr` | Crystal | `RepPaloteoComparativo.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepPaloteoComparativo.frm` | Form | `FrmPaloteoComparativoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmPaloteoComparativoReporte.cs` |
@@ -428,4 +429,3 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmReciboEgreso.frm` / lógica anular | Business rule | `AnularEgresoHandler` (BR-RECIBO-011) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` |
 | `spRep_ReciboEgreso` | SP (report) | `ObtenerEgresosHandler` (reutiliza SP via Dapper) | Handler + Repository | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` + `src/Inforest.Infrastructure/Caja/ReciboEgresoRepository.cs` |
 | (tests BR-RECIBO-001..012) | — | `ReciboIngresoTests` (9) + `ReciboEgresoTests` (8) + `ReciboIngresoHandlerTests` (8) + `ReciboEgresoHandlerTests` (8) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Caja/ReciboIngresoTests.cs`, `tests/Inforest.Domain.Tests/Caja/ReciboEgresoTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboIngresoHandlerTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboEgresoHandlerTests.cs` |
-
