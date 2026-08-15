@@ -87,7 +87,9 @@ public sealed class FrmRepPaloteoTicketReporte : Form
                 SubGrupo = _txtSubGrupo.Text.Trim(),
                 CodigoProducto = _txtProducto.Text.Trim(),
                 CodigoCliente = _txtCliente.Text.Trim(),
-                Origen = (OrigenPaloteoTicket)_cmbOrigen.SelectedValue,
+                Origen = _cmbOrigen.SelectedValue is OrigenPaloteoTicket origen
+                    ? origen
+                    : OrigenPaloteoTicket.Produccion,
                 OrdenarPorCodigoProducto = string.Equals(_cmbOrden.SelectedValue?.ToString(), "CODIGO", StringComparison.Ordinal),
                 MostrarTotalPorProducto = _chkSubtotales.Checked
             };
