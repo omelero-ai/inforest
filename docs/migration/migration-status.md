@@ -124,7 +124,7 @@
 3. **COMPLETED:** `frmRepAnulado.frm` migrado (POS-FUNC-017): `spRep_Anulacion` + `AnulacionRow`/`AnulacionParametros` + `ObtenerAnulacionAsync` + `ObtenerReporteAnulacionHandler` + `FrmRepAnuladoReporte` + BR-REP-014 + 2 tests nuevos — 231 application tests en verde.
 4. **COMPLETED:** `frmRepLiquidacionTicket.frm` migrado y validado (`spRep_LiquidacionSuma` + `LiquidacionTicketRow`/`LiquidacionTicketParametros` + `ObtenerLiquidacionTicketAsync` + `ObtenerReporteLiquidacionTicketHandler` + `FrmRepLiquidacionTicketReporte` + `RepLiquidacionTicket.frx` + BR-REP-015 + 2 tests).
 5. **MIGRATED:** `frmRepPaloteoTicket.frm` como siguiente pendiente directo de `InfoRest.vbp` en POS-FUNC-017: query dinámica Legacy (`MPEDIDO/DPEDIDO/CPEDIDO/MDOCUMENTO`) + `PaloteoTicketRow`/`PaloteoTicketParametros` + `ObtenerPaloteoTicketAsync` + `ObtenerReportePaloteoTicketHandler` + `FrmRepPaloteoTicketReporte` + `RepPaloteoTicket.frx` + BR-REP-016 + 2 tests nuevos — 235 application tests en verde.
-6. Siguiente pendiente directo de etapa POS-FUNC-017 en `InfoRest.vbp`: `frmRepCtaCteIntegrado.frm`.
+6. Siguiente pendiente directo de `InfoRest.vbp` en etapa POS-FUNC-017: `frmRepDeliveryTicket.frm`.
 7. Mantener seguimiento de gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
 8. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 restantes puedan operar extremo a extremo.
 
