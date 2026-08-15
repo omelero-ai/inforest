@@ -242,6 +242,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmRepPropina.frm` | Form | `FrmPropinaReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmPropinaReporte.cs` |
 | `spRep_PrincipalCliente` | SP | `ReporteRepository.ObtenerPrincipalCliente*Async` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrPrincipalD.Dsr` / `dsrPrincipalR.Dsr` | Crystal | `RepPrincipalClienteDetalle.frx` / `ResumenRepPrincipalCliente.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `spRep_CtaCteN` | SP | `ReporteRepository.ObtenerCtaCteOperativaAsync` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepCtaCte.frm` | Form | `FrmRepCtaCteReporte.cs` | WinForm | COMPLETED | `src/Inforest.Desktop/Forms/Reportes/FrmRepCtaCteReporte.cs` |
+| `frmRepCtaCte.frx` | Form resource | `RepCtaCteConsolidado.frx` / `RepCtaCteResumido.frx` / `RepCtaCteDetallado.frx` | FastReport | COMPLETED | `src/Inforest.Desktop/Reports/Templates/` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |
@@ -266,7 +269,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `(KDS tiempo form)` | Form | `FrmTiempoKdsReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmTiempoKdsReporte.cs` |
 | `IReporteRepository` | Interface | `IReporteRepository` | Interface | COMPLETED | `src/Inforest.Application/Reportes/IReporteRepository.cs` |
 | `ReporteRepository` | — | `ReporteRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
-| `(test etapa 10 application)` | — | `ReportesHandlersTests` (14 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/Reportes/` |
+| `(test etapa 10 application)` | — | `ReportesHandlersTests` (16 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/Reportes/` |
 
 ## P3-11 — Periféricos Especializados e Integraciones por País
 

@@ -101,6 +101,46 @@ public sealed class CtaCteIntegradoRow
 }
 
 /// <summary>
+/// Fila del dataset retornado por <c>spRep_CtaCteN</c>.
+/// Legacy: <c>frmRepCtaCte.frm</c>
+/// Regla: BR-REP-013
+/// </summary>
+public sealed class CtaCteOperativaRow
+{
+    public string Descripcion { get; init; } = string.Empty;
+    public string Identidad { get; init; } = string.Empty;
+    public double NConsumo { get; init; }
+    public double NLinea { get; init; }
+    public double NSaldo { get; init; }
+    public string TCodigoPedido { get; init; } = string.Empty;
+    public DateTime FFecha { get; init; }
+    public string Local { get; init; } = string.Empty;
+    public string TEstadoPedido { get; init; } = string.Empty;
+    public double NVenta { get; init; }
+    public string TClienteCtaCte { get; init; } = string.Empty;
+    public string Producto { get; init; } = string.Empty;
+    public double NCantidad { get; init; }
+    public string TDocumento { get; init; } = string.Empty;
+    public string TTipoCtaCte { get; init; } = string.Empty;
+    public string TSubTipoCtaCte { get; init; } = string.Empty;
+    public double Consumo { get; init; }
+    public double Linea { get; init; }
+    public double Saldo { get; init; }
+    public DateTime Fecha { get; init; }
+    public double Suma { get; init; }
+}
+
+/// <summary>
+/// Opción de catálogo para filtros de reportes.
+/// Legacy: <c>vTipoCtaCte</c>, <c>vSubTipoCtaCte</c>
+/// </summary>
+public sealed class ReporteFiltroOpcion
+{
+    public string Codigo { get; init; } = string.Empty;
+    public string Descripcion { get; init; } = string.Empty;
+}
+
+/// <summary>
 /// Fila del dataset retornado por <c>spRep_PaloteoComparativo</c>.
 /// Legacy: <c>frmRepPaloteoComparativo.frm</c>
 /// Regla: BR-REP-005

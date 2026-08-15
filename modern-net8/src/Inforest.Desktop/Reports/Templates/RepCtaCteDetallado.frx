@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Reporte CtaCte detallado - Legacy: frmRepCtaCte.frm / spRep_CtaCteN">
+  <Dictionary>
+    <TableDataSource Name="Result" DataType="System.Int32" Enabled="true">
+      <Column Name="Descripcion" DataType="System.String" />
+      <Column Name="TCodigoPedido" DataType="System.String" />
+      <Column Name="FFecha" DataType="System.DateTime" />
+      <Column Name="Local" DataType="System.String" />
+      <Column Name="TEstadoPedido" DataType="System.String" />
+      <Column Name="NVenta" DataType="System.Double" />
+      <Column Name="Producto" DataType="System.String" />
+      <Column Name="NCantidad" DataType="System.Double" />
+      <Column Name="TDocumento" DataType="System.String" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="297" PaperHeight="210" Landscape="true">
+    <ReportTitleBand Name="ReportTitle1" Width="1047.06" Height="28.35">
+      <TextObject Name="Title" Width="1047.06" Height="28.35" Text="Estados de Cuentas Corrientes - Detallado" Font="Arial, 12pt, style=Bold" HorzAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="32.35" Width="1047.06" Height="18.9">
+      <TextObject Name="h1" Width="200" Height="18.9" Text="Cliente" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h2" Left="205" Width="90" Height="18.9" Text="Pedido" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h3" Left="300" Width="85" Height="18.9" Text="Fecha" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h4" Left="390" Width="90" Height="18.9" Text="Local" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h5" Left="485" Width="220" Height="18.9" Text="Producto" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h6" Left="710" Width="55" Height="18.9" Text="Cant." Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h7" Left="770" Width="120" Height="18.9" Text="Documento" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h8" Left="895" Width="90" Height="18.9" Text="Venta" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="55.25" Width="1047.06" Height="18.9" DataSource="Result">
+      <TextObject Name="d1" Width="200" Height="18.9" Text="[Result.Descripcion]" Font="Arial, 8pt" />
+      <TextObject Name="d2" Left="205" Width="90" Height="18.9" Text="[Result.TCodigoPedido]" Font="Arial, 8pt" />
+      <TextObject Name="d3" Left="300" Width="85" Height="18.9" Text="[Result.FFecha]" Format="Date" Format.Format="d" Font="Arial, 8pt" />
+      <TextObject Name="d4" Left="390" Width="90" Height="18.9" Text="[Result.Local]" Font="Arial, 8pt" />
+      <TextObject Name="d5" Left="485" Width="220" Height="18.9" Text="[Result.Producto]" Font="Arial, 8pt" />
+      <TextObject Name="d6" Left="710" Width="55" Height="18.9" Text="[Result.NCantidad]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d7" Left="770" Width="120" Height="18.9" Text="[Result.TDocumento]" Font="Arial, 8pt" />
+      <TextObject Name="d8" Left="895" Width="90" Height="18.9" Text="[Result.NVenta]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+    </DataBand>
+  </ReportPage>
+</Report>

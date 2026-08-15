@@ -157,6 +157,58 @@ public sealed class ObtenerReporteCtaCteIntegradoHandler
 // ── BR-REP-005 — Paloteo Comparativo ─────────────────────────────────────────
 
 /// <summary>
+/// Query para reporte operativo de cuentas corrientes.
+/// Legacy: <c>frmRepCtaCte.frm</c>, <c>spRep_CtaCteN</c>
+/// </summary>
+public sealed record ObtenerReporteCtaCteOperativaQuery(CtaCteOperativaParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReporteCtaCteOperativaQuery"/>.</summary>
+public sealed class ObtenerReporteCtaCteOperativaHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReporteCtaCteOperativaHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<ReporteResultado<CtaCteOperativaRow>> HandleAsync(
+        ObtenerReporteCtaCteOperativaQuery q,
+        CancellationToken ct = default)
+    {
+        var filas = await _repo.ObtenerCtaCteOperativaAsync(q.Parametros, ct);
+        var plantilla = q.Parametros.FlagConsolidado
+            ? "RepCtaCteConsolidado.frx"
+            : q.Parametros.FlagResumido
+                ? "RepCtaCteResumido.frx"
+                : "RepCtaCteDetallado.frx";
+
+        return new ReporteResultado<CtaCteOperativaRow>
+        {
+            Filas = filas,
+            TituloReporte = "Estados de Cuentas Corrientes",
+            NombrePlantilla = plantilla
+        };
+    }
+}
+
+/// <summary>Handler para catálogo de tipos de cuenta corriente del reporte operativo.</summary>
+public sealed class ObtenerTiposCtaCteReporteHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerTiposCtaCteReporteHandler(IReporteRepository repo) => _repo = repo;
+
+    public Task<IReadOnlyList<ReporteFiltroOpcion>> HandleAsync(CancellationToken ct = default)
+        => _repo.ObtenerTiposCtaCteAsync(ct);
+}
+
+/// <summary>Handler para catálogo de subtipos de cuenta corriente del reporte operativo.</summary>
+public sealed class ObtenerSubTiposCtaCteReporteHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerSubTiposCtaCteReporteHandler(IReporteRepository repo) => _repo = repo;
+
+    public Task<IReadOnlyList<ReporteFiltroOpcion>> HandleAsync(string tipoCtaCte, CancellationToken ct = default)
+        => _repo.ObtenerSubTiposCtaCteAsync(tipoCtaCte, ct);
+}
+
+/// <summary>
 /// Query para reporte paloteo comparativo.
 /// Legacy: <c>frmRepPaloteoComparativo.frm</c>, <c>spRep_PaloteoComparativo</c>
 /// </summary>

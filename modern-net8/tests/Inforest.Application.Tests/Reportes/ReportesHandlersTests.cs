@@ -173,6 +173,44 @@ public class ReportesHandlersTests
         Assert.Contains("Detallado", resultado.NombrePlantilla);
     }
 
+    [Fact]
+    public async Task ObtenerReporteCtaCteOperativaHandler_ModoConsolidado_UsaPlantillaCorrecta()
+    {
+        _repoMock.Setup(r => r.ObtenerCtaCteOperativaAsync(It.Is<CtaCteOperativaParametros>(p => p.FlagConsolidado), default))
+            .ReturnsAsync(new List<CtaCteOperativaRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteCtaCteOperativaHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteCtaCteOperativaQuery(new CtaCteOperativaParametros
+        {
+            FlagConsolidado = true,
+            FechaInicio = DateTime.Today.AddDays(-7),
+            FechaFin = DateTime.Today
+        }));
+
+        Assert.Equal("RepCtaCteConsolidado.frx", resultado.NombrePlantilla);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteCtaCteOperativaHandler_ModoDetallado_RetornaFilas()
+    {
+        _repoMock.Setup(r => r.ObtenerCtaCteOperativaAsync(It.Is<CtaCteOperativaParametros>(p => p.FlagDetalle), default))
+            .ReturnsAsync(new List<CtaCteOperativaRow>
+            {
+                new() { Descripcion = "ACME SAC", TCodigoPedido = "P001", Producto = "Lomo", NVenta = 32.5 }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteCtaCteOperativaHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteCtaCteOperativaQuery(new CtaCteOperativaParametros
+        {
+            FlagDetalle = true,
+            FechaInicio = DateTime.Today.AddDays(-7),
+            FechaFin = DateTime.Today
+        }));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepCtaCteDetallado.frx", resultado.NombrePlantilla);
+    }
+
     // ── BR-REP-SQL-DYN-001 — Expresión precio segura ─────────────────────────
 
     [Theory]

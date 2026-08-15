@@ -1,6 +1,6 @@
 # Estado de Migración — INFOREST
 
-> Última actualización: 2026-08-14
+> Última actualización: 2026-08-15
 >
 > Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001 (Login) y POS-FUNC-002 (Apertura MDI) MIGRATED; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) + POS-FUNC-007/016/019 + POS-FUNC-008 (Caja/Cierre COMPLETED) + POS-FUNC-003 (Gestión pedidos salón MIGRATED) + POS-FUNC-004 (Registro de venta MIGRATED) + POS-FUNC-005 (Cobro y pagos MIGRATED) + POS-FUNC-006 (Notas de Crédito MIGRATED) + POS-FUNC-010 (Cliente y cuentas corrientes MIGRATED) + POS-FUNC-011 (Reservas MIGRATED) + POS-FUNC-012 (Delivery dependiente POS MIGRATED) + POS-FUNC-013 (Insumos/descargo MIGRATED) + **POS-FUNC-014 (Importación de pedidos externos MIGRATED: RequerimientoAlmacen entity + DetalleRequerimientoAlmacen + IRequerimientoAlmacenRepository + RequerimientoAlmacenRepository + IImportacionPedidoGateway + ImportacionPedidoGateway + 3 handlers + FrmImportacionRequerimientos + FrmImportacionRequerimientoDetalle + BR-IMPORT-001..004 + 17 tests)**
 
@@ -11,7 +11,7 @@
 | Indicador | Valor |
 |---|---|
 | Fase actual | 4 (IN_PROGRESS) — W1-W15 completados: Configuración, Maestros, Turno/DíaContable, Pedidos, Venta/Documentos, Caja/Pagos, SEC-006, Reportes FastReport, Módulos POS/Admin/Consultas/CajaRápida/Adición, TaxPolicy/ProductoVisibilidad/InventoryGateway/Email, Caja/Cierre(POS-FUNC-008 COMPLETED) + **POS-FUNC-006 (Notas de Crédito MIGRATED) + **POS-FUNC-010 (Cliente y cuentas corrientes MIGRATED)** |
-| Código .NET 8 existente | IN_PROGRESS — 240+ archivos .cs, 411 tests verdes: baseline + seguridad + KDS + delivery + configuración + maestros + turno + pedidos + venta + caja + reportes FastReport + WinForms POS/Admin/Consultas/CajaRápida/Adición + TaxPolicy + ProductoVisibilidad + InventoryGateway + SmtpEmail + RegistrarPagosMultiplesHandler + DocumentoTests (13) + NotaCredito (19 tests) + CuentaCorrienteHandlerTests (7) + CuentaCorrienteTests (8) + CentralPedidosHandlersTests (10) + RequerimientoAlmacenTests (8) + ImportacionRequerimientoHandlerTests (9) |
+| Código .NET 8 existente | IN_PROGRESS — 240+ archivos .cs, 477 tests verdes: baseline + seguridad + KDS + delivery + configuración + maestros + turno + pedidos + venta + caja + reportes FastReport + WinForms POS/Admin/Consultas/CajaRápida/Adición + TaxPolicy + ProductoVisibilidad + InventoryGateway + SmtpEmail + RegistrarPagosMultiplesHandler + DocumentoTests (13) + NotaCredito (19 tests) + CuentaCorrienteHandlerTests (7) + CuentaCorrienteTests (8) + CentralPedidosHandlersTests (10) + RequerimientoAlmacenTests (8) + ImportacionRequerimientoHandlerTests (9) + ReportesHandlersTests (16) |
 | Módulos migrados | 0 / 7 |
 | Documentación Legacy | IN_PROGRESS — inventarios base completos; trazabilidad y gaps de Fase 3 actualizados al cierre P3-12 |
 | Arquitectura Target definida | IN_PROGRESS — ADR-001 a ADR-012 aceptados; gaps funcionales posteriores siguen abiertos |
@@ -40,7 +40,7 @@
 | Lógica de negocio | 32 módulos + 10 clases | Seguridad, KDS/comanda, delivery, reportes y periféricos encapsulados por slices | IN_PROGRESS |
 | Acceso a datos | ADO + `clsComando` + 150 SP | `IDbConnectionFactory` + `ISpExecutor` + `UnitOfWork` | IN_PROGRESS |
 | Base de datos | 126T + 116V + 150SP | contrato SQL Legacy reutilizable + repositorios/reportes selectivos | IN_PROGRESS |
-| Reportes | 206 Crystal Reports | 12 SPs + handlers + formularios base + plantillas pendientes | IN_PROGRESS |
+| Reportes | 206 Crystal Reports | 13 SPs + handlers + formularios base + plantillas pendientes | IN_PROGRESS |
 | Integraciones | COM/DLL/OCX + hardware POS | KDS XML/directorio + PinPad/CashDro/BlueVision + FE por país (stubs controlados) | IN_PROGRESS |
 | Seguridad/Auth | `INFSEGURIDAD` + cifrado débil Legacy | `AuthService` + `RbacService` + `SessionService` + `AuditoriaService` + `LicenseService` | IN_PROGRESS |
 | Configuración | INI + `TPARAMETRO` + `TCAJA` | lectura tipada de `TPARAMETRO`/`TCAJA`, cache lazy y validación de arranque POS cubiertas por tests; edición administrativa sigue fuera de este corte | COMPLETED |
@@ -95,6 +95,7 @@
 | M4-POS-FUNC-014 | Importación de pedidos externos (POS-FUNC-014): RequerimientoAlmacen + DetalleRequerimientoAlmacen (Domain) + IRequerimientoAlmacenRepository + IImportacionPedidoGateway (Application) + RequerimientoAlmacenRepository + ImportacionPedidoGateway (Infrastructure, ALMACEN DB) + ObtenerRequerimientosPendientesHandler + ObtenerDetalleRequerimientoHandler + ImportarRequerimientoHandler + FrmImportacionRequerimientos + FrmImportacionRequerimientoDetalle + BR-IMPORT-001..004 + 17 tests (8 domain + 9 handler) — 411 tests en verde | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-018 | Recibo Ingresos/Egresos (POS-FUNC-018): ReciboIngreso + ReciboEgreso (Domain, BR-RECIBO-001..012) + IReciboIngresoRepository + IReciboEgresoRepository + ReciboIngresoRepository + ReciboEgresoRepository (direct SQL, MINGRESO/MEGRESO) + ObtenerIngresosHandler + RegistrarIngresoHandler + AnularIngresoHandler + ObtenerEgresosHandler + RegistrarEgresoHandler + AnularEgresoHandler + FrmReciboIngreso + FrmReciboIngresoDetalle + FrmReciboEgreso + FrmReciboEgresoDetalle + 33 tests (9+8 domain + 8+8 handler) | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-009 | Turno/Día Contable (POS-FUNC-009): FrmDiaContable + AperturarDiaContableHandler + CerrarDiaContableHandler + ObtenerDiaContableHandler + IDiaContableService extendido (CerrarDiaContableAsync + ObtenerFechaMaximaDiaContableAsync) + BR-DC-001/002/003/004 documentados + 10 tests | COMPLETED — 2026-08-14 |
+| M4-POS-FUNC-017 | Reportería operativa POS (slice `frmRepCtaCte.frm`): `spRep_CtaCteN` + `ReporteRepository.ObtenerCtaCteOperativaAsync` + catálogos `vTipoCtaCte`/`vSubTipoCtaCte` + `ObtenerReporteCtaCteOperativaHandler` + `FrmRepCtaCteReporte` + 3 plantillas FastReport + 2 tests nuevos | IN_PROGRESS — 2026-08-15 |
 | M5 | Punto de Venta migrado | IN_PROGRESS — W4+W5+W6+W11+POS-FUNC-002/007/016/019 implementados; POS-FUNC-003 MIGRATED (tests completos) |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
 | M7 | Todos los módulos migrados | NOT_STARTED |
@@ -110,7 +111,7 @@
 | HardKey físico | La validación física del dongle sigue reemplazada por validación contractual/SQL; requiere decisión posterior de hardware/licencia | Parcial |
 | Biometría SecuGen | OCX de 32 bits sin SDK .NET oficial; servicio Null mantenido como gap controlado | Alto |
 | Impresora fiscal Epson | Integración real sigue bloqueada por OCX 32-bit propietario | Alto |
-| Plantillas FastReport | Se implementaron handlers/repositorios, pero las plantillas `.frx` siguen pendientes para varios reportes | Medio |
+| Plantillas FastReport | Se implementó `frmRepCtaCte` extremo a extremo, pero siguen pendientes plantillas `.frx` para varios reportes restantes | Medio |
 | Rappi HTTP real | `RappiOrderAdapter` continúa como contrato/stub hasta definir integración productiva | Medio |
 
 ---
@@ -118,10 +119,10 @@
 ## Próximos Pasos
 
 1. **COMPLETED:** POS-FUNC-018 Recibo de Ingresos/Egresos validado (`frmReciboIngreso.frm`, `frmReciboIngresoDetalle.frm`, `frmReciboEgreso.frm`, `frmReciboEgresoDetalle.frm`, MINGRESO/MEGRESO, BR-RECIBO-001..012, 33 tests en verde, 221 application tests en verde, 154 domain tests en verde).
-2. **Pendiente de aprobación:** iniciar siguiente elemento de `InfoRest.vbp`.
-3. Mantener seguimiento de gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
-4. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 puedan operar extremo a extremo.
-5. No avanzar al siguiente elemento hasta recibir aprobación explícita.
+2. **COMPLETED:** `frmRepCtaCte.frm` migrado y validado (`spRep_CtaCteN`, filtros `vTipoCtaCte`/`vSubTipoCtaCte`, `FrmRepCtaCteReporte`, 3 plantillas FastReport, 2 tests nuevos).
+3. Siguiente pendiente de `InfoRest.vbp`: continuar el siguiente `frmRep*` no completado dentro de `POS-FUNC-017` sin abrir una nueva etapa.
+4. Mantener seguimiento de gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
+5. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 restantes puedan operar extremo a extremo.
 
 ---
 

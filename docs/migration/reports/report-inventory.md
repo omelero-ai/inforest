@@ -76,6 +76,7 @@
 | `dsrBoleta` / `dsrBoletaC` | — | — | MDOCUMENTO | Baja | NOT_STARTED |
 | `dsrAnaliticoMozo` / `dsrAnaliticoMozoC` | `spRep_AnaliticoMozo` | `frmRepAnaliticoMozo.frm` | MPEDIDO, DPEDIDO | Media | NOT_STARTED |
 | `dsrMozoProduccion` / `dsrProduccionMozo` | — | — | MPEDIDO, DPEDIDO | Baja | NOT_STARTED |
+| `frmRepCtaCte` (modos consolidado/resumido/detallado) | `spRep_CtaCteN` | `frmRepCtaCte.frm` | MPEDIDO, DPEDIDO, vCompania, vTipoCtaCte, vSubTipoCtaCte | Media | MIGRATED |
 | `dsrRepCtaCteIntegradoConsolidado` / `dsrRepCtaCteIntegradoDetallado` (variantes XC) | `spRep_CtaCteIntegrado` | `frmRepCtaCteIntegrado.frm` | MDOCUMENTO, TCLIENTE, VCOMPANIA | Media | IN_PROGRESS |
 | `dsrClienteCtaCte` / `dsrClienteDelivery` / `dsrClienteDeudaD` / `dsrClienteDeudaR` / `dsrClienteDeudaHistorico` | `spRep_CuentasCobrar` | `frmRepClienteDeuda.frm` | MDOCUMENTO, TCLIENTE | Media | NOT_STARTED |
 | `dsrCuentaCobrar` | `spRep_CuentasCobrar` | `frmRepClienteDeuda.frm` | MDOCUMENTO, TCLIENTE | Media | NOT_STARTED |

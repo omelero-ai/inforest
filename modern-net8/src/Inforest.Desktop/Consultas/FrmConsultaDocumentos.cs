@@ -93,6 +93,12 @@ internal sealed class DummyReporteRepository : IReporteRepository
         => Task.FromResult<IReadOnlyList<PaloteoSubProdRow>>([]);
     public Task<IReadOnlyList<CtaCteIntegradoRow>> ObtenerCtaCteIntegradoAsync(string flagTipo, DateTime fechaInicio, DateTime fechaFin, CancellationToken ct = default)
         => Task.FromResult<IReadOnlyList<CtaCteIntegradoRow>>([]);
+    public Task<IReadOnlyList<CtaCteOperativaRow>> ObtenerCtaCteOperativaAsync(CtaCteOperativaParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<CtaCteOperativaRow>>([]);
+    public Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposCtaCteAsync(CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<ReporteFiltroOpcion>>([]);
+    public Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerSubTiposCtaCteAsync(string tipoCtaCte, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<ReporteFiltroOpcion>>([]);
     public Task<IReadOnlyList<PaloteoVentaIntegradoRow>> ObtenerPaloteoVentaIntegradoAsync(PaloteoVentaIntegradoParametros parametros, CancellationToken ct = default)
         => Task.FromResult<IReadOnlyList<PaloteoVentaIntegradoRow>>([]);
     public Task<IReadOnlyList<RankingIntegradoRow>> ObtenerRankingIntegradoAsync(RankingIntegradoParametros parametros, CancellationToken ct = default)

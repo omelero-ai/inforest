@@ -118,6 +118,29 @@ public interface IReporteRepository
         CancellationToken ct = default);
 
     /// <summary>
+    /// Ejecuta <c>spRep_CtaCteN</c>.
+    /// Legacy: <c>frmRepCtaCte.frm</c>
+    /// Regla: BR-REP-013
+    /// </summary>
+    Task<IReadOnlyList<CtaCteOperativaRow>> ObtenerCtaCteOperativaAsync(
+        CtaCteOperativaParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene el catálogo activo de tipos de cuenta corriente.
+    /// Legacy: <c>vTipoCtaCte</c>, <c>frmRepCtaCte.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposCtaCteAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene el catálogo activo de subtipos de cuenta corriente.
+    /// Legacy: <c>vSubTipoCtaCte</c>, <c>frmRepCtaCte.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerSubTiposCtaCteAsync(
+        string tipoCtaCte,
+        CancellationToken ct = default);
+
+    /// <summary>
     /// Ejecuta <c>spRep_PaloteoVentaIntegrado</c>.
     /// Legacy: <c>frmRepPaloteoVentaIntegrado.frm</c>
     /// Regla: BR-REP-007
@@ -206,6 +229,20 @@ public sealed class PaloteoVentaIntegradoParametros
     public string Boton5 { get; init; } = string.Empty;
     public DateTime FechaInicio { get; init; }
     public DateTime FechaFin { get; init; }
+}
+
+/// <summary>Parámetros para <c>spRep_CtaCteN</c>. Regla: BR-REP-013</summary>
+public sealed class CtaCteOperativaParametros
+{
+    public bool FlagDetalle { get; init; }
+    public bool FlagResumido { get; init; }
+    public bool FlagConsolidado { get; init; }
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+    public string Estado { get; init; } = string.Empty;
+    public string Cliente { get; init; } = string.Empty;
+    public string TipoCtaCte { get; init; } = string.Empty;
+    public string SubTipoCtaCte { get; init; } = string.Empty;
 }
 
 /// <summary>Parámetros para <c>spRep_RankingIntegrado</c>. Regla: BR-REP-008</summary>

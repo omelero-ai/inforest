@@ -55,7 +55,7 @@
 | 38 | `spIns_MPEDIDO` | `FrmRecargarTarjetaDetalle.frm`, `frmCajaRapida.frm`, `frmCargoMozo.frm`… | SQL_ONLY | ANALYSIS |
 | 39 | `spIns_MPEDIDO_RESERVA` | `frmReservaDetalle.frm` | SQL_ONLY | ANALYSIS |
 | 40 | `spIns_TipoCambio` | `frmAcceso.frm`, `frmFlash.frm`, `frmInicio.frm`… | SQL_ONLY | ANALYSIS |
-| 41 | `spRep_CtaCteN` | `frmRepCtaCte.frm` | SQL_ONLY | ANALYSIS |
+| 41 | `spRep_CtaCteN` | `frmRepCtaCte.frm` | SQL_ONLY | MIGRATED |
 | 42 | `spRep_Entregas` | `frmRepEntrega.frm` | SQL_ONLY | ANALYSIS |
 | 43 | `spRep_LiquidacionSuma` | `frmRepLiquidacionTicket.frm` | SQL_ONLY | ANALYSIS |
 | 44 | `spRep_ReciboEgreso` | `frmReciboEgreso.frm` | SQL_ONLY | ANALYSIS |
@@ -153,11 +153,11 @@
 | 51 | `vProducto` | `frmBusquedaRapida.frm`, `frmBusquedaValeConsumo.frm`, `frmCajaRapida.frm`… | ANALYSIS |
 | 52 | `vSalon` | `frmCajaRapida.frm`, `frmCargoMozo.frm`, `frmIr.frm`… | ANALYSIS |
 | 53 | `vSubGrupo` | `frmCargoMozo.frm`, `frmRepEntrega.frm`, `frmRepPaloteoTicket.frm`… | ANALYSIS |
-| 54 | `vSubTipoCtaCte` | `frmNuevoDelivery.frm`, `frmRepCtaCte.frm` | ANALYSIS |
+| 54 | `vSubTipoCtaCte` | `frmNuevoDelivery.frm`, `frmRepCtaCte.frm` | IN_PROGRESS |
 | 55 | `vTienda` | `frmBusquedaDelivery.frm`, `frmCtaCteDetalle.frm` | ANALYSIS |
 | 56 | `vTipoCancelacion` | `frmLiquidacionDetalle.frm`, `frmPago.frm`, `frmPagoMasivo.frm`… | ANALYSIS |
 | 57 | `vTipoClienteFrecuente` | `frmClienteDeliveryFrecuente.frm`, `frmNuevoDelivery.frm`, `frmVenta.frm` | ANALYSIS |
-| 58 | `vTipoCtaCte` | `frmNuevoDelivery.frm`, `frmRepCtaCte.frm` | ANALYSIS |
+| 58 | `vTipoCtaCte` | `frmNuevoDelivery.frm`, `frmRepCtaCte.frm` | IN_PROGRESS |
 | 59 | `vTipoDocumento` | `FrmRecargarTarjetaDetalle.frm`, `FrmSeleccionProductos.frm`, `frmCajaRapida.frm`… | ANALYSIS |
 | 60 | `vTipoIdentidad` | `frmClienteDeliveryFrecuente.frm`, `frmNuevoCliente.frm`, `frmNuevoDelivery.frm`… | ANALYSIS |
 | 61 | `vTipoPago` | `frmRepDeliveryTicket.frm`, `frmRepLiquidacionTicket.frm`, `modProcedimiento.bas` | ANALYSIS |

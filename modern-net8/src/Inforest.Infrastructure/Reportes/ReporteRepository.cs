@@ -245,6 +245,64 @@ internal sealed class ReporteRepository : IReporteRepository
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<CtaCteOperativaRow>> ObtenerCtaCteOperativaAsync(
+        CtaCteOperativaParametros p,
+        CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte CtaCte operativa: {FechaInicio} – {FechaFin}", p.FechaInicio, p.FechaFin);
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<CtaCteOperativaRow>(
+            conn,
+            "spRep_CtaCteN",
+            new
+            {
+                flagTDetalle = p.FlagDetalle,
+                flagTResumido = p.FlagResumido,
+                flagTConsolidado = p.FlagConsolidado,
+                fInicio = p.FechaInicio,
+                fFinal = p.FechaFin,
+                Estado = p.Estado,
+                Cliente = p.Cliente,
+                TipoCC = p.TipoCtaCte,
+                SubTipoCC = p.SubTipoCtaCte
+            },
+            cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposCtaCteAsync(CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT Codigo, Descripcion
+            FROM dbo.vTipoCtaCte
+            WHERE lActivo = 1
+            ORDER BY Descripcion
+            """;
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerSubTiposCtaCteAsync(
+        string tipoCtaCte,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT Codigo, Descripcion
+            FROM dbo.vSubTipoCtaCte
+            WHERE lActivo = 1
+              AND (@TipoCtaCte = '' OR tTipoCtaCte = @TipoCtaCte)
+            ORDER BY Descripcion
+            """;
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(
+            new CommandDefinition(sql, new { TipoCtaCte = tipoCtaCte }, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<PaloteoVentaIntegradoRow>> ObtenerPaloteoVentaIntegradoAsync(
         PaloteoVentaIntegradoParametros p,
         CancellationToken ct = default)

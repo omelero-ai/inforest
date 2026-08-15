@@ -1137,6 +1137,30 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-REP-013
+
+**Nombre:** Estados de cuentas corrientes POS — modos consolidado, resumido y detallado
+
+**Origen:** `frmRepCtaCte.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepCtaCte.frm`
+
+**Procedimiento/Función:** `spRep_CtaCteN`
+
+**Descripción:** El formulario emite el estado de cuentas corrientes del POS en tres modos excluyentes: consolidado, resumido y detallado. Filtra por rango de fechas sobre `MPEDIDO.fRegistro`, estado del pedido, cliente de cuenta corriente, tipo y subtipo de cuenta corriente. Los catálogos de filtro provienen de `vTipoCtaCte` y `vSubTipoCtaCte`.
+
+**Condición:** Al ejecutar `ObtenerReporteCtaCteOperativaQuery`
+
+**Resultado:** Consolidado: total vendido por cliente/local; resumido: total por pedido/documento; detallado: detalle por ítem vendido con producto, cantidad y documento.
+
+**Excepciones:** `@Estado`, `@Cliente`, `@TipoCC` y `@SubTipoCC` vacíos equivalen a “todos”; el detalle excluye `MPEDIDO.tEstadoPedido='03'` y `DPEDIDO.tEstadoItem='A'`.
+
+**Destino .NET:** `ObtenerReporteCtaCteOperativaHandler`, `FrmRepCtaCteReporte.cs`, `RepCtaCteConsolidado.frx`, `RepCtaCteResumido.frx`, `RepCtaCteDetallado.frx`
+
+**Estado:** MIGRATED
+
+---
+
 ### BR-REP-006
 
 **Nombre:** Paloteo Sub-Productos — apertura por componentes de combo

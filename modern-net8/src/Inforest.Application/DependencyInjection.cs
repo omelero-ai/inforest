@@ -152,6 +152,9 @@ public static class DependencyInjection
         services.AddScoped<ObtenerReportePropinaHandler>();
         services.AddScoped<ObtenerReportePrincipalClienteHandler>();
         services.AddScoped<ObtenerReporteCtaCteIntegradoHandler>();
+        services.AddScoped<ObtenerReporteCtaCteOperativaHandler>();
+        services.AddScoped<ObtenerTiposCtaCteReporteHandler>();
+        services.AddScoped<ObtenerSubTiposCtaCteReporteHandler>();
         services.AddScoped<ObtenerReportePaloteoComparativoHandler>();
         services.AddScoped<ObtenerReportePaloteoSubProdHandler>();
         services.AddScoped<ObtenerReportePaloteoVentaIntegradoHandler>();
