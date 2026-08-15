@@ -380,3 +380,22 @@ public sealed class LiquidacionTicketRow
     public int NTotalPromedio { get; init; }
     public int Total00 { get; init; }
 }
+
+/// <summary>
+/// Fila agregada del paloteo por ticketera.
+/// Legacy: <c>frmRepPaloteoTicket.frm</c> (query dinámica sobre MPEDIDO/DPEDIDO/CPEDIDO).
+/// Regla: BR-REP-016
+/// </summary>
+public sealed class PaloteoTicketRow
+{
+    public string TCodProducto { get; init; } = string.Empty;
+    public string TLocal { get; init; } = string.Empty;
+    public string Local { get; init; } = string.Empty;
+    public string Salon { get; init; } = string.Empty;
+    public string TipoProducto { get; init; } = string.Empty;
+    public string Grupo { get; init; } = string.Empty;
+    public string SubGrupo { get; init; } = string.Empty;
+    public string Producto { get; init; } = string.Empty;
+    public double Cantidad { get; init; }
+    public double Venta { get; init; }
+}

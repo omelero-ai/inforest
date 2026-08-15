@@ -539,3 +539,32 @@ public sealed class ObtenerReporteLiquidacionTicketHandler
         };
     }
 }
+
+// ── BR-REP-016 — Paloteo de Producción por Ticketera ───────────────────────────
+
+/// <summary>
+/// Query para paloteo por ticketera.
+/// Legacy: <c>frmRepPaloteoTicket.frm</c>
+/// Regla: BR-REP-016
+/// </summary>
+public sealed record ObtenerReportePaloteoTicketQuery(PaloteoTicketParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReportePaloteoTicketQuery"/>.</summary>
+public sealed class ObtenerReportePaloteoTicketHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReportePaloteoTicketHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<ReporteResultado<PaloteoTicketRow>> HandleAsync(
+        ObtenerReportePaloteoTicketQuery q,
+        CancellationToken ct = default)
+    {
+        var filas = await _repo.ObtenerPaloteoTicketAsync(q.Parametros, ct);
+        return new ReporteResultado<PaloteoTicketRow>
+        {
+            Filas = filas,
+            TituloReporte = "Paloteo de Producción por Ticketera",
+            NombrePlantilla = "RepPaloteoTicket.frx"
+        };
+    }
+}

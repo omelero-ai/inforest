@@ -1209,6 +1209,30 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-REP-016
+
+**Nombre:** Paloteo de Producción por Ticketera — origen configurable y consolidado por producto
+
+**Origen:** `frmRepPaloteoTicket.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepPaloteoTicket.frm`
+
+**Procedimiento/Función:** `Genera` + query dinámica sobre `MPEDIDO/DPEDIDO/CPEDIDO/MDOCUMENTO`
+
+**Descripción:** El formulario permite emitir paloteo por ticketera consolidando por producto con dos órdenes de salida (alfabético o código). El origen se selecciona entre Producción, Ventas, Cortesías, Cuentas Corrientes, Combinación, Cargos o Pedidos Facturados. El filtro temporal opera por turno (`tTurno`) o por rango de fechas (`fRegistro`) y agrega filtros opcionales por salón, tipo producto, mozo, tipo pedido, origen de venta, área, grupo, subgrupo, producto y cliente.
+
+**Condición:** Al ejecutar `ObtenerReportePaloteoTicketQuery`
+
+**Resultado:** Dataset `PaloteoTicketRow` agrupado por `tCodProducto/Grupo/SubGrupo/Producto` con `Cantidad` y `Venta` acumuladas, local descrito (`vLocal`) y normalización de salón para pedidos sin salón.
+
+**Excepciones:** En modo turno, `Turno` es obligatorio. Si no hay filas el reporte no se emite. En origen Cuenta Corriente se excluyen pedidos con documento emitido en `MDOCUMENTO`.
+
+**Destino .NET:** `ObtenerReportePaloteoTicketHandler`, `ReporteRepository.ObtenerPaloteoTicketAsync`, `FrmRepPaloteoTicketReporte.cs`, `RepPaloteoTicket.frx`
+
+**Estado:** MIGRATED
+
+---
+
 ### BR-REP-006
 
 **Nombre:** Paloteo Sub-Productos — apertura por componentes de combo

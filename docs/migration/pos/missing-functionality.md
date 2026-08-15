@@ -104,7 +104,6 @@ frmReciboIngreso.frm
 frmReciboIngresoDetalle.frm
 frmRepDeliveryTicket.frm
 frmRepEntrega.frm
-frmRepPaloteoTicket.frm
 frmRepReservas.frm
 frmReserva.frm
 frmReservaDetalle.frm

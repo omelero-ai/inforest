@@ -73,6 +73,7 @@ static class Program
                 services.AddTransient<FrmCtaCteIntegradoReporte>();
                 services.AddTransient<FrmRepCtaCteReporte>();
                 services.AddTransient<FrmRepLiquidacionTicketReporte>();
+                services.AddTransient<FrmRepPaloteoTicketReporte>();
             });
     }
 }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Paloteo Ticketera - Legacy: frmRepPaloteoTicket.frm">
+  <Dictionary>
+    <TableDataSource Name="Result" DataType="System.Int32" Enabled="true">
+      <Column Name="TCodProducto" DataType="System.String" />
+      <Column Name="Local" DataType="System.String" />
+      <Column Name="Salon" DataType="System.String" />
+      <Column Name="TipoProducto" DataType="System.String" />
+      <Column Name="Grupo" DataType="System.String" />
+      <Column Name="SubGrupo" DataType="System.String" />
+      <Column Name="Producto" DataType="System.String" />
+      <Column Name="Cantidad" DataType="System.Double" />
+      <Column Name="Venta" DataType="System.Double" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="297" PaperHeight="210" Landscape="true">
+    <ReportTitleBand Name="ReportTitle1" Width="1047.06" Height="28.35">
+      <TextObject Name="Title" Width="1047.06" Height="28.35" Text="Paloteo de Producción por Ticketera" Font="Arial, 12pt, style=Bold" HorzAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="32.35" Width="1047.06" Height="18.9">
+      <TextObject Name="h1" Width="80" Height="18.9" Text="Código" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h2" Left="85" Width="170" Height="18.9" Text="Producto" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h3" Left="260" Width="110" Height="18.9" Text="Grupo" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h4" Left="375" Width="110" Height="18.9" Text="SubGrupo" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h5" Left="490" Width="120" Height="18.9" Text="Tipo Producto" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h6" Left="615" Width="120" Height="18.9" Text="Salón" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h7" Left="740" Width="80" Height="18.9" Text="Cantidad" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h8" Left="825" Width="100" Height="18.9" Text="Venta" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h9" Left="930" Width="105" Height="18.9" Text="Local" Font="Arial, 8pt, style=Bold" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="55.25" Width="1047.06" Height="18.9" DataSource="Result">
+      <TextObject Name="d1" Width="80" Height="18.9" Text="[Result.TCodProducto]" Font="Arial, 8pt" />
+      <TextObject Name="d2" Left="85" Width="170" Height="18.9" Text="[Result.Producto]" Font="Arial, 8pt" />
+      <TextObject Name="d3" Left="260" Width="110" Height="18.9" Text="[Result.Grupo]" Font="Arial, 8pt" />
+      <TextObject Name="d4" Left="375" Width="110" Height="18.9" Text="[Result.SubGrupo]" Font="Arial, 8pt" />
+      <TextObject Name="d5" Left="490" Width="120" Height="18.9" Text="[Result.TipoProducto]" Font="Arial, 8pt" />
+      <TextObject Name="d6" Left="615" Width="120" Height="18.9" Text="[Result.Salon]" Font="Arial, 8pt" />
+      <TextObject Name="d7" Left="740" Width="80" Height="18.9" Text="[Result.Cantidad]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d8" Left="825" Width="100" Height="18.9" Text="[Result.Venta]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d9" Left="930" Width="105" Height="18.9" Text="[Result.Local]" Font="Arial, 8pt" />
+    </DataBand>
+  </ReportPage>
+</Report>

@@ -549,4 +549,201 @@ internal sealed class ReporteRepository : IReporteRepository
 
         return result.ToList().AsReadOnly();
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<PaloteoTicketRow>> ObtenerPaloteoTicketAsync(
+        PaloteoTicketParametros p,
+        CancellationToken ct = default)
+    {
+        _logger.LogInformation(
+            "Reporte PaloteoTicket: Origen={Origen} TodosTurnos={TodosTurnos} Turno={Turno}",
+            p.Origen, p.TodosTurnos, string.IsNullOrWhiteSpace(p.Turno) ? "(todos)" : p.Turno);
+
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var sqlParams = new DynamicParameters();
+
+        var filtrosPedido = new List<string>();
+        var filtrosDocumento = new List<string>();
+
+        if (p.TodosTurnos)
+        {
+            filtrosPedido.Add("MPEDIDO.fRegistro >= @FechaInicio AND MPEDIDO.fRegistro <= @FechaFin");
+            filtrosDocumento.Add("MDOCUMENTO.fRegistro >= @FechaInicio AND MDOCUMENTO.fRegistro <= @FechaFin");
+            sqlParams.Add("FechaInicio", p.FechaInicio);
+            sqlParams.Add("FechaFin", p.FechaFin);
+        }
+        else
+        {
+            filtrosPedido.Add("MPEDIDO.tTurno = @Turno");
+            filtrosDocumento.Add("MDOCUMENTO.tTurno = @Turno");
+            sqlParams.Add("Turno", p.Turno);
+        }
+
+        AddFiltro("MPEDIDO.tSalon", "Salon", p.Salon);
+        AddFiltro("vProducto.TipoProducto", "TipoProducto", p.TipoProducto);
+        AddFiltro("MPEDIDO.tMozo", "Mozo", p.Mozo);
+        AddFiltro("MPEDIDO.tTipoPedido", "TipoPedido", p.TipoPedido);
+        AddFiltro("MPEDIDO.CodigoOrigenVenta", "OrigenVenta", p.OrigenVenta);
+        AddFiltro("vProducto.Area", "Area", p.Area);
+        AddFiltro("vProducto.Grupo", "Grupo", p.Grupo);
+        AddFiltro("vProducto.SubGrupo", "SubGrupo", p.SubGrupo);
+        AddFiltro("DPEDIDO.tCodigoProducto", "CodigoProducto", p.CodigoProducto);
+
+        sqlParams.Add("Boton2", p.Boton2);
+        sqlParams.Add("Boton3", p.Boton3);
+        sqlParams.Add("Boton4", p.Boton4);
+        sqlParams.Add("Boton5", p.Boton5);
+
+        var wherePedido = string.Join(" AND ", filtrosPedido);
+        var whereDocumento = string.Join(" AND ", filtrosDocumento);
+        var whereCliente = string.IsNullOrWhiteSpace(p.CodigoCliente)
+            ? string.Empty
+            : " AND MDOCUMENTO.tCodigoCliente = @CodigoCliente";
+        if (!string.IsNullOrWhiteSpace(p.CodigoCliente))
+            sqlParams.Add("CodigoCliente", p.CodigoCliente);
+
+        var origenSql = p.Origen switch
+        {
+            OrigenPaloteoTicket.Produccion => $"""
+                SELECT vProducto.Codigo AS tCodProducto, vSalon.tLocal, vSalon.Descripcion AS Salon,
+                       vProducto.TipoProducto, vProducto.Grupo, vProducto.SubGrupo, vProducto.Descripcion AS Producto,
+                       DPEDIDO.nCantidad AS Cantidad, DPEDIDO.nVenta AS Venta, MPEDIDO.tTipoPedido
+                FROM dbo.DPEDIDO
+                INNER JOIN dbo.MPEDIDO ON DPEDIDO.tCodigoPedido = MPEDIDO.tCodigoPedido
+                LEFT JOIN dbo.vProducto ON DPEDIDO.tCodigoProducto = vProducto.Codigo
+                LEFT JOIN dbo.vSalon ON MPEDIDO.tSalon = vSalon.Codigo
+                WHERE MPEDIDO.tEstadoPedido <> '03'
+                  AND DPEDIDO.tEstadoItem = 'N'
+                  AND {wherePedido}
+                """,
+            OrigenPaloteoTicket.Venta => $"""
+                SELECT vProducto.Codigo AS tCodProducto, vSalon.tLocal, vSalon.Descripcion AS Salon,
+                       vProducto.TipoProducto, vProducto.Grupo, vProducto.SubGrupo, vProducto.Descripcion AS Producto,
+                       DPEDIDO.nCantidad AS Cantidad, DPEDIDO.nVenta AS Venta, MPEDIDO.tTipoPedido
+                FROM dbo.DPEDIDO
+                INNER JOIN dbo.MPEDIDO ON DPEDIDO.tCodigoPedido = MPEDIDO.tCodigoPedido
+                LEFT JOIN dbo.vProducto ON DPEDIDO.tCodigoProducto = vProducto.Codigo
+                LEFT JOIN dbo.vSalon ON MPEDIDO.tSalon = vSalon.Codigo
+                INNER JOIN dbo.MDOCUMENTO ON DPEDIDO.tDocumento = MDOCUMENTO.tDocumento
+                WHERE MPEDIDO.tEstadoPedido <> '03'
+                  AND DPEDIDO.tEstadoItem = 'N'
+                  AND DPEDIDO.tFacturado IN ('P','F')
+                  AND {wherePedido}
+                  AND {whereDocumento}
+                  {whereCliente}
+                """,
+            OrigenPaloteoTicket.Cortesia => $"""
+                SELECT vProducto.Codigo AS tCodProducto, vSalon.tLocal, vSalon.Descripcion AS Salon,
+                       vProducto.TipoProducto, vProducto.Grupo, vProducto.SubGrupo, vProducto.Descripcion AS Producto,
+                       DPEDIDO.nCantidad AS Cantidad, DPEDIDO.nVenta AS Venta, MPEDIDO.tTipoPedido
+                FROM dbo.DPEDIDO
+                INNER JOIN dbo.MPEDIDO ON DPEDIDO.tCodigoPedido = MPEDIDO.tCodigoPedido
+                LEFT JOIN dbo.vProducto ON DPEDIDO.tCodigoProducto = vProducto.Codigo
+                LEFT JOIN dbo.vSalon ON MPEDIDO.tSalon = vSalon.Codigo
+                WHERE MPEDIDO.tEstadoPedido <> '03'
+                  AND DPEDIDO.tEstadoItem = 'N'
+                  AND DPEDIDO.tFacturado = 'C'
+                  AND {wherePedido}
+                """,
+            OrigenPaloteoTicket.CuentaCorriente => $"""
+                SELECT vProducto.Codigo AS tCodProducto, vSalon.tLocal, vSalon.Descripcion AS Salon,
+                       vProducto.TipoProducto, vProducto.Grupo, vProducto.SubGrupo, vProducto.Descripcion AS Producto,
+                       DPEDIDO.nCantidad AS Cantidad, DPEDIDO.nVenta AS Venta, MPEDIDO.tTipoPedido
+                FROM dbo.DPEDIDO
+                INNER JOIN dbo.MPEDIDO ON DPEDIDO.tCodigoPedido = MPEDIDO.tCodigoPedido
+                LEFT JOIN dbo.vProducto ON DPEDIDO.tCodigoProducto = vProducto.Codigo
+                LEFT JOIN dbo.vSalon ON MPEDIDO.tSalon = vSalon.Codigo
+                WHERE ISNULL(MPEDIDO.tClienteCtaCte, '') <> ''
+                  AND DPEDIDO.tEstadoItem = 'N'
+                  AND {wherePedido}
+                  AND DPEDIDO.tCodigoPedido NOT IN (
+                        SELECT DISTINCT DP2.tCodigoPedido
+                        FROM dbo.DPEDIDO DP2
+                        INNER JOIN dbo.MDOCUMENTO ON DP2.tDocumento = MDOCUMENTO.tDocumento
+                        WHERE ISNULL(DP2.tCodigoPedido, '0') <> '0'
+                          AND {whereDocumento}
+                  )
+                """,
+            OrigenPaloteoTicket.Combinacion => $"""
+                SELECT vProducto.Codigo AS tCodProducto, vSalon.tLocal, vSalon.Descripcion AS Salon,
+                       vProducto.TipoProducto, vProducto.Grupo, vProducto.SubGrupo, vProducto.Descripcion AS Producto,
+                       CPEDIDO.nCantidad AS Cantidad, vProducto.nPrecioVenta AS Venta, MPEDIDO.tTipoPedido
+                FROM dbo.CPEDIDO
+                INNER JOIN dbo.DPEDIDO ON CPEDIDO.tCodigoPedido = DPEDIDO.tCodigoPedido AND CPEDIDO.tItem = DPEDIDO.tItem
+                INNER JOIN dbo.MPEDIDO ON CPEDIDO.tCodigoPedido = MPEDIDO.tCodigoPedido
+                LEFT JOIN dbo.vSalon ON MPEDIDO.tSalon = vSalon.Codigo
+                LEFT JOIN dbo.vProducto ON CPEDIDO.tProductocombo = vProducto.Codigo
+                WHERE MPEDIDO.tEstadoPedido <> '03'
+                  AND {wherePedido}
+                """,
+            OrigenPaloteoTicket.Cargos => $"""
+                SELECT vProducto.Codigo AS tCodProducto, vSalon.tLocal, vSalon.Descripcion AS Salon,
+                       vProducto.TipoProducto, vProducto.Grupo, vProducto.SubGrupo, vProducto.Descripcion AS Producto,
+                       DPEDIDO.nCantidad AS Cantidad, DPEDIDO.nVenta AS Venta, MPEDIDO.tTipoPedido
+                FROM dbo.DPEDIDO
+                INNER JOIN dbo.MPEDIDO ON DPEDIDO.tCodigoPedido = MPEDIDO.tCodigoPedido
+                LEFT JOIN dbo.vProducto ON DPEDIDO.tCodigoProducto = vProducto.Codigo
+                LEFT JOIN dbo.vSalon ON MPEDIDO.tSalon = vSalon.Codigo
+                WHERE MPEDIDO.tEstadoPedido = '05'
+                  AND DPEDIDO.tEstadoItem = 'N'
+                  AND {wherePedido}
+                """,
+            _ => $"""
+                SELECT vProducto.Codigo AS tCodProducto, vSalon.tLocal, vSalon.Descripcion AS Salon,
+                       vProducto.TipoProducto, vProducto.Grupo, vProducto.SubGrupo, vProducto.Descripcion AS Producto,
+                       DPEDIDO.nCantidad AS Cantidad, DPEDIDO.nVenta AS Venta, MPEDIDO.tTipoPedido
+                FROM dbo.DPEDIDO
+                INNER JOIN dbo.MPEDIDO ON DPEDIDO.tCodigoPedido = MPEDIDO.tCodigoPedido
+                LEFT JOIN dbo.vProducto ON DPEDIDO.tCodigoProducto = vProducto.Codigo
+                LEFT JOIN dbo.vSalon ON MPEDIDO.tSalon = vSalon.Codigo
+                INNER JOIN dbo.MDOCUMENTO ON DPEDIDO.tDocumento = MDOCUMENTO.tDocumento
+                WHERE MPEDIDO.tEstadoPedido <> '03'
+                  AND DPEDIDO.tEstadoItem = 'N'
+                  AND DPEDIDO.tFacturado IN ('P','F')
+                  AND {wherePedido}
+                  {whereCliente}
+                """
+        };
+
+        var orderBy = p.OrdenarPorCodigoProducto ? "tCodProducto" : "Producto";
+        var sql = $"""
+            WITH Base AS (
+                {origenSql}
+            )
+            SELECT
+                ISNULL(Base.tCodProducto, '') AS TCodProducto,
+                MAX(ISNULL(Base.tLocal, '')) AS TLocal,
+                MAX(COALESCE(vLocal.Descripcion, Base.tLocal, '')) AS Local,
+                MAX(
+                    CASE Base.tTipoPedido
+                        WHEN '02' THEN COALESCE(NULLIF(@Boton2, ''), ISNULL(Base.Salon, 'Sin Salon'))
+                        WHEN '03' THEN COALESCE(NULLIF(@Boton3, ''), ISNULL(Base.Salon, 'Sin Salon'))
+                        WHEN '04' THEN COALESCE(NULLIF(@Boton4, ''), ISNULL(Base.Salon, 'Sin Salon'))
+                        WHEN '05' THEN COALESCE(NULLIF(@Boton5, ''), ISNULL(Base.Salon, 'Sin Salon'))
+                        ELSE ISNULL(Base.Salon, 'Sin Salon')
+                    END
+                ) AS Salon,
+                MAX(ISNULL(Base.TipoProducto, '')) AS TipoProducto,
+                ISNULL(Base.Grupo, '') AS Grupo,
+                ISNULL(Base.SubGrupo, '') AS SubGrupo,
+                ISNULL(Base.Producto, '') AS Producto,
+                SUM(ISNULL(Base.Cantidad, 0)) AS Cantidad,
+                SUM(ISNULL(Base.Venta, 0)) AS Venta
+            FROM Base
+            LEFT JOIN dbo.vLocal ON Base.tLocal = vLocal.Codigo
+            GROUP BY Base.tCodProducto, Base.Grupo, Base.SubGrupo, Base.Producto
+            ORDER BY {orderBy};
+            """;
+
+        var result = await conn.QueryAsync<PaloteoTicketRow>(new CommandDefinition(sql, sqlParams, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+
+        void AddFiltro(string campoSql, string parametro, string valor)
+        {
+            if (string.IsNullOrWhiteSpace(valor))
+                return;
+            filtrosPedido.Add($"{campoSql} = @{parametro}");
+            sqlParams.Add(parametro, valor);
+        }
+    }
 }

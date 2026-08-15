@@ -63,6 +63,7 @@ public class FrmPuntoVenta : Form
         var reportes = new ToolStripMenuItem("Reportes");
         reportes.DropDownItems.Add("Estados Cta Cte", null, (_, _) => AbrirReporte<FrmRepCtaCteReporte>());
         reportes.DropDownItems.Add("Liquidación Ticketera", null, (_, _) => AbrirReporte<FrmRepLiquidacionTicketReporte>());
+        reportes.DropDownItems.Add("Paloteo Ticketera", null, (_, _) => AbrirReporte<FrmRepPaloteoTicketReporte>());
         reportes.DropDownItems.Add("Cta Cte Integrado", null, (_, _) => AbrirReporte<FrmCtaCteIntegradoReporte>());
         menu.Items.Add(reportes);
         menu.Items.Add(new ToolStripMenuItem("Administración", null, (_, _) => MessageBox.Show("Abrir FrmAdministracion desde el shell principal.", Text)));

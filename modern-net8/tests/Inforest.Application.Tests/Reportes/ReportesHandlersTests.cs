@@ -427,4 +427,51 @@ public class ReportesHandlersTests
         Assert.Empty(resultado.Filas);
         Assert.Equal("RepLiquidacionTicket.frx", resultado.NombrePlantilla);
     }
+
+    [Fact]
+    public async Task ObtenerReportePaloteoTicketHandler_OrdenCodigo_RetornaPlantillaCorrecta()
+    {
+        var parametros = new PaloteoTicketParametros
+        {
+            TodosTurnos = false,
+            Turno = "T0001",
+            Origen = OrigenPaloteoTicket.Produccion,
+            OrdenarPorCodigoProducto = true
+        };
+
+        _repoMock.Setup(r => r.ObtenerPaloteoTicketAsync(parametros, default))
+            .ReturnsAsync(new List<PaloteoTicketRow>
+            {
+                new() { TCodProducto = "P001", Producto = "Lomo", Cantidad = 2, Venta = 30 }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReportePaloteoTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReportePaloteoTicketQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepPaloteoTicket.frx", resultado.NombrePlantilla);
+        Assert.Equal("Paloteo de Producción por Ticketera", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerPaloteoTicketAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReportePaloteoTicketHandler_SinDatos_RetornaListaVacia()
+    {
+        var parametros = new PaloteoTicketParametros
+        {
+            TodosTurnos = true,
+            FechaInicio = DateTime.Today.AddDays(-1),
+            FechaFin = DateTime.Today,
+            Origen = OrigenPaloteoTicket.PedidosFacturados
+        };
+
+        _repoMock.Setup(r => r.ObtenerPaloteoTicketAsync(parametros, default))
+            .ReturnsAsync(new List<PaloteoTicketRow>().AsReadOnly());
+
+        var handler = new ObtenerReportePaloteoTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReportePaloteoTicketQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepPaloteoTicket.frx", resultado.NombrePlantilla);
+    }
 }

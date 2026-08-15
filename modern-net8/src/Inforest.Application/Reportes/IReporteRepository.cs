@@ -214,6 +214,15 @@ public interface IReporteRepository
     Task<IReadOnlyList<LiquidacionTicketRow>> ObtenerLiquidacionTicketAsync(
         LiquidacionTicketParametros parametros,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta el query de <c>frmRepPaloteoTicket.frm</c>.
+    /// Legacy: paloteo por ticketera con filtros opcionales y origen configurable.
+    /// Regla: BR-REP-016
+    /// </summary>
+    Task<IReadOnlyList<PaloteoTicketRow>> ObtenerPaloteoTicketAsync(
+        PaloteoTicketParametros parametros,
+        CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────
@@ -356,4 +365,51 @@ public sealed class LiquidacionTicketParametros
     public DateTime FechaFin { get; init; }
     /// <summary>Sector de venta opcional; vacío = todos.</summary>
     public string SectorVenta { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Origen de datos para paloteo por ticketera (<c>frmRepPaloteoTicket.frm</c>).
+/// </summary>
+public enum OrigenPaloteoTicket
+{
+    Produccion = 0,
+    Venta = 1,
+    Cortesia = 2,
+    CuentaCorriente = 3,
+    Combinacion = 4,
+    Cargos = 5,
+    PedidosFacturados = 6
+}
+
+/// <summary>
+/// Parámetros para consulta de paloteo por ticketera. Regla: BR-REP-016
+/// Legacy: <c>frmRepPaloteoTicket.frm</c>
+/// </summary>
+public sealed class PaloteoTicketParametros
+{
+    /// <summary>true = filtra por rango de fechas; false = turno específico.</summary>
+    public bool TodosTurnos { get; init; } = true;
+    public string Turno { get; init; } = string.Empty;
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+
+    public string Salon { get; init; } = string.Empty;
+    public string TipoProducto { get; init; } = string.Empty;
+    public string Mozo { get; init; } = string.Empty;
+    public string TipoPedido { get; init; } = string.Empty;
+    public string OrigenVenta { get; init; } = string.Empty;
+    public string Area { get; init; } = string.Empty;
+    public string Grupo { get; init; } = string.Empty;
+    public string SubGrupo { get; init; } = string.Empty;
+    public string CodigoProducto { get; init; } = string.Empty;
+    public string CodigoCliente { get; init; } = string.Empty;
+
+    public OrigenPaloteoTicket Origen { get; init; } = OrigenPaloteoTicket.Produccion;
+    public bool OrdenarPorCodigoProducto { get; init; }
+    public bool MostrarTotalPorProducto { get; init; }
+
+    public string Boton2 { get; init; } = string.Empty;
+    public string Boton3 { get; init; } = string.Empty;
+    public string Boton4 { get; init; } = string.Empty;
+    public string Boton5 { get; init; } = string.Empty;
 }
