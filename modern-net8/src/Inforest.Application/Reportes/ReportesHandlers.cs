@@ -510,3 +510,32 @@ public sealed class ObtenerReporteAnulacionHandler
         };
     }
 }
+
+// ── BR-REP-015 — Liquidación de Cajero por Ticketera ──────────────────────────
+
+/// <summary>
+/// Query para liquidación de cajero por ticketera.
+/// Legacy: <c>frmRepLiquidacionTicket.frm</c>, <c>spRep_LiquidacionSuma</c>
+/// Regla: BR-REP-015
+/// </summary>
+public sealed record ObtenerReporteLiquidacionTicketQuery(LiquidacionTicketParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReporteLiquidacionTicketQuery"/>.</summary>
+public sealed class ObtenerReporteLiquidacionTicketHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReporteLiquidacionTicketHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<ReporteResultado<LiquidacionTicketRow>> HandleAsync(
+        ObtenerReporteLiquidacionTicketQuery q,
+        CancellationToken ct = default)
+    {
+        var filas = await _repo.ObtenerLiquidacionTicketAsync(q.Parametros, ct);
+        return new ReporteResultado<LiquidacionTicketRow>
+        {
+            Filas = filas,
+            TituloReporte = "Liquidación de Cajero por Ticketera",
+            NombrePlantilla = "RepLiquidacionTicket.frx"
+        };
+    }
+}

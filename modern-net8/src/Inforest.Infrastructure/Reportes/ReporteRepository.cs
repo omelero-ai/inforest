@@ -519,4 +519,34 @@ internal sealed class ReporteRepository : IReporteRepository
             cancellationToken: ct);
         return result.ToList().AsReadOnly();
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<LiquidacionTicketRow>> ObtenerLiquidacionTicketAsync(
+        LiquidacionTicketParametros p,
+        CancellationToken ct = default)
+    {
+        _logger.LogInformation(
+            "Reporte LiquidacionTicket: TodosLosTurnos={TodosLosTurnos} Turno={Turno} Usuario={Usuario}",
+            p.TodosLosTurnos,
+            string.IsNullOrWhiteSpace(p.Turno) ? "(todos)" : p.Turno,
+            string.IsNullOrWhiteSpace(p.Usuario) ? "(todos)" : p.Usuario);
+
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<LiquidacionTicketRow>(
+            conn,
+            "spRep_LiquidacionSuma",
+            new
+            {
+                flagTurno = p.TodosLosTurnos,
+                flagDiaContable = p.DiaContable,
+                sTurno = p.Turno,
+                sUsuario = p.Usuario,
+                finicio = p.FechaInicio,
+                ffinal = p.FechaFin,
+                sSectorVenta = p.SectorVenta
+            },
+            cancellationToken: ct);
+
+        return result.ToList().AsReadOnly();
+    }
 }

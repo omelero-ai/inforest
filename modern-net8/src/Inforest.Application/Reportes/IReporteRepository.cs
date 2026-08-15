@@ -205,6 +205,15 @@ public interface IReporteRepository
     Task<IReadOnlyList<AnulacionRow>> ObtenerAnulacionAsync(
         AnulacionParametros parametros,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_LiquidacionSuma</c>.
+    /// Legacy: <c>frmRepLiquidacionTicket.frm</c>
+    /// Regla: BR-REP-015
+    /// </summary>
+    Task<IReadOnlyList<LiquidacionTicketRow>> ObtenerLiquidacionTicketAsync(
+        LiquidacionTicketParametros parametros,
+        CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────
@@ -327,4 +336,24 @@ public sealed class AnulacionParametros
     public bool FlagTransferidos { get; init; } = true;
     /// <summary>Criterio SQL adicional construido por la UI (salon, usuario, motivo, estado impresión)</summary>
     public string Criterio { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Parámetros para <c>spRep_LiquidacionSuma</c>. Regla: BR-REP-015
+/// Legacy: <c>frmRepLiquidacionTicket.frm</c> — "Liquidación de Cajero por Ticketera"
+/// </summary>
+public sealed class LiquidacionTicketParametros
+{
+    /// <summary>true = consultar todos los turnos por rango de fechas; false = un turno específico</summary>
+    public bool TodosLosTurnos { get; init; }
+    /// <summary>true = filtrar por día contable; false = usar <c>MDOCUMENTO.fRegistro</c></summary>
+    public bool DiaContable { get; init; }
+    /// <summary>Código de turno cuando <see cref="TodosLosTurnos"/> es false.</summary>
+    public string Turno { get; init; } = string.Empty;
+    /// <summary>Usuario opcional; vacío = todos.</summary>
+    public string Usuario { get; init; } = string.Empty;
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+    /// <summary>Sector de venta opcional; vacío = todos.</summary>
+    public string SectorVenta { get; init; } = string.Empty;
 }

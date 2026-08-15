@@ -381,4 +381,50 @@ public class ReportesHandlersTests
         Assert.Empty(resultado.Filas);
         Assert.Equal("RepAnulacion.frx", resultado.NombrePlantilla);
     }
+
+    [Fact]
+    public async Task ObtenerReporteLiquidacionTicketHandler_ConTurno_RetornaPlantillaCorrecta()
+    {
+        var parametros = new LiquidacionTicketParametros
+        {
+            TodosLosTurnos = false,
+            Turno = "T001",
+            FechaInicio = DateTime.Today,
+            FechaFin = DateTime.Today.AddDays(1).AddSeconds(-1)
+        };
+
+        _repoMock.Setup(r => r.ObtenerLiquidacionTicketAsync(parametros, default))
+            .ReturnsAsync(new List<LiquidacionTicketRow>
+            {
+                new() { TTipoPedido = "01", NNeto = 100, NImpuesto1 = 18, NVenta = 118, NTotalPromedio = 2, Total00 = 2 }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteLiquidacionTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteLiquidacionTicketQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepLiquidacionTicket.frx", resultado.NombrePlantilla);
+        Assert.Equal("Liquidación de Cajero por Ticketera", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerLiquidacionTicketAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteLiquidacionTicketHandler_TodosLosTurnos_RetornaListaVacia()
+    {
+        var parametros = new LiquidacionTicketParametros
+        {
+            TodosLosTurnos = true,
+            FechaInicio = DateTime.Today.AddDays(-1),
+            FechaFin = DateTime.Today
+        };
+
+        _repoMock.Setup(r => r.ObtenerLiquidacionTicketAsync(parametros, default))
+            .ReturnsAsync(new List<LiquidacionTicketRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteLiquidacionTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteLiquidacionTicketQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepLiquidacionTicket.frx", resultado.NombrePlantilla);
+    }
 }

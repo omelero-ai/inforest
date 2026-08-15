@@ -363,3 +363,20 @@ public sealed class AnulacionRow
     public string TTurno { get; init; } = string.Empty;
     public DateTime? FFechaItem { get; init; }
 }
+
+/// <summary>
+/// Fila agregada retornada por <c>spRep_LiquidacionSuma</c>.
+/// Legacy: <c>frmRepLiquidacionTicket.frm</c> — "Liquidación de Cajero por Ticketera"
+/// Regla: BR-REP-015
+/// </summary>
+public sealed class LiquidacionTicketRow
+{
+    public double NNeto { get; init; }
+    public double NImpuesto1 { get; init; }
+    public double NImpuesto2 { get; init; }
+    public double NImpuesto3 { get; init; }
+    public double NVenta { get; init; }
+    public string TTipoPedido { get; init; } = string.Empty;
+    public int NTotalPromedio { get; init; }
+    public int Total00 { get; init; }
+}

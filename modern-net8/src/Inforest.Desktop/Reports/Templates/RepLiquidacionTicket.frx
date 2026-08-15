@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Reporte Liquidación Ticketera - Legacy: frmRepLiquidacionTicket.frm / spRep_LiquidacionSuma">
+  <Dictionary>
+    <TableDataSource Name="Result" DataType="System.Int32" Enabled="true">
+      <Column Name="TTipoPedido" DataType="System.String" />
+      <Column Name="NNeto" DataType="System.Double" />
+      <Column Name="NImpuesto1" DataType="System.Double" />
+      <Column Name="NImpuesto2" DataType="System.Double" />
+      <Column Name="NImpuesto3" DataType="System.Double" />
+      <Column Name="NVenta" DataType="System.Double" />
+      <Column Name="NTotalPromedio" DataType="System.Int32" />
+      <Column Name="Total00" DataType="System.Int32" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="297" PaperHeight="210" Landscape="true">
+    <ReportTitleBand Name="ReportTitle1" Width="1047.06" Height="28.35">
+      <TextObject Name="Title" Width="1047.06" Height="28.35" Text="Liquidación de Cajero por Ticketera" Font="Arial, 12pt, style=Bold" HorzAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="32.35" Width="1047.06" Height="18.9">
+      <TextObject Name="h1" Width="110" Height="18.9" Text="Tipo Pedido" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h2" Left="115" Width="100" Height="18.9" Text="Neto" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h3" Left="220" Width="100" Height="18.9" Text="Imp. 1" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h4" Left="325" Width="100" Height="18.9" Text="Imp. 2" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h5" Left="430" Width="100" Height="18.9" Text="Imp. 3" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h6" Left="535" Width="100" Height="18.9" Text="Venta" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h7" Left="640" Width="100" Height="18.9" Text="Docs Grupo" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h8" Left="745" Width="120" Height="18.9" Text="Total Docs" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="55.25" Width="1047.06" Height="18.9" DataSource="Result">
+      <TextObject Name="d1" Width="110" Height="18.9" Text="[Result.TTipoPedido]" Font="Arial, 8pt" />
+      <TextObject Name="d2" Left="115" Width="100" Height="18.9" Text="[Result.NNeto]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d3" Left="220" Width="100" Height="18.9" Text="[Result.NImpuesto1]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d4" Left="325" Width="100" Height="18.9" Text="[Result.NImpuesto2]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d5" Left="430" Width="100" Height="18.9" Text="[Result.NImpuesto3]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d6" Left="535" Width="100" Height="18.9" Text="[Result.NVenta]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d7" Left="640" Width="100" Height="18.9" Text="[Result.NTotalPromedio]" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d8" Left="745" Width="120" Height="18.9" Text="[Result.Total00]" Font="Arial, 8pt" HorzAlign="Right" />
+    </DataBand>
+  </ReportPage>
+</Report>
