@@ -1,4 +1,5 @@
 using Inforest.Domain.Entities.Caja;
+using Inforest.Domain.Entities.Hardware;
 
 namespace Inforest.Application.Caja;
 
@@ -19,4 +20,9 @@ public interface IPagoRepository
 public interface IMedioPagoRepository
 {
     Task<IReadOnlyList<MedioPago>> ObtenerActivosAsync(CancellationToken ct = default);
+}
+
+public interface IPinPadTerminalRepository
+{
+    Task<IReadOnlyList<TerminalPinPad>> ObtenerActivosPorCajaAsync(string codigoCaja, CancellationToken ct = default);
 }

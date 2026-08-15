@@ -16,6 +16,9 @@ public class FrmVenta : Form
     private readonly EmitirDocumentoHandler? _emitirHandler;
     private readonly ObtenerMediosPagoHandler? _mediosPagoHandler;
     private readonly PagarDocumentoHandler? _pagarHandler;
+    private readonly RegistrarPagosMultiplesHandler? _registrarPagosMultiplesHandler;
+    private readonly ProcesarPagoPinPadHandler? _procesarPagoPinPadHandler;
+    private readonly ObtenerTerminalesPinPadHandler? _obtenerTerminalesPinPadHandler;
     private readonly AnularDocumentoHandler? _anularHandler;
 
     private readonly BindingList<VentaItemRow> _items = [];
@@ -32,12 +35,18 @@ public class FrmVenta : Form
         EmitirDocumentoHandler? emitirHandler = null,
         ObtenerMediosPagoHandler? mediosPagoHandler = null,
         PagarDocumentoHandler? pagarHandler = null,
+        RegistrarPagosMultiplesHandler? registrarPagosMultiplesHandler = null,
+        ProcesarPagoPinPadHandler? procesarPagoPinPadHandler = null,
+        ObtenerTerminalesPinPadHandler? obtenerTerminalesPinPadHandler = null,
         AnularDocumentoHandler? anularHandler = null)
     {
         _pedido = pedido;
         _emitirHandler = emitirHandler;
         _mediosPagoHandler = mediosPagoHandler;
         _pagarHandler = pagarHandler;
+        _registrarPagosMultiplesHandler = registrarPagosMultiplesHandler;
+        _procesarPagoPinPadHandler = procesarPagoPinPadHandler;
+        _obtenerTerminalesPinPadHandler = obtenerTerminalesPinPadHandler;
         _anularHandler = anularHandler;
 
         Text = "Venta / Emisión de Documento";
@@ -167,7 +176,15 @@ public class FrmVenta : Form
         }
 
         var documento = result.Valor!;
-        using var frmPago = new FrmPago(documento.CodigoDocumento, documento.Total, _mediosPagoHandler, _pagarHandler);
+        using var frmPago = new FrmPago(
+            documento.CodigoDocumento,
+            documento.Total,
+            documento.CodigoCaja,
+            _mediosPagoHandler,
+            _pagarHandler,
+            _registrarPagosMultiplesHandler,
+            _procesarPagoPinPadHandler,
+            _obtenerTerminalesPinPadHandler);
         if (frmPago.ShowDialog(this) == DialogResult.OK)
         {
             using var frmDocumento = new FrmDocumento(documento, _anularHandler);

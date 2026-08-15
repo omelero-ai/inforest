@@ -11,7 +11,7 @@ public interface IPinPadService
     /// Inicializa la comunicación con el PinPad.
     /// Legacy: fiOpenPort(ConfigFileName)
     /// </summary>
-    Task<PinPadResult> InicializarAsync(string configPath, CancellationToken cancellationToken = default);
+    Task<PinPadResult> InicializarAsync(string? configPath = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Ejecuta una operación de venta con tarjeta.

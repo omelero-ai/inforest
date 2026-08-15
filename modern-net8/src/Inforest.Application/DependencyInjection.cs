@@ -105,8 +105,11 @@ public static class DependencyInjection
 
         // W6: Caja / Pagos — Handlers CQRS (BR-007, BR-013)
         services.AddScoped<PagarDocumentoHandler>();
+        services.AddScoped<RegistrarPagosMultiplesHandler>();
         services.AddScoped<ObtenerResumenTurnoHandler>();
         services.AddScoped<ObtenerMediosPagoHandler>();
+        services.AddScoped<ObtenerTerminalesPinPadHandler>();
+        services.AddScoped<ProcesarPagoPinPadHandler>();
 
         // P3-09: Delivery, Despacho, Motorizados y Centralización — Handlers
         services.AddScoped<CrearClienteDeliveryHandler>();

@@ -13,7 +13,7 @@ internal sealed class NullPinPadService : IPinPadService
 
     public NullPinPadService(ILogger<NullPinPadService> logger) => _logger = logger;
 
-    public Task<PinPadResult> InicializarAsync(string configPath, CancellationToken cancellationToken = default)
+    public Task<PinPadResult> InicializarAsync(string? configPath = null, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("PinPad (Null): inicialización simulada con {ConfigPath}", configPath);
         return Task.FromResult(PinPadResult.Ok("Simulado"));
