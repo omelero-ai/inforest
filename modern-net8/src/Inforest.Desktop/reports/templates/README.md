@@ -13,7 +13,7 @@
 | `RepPropina.frx` | Propinas | `spRep_Propina` | `dsrPropinaD.Dsr` |
 | `RepPrincipalClienteDetalle.frx` | Clientes Principales (detalle) | `spRep_PrincipalCliente` | `dsrPrincipalD.Dsr` |
 | `RepPrincipalClienteResumen.frx` | Clientes Principales (resumen) | `spRep_PrincipalCliente` | `dsrPrincipalR.Dsr` |
-| `RepLiquidacionTicket.frx` | Liquidación de Cajero por Ticketera | `spRep_LiquidacionSuma` | `frmRepLiquidacionTicket.frm` |
+| `RepLiquidacionTicket.frx` | Liquidación de Cajero por Ticketera | `spRep_LiquidacionSuma` | `(no DSR — direct SP desde frmRepLiquidacionTicket.frm)` |
 | `RepPaloteoComparativo.frx` | Paloteo Comparativo | `spRep_PaloteoComparativo` | `dsrPaloteoComparativo.Dsr` |
 | `RepPaloteoSubProd.frx` | Paloteo Sub-Productos | `spRep_PaloteoSubProd` | `dsrPaloteoSPD.Dsr` |
 
