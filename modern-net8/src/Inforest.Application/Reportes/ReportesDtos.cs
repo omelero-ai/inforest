@@ -339,3 +339,27 @@ public static class ExpresionPrecioExtensions
         _ => "dbo.DPEDIDO.nVenta"
     };
 }
+
+/// <summary>
+/// Fila del dataset retornado por <c>spRep_Anulacion</c>.
+/// Legacy: <c>frmRepAnulado.frm</c> — "Control de Transacciones"
+/// Regla: BR-REP-014
+/// </summary>
+public sealed class AnulacionRow
+{
+    public string TCodigoPedido { get; init; } = string.Empty;
+    public string TItem { get; init; } = string.Empty;
+    public string TCodigoProducto { get; init; } = string.Empty;
+    public double NCantidad { get; init; }
+    public double NVenta { get; init; }
+    public string TEstadoItem { get; init; } = string.Empty;
+    public string TDocumento { get; init; } = string.Empty;
+    public DateTime FRegistro { get; init; }
+    public bool LImprime { get; init; }
+    public string TMotivoAnulacion { get; init; } = string.Empty;
+    public string TObservacionAnulado { get; init; } = string.Empty;
+    public string TUsuarioAnulado { get; init; } = string.Empty;
+    public DateTime? FRegAnulado { get; init; }
+    public string TTurno { get; init; } = string.Empty;
+    public DateTime? FFechaItem { get; init; }
+}

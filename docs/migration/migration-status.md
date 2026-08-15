@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-15
 >
-> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001 (Login) y POS-FUNC-002 (Apertura MDI) MIGRATED; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) + POS-FUNC-007/016/019 + POS-FUNC-008 (Caja/Cierre COMPLETED) + POS-FUNC-003 (Gestión pedidos salón MIGRATED) + POS-FUNC-004 (Registro de venta MIGRATED) + POS-FUNC-005 (Cobro y pagos MIGRATED) + POS-FUNC-006 (Notas de Crédito MIGRATED) + POS-FUNC-010 (Cliente y cuentas corrientes MIGRATED) + POS-FUNC-011 (Reservas MIGRATED) + POS-FUNC-012 (Delivery dependiente POS MIGRATED) + POS-FUNC-013 (Insumos/descargo MIGRATED) + **POS-FUNC-014 (Importación de pedidos externos MIGRATED: RequerimientoAlmacen entity + DetalleRequerimientoAlmacen + IRequerimientoAlmacenRepository + RequerimientoAlmacenRepository + IImportacionPedidoGateway + ImportacionPedidoGateway + 3 handlers + FrmImportacionRequerimientos + FrmImportacionRequerimientoDetalle + BR-IMPORT-001..004 + 17 tests)**
+> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001 (Login) y POS-FUNC-002 (Apertura MDI) MIGRATED; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio W14 (TaxPolicy, ProductoVisibilidad, InventoryGateway, Email) + POS-FUNC-007/016/019 + POS-FUNC-008 (Caja/Cierre COMPLETED) + POS-FUNC-003 (Gestión pedidos salón MIGRATED) + POS-FUNC-004 (Registro de venta MIGRATED) + POS-FUNC-005 (Cobro y pagos MIGRATED) + POS-FUNC-006 (Notas de Crédito MIGRATED) + POS-FUNC-010 (Cliente y cuentas corrientes MIGRATED) + POS-FUNC-011 (Reservas MIGRATED) + POS-FUNC-012 (Delivery dependiente POS MIGRATED) + POS-FUNC-013 (Insumos/descargo MIGRATED) + POS-FUNC-014 (Importación de pedidos externos MIGRATED) + **POS-FUNC-017 IN_PROGRESS (frmRepCtaCte COMPLETED + frmRepAnulado MIGRATED: AnulacionRow + AnulacionParametros + ObtenerAnulacionAsync + ObtenerReporteAnulacionHandler + FrmRepAnuladoReporte + BR-REP-014 + 2 tests — 231 application tests en verde)**
 
 ---
 
@@ -95,7 +95,7 @@
 | M4-POS-FUNC-014 | Importación de pedidos externos (POS-FUNC-014): RequerimientoAlmacen + DetalleRequerimientoAlmacen (Domain) + IRequerimientoAlmacenRepository + IImportacionPedidoGateway (Application) + RequerimientoAlmacenRepository + ImportacionPedidoGateway (Infrastructure, ALMACEN DB) + ObtenerRequerimientosPendientesHandler + ObtenerDetalleRequerimientoHandler + ImportarRequerimientoHandler + FrmImportacionRequerimientos + FrmImportacionRequerimientoDetalle + BR-IMPORT-001..004 + 17 tests (8 domain + 9 handler) — 411 tests en verde | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-018 | Recibo Ingresos/Egresos (POS-FUNC-018): ReciboIngreso + ReciboEgreso (Domain, BR-RECIBO-001..012) + IReciboIngresoRepository + IReciboEgresoRepository + ReciboIngresoRepository + ReciboEgresoRepository (direct SQL, MINGRESO/MEGRESO) + ObtenerIngresosHandler + RegistrarIngresoHandler + AnularIngresoHandler + ObtenerEgresosHandler + RegistrarEgresoHandler + AnularEgresoHandler + FrmReciboIngreso + FrmReciboIngresoDetalle + FrmReciboEgreso + FrmReciboEgresoDetalle + 33 tests (9+8 domain + 8+8 handler) | MIGRATED — 2026-08-14 |
 | M4-POS-FUNC-009 | Turno/Día Contable (POS-FUNC-009): FrmDiaContable + AperturarDiaContableHandler + CerrarDiaContableHandler + ObtenerDiaContableHandler + IDiaContableService extendido (CerrarDiaContableAsync + ObtenerFechaMaximaDiaContableAsync) + BR-DC-001/002/003/004 documentados + 10 tests | COMPLETED — 2026-08-14 |
-| M4-POS-FUNC-017 | Reportería operativa POS (slice `frmRepCtaCte.frm`): `spRep_CtaCteN` + `ReporteRepository.ObtenerCtaCteOperativaAsync` + catálogos `vTipoCtaCte`/`vSubTipoCtaCte` + `ObtenerReporteCtaCteOperativaHandler` + `FrmRepCtaCteReporte` + 3 plantillas FastReport + 2 tests nuevos | IN_PROGRESS — 2026-08-15 |
+| M4-POS-FUNC-017 | Reportería operativa POS (slice `frmRepCtaCte.frm` + `frmRepAnulado.frm`): `spRep_CtaCteN` + `spRep_Anulacion` + `ReporteRepository.ObtenerCtaCteOperativaAsync` + `ReporteRepository.ObtenerAnulacionAsync` + `ObtenerReporteCtaCteOperativaHandler` + `ObtenerReporteAnulacionHandler` + `FrmRepCtaCteReporte` + `FrmRepAnuladoReporte` + 3+1 plantillas FastReport + 4 tests nuevos — 231 application tests en verde | IN_PROGRESS — 2026-08-15 |
 | M5 | Punto de Venta migrado | IN_PROGRESS — W4+W5+W6+W11+POS-FUNC-002/007/016/019 implementados; POS-FUNC-003 MIGRATED (tests completos) |
 | M6 | Caja y Pagos migrados | NOT_STARTED |
 | M7 | Todos los módulos migrados | NOT_STARTED |
@@ -120,9 +120,10 @@
 
 1. **COMPLETED:** POS-FUNC-018 Recibo de Ingresos/Egresos validado (`frmReciboIngreso.frm`, `frmReciboIngresoDetalle.frm`, `frmReciboEgreso.frm`, `frmReciboEgresoDetalle.frm`, MINGRESO/MEGRESO, BR-RECIBO-001..012, 33 tests en verde, 221 application tests en verde, 154 domain tests en verde).
 2. **COMPLETED:** `frmRepCtaCte.frm` migrado y validado (`spRep_CtaCteN`, filtros `vTipoCtaCte`/`vSubTipoCtaCte`, `FrmRepCtaCteReporte`, 3 plantillas FastReport, 2 tests nuevos).
-3. Siguiente pendiente de `InfoRest.vbp`: continuar el siguiente `frmRep*` no completado dentro de `POS-FUNC-017` sin abrir una nueva etapa.
-4. Mantener seguimiento de gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
-5. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 restantes puedan operar extremo a extremo.
+3. **COMPLETED:** `frmRepAnulado.frm` migrado (POS-FUNC-017): `spRep_Anulacion` + `AnulacionRow`/`AnulacionParametros` + `ObtenerAnulacionAsync` + `ObtenerReporteAnulacionHandler` + `FrmRepAnuladoReporte` + BR-REP-014 + 2 tests nuevos — 231 application tests en verde.
+4. Siguiente pendiente de `InfoRest.vbp` dentro de POS-FUNC-017: continuar con el siguiente `frmRep*` no completado.
+5. Mantener seguimiento de gaps bloqueantes heredados de Fase 3: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
+6. Completar plantillas FastReport pendientes para que los handlers/reportes de Etapa 10 restantes puedan operar extremo a extremo.
 
 ---
 

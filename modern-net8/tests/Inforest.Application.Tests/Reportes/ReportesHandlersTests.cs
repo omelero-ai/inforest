@@ -320,4 +320,65 @@ public class ReportesHandlersTests
         _repoMock.Verify(r => r.ObtenerTiempoKdsProductoAsync(
             It.IsAny<DateTime>(), It.IsAny<DateTime>(), "GRP01", "SG01", "P001", default), Times.Once);
     }
+
+    // ── BR-REP-014 — Anulación / Control de Transacciones ────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteAnulacionHandler_ConFiltros_RetornaPlantillaCorrecta()
+    {
+        // Arrange
+        var parametros = new AnulacionParametros
+        {
+            FechaInicio = DateTime.Today.AddDays(-7),
+            FechaFin = DateTime.Today,
+            FlagFacturados = true,
+            FlagAnulados = true,
+            FlagTransferidos = false,
+            Criterio = string.Empty
+        };
+
+        _repoMock.Setup(r => r.ObtenerAnulacionAsync(parametros, default))
+            .ReturnsAsync(new List<AnulacionRow>
+            {
+                new() { TCodigoPedido = "P001", TItem = "01", TCodigoProducto = "PROD01", NCantidad = 2, NVenta = 25.50, TEstadoItem = "A", TMotivoAnulacion = "ERR" }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteAnulacionHandler(_repoMock.Object);
+        var query = new ObtenerReporteAnulacionQuery(parametros);
+
+        // Act
+        var resultado = await handler.HandleAsync(query);
+
+        // Assert
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepAnulacion.frx", resultado.NombrePlantilla);
+        Assert.Equal("Control de Transacciones", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerAnulacionAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteAnulacionHandler_SinResultados_RetornaListaVacia()
+    {
+        // Arrange
+        var parametros = new AnulacionParametros
+        {
+            FechaInicio = DateTime.Today.AddDays(-1),
+            FechaFin = DateTime.Today,
+            FlagFacturados = false,
+            FlagAnulados = true,
+            FlagTransferidos = false
+        };
+
+        _repoMock.Setup(r => r.ObtenerAnulacionAsync(parametros, default))
+            .ReturnsAsync(new List<AnulacionRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteAnulacionHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteAnulacionQuery(parametros));
+
+        // Assert
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepAnulacion.frx", resultado.NombrePlantilla);
+    }
 }

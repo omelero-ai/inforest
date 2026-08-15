@@ -200,6 +200,11 @@ public interface IReporteRepository
         string subGrupo,
         string producto,
         CancellationToken ct = default);
+
+    /// <summary>Ejecuta <c>spRep_Anulacion</c>. Regla: BR-REP-014</summary>
+    Task<IReadOnlyList<AnulacionRow>> ObtenerAnulacionAsync(
+        AnulacionParametros parametros,
+        CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────
@@ -300,4 +305,26 @@ public sealed class AnaliticoMotorizadoIntegradoParametros
     public ExpresionPrecio TipoPrecio { get; init; } = ExpresionPrecio.Venta;
     public DateTime FechaInicio { get; init; }
     public DateTime FechaFin { get; init; }
+}
+
+/// <summary>
+/// Parámetros para <c>spRep_Anulacion</c>. Regla: BR-REP-014
+/// Legacy: <c>frmRepAnulado.frm</c> — "Control de Transacciones"
+/// </summary>
+public sealed class AnulacionParametros
+{
+    /// <summary>true = filtrar por franja horaria sin importar el día</summary>
+    public bool FranjaHoraria { get; init; }
+    /// <summary>Código de turno; string.Empty = todos los turnos</summary>
+    public string Turno { get; init; } = string.Empty;
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+    /// <summary>Incluir ítems facturados (tEstadoItem='N')</summary>
+    public bool FlagFacturados { get; init; } = true;
+    /// <summary>Incluir pedidos anulados (tEstadoPedido='03')</summary>
+    public bool FlagAnulados { get; init; } = true;
+    /// <summary>Incluir ítems/pedidos transferidos</summary>
+    public bool FlagTransferidos { get; init; } = true;
+    /// <summary>Criterio SQL adicional construido por la UI (salon, usuario, motivo, estado impresión)</summary>
+    public string Criterio { get; init; } = string.Empty;
 }

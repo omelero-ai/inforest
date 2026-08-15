@@ -1161,6 +1161,30 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-REP-014
+
+**Nombre:** Control de Transacciones — anulados, facturados y transferidos
+
+**Origen:** `frmRepAnulado.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepAnulado.frm`
+
+**Procedimiento/Función:** `spRep_Anulacion`
+
+**Descripción:** El formulario "Control de Transacciones" permite auditar transacciones según su tipo: ítems facturados (`tEstadoItem='N'`), pedidos anulados (`tEstadoPedido='03'`) y pedidos/ítems transferidos. El SP construye una tabla temporal `#DBTRANS` y la puebla en función de los flags seleccionados, respetando el rango de fechas (`@fInicio`/`@fFinal`). La selección de tipo se controla con `@lFlag1` (facturados), `@lFlag2` (anulados), `@lFlag3` (transferidos). El filtro `@lFranjaHoraria=1` restringe a la franja horaria sin importar el día. El criterio adicional (`@sCriterio`) permite filtrar por salón, usuario anulador, mesero, motivo de anulación y estado de impresión.
+
+**Condición:** Al ejecutar `ObtenerReporteAnulacionQuery`
+
+**Resultado:** Dataset de filas `AnulacionRow` con campos: `TCodigoPedido`, `TItem`, `TCodigoProducto`, `NCantidad`, `NVenta`, `TEstadoItem`, `TDocumento`, `FRegistro`, `LImprime`, `TMotivoAnulacion`, `TObservacionAnulado`, `TUsuarioAnulado`, `FRegAnulado`, `TTurno`, `FFechaItem`.
+
+**Excepciones:** Si los tres flags son `false` el SP no retorna filas; la UI valida que al menos uno esté marcado. El campo `@tTurno` vacío equivale a todos los turnos.
+
+**Destino .NET:** `ObtenerReporteAnulacionHandler`, `FrmRepAnuladoReporte.cs`, `RepAnulacion.frx`
+
+**Estado:** MIGRATED
+
+---
+
 ### BR-REP-006
 
 **Nombre:** Paloteo Sub-Productos — apertura por componentes de combo

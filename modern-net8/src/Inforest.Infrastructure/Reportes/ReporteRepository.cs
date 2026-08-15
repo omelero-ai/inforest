@@ -490,4 +490,33 @@ internal sealed class ReporteRepository : IReporteRepository
             cancellationToken: ct);
         return result.ToList().AsReadOnly();
     }
+
+    // ── Anulación / Control de Transacciones ──────────────────────────────
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<AnulacionRow>> ObtenerAnulacionAsync(
+        AnulacionParametros p,
+        CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte Anulacion: {FechaInicio} – {FechaFin} Turno={Turno}",
+            p.FechaInicio, p.FechaFin, string.IsNullOrEmpty(p.Turno) ? "(todos)" : p.Turno);
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<AnulacionRow>(
+            conn,
+            "spRep_Anulacion",
+            new
+            {
+                lFranjaHoraria = p.FranjaHoraria,
+                tTurno = p.Turno,
+                fInicio = p.FechaInicio,
+                fFinal = p.FechaFin,
+                lFlag1 = p.FlagFacturados,
+                lFlag2 = p.FlagAnulados,
+                lFlag3 = p.FlagTransferidos,
+                sCriterio = p.Criterio,
+                ExportaExcel = false
+            },
+            cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
 }

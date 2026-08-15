@@ -115,4 +115,6 @@ internal sealed class DummyReporteRepository : IReporteRepository
         => Task.FromResult<IReadOnlyList<TiempoKdsPedidoRow>>([]);
     public Task<IReadOnlyList<TiempoKdsProductoRow>> ObtenerTiempoKdsProductoAsync(DateTime fechaInicio, DateTime fechaFin, string grupo, string subGrupo, string producto, CancellationToken ct = default)
         => Task.FromResult<IReadOnlyList<TiempoKdsProductoRow>>([]);
+    public Task<IReadOnlyList<AnulacionRow>> ObtenerAnulacionAsync(AnulacionParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<AnulacionRow>>([]);
 }

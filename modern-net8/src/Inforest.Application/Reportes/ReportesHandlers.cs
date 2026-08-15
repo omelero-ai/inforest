@@ -481,3 +481,32 @@ public sealed class ObtenerReporteTiempoKdsProductoHandler
         };
     }
 }
+
+// ── BR-REP-014 — Anulación / Control de Transacciones ────────────────────────
+
+/// <summary>
+/// Query para reporte de anulaciones y control de transacciones.
+/// Legacy: <c>frmRepAnulado.frm</c>, <c>spRep_Anulacion</c>
+/// Regla: BR-REP-014
+/// </summary>
+public sealed record ObtenerReporteAnulacionQuery(AnulacionParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReporteAnulacionQuery"/>.</summary>
+public sealed class ObtenerReporteAnulacionHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReporteAnulacionHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<ReporteResultado<AnulacionRow>> HandleAsync(
+        ObtenerReporteAnulacionQuery q,
+        CancellationToken ct = default)
+    {
+        var filas = await _repo.ObtenerAnulacionAsync(q.Parametros, ct);
+        return new ReporteResultado<AnulacionRow>
+        {
+            Filas = filas,
+            TituloReporte = "Control de Transacciones",
+            NombrePlantilla = "RepAnulacion.frx"
+        };
+    }
+}

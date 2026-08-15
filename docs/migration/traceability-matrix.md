@@ -245,6 +245,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `spRep_CtaCteN` | SP | `ReporteRepository.ObtenerCtaCteOperativaAsync` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `frmRepCtaCte.frm` | Form | `FrmRepCtaCteReporte.cs` | WinForm | COMPLETED | `src/Inforest.Desktop/Forms/Reportes/FrmRepCtaCteReporte.cs` |
 | `frmRepCtaCte.frx` | Form resource | `RepCtaCteConsolidado.frx` / `RepCtaCteResumido.frx` / `RepCtaCteDetallado.frx` | FastReport | COMPLETED | `src/Inforest.Desktop/Reports/Templates/` |
+| `spRep_Anulacion` | SP | `ReporteRepository.ObtenerAnulacionAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepAnulado.frm` | Form | `FrmRepAnuladoReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepAnuladoReporte.cs` |
+| `frmRepAnulado.frx` | Form resource | `RepAnulacion.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/Reports/Templates/` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |
