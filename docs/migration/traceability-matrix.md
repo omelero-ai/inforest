@@ -2,7 +2,7 @@
 
 > Status: IN_PROGRESS — baseline transversal de Fase 3 validado; la matriz refleja equivalencias parciales y gaps controlados.
 >
-> Última actualización: 2026-08-14
+> Última actualización: 2026-08-15
 
 ---
 
@@ -248,6 +248,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `spRep_Anulacion` | SP | `ReporteRepository.ObtenerAnulacionAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `frmRepAnulado.frm` | Form | `FrmRepAnuladoReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepAnuladoReporte.cs` |
 | `frmRepAnulado.frx` | Form resource | `RepAnulacion.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/Reports/Templates/` |
+| `spRep_LiquidacionSuma` | SP | `ReporteRepository.ObtenerLiquidacionTicketAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepLiquidacionTicket.frm` | Form | `FrmRepLiquidacionTicketReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepLiquidacionTicketReporte.cs` |
+| `frmRepLiquidacionTicket.frx` | Form resource | `RepLiquidacionTicket.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepLiquidacionTicket.frx` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |

@@ -1185,6 +1185,30 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-REP-015
+
+**Nombre:** Liquidación de Cajero por Ticketera — resumen por tipo de pedido
+
+**Origen:** `frmRepLiquidacionTicket.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepLiquidacionTicket.frm`
+
+**Procedimiento/Función:** `spRep_LiquidacionSuma`
+
+**Descripción:** El formulario emite la liquidación resumida por ticketera agrupando documentos válidos por tipo de pedido (`tTipoPedido` y grupo no-registro `XX`). El SP agrega `nNeto`, `nImpuesto1`, `nImpuesto2`, `nImpuesto3`, `nVenta`, cantidad de documentos del grupo (`nTotalPromedio`) y total global (`total00`). Soporta dos modos: por turno específico (`@flagTurno=0`, `@sTurno`) o por rango de fechas/todos los turnos (`@flagTurno=1`). El filtro opcional de usuario se aplica con `@sUsuario`; el filtro por día contable usa `MDOCUMENTO.fDiaContable` cuando `@flagDiaContable=1`.
+
+**Condición:** Al ejecutar `ObtenerReporteLiquidacionTicketQuery`
+
+**Resultado:** Dataset `LiquidacionTicketRow` con una fila por tipo de pedido/agrupación y columnas agregadas de neto, impuestos, venta y conteo de documentos.
+
+**Excepciones:** Si `@sUsuario` está vacío se consideran todos los usuarios; si `@sSectorVenta` está vacío no restringe por sector; cuando `TPARAMETRO.lDesactivaNCFP=1` el SP excluye documentos presentes en `MNOTACREDITO` con estado `02/05`.
+
+**Destino .NET:** `ObtenerReporteLiquidacionTicketHandler`, `FrmRepLiquidacionTicketReporte.cs`, `RepLiquidacionTicket.frx`
+
+**Estado:** MIGRATED
+
+---
+
 ### BR-REP-006
 
 **Nombre:** Paloteo Sub-Productos — apertura por componentes de combo

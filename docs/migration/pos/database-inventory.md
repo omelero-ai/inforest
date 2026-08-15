@@ -57,7 +57,7 @@
 | 40 | `spIns_TipoCambio` | `frmAcceso.frm`, `frmFlash.frm`, `frmInicio.frm`… | SQL_ONLY | ANALYSIS |
 | 41 | `spRep_CtaCteN` | `frmRepCtaCte.frm` | SQL_ONLY | MIGRATED |
 | 42 | `spRep_Entregas` | `frmRepEntrega.frm` | SQL_ONLY | ANALYSIS |
-| 43 | `spRep_LiquidacionSuma` | `frmRepLiquidacionTicket.frm` | SQL_ONLY | ANALYSIS |
+| 43 | `spRep_LiquidacionSuma` | `frmRepLiquidacionTicket.frm` | SQL_ONLY | MIGRATED |
 | 44 | `spRep_ReciboEgreso` | `frmReciboEgreso.frm` | SQL_ONLY | ANALYSIS |
 | 45 | `spUpd_MPEDIDO` | `frmCajaRapida.frm`, `frmCargoMozo.frm`, `frmVenta.frm` | SQL_ONLY | ANALYSIS |
 | 46 | `sp_AsignaAnticipo_Pedido` | `frmVenta.frm` | SQL_ONLY | ANALYSIS |

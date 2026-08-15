@@ -117,4 +117,6 @@ internal sealed class DummyReporteRepository : IReporteRepository
         => Task.FromResult<IReadOnlyList<TiempoKdsProductoRow>>([]);
     public Task<IReadOnlyList<AnulacionRow>> ObtenerAnulacionAsync(AnulacionParametros parametros, CancellationToken ct = default)
         => Task.FromResult<IReadOnlyList<AnulacionRow>>([]);
+    public Task<IReadOnlyList<LiquidacionTicketRow>> ObtenerLiquidacionTicketAsync(LiquidacionTicketParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<LiquidacionTicketRow>>([]);
 }
