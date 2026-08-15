@@ -1271,9 +1271,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** `ERR_COM (-2)`, `ERR_PPAD_NO_RESP (-3)`, `ERR_SOCKET (-5)`, `ERR_HOST_NO_RESP (-6)`. Se muestra MsgBox al operador.
 
-**Destino .NET:** `IPinPadService`, `PinPadService` (P/Invoke), `NullPinPadService`
+**Destino .NET:** `IPinPadService`, `PinPadService` (P/Invoke), `NullPinPadService`, `ProcesarPagoPinPadHandler`, `ObtenerTerminalesPinPadHandler`, `FrmPago`, `FrmPagoPinPad`
 
-**Estado:** IN_PROGRESS
+**Estado:** IN_PROGRESS — flujo WinForms y selección de terminal migrados; parsing completo de respuesta/cupón legacy sigue parcial
 
 ---
 

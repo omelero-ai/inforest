@@ -84,7 +84,6 @@ frmNuevoCliente.frm
 frmNuevoInvitado.frm
 frmNumPad.frm
 frmPagoMasivo.frm
-frmPagoPinPad.frm
 frmPagoRapido.frm
 frmPassword.frm
 frmPedidoAnterior.frm
