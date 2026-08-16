@@ -260,6 +260,11 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmRepReservas.frm` | Form | `FrmRepReservasReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepReservasReporte.cs` |
 | `(query dinámica frmRepReservas: TRESERVA+vEstadoReserva)` | Query | `ReporteRepository.ObtenerReservasReporteAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `frmRepReservas.frx` | Form resource | `RepReservas.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepReservas.frx` |
+| `spRep_Entregas` | SP | `ReporteRepository.ObtenerEntregasAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepEntrega.frm` | Form | `FrmRepEntregaReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepEntregaReporte.cs` |
+| `dsrReporteEntrega.Dsr` | Crystal | `RepEntregaFormato1.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepEntregaFormato1.frx` |
+| `dsrReporteEntregaFormato2.Dsr` | Crystal | `RepEntregaFormato2.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepEntregaFormato2.frx` |
+| `dsrReporteEntregaResumidoProd.Dsr` | Crystal | `RepEntregaResumidoProd.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepEntregaResumidoProd.frx` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |
@@ -284,7 +289,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `(KDS tiempo form)` | Form | `FrmTiempoKdsReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmTiempoKdsReporte.cs` |
 | `IReporteRepository` | Interface | `IReporteRepository` | Interface | COMPLETED | `src/Inforest.Application/Reportes/IReporteRepository.cs` |
 | `ReporteRepository` | — | `ReporteRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
-| `(test etapa 10 application)` | — | `ReportesHandlersTests` (16 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/Reportes/` |
+| `(test etapa 10 application)` | — | `ReportesHandlersTests` (18 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/Reportes/` |
 
 ## P3-11 — Periféricos Especializados e Integraciones por País
 

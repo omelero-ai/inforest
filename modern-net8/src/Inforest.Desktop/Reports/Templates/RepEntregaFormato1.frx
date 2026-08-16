@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Reporte de Entregas Formato 1 - Legacy: frmRepEntrega.frm">
+  <Dictionary>
+    <TableDataSource Name="Entregas" DataType="System.Int32" Enabled="true">
+      <Column Name="Pedido" DataType="System.String" />
+      <Column Name="FechaPedido" DataType="System.String" />
+      <Column Name="FechaEntrega" DataType="System.String" />
+      <Column Name="HoraEntrega" DataType="System.String" />
+      <Column Name="Cliente" DataType="System.String" />
+      <Column Name="Telefono" DataType="System.String" />
+      <Column Name="CanalVenta" DataType="System.String" />
+      <Column Name="Producto" DataType="System.String" />
+      <Column Name="Cantidad" DataType="System.Double" />
+      <Column Name="Monto" DataType="System.Double" />
+      <Column Name="SaldoPendiente" DataType="System.Double" />
+      <Column Name="EstadoPedido" DataType="System.String" />
+      <Column Name="Cancelacion" DataType="System.String" />
+      <Column Name="DPropiedad" DataType="System.String" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="297" PaperHeight="210" Landscape="true">
+    <ReportTitleBand Name="ReportTitle1" Width="1047.06" Height="28.35">
+      <TextObject Name="Title" Width="1047.06" Height="28.35" Text="Reporte de Entregas - Formato 1" Font="Arial, 12pt, style=Bold" HorzAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="32.35" Width="1047.06" Height="18.9">
+      <TextObject Name="h1" Width="70" Height="18.9" Text="Pedido" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h2" Left="75" Width="110" Height="18.9" Text="F. Entrega" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h3" Left="190" Width="200" Height="18.9" Text="Cliente" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h4" Left="395" Width="150" Height="18.9" Text="Producto" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h5" Left="550" Width="60" Height="18.9" Text="Cant." Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h6" Left="615" Width="80" Height="18.9" Text="Monto" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h7" Left="700" Width="85" Height="18.9" Text="Saldo" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h8" Left="790" Width="90" Height="18.9" Text="Entrega" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h9" Left="885" Width="90" Height="18.9" Text="Cancelación" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h10" Left="980" Width="65" Height="18.9" Text="Canal" Font="Arial, 8pt, style=Bold" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="55.25" Width="1047.06" Height="18.9" DataSource="Entregas">
+      <TextObject Name="d1" Width="70" Height="18.9" Text="[Entregas.Pedido]" Font="Arial, 8pt" />
+      <TextObject Name="d2" Left="75" Width="110" Height="18.9" Text="[Entregas.FechaEntrega] [Entregas.HoraEntrega]" Font="Arial, 8pt" />
+      <TextObject Name="d3" Left="190" Width="200" Height="18.9" Text="[Entregas.Cliente]" Font="Arial, 8pt" />
+      <TextObject Name="d4" Left="395" Width="150" Height="18.9" Text="[Entregas.Producto]" Font="Arial, 8pt" />
+      <TextObject Name="d5" Left="550" Width="60" Height="18.9" Text="[Entregas.Cantidad]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d6" Left="615" Width="80" Height="18.9" Text="[Entregas.Monto]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d7" Left="700" Width="85" Height="18.9" Text="[Entregas.SaldoPendiente]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d8" Left="790" Width="90" Height="18.9" Text="[Entregas.EstadoPedido]" Font="Arial, 8pt" />
+      <TextObject Name="d9" Left="885" Width="90" Height="18.9" Text="[Entregas.Cancelacion]" Font="Arial, 8pt" />
+      <TextObject Name="d10" Left="980" Width="65" Height="18.9" Text="[Entregas.CanalVenta]" Font="Arial, 8pt" />
+    </DataBand>
+  </ReportPage>
+</Report>

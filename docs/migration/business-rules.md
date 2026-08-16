@@ -1281,6 +1281,30 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-REP-019
+
+**Nombre:** Reporte de Entregas — filtros operativos y salida detallada/resumida
+
+**Origen:** `frmRepEntrega.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepEntrega.frm`
+
+**Procedimiento/Función:** `Genera` + `spRep_Entregas`
+
+**Descripción:** El formulario emite el reporte de entregas del canal central de pedidos sobre `spRep_Entregas`, filtrando por rango fecha/hora de entrega, cliente, estado de entrega, estado de cancelación, grupo, subgrupo, producto y canal de venta. El formato de salida se controla con tres opciones del formulario: detallado formato 1, detallado formato 2 y resumido por producto. En SQL, `@tTipo='1'` retorna detalle por pedido/ítem y `@tTipo='0'` retorna consolidado por producto.
+
+**Condición:** Al ejecutar `ObtenerReporteEntregaQuery`.
+
+**Resultado:** Dataset `EntregaRow` para formatos detallados (`Pedido`, `FechaEntrega`, `Cliente`, `Producto`, `Cantidad`, `Monto`, `SaldoPendiente`, `EstadoPedido`, `Cancelacion`, etc.) y dataset agregado por producto/cantidad para modo resumido.
+
+**Excepciones:** Si la fecha inicio es mayor que la fecha fin se bloquea la ejecución; cuando un filtro está en modo específico, su valor es obligatorio; si no hay filas se muestra "No hay Datos para Mostrar".
+
+**Destino .NET:** `ObtenerReporteEntregaHandler`, `ReporteRepository.ObtenerEntregasAsync`, `FrmRepEntregaReporte.cs`, `RepEntregaFormato1.frx`, `RepEntregaFormato2.frx`, `RepEntregaResumidoProd.frx`
+
+**Estado:** MIGRATED
+
+---
+
 **Nombre:** Paloteo Sub-Productos — apertura por componentes de combo
 
 **Origen:** `frmRepPaloteoSubProd.frm`

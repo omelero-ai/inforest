@@ -102,9 +102,6 @@ frmReciboEgreso.frm
 frmReciboEgresoDetalle.frm
 frmReciboIngreso.frm
 frmReciboIngresoDetalle.frm
-frmRepDeliveryTicket.frm
-frmRepEntrega.frm
-frmRepReservas.frm
 frmReserva.frm
 frmReservaDetalle.frm
 FrmSeleccionProductos.frm

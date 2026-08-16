@@ -503,3 +503,62 @@ public sealed class ReservaReporteParametros
     public bool EstadoAnulado { get; init; }
     public OrdenReserva Orden { get; init; } = OrdenReserva.Reserva;
 }
+
+// ── BR-REP-019 — Reporte de Entregas ─────────────────────────────────────────
+
+/// <summary>
+/// Formatos del reporte de entregas.
+/// Legacy: <c>frmRepEntrega.frm</c> (Option1/Option2/Option3)
+/// </summary>
+public enum FormatoReporteEntrega
+{
+    DetalladoFormato1 = 0,
+    ResumidoPorProducto = 1,
+    DetalladoFormato2 = 2
+}
+
+/// <summary>
+/// Fila del dataset retornado por <c>spRep_Entregas</c>.
+/// Legacy: <c>frmRepEntrega.frm</c>
+/// Regla: BR-REP-019
+/// </summary>
+public sealed class EntregaRow
+{
+    public string Pedido { get; init; } = string.Empty;
+    public string FechaPedido { get; init; } = string.Empty;
+    public string FechaEntrega { get; init; } = string.Empty;
+    public string HoraEntrega { get; init; } = string.Empty;
+    public string Identificacion { get; init; } = string.Empty;
+    public string Cliente { get; init; } = string.Empty;
+    public string Direccion { get; init; } = string.Empty;
+    public string Telefono { get; init; } = string.Empty;
+    public string Observacion { get; init; } = string.Empty;
+    public string CanalVenta { get; init; } = string.Empty;
+    public string EstadoPedido { get; init; } = string.Empty;
+    public string Cancelacion { get; init; } = string.Empty;
+    public string Producto { get; init; } = string.Empty;
+    public double Cantidad { get; init; }
+    public double Monto { get; init; }
+    public double SaldoPendiente { get; init; }
+    public string DObservacion { get; init; } = string.Empty;
+    public string DPropiedad { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Parámetros de filtro para <c>spRep_Entregas</c>.
+/// Legacy: <c>frmRepEntrega.frm</c>
+/// Regla: BR-REP-019
+/// </summary>
+public sealed class EntregaParametros
+{
+    public DateTime FechaHoraInicio { get; init; }
+    public DateTime FechaHoraFin { get; init; }
+    public string CodigoCliente { get; init; } = string.Empty;
+    public string EstadoEntrega { get; init; } = string.Empty;
+    public string EstadoCancelacion { get; init; } = string.Empty;
+    public string Grupo { get; init; } = string.Empty;
+    public string SubGrupo { get; init; } = string.Empty;
+    public string CodigoProducto { get; init; } = string.Empty;
+    public string CanalVenta { get; init; } = string.Empty;
+    public FormatoReporteEntrega Formato { get; init; } = FormatoReporteEntrega.ResumidoPorProducto;
+}

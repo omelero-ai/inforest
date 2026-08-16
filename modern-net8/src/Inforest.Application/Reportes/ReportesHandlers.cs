@@ -626,3 +626,37 @@ public sealed class ObtenerReporteReservasHandler
         };
     }
 }
+
+// ── BR-REP-019 — Reporte de Entregas ─────────────────────────────────────────
+
+/// <summary>
+/// Query para obtener el reporte de entregas.
+/// Legacy: <c>frmRepEntrega.frm</c>, <c>spRep_Entregas</c>
+/// Regla: BR-REP-019
+/// </summary>
+public sealed record ObtenerReporteEntregaQuery(EntregaParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReporteEntregaQuery"/>.</summary>
+public sealed class ObtenerReporteEntregaHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReporteEntregaHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<ReporteResultado<EntregaRow>> HandleAsync(
+        ObtenerReporteEntregaQuery q,
+        CancellationToken ct = default)
+    {
+        var filas = await _repo.ObtenerEntregasAsync(q.Parametros, ct);
+        return new ReporteResultado<EntregaRow>
+        {
+            Filas = filas,
+            TituloReporte = "Reporte de Entregas",
+            NombrePlantilla = q.Parametros.Formato switch
+            {
+                FormatoReporteEntrega.DetalladoFormato1 => "RepEntregaFormato1.frx",
+                FormatoReporteEntrega.DetalladoFormato2 => "RepEntregaFormato2.frx",
+                _ => "RepEntregaResumidoProd.frx"
+            }
+        };
+    }
+}

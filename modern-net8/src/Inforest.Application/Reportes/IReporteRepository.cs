@@ -241,6 +241,15 @@ public interface IReporteRepository
     Task<IReadOnlyList<ReservaReporteRow>> ObtenerReservasReporteAsync(
         ReservaReporteParametros parametros,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_Entregas</c>.
+    /// Legacy: <c>frmRepEntrega.frm</c>
+    /// Regla: BR-REP-019
+    /// </summary>
+    Task<IReadOnlyList<EntregaRow>> ObtenerEntregasAsync(
+        EntregaParametros parametros,
+        CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────

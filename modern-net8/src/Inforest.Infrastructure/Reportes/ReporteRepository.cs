@@ -846,7 +846,8 @@ internal sealed class ReporteRepository : IReporteRepository
                      dbo.MDOCUMENTO.tDocumento
             """;
 
-        var result = await conn.QueryAsync<DeliveryTicketRow>(sql, sqlParams, commandTimeout: 120);
+        var result = await conn.QueryAsync<DeliveryTicketRow>(
+            new CommandDefinition(sql, sqlParams, commandTimeout: 120, cancellationToken: ct));
         return result.ToList().AsReadOnly();
     }
 
@@ -909,6 +910,48 @@ internal sealed class ReporteRepository : IReporteRepository
             """;
 
         var result = await conn.QueryAsync<ReservaReporteRow>(new CommandDefinition(sql, sqlParams, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<EntregaRow>> ObtenerEntregasAsync(
+        EntregaParametros p,
+        CancellationToken ct = default)
+    {
+        _logger.LogInformation(
+            "Reporte Entregas: Inicio={Inicio} Fin={Fin} Cliente={Cliente} Entrega={Entrega} Cancelacion={Cancelacion} Grupo={Grupo} SubGrupo={SubGrupo} Producto={Producto} Canal={Canal} Formato={Formato}",
+            p.FechaHoraInicio,
+            p.FechaHoraFin,
+            string.IsNullOrWhiteSpace(p.CodigoCliente) ? "(todos)" : p.CodigoCliente,
+            string.IsNullOrWhiteSpace(p.EstadoEntrega) ? "(todos)" : p.EstadoEntrega,
+            string.IsNullOrWhiteSpace(p.EstadoCancelacion) ? "(todos)" : p.EstadoCancelacion,
+            string.IsNullOrWhiteSpace(p.Grupo) ? "(todos)" : p.Grupo,
+            string.IsNullOrWhiteSpace(p.SubGrupo) ? "(todos)" : p.SubGrupo,
+            string.IsNullOrWhiteSpace(p.CodigoProducto) ? "(todos)" : p.CodigoProducto,
+            string.IsNullOrWhiteSpace(p.CanalVenta) ? "(todos)" : p.CanalVenta,
+            p.Formato);
+
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var tTipo = p.Formato == FormatoReporteEntrega.ResumidoPorProducto ? "0" : "1";
+
+        var result = await _spExecutor.QueryAsync<EntregaRow>(
+            conn,
+            "spRep_Entregas",
+            new
+            {
+                fInicio = p.FechaHoraInicio,
+                fFinal = p.FechaHoraFin,
+                tCliente = p.CodigoCliente,
+                tEstadoEntrega = p.EstadoEntrega,
+                tEstadoCanc = p.EstadoCancelacion,
+                tGrupo = p.Grupo,
+                tSubGrupo = p.SubGrupo,
+                tProducto = p.CodigoProducto,
+                tCanalVenta = p.CanalVenta,
+                tTipo
+            },
+            cancellationToken: ct);
+
         return result.ToList().AsReadOnly();
     }
 }

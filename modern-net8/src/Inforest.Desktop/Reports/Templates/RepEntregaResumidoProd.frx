@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Reporte de Entregas Resumido por Producto - Legacy: frmRepEntrega.frm">
+  <Dictionary>
+    <TableDataSource Name="Entregas" DataType="System.Int32" Enabled="true">
+      <Column Name="Producto" DataType="System.String" />
+      <Column Name="Cantidad" DataType="System.Double" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="297" PaperHeight="210" Landscape="true">
+    <ReportTitleBand Name="ReportTitle1" Width="1047.06" Height="28.35">
+      <TextObject Name="Title" Width="1047.06" Height="28.35" Text="Reporte de Entregas - Resumido por Producto" Font="Arial, 12pt, style=Bold" HorzAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="32.35" Width="1047.06" Height="18.9">
+      <TextObject Name="h1" Width="900" Height="18.9" Text="Producto" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h2" Left="905" Width="140" Height="18.9" Text="Cantidad" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="55.25" Width="1047.06" Height="18.9" DataSource="Entregas">
+      <TextObject Name="d1" Width="900" Height="18.9" Text="[Entregas.Producto]" Font="Arial, 8pt" />
+      <TextObject Name="d2" Left="905" Width="140" Height="18.9" Text="[Entregas.Cantidad]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+    </DataBand>
+    <PageFooterBand Name="PageFooter1" Top="78.15" Width="1047.06" Height="18.9">
+      <TextObject Name="pf1" Width="1047.06" Height="18.9" Text="Página [Page#] de [TotalPages#]" HorzAlign="Right" Font="Arial, 8pt" />
+    </PageFooterBand>
+  </ReportPage>
+</Report>

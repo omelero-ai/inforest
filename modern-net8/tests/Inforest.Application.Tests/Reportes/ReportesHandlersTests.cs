@@ -591,4 +591,52 @@ public class ReportesHandlersTests
         Assert.Empty(resultado.Filas);
         Assert.Equal("RepReservas.frx", resultado.NombrePlantilla);
     }
+
+    // ── BR-REP-019 Entregas ───────────────────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteEntregaHandler_DetalladoFormato1_RetornaPlantillaCorrecta()
+    {
+        var parametros = new EntregaParametros
+        {
+            FechaHoraInicio = new DateTime(2026, 8, 1, 8, 0, 0),
+            FechaHoraFin = new DateTime(2026, 8, 1, 23, 59, 59),
+            CodigoCliente = "CLI001",
+            Formato = FormatoReporteEntrega.DetalladoFormato1
+        };
+
+        _repoMock.Setup(r => r.ObtenerEntregasAsync(parametros, default))
+            .ReturnsAsync(new List<EntregaRow>
+            {
+                new() { Pedido = "P001", Producto = "Lomo", Cantidad = 2, EstadoPedido = "ENTREGADO" }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteEntregaHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteEntregaQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepEntregaFormato1.frx", resultado.NombrePlantilla);
+        Assert.Equal("Reporte de Entregas", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerEntregasAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteEntregaHandler_Resumido_RetornaPlantillaResumida()
+    {
+        var parametros = new EntregaParametros
+        {
+            FechaHoraInicio = DateTime.Today,
+            FechaHoraFin = DateTime.Today.AddHours(23).AddMinutes(59),
+            Formato = FormatoReporteEntrega.ResumidoPorProducto
+        };
+
+        _repoMock.Setup(r => r.ObtenerEntregasAsync(parametros, default))
+            .ReturnsAsync(new List<EntregaRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteEntregaHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteEntregaQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepEntregaResumidoProd.frx", resultado.NombrePlantilla);
+    }
 }

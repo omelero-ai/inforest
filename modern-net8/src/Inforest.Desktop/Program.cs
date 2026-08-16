@@ -72,8 +72,12 @@ static class Program
                 services.AddTransient<ReasignacionMotorizadoForm>();
                 services.AddTransient<FrmCtaCteIntegradoReporte>();
                 services.AddTransient<FrmRepCtaCteReporte>();
+                services.AddTransient<FrmRepAnuladoReporte>();
                 services.AddTransient<FrmRepLiquidacionTicketReporte>();
                 services.AddTransient<FrmRepPaloteoTicketReporte>();
+                services.AddTransient<FrmRepDeliveryTicketReporte>();
+                services.AddTransient<FrmRepReservasReporte>();
+                services.AddTransient<FrmRepEntregaReporte>();
             });
     }
 }
