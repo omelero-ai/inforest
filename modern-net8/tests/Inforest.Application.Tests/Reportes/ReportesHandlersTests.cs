@@ -729,4 +729,84 @@ public class ReportesHandlersTests
         Assert.Contains("Precios Netos", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("marzo", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
     }
+
+    // ── BR-REP-021: Liquidación de Cajero ──────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteLiquidacionHandler_PorFecha_RetornaResultadoConTitulo()
+    {
+        // Arrange — BR-REP-021: Liquidación por rango de fechas, todos los usuarios
+        var parametros = new LiquidacionParametros
+        {
+            ModoFiltro = LiquidacionModoFiltro.PorFecha,
+            FechaInicio = new DateTime(2026, 8, 1, 0, 0, 0),
+            FechaFin = new DateTime(2026, 8, 1, 23, 59, 0),
+            Usuario = string.Empty,
+            SectorVenta = string.Empty,
+            MostrarTodos = true
+        };
+
+        var output = new LiquidacionOutput { VentaTotal = 1500.50, Neto = 1268.50, Impuesto1 = 228.33, TipoCambio = 3.75 };
+        var documentos = new List<LiquidacionRow>
+        {
+            new() { TGrupo = "01", Grupo = "Efectivo", TDocumento = "B001-0001", TUsuario = "USR01", NVenta1 = 1500.50 }
+        };
+        var sumasGrupo = new List<LiquidacionSumaGrupoRow>
+        {
+            new() { TGrupo = "01", NVenta1 = 1500.50 }
+        };
+
+        _repoMock.Setup(r => r.ObtenerLiquidacionOutputAsync(parametros, default)).ReturnsAsync(output);
+        _repoMock.Setup(r => r.ObtenerLiquidacionDocumentosAsync(parametros, default)).ReturnsAsync(documentos.AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionSumasGrupoAsync(parametros, default)).ReturnsAsync(sumasGrupo.AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionTarjetasAsync(parametros, default)).ReturnsAsync(new List<LiquidacionTarjetaRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionTiposPedidoAsync(parametros, default)).ReturnsAsync(new List<LiquidacionTipoPedidoRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionOtrosTiposAsync(parametros, default)).ReturnsAsync(new List<LiquidacionOtroTipoRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteLiquidacionHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteLiquidacionQuery(parametros));
+
+        // Assert
+        Assert.Single(resultado.Documentos);
+        Assert.Single(resultado.SumasGrupo);
+        Assert.Equal(1500.50, resultado.Output.VentaTotal);
+        Assert.Contains("Todos los Turnos", resultado.Titulo, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Todos los Usuarios", resultado.Titulo, StringComparison.OrdinalIgnoreCase);
+        _repoMock.Verify(r => r.ObtenerLiquidacionOutputAsync(parametros, default), Times.Once);
+        _repoMock.Verify(r => r.ObtenerLiquidacionDocumentosAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteLiquidacionHandler_PorTurno_ConUsuario_TituloContieneAmbos()
+    {
+        // Arrange — BR-REP-021: Liquidación filtrada por turno y usuario específico
+        var parametros = new LiquidacionParametros
+        {
+            ModoFiltro = LiquidacionModoFiltro.PorTurno,
+            Turno = "T-2026-001",
+            FechaInicio = new DateTime(2026, 8, 1),
+            FechaFin = new DateTime(2026, 8, 1),
+            Usuario = "CAJERO01",
+            MostrarTodos = true
+        };
+
+        _repoMock.Setup(r => r.ObtenerLiquidacionOutputAsync(parametros, default)).ReturnsAsync(new LiquidacionOutput());
+        _repoMock.Setup(r => r.ObtenerLiquidacionDocumentosAsync(parametros, default)).ReturnsAsync(new List<LiquidacionRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionSumasGrupoAsync(parametros, default)).ReturnsAsync(new List<LiquidacionSumaGrupoRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionTarjetasAsync(parametros, default)).ReturnsAsync(new List<LiquidacionTarjetaRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionTiposPedidoAsync(parametros, default)).ReturnsAsync(new List<LiquidacionTipoPedidoRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionOtrosTiposAsync(parametros, default)).ReturnsAsync(new List<LiquidacionOtroTipoRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteLiquidacionHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteLiquidacionQuery(parametros));
+
+        // Assert
+        Assert.Contains("T-2026-001", resultado.Titulo);
+        Assert.Contains("CAJERO01", resultado.Titulo);
+        Assert.Empty(resultado.Documentos);
+    }
 }

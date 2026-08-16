@@ -702,3 +702,88 @@ public sealed class ObtenerReporteVentaFechaHandler
         };
     }
 }
+
+// ============================================================
+// Liquidación de Cajero — frmRepLiquidacion.frm
+// Legacy: spRep_LiquidacionOutPut, spRep_Liquidacion (tipos 1-5), spRep_LiquidacionSuma
+// Regla: BR-REP-021
+// ============================================================
+
+/// <summary>
+/// Query para el reporte Liquidación de Cajero.
+/// Legacy: <c>frmRepLiquidacion.frm</c>, cmdOpcion_Click → Sub Genera()
+/// Regla: BR-REP-021
+/// SQL: <c>spRep_LiquidacionOutPut</c>, <c>spRep_Liquidacion</c>, <c>spRep_LiquidacionSuma</c>
+/// </summary>
+public sealed record ObtenerReporteLiquidacionQuery(LiquidacionParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReporteLiquidacionQuery"/>.</summary>
+public sealed class ObtenerReporteLiquidacionHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReporteLiquidacionHandler(IReporteRepository repo) => _repo = repo;
+
+    /// <summary>
+    /// Ejecuta todos los SPs del Legacy necesarios para el reporte de Liquidación de Cajero
+    /// y devuelve el resultado consolidado.
+    /// Legacy: Sub Genera() + Sub Genera2() — spRep_LiquidacionOutPut tipos 1-5 + spRep_LiquidacionSuma
+    /// Regla: BR-REP-021
+    /// </summary>
+    public async Task<LiquidacionResultado> HandleAsync(
+        ObtenerReporteLiquidacionQuery q,
+        CancellationToken ct = default)
+    {
+        var p = q.Parametros;
+
+        // Ejecutar todos los SPs en paralelo para mejorar rendimiento
+        var outputTask = _repo.ObtenerLiquidacionOutputAsync(p, ct);
+        var documentosTask = _repo.ObtenerLiquidacionDocumentosAsync(p, ct);
+        var sumasTask = _repo.ObtenerLiquidacionSumasGrupoAsync(p, ct);
+        var tarjetasTask = _repo.ObtenerLiquidacionTarjetasAsync(p, ct);
+        var tiposPedidoTask = _repo.ObtenerLiquidacionTiposPedidoAsync(p, ct);
+        var otrosTiposTask = _repo.ObtenerLiquidacionOtrosTiposAsync(p, ct);
+
+        await Task.WhenAll(outputTask, documentosTask, sumasTask, tarjetasTask, tiposPedidoTask, otrosTiposTask);
+
+        // Construir título igual que Legacy (sTitulo en Sub cmdOpcion_Click)
+        var titulo = ConstruirTitulo(p);
+
+        return new LiquidacionResultado
+        {
+            Output = await outputTask,
+            Documentos = await documentosTask,
+            SumasGrupo = await sumasTask,
+            Tarjetas = await tarjetasTask,
+            TiposPedido = await tiposPedidoTask,
+            OtrosTipos = await otrosTiposTask,
+            Titulo = titulo
+        };
+    }
+
+    /// <summary>
+    /// Construye el título descriptivo del reporte equivalente al string sTitulo del Legacy.
+    /// Legacy: cmdOpcion_Click — sTitulo = "Turno : " & ... & " Del " & ... & " Al " & ...
+    /// </summary>
+    private static string ConstruirTitulo(LiquidacionParametros p)
+    {
+        string rango;
+        if (p.ModoFiltro == LiquidacionModoFiltro.PorTurno)
+        {
+            rango = $"Turno : {p.Turno}";
+        }
+        else if (p.PorDiaContable)
+        {
+            rango = $"Por Dia Contable, Todos los Turnos del {p.FechaInicio:dd/MM/yyyy} Al {p.FechaFin:dd/MM/yyyy}";
+        }
+        else
+        {
+            rango = $"Turno : Todos los Turnos Del {p.FechaInicio:dd/MM/yyyy} {p.FechaInicio:HH:mm} Hrs Al {p.FechaFin:dd/MM/yyyy} {p.FechaFin:HH:mm} Hrs";
+        }
+
+        var usuario = string.IsNullOrEmpty(p.Usuario)
+            ? "Usuario : Todos los Usuarios"
+            : $"Usuario : {p.Usuario}";
+
+        return $"{rango}\n{usuario}";
+    }
+}

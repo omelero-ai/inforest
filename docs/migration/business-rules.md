@@ -2849,3 +2849,17 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Ninguna.
 **Destino .NET:** Validación en `ReciboEgreso.Registrar()` — lanza `DomainException` si modo es NOTACREDITO y referencia vacía.
 **Estado:** MIGRATED
+
+---
+
+## BR-REP-021
+**Nombre:** Liquidación de Cajero
+**Origen:** Legacy/frmRepLiquidacion.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepLiquidacion.frm`
+**Procedimiento/Función:** Sub Genera() / Sub Genera2() — cmdOpcion_Click
+**Descripción:** Genera el reporte de Liquidación de Cajero que consolida todos los movimientos de caja para un turno o rango de fechas. Incluye: documentos emitidos por forma de pago (efectivo, cheques, tarjetas 01-24, puntos, cortesías, cuentas por cobrar), recibos de ingreso/egreso/anticipo, notas de crédito, y resumen por tipo de pedido (Salón/Delivery/Llevar/Canal4/Canal5/Fiscal). Soporta variante `_NC` cuando `lNcOfisis=True` para operaciones con notas de crédito Ofisis.
+**Condición:** Filtrado por turno específico (`ChkTurno.Value=0`) o rango de fechas con/sin hora (`ChkTurno.Value=1`). Filtros adicionales: usuario (`chkUsuario`), sector de venta (`chkSectorVenta`), día contable (`chkDiaContable`), cortesías (`chkCortesia`).
+**Resultado:** Dataset de documentos agrupados por grupo/subgrupo de pago; escalares de totales (nNeto, nImpuesto1..3, nVenta, nDescuento, nRecargo, nCambio, nAdulto..5, nNino..5); sumas por grupo (01=Efectivo, 03=Cheque, 04=Otro, 05=Puntos, 06=Cortesía, 07=CtaCobrar, 08=Ingreso, 09=IngresoAnticipo, 10=Egreso, 20=NotaCredito); sumas por tarjeta (01-24); sumas por tipo de pedido; otros tipos de cancelación.
+**Excepciones:** Si modo=Turno y turno vacío: mensaje de error. Si modo=Fecha y fin < inicio: error de rango. Si usuario no seleccionado y chkUsuario=0: error.
+**Destino .NET:** `ObtenerReporteLiquidacionHandler` + `FrmRepLiquidacionReporte` + `RepLiquidacion.frx`
+**Estado:** MIGRATED
