@@ -84,7 +84,6 @@ frmNuevoCliente.frm
 frmNuevoInvitado.frm
 frmNumPad.frm
 frmPagoMasivo.frm
-frmPagoPinPad.frm
 frmPagoRapido.frm
 frmPassword.frm
 frmPedidoAnterior.frm
@@ -103,12 +102,6 @@ frmReciboEgreso.frm
 frmReciboEgresoDetalle.frm
 frmReciboIngreso.frm
 frmReciboIngresoDetalle.frm
-frmRepCtaCte.frm
-frmRepDeliveryTicket.frm
-frmRepEntrega.frm
-frmRepLiquidacionTicket.frm
-frmRepPaloteoTicket.frm
-frmRepReservas.frm
 frmReserva.frm
 frmReservaDetalle.frm
 FrmSeleccionProductos.frm

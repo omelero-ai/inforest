@@ -149,6 +149,7 @@ public static class DependencyInjection
     {
         // PinPad — BR-PERIPH-001, ADR-009
         services.Configure<PinPadOptions>(configuration.GetSection(PinPadOptions.SectionName));
+        services.AddScoped<IPinPadTerminalRepository, PinPadTerminalRepository>();
         var pinPadHabilitado = configuration.GetValue<bool>($"{PinPadOptions.SectionName}:Habilitado");
         if (pinPadHabilitado)
             services.AddSingleton<IPinPadService, PinPadService>();

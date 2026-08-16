@@ -2,7 +2,7 @@
 
 > Status: IN_PROGRESS — baseline transversal de Fase 3 validado; la matriz refleja equivalencias parciales y gaps controlados.
 >
-> Última actualización: 2026-08-14
+> Última actualización: 2026-08-15
 
 ---
 
@@ -104,10 +104,12 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `DDOCUMENTO` | Table | `DetalleDocumento` | Domain Entity | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Ventas/ |
 | `MTURNO` | Table | `Turno`, `ITurnoRepository`, `TurnoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Infrastructure/Turno/ |
 | `TCAJA` | Table | `ConfiguracionCaja`, `IParametroRepository.ObtenerConfiguracionCajaAsync`, `ValidarInicioPosHandler` | Domain Record + Repository + Handler | COMPLETED | `modern-net8/src/Inforest.Domain/Entities/Configuracion/ConfiguracionCaja.cs`, `modern-net8/src/Inforest.Application/Configuracion/ConfiguracionHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs`, `modern-net8/tests/Inforest.Application.Tests/Configuracion/ValidarInicioPosHandlerTests.cs`, `modern-net8/tests/Inforest.Infrastructure.Tests/Configuracion/ConfiguracionCajaTests.cs` |
+| `TCAJATERMINAL` | Table | `IPinPadTerminalRepository`, `PinPadTerminalRepository`, `ObtenerTerminalesPinPadHandler` | Repository + Handler | COMPLETED | `modern-net8/src/Inforest.Infrastructure/Hardware/PinPadTerminalRepository.cs` + `modern-net8/src/Inforest.Application/Caja/PinPadHandlers.cs` |
 | `TPRODUCTO` | Table | `ProductoMaestro`, `IProductoMaestroRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
 | `TGRUPO` | Table | `GrupoProducto`, `IGrupoProductoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
 | `TSUBGRUPO` | Table | `SubGrupoProducto`, `ISubGrupoProductoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
 | `TCLIENTE` | Table | `Cliente`, `IClienteRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Maestros/ |
+| `TTERMINAL` | Table | `TerminalPinPad`, `IPinPadTerminalRepository`, `PinPadTerminalRepository` | Domain Record + Repository | COMPLETED | `modern-net8/src/Inforest.Domain/Entities/Hardware/TerminalPinPad.cs` + `modern-net8/src/Inforest.Infrastructure/Hardware/PinPadTerminalRepository.cs` |
 | `TUSUARIO` | Table | — | — | NOT_STARTED | Usuarios |
 | `TPARAMETRO` | Table | `ConfiguracionSistema`, `IParametroRepository`, `ParametroService`, `ValidarInicioPosHandler` | Domain Record + Repository + Service + Handler | COMPLETED | `modern-net8/src/Inforest.Domain/Entities/Configuracion/ConfiguracionSistema.cs`, `modern-net8/src/Inforest.Application/Configuracion/ConfiguracionHandlers.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs`, `modern-net8/src/Inforest.Infrastructure/Configuracion/ParametroService.cs`, `modern-net8/tests/Inforest.Application.Tests/Configuracion/ValidarInicioPosHandlerTests.cs`, `modern-net8/tests/Inforest.Infrastructure.Tests/Configuracion/ParametroRepositoryTests.cs` |
 | `DPAGODOCUMENTO` | Table | `PagoDocumento`, `IPagoRepository` | Entity + Repository | IN_PROGRESS | modern-net8/src/Inforest.Domain/Entities/Caja/ |
@@ -233,15 +235,42 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | **Etapa 10 — Reportes, Consultas y Salidas Operativas** | | | | | |
 | `spRep_Comanda` | SP | `ReporteRepository.ObtenerComandaAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
-| `dsrComandaD.Dsr` / `dsrComandaR.Dsr` | Crystal | `RepComanda.frx` / `RepComandaDetallado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
-| `frmRepComanda.frm` | Form | `FrmComandaReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmComandaReporte.cs` |
-| `spRep_Propina` | SP | `ReporteRepository.ObtenerPropinaAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
-| `dsrPropinaD.Dsr` / `dsrPropinaR.Dsr` | Crystal | `RepPropina.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
-| `frmRepPropina.frm` | Form | `FrmPropinaReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmPropinaReporte.cs` |
+| `dsrComandaD.Dsr` / `dsrComandaR.Dsr` | Crystal | `RepComanda.frx` (resumido) / `RepComandaDetallado.frx` (detallado) | FastReport | COMPLETED | `src/Inforest.Desktop/Reports/Templates/RepComanda.frx`, `src/Inforest.Desktop/Reports/Templates/RepComandaDetallado.frx` |
+| `frmRepComanda.frm` | Form | `FrmComandaReporte.cs` + `ObtenerReporteComandaHandler` + `ComandaRow` + `ObtenerComandaAsync` + BR-REP-001 + 2 tests | WinForm + Handler + DTO + Repository | COMPLETED | `src/Inforest.Desktop/Forms/Reportes/FrmComandaReporte.cs`, `src/Inforest.Application/Reportes/` |
+| `spRep_Propina` | SP | `ReporteRepository.ObtenerPropinaAsync` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `dsrPropinaD.Dsr` / `dsrPropinaR.Dsr` | Crystal | `RepPropina.frx` (Detallado, landscape, 10 col) / `RepPropinaResumido.frx` (Resumido, portrait, 5 col) | FastReport | COMPLETED | `src/Inforest.Desktop/Reports/Templates/RepPropina.frx`, `src/Inforest.Desktop/Reports/Templates/RepPropinaResumido.frx` |
+| `frmRepPropina.frm` | Form | `FrmPropinaReporte.cs` + `ObtenerReportePropinaHandler` + `PropinaRow` + `ObtenerPropinaAsync` + BR-REP-002 + 2 tests | WinForm + Handler + DTO + Repository | COMPLETED | `src/Inforest.Desktop/Forms/Reportes/FrmPropinaReporte.cs`, `src/Inforest.Application/Reportes/` |
 | `spRep_PrincipalCliente` | SP | `ReporteRepository.ObtenerPrincipalCliente*Async` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrPrincipalD.Dsr` / `dsrPrincipalR.Dsr` | Crystal | `RepPrincipalClienteDetalle.frx` / `ResumenRepPrincipalCliente.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `spRep_CtaCteN` | SP | `ReporteRepository.ObtenerCtaCteOperativaAsync` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepCtaCte.frm` | Form | `FrmRepCtaCteReporte.cs` | WinForm | COMPLETED | `src/Inforest.Desktop/Forms/Reportes/FrmRepCtaCteReporte.cs` |
+| `frmRepCtaCte.frx` | Form resource | `RepCtaCteConsolidado.frx` / `RepCtaCteResumido.frx` / `RepCtaCteDetallado.frx` | FastReport | COMPLETED | `src/Inforest.Desktop/Reports/Templates/` |
+| `spRep_Anulacion` | SP | `ReporteRepository.ObtenerAnulacionAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepAnulado.frm` | Form | `FrmRepAnuladoReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepAnuladoReporte.cs` |
+| `frmRepAnulado.frx` | Form resource | `RepAnulacion.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/Reports/Templates/` |
+| `spRep_LiquidacionSuma` | SP | `ReporteRepository.ObtenerLiquidacionTicketAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepLiquidacionTicket.frm` | Form | `FrmRepLiquidacionTicketReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepLiquidacionTicketReporte.cs` |
+| `frmRepLiquidacionTicket.frx` | Form resource | `RepLiquidacionTicket.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepLiquidacionTicket.frx` |
+| `frmRepPaloteoTicket.frm` | Form | `FrmRepPaloteoTicketReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepPaloteoTicketReporte.cs` |
+| `(query dinámica frmRepPaloteoTicket)` | Query | `ReporteRepository.ObtenerPaloteoTicketAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepPaloteoTicket.frx` | Form resource | `RepPaloteoTicket.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepPaloteoTicket.frx` |
+| `frmRepDeliveryTicket.frm` | Form | `FrmRepDeliveryTicketReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepDeliveryTicketReporte.cs` |
+| `(query dinámica frmRepDeliveryTicket)` | Query | `ReporteRepository.ObtenerDeliveryTicketAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepDeliveryTicket.frx` | Form resource | `RepDeliveryTicket.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepDeliveryTicket.frx` |
+| `frmRepReservas.frm` | Form | `FrmRepReservasReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepReservasReporte.cs` |
+| `(query dinámica frmRepReservas: TRESERVA+vEstadoReserva)` | Query | `ReporteRepository.ObtenerReservasReporteAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepReservas.frx` | Form resource | `RepReservas.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepReservas.frx` |
+| `spRep_Entregas` | SP | `ReporteRepository.ObtenerEntregasAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepEntrega.frm` | Form | `FrmRepEntregaReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepEntregaReporte.cs` |
+| `dsrReporteEntrega.Dsr` | Crystal | `RepEntregaFormato1.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepEntregaFormato1.frx` |
+| `dsrReporteEntregaFormato2.Dsr` | Crystal | `RepEntregaFormato2.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepEntregaFormato2.frx` |
+| `dsrReporteEntregaResumidoProd.Dsr` | Crystal | `RepEntregaResumidoProd.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepEntregaResumidoProd.frx` |
+| `spRep_VentaFecha` | SP | `ReporteRepository.ObtenerVentaFechaAsync` + `ReporteRepository.ObtenerSubGruposAsync` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepVentaFecha.frm` | Form | `FrmRepVentaFechaReporte.cs` + `ObtenerReporteVentaFechaHandler` + `VentaFechaRow` + `VentaFechaParametros` + `SubGrupoItem` + BR-REP-020 + 2 tests | WinForm + Handler + DTO + Repository | COMPLETED | `src/Inforest.Desktop/Forms/Reportes/FrmRepVentaFechaReporte.cs`, `src/Inforest.Application/Reportes/` |
+| `frmRepVentaFecha.frx` | Form resource | `RepVentaFecha.frx` | FastReport | COMPLETED | `src/Inforest.Desktop/Reports/Templates/RepVentaFecha.frx` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
+| `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |
 | `spRep_PaloteoComparativo` | SP | `ReporteRepository.ObtenerPaloteoComparativoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrPaloteoComparativo.Dsr` | Crystal | `RepPaloteoComparativo.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepPaloteoComparativo.frm` | Form | `FrmPaloteoComparativoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmPaloteoComparativoReporte.cs` |
@@ -263,7 +292,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `(KDS tiempo form)` | Form | `FrmTiempoKdsReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmTiempoKdsReporte.cs` |
 | `IReporteRepository` | Interface | `IReporteRepository` | Interface | COMPLETED | `src/Inforest.Application/Reportes/IReporteRepository.cs` |
 | `ReporteRepository` | — | `ReporteRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
-| `(test etapa 10 application)` | — | `ReportesHandlersTests` (14 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/Reportes/` |
+| `(test etapa 10 application)` | — | `ReportesHandlersTests` (18 tests) | xUnit | COMPLETED | `tests/Inforest.Application.Tests/Reportes/` |
 
 ## P3-11 — Periféricos Especializados e Integraciones por País
 
@@ -302,7 +331,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `clsTrama.cls` / `clsxml.cls` | Domain | `DocumentoFE` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Hardware/DocumentoFE.cs` |
 | `modBlueVision.bas` (TvsTicket) | Domain | `BlueVisionTicket` / `BlueVisionLinea` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Hardware/BlueVisionTicket.cs` |
 | `modImpresoraFiscal.bas` (zonas) | Domain | `FiscalDocumento` / `FiscalItem` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Hardware/FiscalDocumento.cs` |
-| `frmPago.frm`, `frmPagoPinPad.frm` | Form | `FrmPago` / `FrmPagoPinPad` | WinForm | NOT_STARTED | `src/Inforest.Desktop/Forms/` |
+| `frmPago.frm`, `frmPagoPinPad.frm` | Form | `FrmPago` / `FrmPagoPinPad` + `ProcesarPagoPinPadHandler` + `ObtenerTerminalesPinPadHandler` | WinForm + Handlers | COMPLETED | `src/Inforest.Desktop/Caja/FrmPago.cs` + `src/Inforest.Desktop/Caja/FrmPagoPinPad.cs` + `src/Inforest.Application/Caja/PinPadHandlers.cs` |
 | (tests P3-11) | — | `NullHardwareServicesTests` (15 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |
 | (tests P3-11) | — | `FacturacionElectronicaFactoryTests` (7 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |
 | (tests P3-11) | — | `PaisPolicyTests` (8 tests) | xUnit | COMPLETED | `tests/Inforest.Infrastructure.Tests/Hardware/` |
@@ -428,4 +457,3 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmReciboEgreso.frm` / lógica anular | Business rule | `AnularEgresoHandler` (BR-RECIBO-011) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` |
 | `spRep_ReciboEgreso` | SP (report) | `ObtenerEgresosHandler` (reutiliza SP via Dapper) | Handler + Repository | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` + `src/Inforest.Infrastructure/Caja/ReciboEgresoRepository.cs` |
 | (tests BR-RECIBO-001..012) | — | `ReciboIngresoTests` (9) + `ReciboEgresoTests` (8) + `ReciboIngresoHandlerTests` (8) + `ReciboEgresoHandlerTests` (8) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Caja/ReciboIngresoTests.cs`, `tests/Inforest.Domain.Tests/Caja/ReciboEgresoTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboIngresoHandlerTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboEgresoHandlerTests.cs` |
-

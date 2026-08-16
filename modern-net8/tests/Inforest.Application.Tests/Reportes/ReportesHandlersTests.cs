@@ -93,6 +93,30 @@ public class ReportesHandlersTests
         Assert.Equal("RepPropina.frx", resultado.NombrePlantilla);
     }
 
+    [Fact]
+    public async Task ObtenerReportePropinaHandler_EsResumido_RetornaPlantillaResumido()
+    {
+        // Arrange — BR-REP-002 modo Resumido (optOpcion(1) del Legacy)
+        var inicio = new DateTime(2026, 2, 1);
+        var fin = new DateTime(2026, 2, 28);
+        _repoMock.Setup(r => r.ObtenerPropinaAsync(inicio, fin, "tmozo = '01'", default))
+            .ReturnsAsync(new List<PropinaRow>
+            {
+                new() { Propina = 8.50, Trabajador = "Maria", TMozo = "01" }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReportePropinaHandler(_repoMock.Object);
+        var query = new ObtenerReportePropinaQuery(inicio, fin, Condicion: "tmozo = '01'", EsDetallado: false);
+
+        // Act
+        var resultado = await handler.HandleAsync(query);
+
+        // Assert
+        Assert.Single(resultado.Filas);
+        Assert.Equal(8.50, resultado.Filas[0].Propina);
+        Assert.Equal("RepPropinaResumido.frx", resultado.NombrePlantilla);
+    }
+
     // ── BR-REP-003 — PrincipalCliente ────────────────────────────────────────
 
     [Fact]
@@ -171,6 +195,44 @@ public class ReportesHandlersTests
 
         // Assert
         Assert.Contains("Detallado", resultado.NombrePlantilla);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteCtaCteOperativaHandler_ModoConsolidado_UsaPlantillaCorrecta()
+    {
+        _repoMock.Setup(r => r.ObtenerCtaCteOperativaAsync(It.Is<CtaCteOperativaParametros>(p => p.FlagConsolidado), default))
+            .ReturnsAsync(new List<CtaCteOperativaRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteCtaCteOperativaHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteCtaCteOperativaQuery(new CtaCteOperativaParametros
+        {
+            FlagConsolidado = true,
+            FechaInicio = DateTime.Today.AddDays(-7),
+            FechaFin = DateTime.Today
+        }));
+
+        Assert.Equal("RepCtaCteConsolidado.frx", resultado.NombrePlantilla);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteCtaCteOperativaHandler_ModoDetallado_RetornaFilas()
+    {
+        _repoMock.Setup(r => r.ObtenerCtaCteOperativaAsync(It.Is<CtaCteOperativaParametros>(p => p.FlagDetalle), default))
+            .ReturnsAsync(new List<CtaCteOperativaRow>
+            {
+                new() { Descripcion = "ACME SAC", TCodigoPedido = "P001", Producto = "Lomo", NVenta = 32.5 }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteCtaCteOperativaHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteCtaCteOperativaQuery(new CtaCteOperativaParametros
+        {
+            FlagDetalle = true,
+            FechaInicio = DateTime.Today.AddDays(-7),
+            FechaFin = DateTime.Today
+        }));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepCtaCteDetallado.frx", resultado.NombrePlantilla);
     }
 
     // ── BR-REP-SQL-DYN-001 — Expresión precio segura ─────────────────────────
@@ -281,5 +343,390 @@ public class ReportesHandlersTests
         Assert.Equal("RepTiempoKdsProducto.frx", resultado.NombrePlantilla);
         _repoMock.Verify(r => r.ObtenerTiempoKdsProductoAsync(
             It.IsAny<DateTime>(), It.IsAny<DateTime>(), "GRP01", "SG01", "P001", default), Times.Once);
+    }
+
+    // ── BR-REP-014 — Anulación / Control de Transacciones ────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteAnulacionHandler_ConFiltros_RetornaPlantillaCorrecta()
+    {
+        // Arrange
+        var parametros = new AnulacionParametros
+        {
+            FechaInicio = DateTime.Today.AddDays(-7),
+            FechaFin = DateTime.Today,
+            FlagFacturados = true,
+            FlagAnulados = true,
+            FlagTransferidos = false,
+            Criterio = string.Empty
+        };
+
+        _repoMock.Setup(r => r.ObtenerAnulacionAsync(parametros, default))
+            .ReturnsAsync(new List<AnulacionRow>
+            {
+                new() { TCodigoPedido = "P001", TItem = "01", TCodigoProducto = "PROD01", NCantidad = 2, NVenta = 25.50, TEstadoItem = "A", TMotivoAnulacion = "ERR" }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteAnulacionHandler(_repoMock.Object);
+        var query = new ObtenerReporteAnulacionQuery(parametros);
+
+        // Act
+        var resultado = await handler.HandleAsync(query);
+
+        // Assert
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepAnulacion.frx", resultado.NombrePlantilla);
+        Assert.Equal("Control de Transacciones", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerAnulacionAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteAnulacionHandler_SinResultados_RetornaListaVacia()
+    {
+        // Arrange
+        var parametros = new AnulacionParametros
+        {
+            FechaInicio = DateTime.Today.AddDays(-1),
+            FechaFin = DateTime.Today,
+            FlagFacturados = false,
+            FlagAnulados = true,
+            FlagTransferidos = false
+        };
+
+        _repoMock.Setup(r => r.ObtenerAnulacionAsync(parametros, default))
+            .ReturnsAsync(new List<AnulacionRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteAnulacionHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteAnulacionQuery(parametros));
+
+        // Assert
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepAnulacion.frx", resultado.NombrePlantilla);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteLiquidacionTicketHandler_ConTurno_RetornaPlantillaCorrecta()
+    {
+        var parametros = new LiquidacionTicketParametros
+        {
+            TodosLosTurnos = false,
+            Turno = "T001",
+            FechaInicio = DateTime.Today,
+            FechaFin = DateTime.Today.AddDays(1).AddSeconds(-1)
+        };
+
+        _repoMock.Setup(r => r.ObtenerLiquidacionTicketAsync(parametros, default))
+            .ReturnsAsync(new List<LiquidacionTicketRow>
+            {
+                new() { TTipoPedido = "01", NNeto = 100, NImpuesto1 = 18, NVenta = 118, NTotalPromedio = 2, Total00 = 2 }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteLiquidacionTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteLiquidacionTicketQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepLiquidacionTicket.frx", resultado.NombrePlantilla);
+        Assert.Equal("Liquidación de Cajero por Ticketera", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerLiquidacionTicketAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteLiquidacionTicketHandler_TodosLosTurnos_RetornaListaVacia()
+    {
+        var parametros = new LiquidacionTicketParametros
+        {
+            TodosLosTurnos = true,
+            FechaInicio = DateTime.Today.AddDays(-1),
+            FechaFin = DateTime.Today
+        };
+
+        _repoMock.Setup(r => r.ObtenerLiquidacionTicketAsync(parametros, default))
+            .ReturnsAsync(new List<LiquidacionTicketRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteLiquidacionTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteLiquidacionTicketQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepLiquidacionTicket.frx", resultado.NombrePlantilla);
+    }
+
+    [Fact]
+    public async Task ObtenerReportePaloteoTicketHandler_OrdenCodigo_RetornaPlantillaCorrecta()
+    {
+        var parametros = new PaloteoTicketParametros
+        {
+            TodosTurnos = false,
+            Turno = "T0001",
+            Origen = OrigenPaloteoTicket.Produccion,
+            OrdenarPorCodigoProducto = true
+        };
+
+        _repoMock.Setup(r => r.ObtenerPaloteoTicketAsync(parametros, default))
+            .ReturnsAsync(new List<PaloteoTicketRow>
+            {
+                new() { TCodProducto = "P001", Producto = "Lomo", Cantidad = 2, Venta = 30 }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReportePaloteoTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReportePaloteoTicketQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepPaloteoTicket.frx", resultado.NombrePlantilla);
+        Assert.Equal("Paloteo de Producción por Ticketera", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerPaloteoTicketAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReportePaloteoTicketHandler_SinDatos_RetornaListaVacia()
+    {
+        var parametros = new PaloteoTicketParametros
+        {
+            TodosTurnos = true,
+            FechaInicio = DateTime.Today.AddDays(-1),
+            FechaFin = DateTime.Today,
+            Origen = OrigenPaloteoTicket.PedidosFacturados
+        };
+
+        _repoMock.Setup(r => r.ObtenerPaloteoTicketAsync(parametros, default))
+            .ReturnsAsync(new List<PaloteoTicketRow>().AsReadOnly());
+
+        var handler = new ObtenerReportePaloteoTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReportePaloteoTicketQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepPaloteoTicket.frx", resultado.NombrePlantilla);
+    }
+
+    // ── BR-REP-017 DeliveryTicket ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteDeliveryTicketHandler_ConResultados_RetornaNombrePlantillaYFilas()
+    {
+        var parametros = new DeliveryTicketParametros
+        {
+            TodosTurnos = false,
+            Turno = "T001",
+            TodasLasCajas = true,
+            TodosLosMotorizados = true
+        };
+
+        _repoMock.Setup(r => r.ObtenerDeliveryTicketAsync(parametros, default))
+            .ReturnsAsync(new List<DeliveryTicketRow>
+            {
+                new()
+                {
+                    TCaja = "001", TTipoPago = "01", TipoPago = "Efectivo",
+                    TMotorizado = "M001", Motorizado = "Juan", TDocumento = "B001-0001",
+                    FRegistro = DateTime.Today, NVenta = 50.00, NMonto = 50.00, NVuelto = 0,
+                    TMoneda = "01", Mon = "S/.", TTurno = "T001", TUsuario = "USR1"
+                }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteDeliveryTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteDeliveryTicketQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepDeliveryTicket.frx", resultado.NombrePlantilla);
+        Assert.Equal("Cierre de Cajeros Delivery", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerDeliveryTicketAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteDeliveryTicketHandler_SinResultados_RetornaListaVacia()
+    {
+        var parametros = new DeliveryTicketParametros
+        {
+            TodosTurnos = true,
+            FechaInicio = DateTime.Today.AddDays(-1),
+            FechaFin = DateTime.Today,
+            TodasLasCajas = false,
+            Caja = "002",
+            TodosLosMotorizados = false,
+            Motorizado = "M002"
+        };
+
+        _repoMock.Setup(r => r.ObtenerDeliveryTicketAsync(parametros, default))
+            .ReturnsAsync(new List<DeliveryTicketRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteDeliveryTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteDeliveryTicketQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepDeliveryTicket.frx", resultado.NombrePlantilla);
+    }
+
+    // ── BR-REP-018 Reservas ───────────────────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteReservasHandler_ConResultados_RetornaNombrePlantillaYFilas()
+    {
+        var parametros = new ReservaReporteParametros
+        {
+            FechaHoraInicio = new DateTime(2026, 8, 1, 8, 0, 0),
+            FechaHoraFin    = new DateTime(2026, 8, 1, 23, 59, 59),
+            EstadoGenerado  = true,
+            EstadoAtendido  = false,
+            EstadoAnulado   = false,
+            Orden           = OrdenReserva.Fecha
+        };
+
+        _repoMock.Setup(r => r.ObtenerReservasReporteAsync(parametros, default))
+            .ReturnsAsync(new List<ReservaReporteRow>
+            {
+                new()
+                {
+                    TReserva = "R001", Cliente = "Garcia Juan",
+                    TTelefono = "999111222", NPax = 4,
+                    FFecha = new DateTime(2026, 8, 1, 20, 0, 0),
+                    TEstadoReserva = "01", EstadoReserva = "GENERADO"
+                }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteReservasHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteReservasQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepReservas.frx", resultado.NombrePlantilla);
+        Assert.Equal("Reservas", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerReservasReporteAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteReservasHandler_SinDatos_RetornaListaVacia()
+    {
+        var parametros = new ReservaReporteParametros
+        {
+            FechaHoraInicio = DateTime.Today,
+            FechaHoraFin    = DateTime.Today.AddHours(23).AddMinutes(59),
+            EstadoGenerado  = true,
+            EstadoAtendido  = true,
+            EstadoAnulado   = true,
+            Orden           = OrdenReserva.Reserva
+        };
+
+        _repoMock.Setup(r => r.ObtenerReservasReporteAsync(parametros, default))
+            .ReturnsAsync(new List<ReservaReporteRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteReservasHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteReservasQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepReservas.frx", resultado.NombrePlantilla);
+    }
+
+    // ── BR-REP-019 Entregas ───────────────────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteEntregaHandler_DetalladoFormato1_RetornaPlantillaCorrecta()
+    {
+        var parametros = new EntregaParametros
+        {
+            FechaHoraInicio = new DateTime(2026, 8, 1, 8, 0, 0),
+            FechaHoraFin = new DateTime(2026, 8, 1, 23, 59, 59),
+            CodigoCliente = "CLI001",
+            Formato = FormatoReporteEntrega.DetalladoFormato1
+        };
+
+        _repoMock.Setup(r => r.ObtenerEntregasAsync(parametros, default))
+            .ReturnsAsync(new List<EntregaRow>
+            {
+                new() { Pedido = "P001", Producto = "Lomo", Cantidad = 2, EstadoPedido = "ENTREGADO" }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteEntregaHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteEntregaQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepEntregaFormato1.frx", resultado.NombrePlantilla);
+        Assert.Equal("Reporte de Entregas", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerEntregasAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteEntregaHandler_Resumido_RetornaPlantillaResumida()
+    {
+        var parametros = new EntregaParametros
+        {
+            FechaHoraInicio = DateTime.Today,
+            FechaHoraFin = DateTime.Today.AddHours(23).AddMinutes(59),
+            Formato = FormatoReporteEntrega.ResumidoPorProducto
+        };
+
+        _repoMock.Setup(r => r.ObtenerEntregasAsync(parametros, default))
+            .ReturnsAsync(new List<EntregaRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteEntregaHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteEntregaQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepEntregaResumidoProd.frx", resultado.NombrePlantilla);
+    }
+
+    // ── BR-REP-020 — Venta Mensual por Fechas ─────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteVentaFechaHandler_TodosLosSubGrupos_LlamaRepositorioYRetornaPlantilla()
+    {
+        // Arrange — BR-REP-020: todos los sub-grupos (SubGruposFiltro vacío)
+        var filas = new List<VentaFechaRow>
+        {
+            new() { Dia = 1, Fecha = new DateTime(2026, 8, 1), Salon = 1500.00, Delivery = 300.00,
+                    Llevar = 100.00, Canal4 = 0, Canal5 = 0, Venta = 1900.00, Cantidad = 45, Pax = 90 }
+        };
+        var parametros = new VentaFechaParametros
+        {
+            Ano = 2026,
+            Mes = 8,
+            HoraCierre = 0,
+            TipoPrecio = TipoPrecioVentaFecha.Venta,
+            ValorarPreventaEnCero = false,
+            EvaluarPorDocumentos = false,
+            SubGruposFiltro = Array.Empty<string>()
+        };
+        _repoMock.Setup(r => r.ObtenerVentaFechaAsync(parametros, default))
+            .ReturnsAsync(filas.AsReadOnly());
+
+        var handler = new ObtenerReporteVentaFechaHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteVentaFechaQuery(parametros));
+
+        // Assert
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepVentaFecha.frx", resultado.NombrePlantilla);
+        Assert.Contains("agosto", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Precios de Venta", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
+        _repoMock.Verify(r => r.ObtenerVentaFechaAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteVentaFechaHandler_PrecioNeto_TituloIndicaPreciosNetos()
+    {
+        // Arrange — BR-REP-020: precio neto, con sub-grupos filtrados
+        var parametros = new VentaFechaParametros
+        {
+            Ano = 2026,
+            Mes = 3,
+            HoraCierre = 6,
+            TipoPrecio = TipoPrecioVentaFecha.Neto,
+            ValorarPreventaEnCero = true,
+            EvaluarPorDocumentos = true,
+            SubGruposFiltro = new[] { "SG01", "SG02" }
+        };
+        _repoMock.Setup(r => r.ObtenerVentaFechaAsync(parametros, default))
+            .ReturnsAsync(new List<VentaFechaRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteVentaFechaHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteVentaFechaQuery(parametros));
+
+        // Assert
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepVentaFecha.frx", resultado.NombrePlantilla);
+        Assert.Contains("Precios Netos", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("marzo", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
     }
 }

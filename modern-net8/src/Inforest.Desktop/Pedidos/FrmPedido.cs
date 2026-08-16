@@ -25,6 +25,9 @@ public class FrmPedido : Form
     private readonly EmitirDocumentoHandler? _emitirHandler;
     private readonly ObtenerMediosPagoHandler? _mediosPagoHandler;
     private readonly PagarDocumentoHandler? _pagarHandler;
+    private readonly RegistrarPagosMultiplesHandler? _registrarPagosMultiplesHandler;
+    private readonly ProcesarPagoPinPadHandler? _procesarPagoPinPadHandler;
+    private readonly ObtenerTerminalesPinPadHandler? _obtenerTerminalesPinPadHandler;
     private readonly AnularDocumentoHandler? _anularHandler;
 
     private DataGridView _dgvProductos = null!;
@@ -47,6 +50,9 @@ public class FrmPedido : Form
         EmitirDocumentoHandler? emitirHandler = null,
         ObtenerMediosPagoHandler? mediosPagoHandler = null,
         PagarDocumentoHandler? pagarHandler = null,
+        RegistrarPagosMultiplesHandler? registrarPagosMultiplesHandler = null,
+        ProcesarPagoPinPadHandler? procesarPagoPinPadHandler = null,
+        ObtenerTerminalesPinPadHandler? obtenerTerminalesPinPadHandler = null,
         AnularDocumentoHandler? anularHandler = null)
     {
         _mesa = mesa;
@@ -58,6 +64,9 @@ public class FrmPedido : Form
         _emitirHandler = emitirHandler;
         _mediosPagoHandler = mediosPagoHandler;
         _pagarHandler = pagarHandler;
+        _registrarPagosMultiplesHandler = registrarPagosMultiplesHandler;
+        _procesarPagoPinPadHandler = procesarPagoPinPadHandler;
+        _obtenerTerminalesPinPadHandler = obtenerTerminalesPinPadHandler;
         _anularHandler = anularHandler;
         InitializeComponent();
     }
@@ -269,7 +278,15 @@ public class FrmPedido : Form
             return;
         }
 
-        using var frmVenta = new FrmVenta(_pedidoCreado, _emitirHandler, _mediosPagoHandler, _pagarHandler, _anularHandler);
+        using var frmVenta = new FrmVenta(
+            _pedidoCreado,
+            _emitirHandler,
+            _mediosPagoHandler,
+            _pagarHandler,
+            _registrarPagosMultiplesHandler,
+            _procesarPagoPinPadHandler,
+            _obtenerTerminalesPinPadHandler,
+            _anularHandler);
         if (frmVenta.ShowDialog(this) == DialogResult.OK)
             Close();
     }

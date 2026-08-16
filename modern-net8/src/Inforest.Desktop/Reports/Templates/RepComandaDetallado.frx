@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Reporte Comanda Detallado - Legacy: spRep_Comanda (flagTipo=1) / dsrComandaD.Dsr">
+  <Dictionary>
+    <TableDataSource Name="Comanda" DataType="Inforest.Application.Reportes.ComandaRow" Enabled="true" />
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="297" PaperHeight="210" Landscape="true">
+    <ReportTitleBand Name="ReportTitle1" Width="1039.2" Height="56.7">
+      <TextObject Name="Title" Left="0" Top="0" Width="1039.2" Height="37.8"
+                  Text="Reporte de Comanda — Detallado"
+                  Font="Arial, 14pt, style=Bold" HorzAlign="Center" />
+      <TextObject Name="SubTitle" Left="0" Top="37.8" Width="1039.2" Height="18.9"
+                  Text="Fecha: [System.DateTime.Now.ToString(&quot;dd/MM/yyyy HH:mm&quot;)]"
+                  Font="Arial, 8pt" HorzAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Width="1039.2" Height="18.9">
+      <TextObject Name="hPedido"    Left="0"    Top="0" Width="80"  Height="18.9" Text="Pedido"      Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hComanda"   Left="80"   Top="0" Width="80"  Height="18.9" Text="Comanda"     Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hProducto"  Left="160"  Top="0" Width="180" Height="18.9" Text="Producto"    Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hMozo"      Left="340"  Top="0" Width="110" Height="18.9" Text="Mesero"      Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hCantidad"  Left="450"  Top="0" Width="70"  Height="18.9" Text="Cant."       Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="hPrecioU"   Left="520"  Top="0" Width="90"  Height="18.9" Text="P.Unit."     Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="hTotal"     Left="610"  Top="0" Width="90"  Height="18.9" Text="Total"       Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="hFecha"     Left="700"  Top="0" Width="100" Height="18.9" Text="Fecha"       Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hUsuario"   Left="800"  Top="0" Width="90"  Height="18.9" Text="Usuario"     Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hDocumento" Left="890"  Top="0" Width="80"  Height="18.9" Text="Documento"   Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hEstado"    Left="970"  Top="0" Width="69.2" Height="18.9" Text="Estado"     Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="85" Width="1039.2" Height="18.9" DataSource="Comanda" EvenStyle="EvenRow">
+      <TextObject Name="dPedido"    Left="0"    Top="0" Width="80"  Height="18.9" Text="[Comanda.TCodigoPedido]"  Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dComanda"   Left="80"   Top="0" Width="80"  Height="18.9" Text="[Comanda.TComanda]"       Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dProducto"  Left="160"  Top="0" Width="180" Height="18.9" Text="[Comanda.NombreProducto]" Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dMozo"      Left="340"  Top="0" Width="110" Height="18.9" Text="[Comanda.Mozo]"            Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dCantidad"  Left="450"  Top="0" Width="70"  Height="18.9" Text="[Comanda.NCantidad.ToString(&quot;N2&quot;)]" Font="Arial, 8pt" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="dPrecioU"   Left="520"  Top="0" Width="90"  Height="18.9" Text="[Comanda.PrecioUnitario.ToString(&quot;N2&quot;)]" Font="Arial, 8pt" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="dTotal"     Left="610"  Top="0" Width="90"  Height="18.9" Text="[Comanda.PrecioTotal.ToString(&quot;N2&quot;)]" Font="Arial, 8pt" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="dFecha"     Left="700"  Top="0" Width="100" Height="18.9" Text="[Comanda.FFecha.ToString(&quot;dd/MM/yyyy HH:mm&quot;)]" Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dUsuario"   Left="800"  Top="0" Width="90"  Height="18.9" Text="[Comanda.Usuario]"        Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dDocumento" Left="890"  Top="0" Width="80"  Height="18.9" Text="[Comanda.TDocumento]"     Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dEstado"    Left="970"  Top="0" Width="69.2" Height="18.9" Text="[Comanda.Estado]"        Font="Arial, 8pt" Border.Lines="All" />
+    </DataBand>
+    <GroupFooterBand Name="GroupFooter1" Width="1039.2" Height="18.9">
+      <TextObject Name="fTotal" Left="520" Top="0" Width="180" Height="18.9"
+                  Text="Total: [Sum(Comanda.PrecioTotal).ToString(&quot;N2&quot;)]"
+                  Font="Arial, 9pt, style=Bold" HorzAlign="Right" Border.Lines="Top" />
+    </GroupFooterBand>
+    <PageFooterBand Name="PageFooter1" Width="1039.2" Height="18.9">
+      <TextObject Name="fPage" Left="0" Top="0" Width="1039.2" Height="18.9"
+                  Text="Página [PageN] de [TotalPages]"
+                  Font="Arial, 8pt" HorzAlign="Right" />
+    </PageFooterBand>
+  </ReportPage>
+  <Styles>
+    <Style Name="EvenRow" FillColor="AliceBlue" />
+  </Styles>
+</Report>

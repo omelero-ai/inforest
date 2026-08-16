@@ -1063,9 +1063,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** Si `@sCondicion` no está vacío, se añade como AND al WHERE del SQL dinámico.
 
-**Destino .NET:** `ObtenerReportePropinaHandler`, `FrmPropinaReporte.cs`, `RepPropina.frx`
+**Destino .NET:** `ObtenerReportePropinaHandler`, `FrmPropinaReporte.cs`, `RepPropina.frx` (Detallado), `RepPropinaResumido.frx` (Resumido)
 
-**Estado:** IN_PROGRESS
+**Estado:** COMPLETED
 
 ---
 
@@ -1137,7 +1137,197 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
-### BR-REP-006
+### BR-REP-013
+
+**Nombre:** Estados de cuentas corrientes POS — modos consolidado, resumido y detallado
+
+**Origen:** `frmRepCtaCte.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepCtaCte.frm`
+
+**Procedimiento/Función:** `spRep_CtaCteN`
+
+**Descripción:** El formulario emite el estado de cuentas corrientes del POS en tres modos excluyentes: consolidado, resumido y detallado. Filtra por rango de fechas sobre `MPEDIDO.fRegistro`, estado del pedido, cliente de cuenta corriente, tipo y subtipo de cuenta corriente. Los catálogos de filtro provienen de `vTipoCtaCte` y `vSubTipoCtaCte`.
+
+**Condición:** Al ejecutar `ObtenerReporteCtaCteOperativaQuery`
+
+**Resultado:** Consolidado: total vendido por cliente/local; resumido: total por pedido/documento; detallado: detalle por ítem vendido con producto, cantidad y documento.
+
+**Excepciones:** `@Estado`, `@Cliente`, `@TipoCC` y `@SubTipoCC` vacíos equivalen a “todos”; el detalle excluye `MPEDIDO.tEstadoPedido='03'` y `DPEDIDO.tEstadoItem='A'`.
+
+**Destino .NET:** `ObtenerReporteCtaCteOperativaHandler`, `FrmRepCtaCteReporte.cs`, `RepCtaCteConsolidado.frx`, `RepCtaCteResumido.frx`, `RepCtaCteDetallado.frx`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-REP-014
+
+**Nombre:** Control de Transacciones — anulados, facturados y transferidos
+
+**Origen:** `frmRepAnulado.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepAnulado.frm`
+
+**Procedimiento/Función:** `spRep_Anulacion`
+
+**Descripción:** El formulario "Control de Transacciones" permite auditar transacciones según su tipo: ítems facturados (`tEstadoItem='N'`), pedidos anulados (`tEstadoPedido='03'`) y pedidos/ítems transferidos. El SP construye una tabla temporal `#DBTRANS` y la puebla en función de los flags seleccionados, respetando el rango de fechas (`@fInicio`/`@fFinal`). La selección de tipo se controla con `@lFlag1` (facturados), `@lFlag2` (anulados), `@lFlag3` (transferidos). El filtro `@lFranjaHoraria=1` restringe a la franja horaria sin importar el día. El criterio adicional (`@sCriterio`) permite filtrar por salón, usuario anulador, mesero, motivo de anulación y estado de impresión.
+
+**Condición:** Al ejecutar `ObtenerReporteAnulacionQuery`
+
+**Resultado:** Dataset de filas `AnulacionRow` con campos: `TCodigoPedido`, `TItem`, `TCodigoProducto`, `NCantidad`, `NVenta`, `TEstadoItem`, `TDocumento`, `FRegistro`, `LImprime`, `TMotivoAnulacion`, `TObservacionAnulado`, `TUsuarioAnulado`, `FRegAnulado`, `TTurno`, `FFechaItem`.
+
+**Excepciones:** Si los tres flags son `false` el SP no retorna filas; la UI valida que al menos uno esté marcado. El campo `@tTurno` vacío equivale a todos los turnos.
+
+**Destino .NET:** `ObtenerReporteAnulacionHandler`, `FrmRepAnuladoReporte.cs`, `RepAnulacion.frx`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-REP-015
+
+**Nombre:** Liquidación de Cajero por Ticketera — resumen por tipo de pedido
+
+**Origen:** `frmRepLiquidacionTicket.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepLiquidacionTicket.frm`
+
+**Procedimiento/Función:** `spRep_LiquidacionSuma`
+
+**Descripción:** El formulario emite la liquidación resumida por ticketera agrupando documentos válidos por tipo de pedido (`tTipoPedido` y grupo no-registro `XX`). El SP agrega `nNeto`, `nImpuesto1`, `nImpuesto2`, `nImpuesto3`, `nVenta`, cantidad de documentos del grupo (`nTotalPromedio`) y total global (`total00`). Soporta dos modos: por turno específico (`@flagTurno=0`, `@sTurno`) o por rango de fechas/todos los turnos (`@flagTurno=1`). El filtro opcional de usuario se aplica con `@sUsuario`; el filtro por día contable usa `MDOCUMENTO.fDiaContable` cuando `@flagDiaContable=1`.
+
+**Condición:** Al ejecutar `ObtenerReporteLiquidacionTicketQuery`
+
+**Resultado:** Dataset `LiquidacionTicketRow` con una fila por tipo de pedido/agrupación y columnas agregadas de neto, impuestos, venta y conteo de documentos.
+
+**Excepciones:** Si `@sUsuario` está vacío se consideran todos los usuarios; si `@sSectorVenta` está vacío no restringe por sector; cuando `TPARAMETRO.lDesactivaNCFP=1` el SP excluye documentos presentes en `MNOTACREDITO` con estado `02/05`.
+
+**Destino .NET:** `ObtenerReporteLiquidacionTicketHandler`, `FrmRepLiquidacionTicketReporte.cs`, `RepLiquidacionTicket.frx`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-REP-016
+
+**Nombre:** Paloteo de Producción por Ticketera — origen configurable y consolidado por producto
+
+**Origen:** `frmRepPaloteoTicket.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepPaloteoTicket.frm`
+
+**Procedimiento/Función:** `Genera` + query dinámica sobre `MPEDIDO/DPEDIDO/CPEDIDO/MDOCUMENTO`
+
+**Descripción:** El formulario permite emitir paloteo por ticketera consolidando por producto con dos órdenes de salida (alfabético o código). El origen se selecciona entre Producción, Ventas, Cortesías, Cuentas Corrientes, Combinación, Cargos o Pedidos Facturados. El filtro temporal opera por turno (`tTurno`) o por rango de fechas (`fRegistro`) y agrega filtros opcionales por salón, tipo producto, mozo, tipo pedido, origen de venta, área, grupo, subgrupo, producto y cliente.
+
+**Condición:** Al ejecutar `ObtenerReportePaloteoTicketQuery`
+
+**Resultado:** Dataset `PaloteoTicketRow` agrupado por `tCodProducto/Grupo/SubGrupo/Producto` con `Cantidad` y `Venta` acumuladas, local descrito (`vLocal`) y normalización de salón para pedidos sin salón.
+
+**Excepciones:** En modo turno, `Turno` es obligatorio. Si no hay filas el reporte no se emite. En origen Cuenta Corriente se excluyen pedidos con documento emitido en `MDOCUMENTO`.
+
+**Destino .NET:** `ObtenerReportePaloteoTicketHandler`, `ReporteRepository.ObtenerPaloteoTicketAsync`, `FrmRepPaloteoTicketReporte.cs`, `RepPaloteoTicket.frx`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-REP-017
+
+**Nombre:** Cierre de Cajeros Delivery — pagos delivery agrupados por caja/motorizado/tipo pago
+
+**Origen:** `frmRepDeliveryTicket.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepDeliveryTicket.frm`
+
+**Procedimiento/Función:** `Genera` + query dinámica sobre `MDOCUMENTO/DPREPAGO/MPEDIDO/vMotorizado/vTipoPago/vMoneda/TTARJETACREDITO/vTipoCancelacion`
+
+**Descripción:** El formulario emite el cierre de cajeros del canal delivery, mostrando los comprobantes agrupados por caja, motorizado y tipo de pago. Solo incluye pedidos con `tTipoPedido='02'` (delivery) y documentos con `tEstadoDocumento='01'`. El filtro temporal opera por turno (`MDOCUMENTO.tTurno`) o por rango de fechas/horas (`MDOCUMENTO.fRegistro`). Filtros opcionales por caja y motorizado específicos.
+
+**Condición:** Al ejecutar `ObtenerReporteDeliveryTicketQuery`
+
+**Resultado:** Dataset `DeliveryTicketRow` con campos: `TCaja`, `TTipoPago`, `TipoPago`, `TMotorizado`, `Motorizado`, `TDocumento`, `FRegistro`, `NVenta`, `TTurno`, `TUsuario`, `TMoneda`, `Mon`, `NTipoCambio`, `NMonto`, `NVuelto`, `Tarjeta`, `TNumero`, `OtroTipo`. Ordenado por caja → motorizado → tipo pago → moneda → documento.
+
+**Excepciones:** En modo turno, `Turno` es obligatorio. Si se filtra por caja/motorizado específico, el campo correspondiente es obligatorio. Si no hay filas, el reporte no se emite y se muestra mensaje: "No se tienen Comprobantes pendientes de cobro del Canal Delivery".
+
+**Destino .NET:** `ObtenerReporteDeliveryTicketHandler`, `ReporteRepository.ObtenerDeliveryTicketAsync`, `FrmRepDeliveryTicketReporte.cs`, `RepDeliveryTicket.frx`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-REP-018
+
+**Nombre:** Reporte de Reservas — listado de reservas por rango de fecha/hora y estado
+
+**Origen:** `frmRepReservas.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepReservas.frm`
+
+**Procedimiento/Función:** `ObtenerReservas` + query dinámica sobre `TRESERVA LEFT JOIN vEstadoReserva`
+
+**Descripción:** El formulario emite un listado de reservas filtrado por rango de fecha y hora (`TRESERVA.fFecha + TRESERVA.fHora BETWEEN @fInicio AND @fFinal`). Permite filtrar por estado: Generado ('01', marcado por defecto), Atendido ('02') y Anulado ('03'). El criterio de ordenamiento es configurable: Reserva (tReserva), Nombres (tNombre), Teléfono (tTelefono), Fecha (FFecha), Pax (nPax) o Estado (tEstadoReserva). El resultado incluye la descripción del estado en mayúsculas tomada de `vEstadoReserva`.
+
+**Condición:** Al ejecutar `ObtenerReporteReservasQuery` con los parámetros correspondientes.
+
+**Resultado:** Dataset `ReservaReporteRow` con campos: `TReserva`, `FFecha` (fFecha+fHora), `TApellido`, `Cliente` (apellido+nombre), `TNombre`, `TTelefono`, `NPax`, `TEstadoReserva`, `TObservacion`, `FRegistro`, `EstadoReserva`. Ordenado por el criterio seleccionado ASC.
+
+**Excepciones:** Si FechaHoraInicio > FechaHoraFin se muestra validación. Si no hay datos, se muestra "No hay Datos para Mostrar". Si ningún estado está seleccionado, la cláusula IN queda vacía y no retorna resultados.
+
+**Destino .NET:** `ObtenerReporteReservasHandler`, `ReporteRepository.ObtenerReservasReporteAsync`, `FrmRepReservasReporte.cs`, `RepReservas.frx`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-REP-019
+
+**Nombre:** Reporte de Entregas — filtros operativos y salida detallada/resumida
+
+**Origen:** `frmRepEntrega.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepEntrega.frm`
+
+**Procedimiento/Función:** `Genera` + `spRep_Entregas`
+
+**Descripción:** El formulario emite el reporte de entregas del canal central de pedidos sobre `spRep_Entregas`, filtrando por rango fecha/hora de entrega, cliente, estado de entrega, estado de cancelación, grupo, subgrupo, producto y canal de venta. El formato de salida se controla con tres opciones del formulario: detallado formato 1, detallado formato 2 y resumido por producto. En SQL, `@tTipo='1'` retorna detalle por pedido/ítem y `@tTipo='0'` retorna consolidado por producto.
+
+**Condición:** Al ejecutar `ObtenerReporteEntregaQuery`.
+
+**Resultado:** Dataset `EntregaRow` para formatos detallados (`Pedido`, `FechaEntrega`, `Cliente`, `Producto`, `Cantidad`, `Monto`, `SaldoPendiente`, `EstadoPedido`, `Cancelacion`, etc.) y dataset agregado por producto/cantidad para modo resumido.
+
+**Excepciones:** Si la fecha inicio es mayor que la fecha fin se bloquea la ejecución; cuando un filtro está en modo específico, su valor es obligatorio; si no hay filas se muestra "No hay Datos para Mostrar".
+
+**Destino .NET:** `ObtenerReporteEntregaHandler`, `ReporteRepository.ObtenerEntregasAsync`, `FrmRepEntregaReporte.cs`, `RepEntregaFormato1.frx`, `RepEntregaFormato2.frx`, `RepEntregaResumidoProd.frx`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-REP-020
+
+**Nombre:** Venta Mensual por Fechas — comparativo diario por canal de venta
+
+**Origen:** `frmRepVentaFecha.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepVentaFecha.frm`
+
+**Procedimiento/Función:** `Genera` + `spRep_VentaFecha`
+
+**Descripción:** Emite el reporte comparativo de venta diaria dentro de un mes seleccionado, desglosado por canal (Salón/Delivery/Llevar/Canal4/Canal5), más totales de venta, cantidad de pedidos y pax. El SP recibe una expresión dinámica de precio (`@sPrecio`), el año/mes, la hora de corte contable (`@dHour`), el rango de fechas calculado (`@sFecha`), el filtro de sub-grupos (`@criterio`) y el modo de operación (`@tipooper`: 1=por pedido, 2=por documentos). La hora de corte establece el límite de cambio de día: ventas registradas antes de esa hora se asignan al día anterior. Si `chkCFacturados` está marcado, la pre-venta con `lregistroventa=0` se valoriza en cero. El filtro de sub-grupos permite seleccionar todos o una lista específica de `tCodigoSubGrupo`.
+
+**Condición:** Al ejecutar `ObtenerReporteVentaFechaQuery` con `VentaFechaParametros`.
+
+**Resultado:** Lista de `VentaFechaRow` (Dia, Salon, Delivery, Llevar, Canal4, Canal5, Venta, Cantidad, Pax, Fecha) agrupada por día del mes. El título del reporte incluye el nombre del mes y el tipo de precio utilizado.
+
+**Excepciones:** Si `OptSel=Selección` y no hay sub-grupos seleccionados, se bloquea la ejecución con mensaje "Debe escoger mínimo un subgrupo"; si no hay filas retornadas se muestra "No hay Datos para Mostrar".
+
+**Destino .NET:** `ObtenerReporteVentaFechaHandler`, `ReporteRepository.ObtenerVentaFechaAsync`, `ReporteRepository.ObtenerSubGruposAsync`, `FrmRepVentaFechaReporte.cs`, `RepVentaFecha.frx`
+
+**Estado:** COMPLETED
+
+---
 
 **Nombre:** Paloteo Sub-Productos — apertura por componentes de combo
 
@@ -1271,9 +1461,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** `ERR_COM (-2)`, `ERR_PPAD_NO_RESP (-3)`, `ERR_SOCKET (-5)`, `ERR_HOST_NO_RESP (-6)`. Se muestra MsgBox al operador.
 
-**Destino .NET:** `IPinPadService`, `PinPadService` (P/Invoke), `NullPinPadService`
+**Destino .NET:** `IPinPadService`, `PinPadService` (P/Invoke), `NullPinPadService`, `ProcesarPagoPinPadHandler`, `ObtenerTerminalesPinPadHandler`, `FrmPago`, `FrmPagoPinPad`
 
-**Estado:** IN_PROGRESS
+**Estado:** IN_PROGRESS — flujo WinForms y selección de terminal migrados; parsing completo de respuesta/cupón legacy sigue parcial
 
 ---
 

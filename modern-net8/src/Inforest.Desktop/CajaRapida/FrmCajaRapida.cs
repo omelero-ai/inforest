@@ -24,6 +24,9 @@ public class FrmCajaRapida : Form
     private readonly EmitirDocumentoHandler _emitirHandler;
     private readonly ObtenerMediosPagoHandler _mediosPagoHandler;
     private readonly PagarDocumentoHandler _pagarHandler;
+    private readonly RegistrarPagosMultiplesHandler _registrarPagosMultiplesHandler;
+    private readonly ProcesarPagoPinPadHandler _procesarPagoPinPadHandler;
+    private readonly ObtenerTerminalesPinPadHandler _obtenerTerminalesPinPadHandler;
 
     private readonly FlowLayoutPanel _catalogoPanel;
     private readonly BindingList<ItemRapidoRow> _items = [];
@@ -37,7 +40,10 @@ public class FrmCajaRapida : Form
         CreatePedidoHandler createPedidoHandler,
         EmitirDocumentoHandler emitirHandler,
         ObtenerMediosPagoHandler mediosPagoHandler,
-        PagarDocumentoHandler pagarHandler)
+        PagarDocumentoHandler pagarHandler,
+        RegistrarPagosMultiplesHandler registrarPagosMultiplesHandler,
+        ProcesarPagoPinPadHandler procesarPagoPinPadHandler,
+        ObtenerTerminalesPinPadHandler obtenerTerminalesPinPadHandler)
     {
         _productoRepository = productoRepository;
         _sessionService = sessionService;
@@ -46,6 +52,9 @@ public class FrmCajaRapida : Form
         _emitirHandler = emitirHandler;
         _mediosPagoHandler = mediosPagoHandler;
         _pagarHandler = pagarHandler;
+        _registrarPagosMultiplesHandler = registrarPagosMultiplesHandler;
+        _procesarPagoPinPadHandler = procesarPagoPinPadHandler;
+        _obtenerTerminalesPinPadHandler = obtenerTerminalesPinPadHandler;
 
         Text = "Caja Rápida";
         WindowState = FormWindowState.Maximized;
@@ -188,7 +197,15 @@ public class FrmCajaRapida : Form
         }
 
         // Cobrar
-        using var frmPago = new FrmPago(docResult.Valor!.CodigoDocumento, docResult.Valor!.Total, _mediosPagoHandler, _pagarHandler);
+        using var frmPago = new FrmPago(
+            docResult.Valor!.CodigoDocumento,
+            docResult.Valor!.Total,
+            docResult.Valor!.CodigoCaja,
+            _mediosPagoHandler,
+            _pagarHandler,
+            _registrarPagosMultiplesHandler,
+            _procesarPagoPinPadHandler,
+            _obtenerTerminalesPinPadHandler);
         if (frmPago.ShowDialog(this) == DialogResult.OK)
         {
             _items.Clear();

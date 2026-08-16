@@ -105,8 +105,11 @@ public static class DependencyInjection
 
         // W6: Caja / Pagos — Handlers CQRS (BR-007, BR-013)
         services.AddScoped<PagarDocumentoHandler>();
+        services.AddScoped<RegistrarPagosMultiplesHandler>();
         services.AddScoped<ObtenerResumenTurnoHandler>();
         services.AddScoped<ObtenerMediosPagoHandler>();
+        services.AddScoped<ObtenerTerminalesPinPadHandler>();
+        services.AddScoped<ProcesarPagoPinPadHandler>();
 
         // P3-09: Delivery, Despacho, Motorizados y Centralización — Handlers
         services.AddScoped<CrearClienteDeliveryHandler>();
@@ -149,6 +152,9 @@ public static class DependencyInjection
         services.AddScoped<ObtenerReportePropinaHandler>();
         services.AddScoped<ObtenerReportePrincipalClienteHandler>();
         services.AddScoped<ObtenerReporteCtaCteIntegradoHandler>();
+        services.AddScoped<ObtenerReporteCtaCteOperativaHandler>();
+        services.AddScoped<ObtenerTiposCtaCteReporteHandler>();
+        services.AddScoped<ObtenerSubTiposCtaCteReporteHandler>();
         services.AddScoped<ObtenerReportePaloteoComparativoHandler>();
         services.AddScoped<ObtenerReportePaloteoSubProdHandler>();
         services.AddScoped<ObtenerReportePaloteoVentaIntegradoHandler>();
@@ -157,6 +163,10 @@ public static class DependencyInjection
         services.AddScoped<ObtenerReporteAnaliticoMotorizadoIntegradoHandler>();
         services.AddScoped<ObtenerReporteTiempoKdsPedidoHandler>();
         services.AddScoped<ObtenerReporteTiempoKdsProductoHandler>();
+        services.AddScoped<ObtenerReporteAnulacionHandler>();
+        services.AddScoped<ObtenerReporteLiquidacionTicketHandler>();
+        services.AddScoped<ObtenerReportePaloteoTicketHandler>();
+        services.AddScoped<ObtenerReporteEntregaHandler>();
 
         // POS-FUNC-018: Recibo Ingresos/Egresos — MINGRESO / MEGRESO
         services.AddScoped<ObtenerIngresosHandler>();

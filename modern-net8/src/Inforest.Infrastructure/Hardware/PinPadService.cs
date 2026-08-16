@@ -57,12 +57,16 @@ internal sealed class PinPadService : IPinPadService
         [MarshalAs(UnmanagedType.LPStr)] ref string sBuffer,
         int sizeBuffer);
 
-    public Task<PinPadResult> InicializarAsync(string configPath, CancellationToken cancellationToken = default)
+    public Task<PinPadResult> InicializarAsync(string? configPath = null, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("PinPad: inicializando con config {ConfigPath}", configPath);
+        var rutaConfiguracion = string.IsNullOrWhiteSpace(configPath) ? _options.ConfigPath : configPath;
+        if (string.IsNullOrWhiteSpace(rutaConfiguracion))
+            return Task.FromResult(PinPadResult.ErrorComunicacion(ERR_COM, "No se configuró la ruta del archivo PinPad."));
+
+        _logger.LogInformation("PinPad: inicializando con config {ConfigPath}", rutaConfiguracion);
         try
         {
-            var ret = fiOpenPort(configPath);
+            var ret = fiOpenPort(rutaConfiguracion);
             var result = InterpretarRetorno(ret, "Inicialización");
             _logger.LogInformation("PinPad: inicialización retorno={Retorno}", ret);
             return Task.FromResult(result);

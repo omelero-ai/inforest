@@ -93,6 +93,12 @@ internal sealed class DummyReporteRepository : IReporteRepository
         => Task.FromResult<IReadOnlyList<PaloteoSubProdRow>>([]);
     public Task<IReadOnlyList<CtaCteIntegradoRow>> ObtenerCtaCteIntegradoAsync(string flagTipo, DateTime fechaInicio, DateTime fechaFin, CancellationToken ct = default)
         => Task.FromResult<IReadOnlyList<CtaCteIntegradoRow>>([]);
+    public Task<IReadOnlyList<CtaCteOperativaRow>> ObtenerCtaCteOperativaAsync(CtaCteOperativaParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<CtaCteOperativaRow>>([]);
+    public Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposCtaCteAsync(CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<ReporteFiltroOpcion>>([]);
+    public Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerSubTiposCtaCteAsync(string tipoCtaCte, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<ReporteFiltroOpcion>>([]);
     public Task<IReadOnlyList<PaloteoVentaIntegradoRow>> ObtenerPaloteoVentaIntegradoAsync(PaloteoVentaIntegradoParametros parametros, CancellationToken ct = default)
         => Task.FromResult<IReadOnlyList<PaloteoVentaIntegradoRow>>([]);
     public Task<IReadOnlyList<RankingIntegradoRow>> ObtenerRankingIntegradoAsync(RankingIntegradoParametros parametros, CancellationToken ct = default)
@@ -109,4 +115,20 @@ internal sealed class DummyReporteRepository : IReporteRepository
         => Task.FromResult<IReadOnlyList<TiempoKdsPedidoRow>>([]);
     public Task<IReadOnlyList<TiempoKdsProductoRow>> ObtenerTiempoKdsProductoAsync(DateTime fechaInicio, DateTime fechaFin, string grupo, string subGrupo, string producto, CancellationToken ct = default)
         => Task.FromResult<IReadOnlyList<TiempoKdsProductoRow>>([]);
+    public Task<IReadOnlyList<AnulacionRow>> ObtenerAnulacionAsync(AnulacionParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<AnulacionRow>>([]);
+    public Task<IReadOnlyList<LiquidacionTicketRow>> ObtenerLiquidacionTicketAsync(LiquidacionTicketParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<LiquidacionTicketRow>>([]);
+    public Task<IReadOnlyList<PaloteoTicketRow>> ObtenerPaloteoTicketAsync(PaloteoTicketParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<PaloteoTicketRow>>([]);
+    public Task<IReadOnlyList<DeliveryTicketRow>> ObtenerDeliveryTicketAsync(DeliveryTicketParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<DeliveryTicketRow>>([]);
+    public Task<IReadOnlyList<ReservaReporteRow>> ObtenerReservasReporteAsync(ReservaReporteParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<ReservaReporteRow>>([]);
+    public Task<IReadOnlyList<EntregaRow>> ObtenerEntregasAsync(EntregaParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<EntregaRow>>([]);
+    public Task<IReadOnlyList<VentaFechaRow>> ObtenerVentaFechaAsync(VentaFechaParametros parametros, CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<VentaFechaRow>>([]);
+    public Task<IReadOnlyList<SubGrupoItem>> ObtenerSubGruposAsync(CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<SubGrupoItem>>([]);
 }

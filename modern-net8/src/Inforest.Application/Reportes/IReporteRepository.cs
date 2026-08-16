@@ -118,6 +118,29 @@ public interface IReporteRepository
         CancellationToken ct = default);
 
     /// <summary>
+    /// Ejecuta <c>spRep_CtaCteN</c>.
+    /// Legacy: <c>frmRepCtaCte.frm</c>
+    /// Regla: BR-REP-013
+    /// </summary>
+    Task<IReadOnlyList<CtaCteOperativaRow>> ObtenerCtaCteOperativaAsync(
+        CtaCteOperativaParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene el catálogo activo de tipos de cuenta corriente.
+    /// Legacy: <c>vTipoCtaCte</c>, <c>frmRepCtaCte.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposCtaCteAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene el catálogo activo de subtipos de cuenta corriente.
+    /// Legacy: <c>vSubTipoCtaCte</c>, <c>frmRepCtaCte.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerSubTiposCtaCteAsync(
+        string tipoCtaCte,
+        CancellationToken ct = default);
+
+    /// <summary>
     /// Ejecuta <c>spRep_PaloteoVentaIntegrado</c>.
     /// Legacy: <c>frmRepPaloteoVentaIntegrado.frm</c>
     /// Regla: BR-REP-007
@@ -177,6 +200,71 @@ public interface IReporteRepository
         string subGrupo,
         string producto,
         CancellationToken ct = default);
+
+    /// <summary>Ejecuta <c>spRep_Anulacion</c>. Regla: BR-REP-014</summary>
+    Task<IReadOnlyList<AnulacionRow>> ObtenerAnulacionAsync(
+        AnulacionParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_LiquidacionSuma</c>.
+    /// Legacy: <c>frmRepLiquidacionTicket.frm</c>
+    /// Regla: BR-REP-015
+    /// </summary>
+    Task<IReadOnlyList<LiquidacionTicketRow>> ObtenerLiquidacionTicketAsync(
+        LiquidacionTicketParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta el query de <c>frmRepPaloteoTicket.frm</c>.
+    /// Legacy: paloteo por ticketera con filtros opcionales y origen configurable.
+    /// Regla: BR-REP-016
+    /// </summary>
+    Task<IReadOnlyList<PaloteoTicketRow>> ObtenerPaloteoTicketAsync(
+        PaloteoTicketParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene filas del reporte "Cierre de Cajeros Delivery".
+    /// Legacy: <c>frmRepDeliveryTicket.frm</c> — query dinámica sobre MDOCUMENTO/DPREPAGO/MPEDIDO.
+    /// Regla: BR-REP-017
+    /// </summary>
+    Task<IReadOnlyList<DeliveryTicketRow>> ObtenerDeliveryTicketAsync(
+        DeliveryTicketParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene filas del reporte de reservas.
+    /// Legacy: <c>frmRepReservas.frm</c> — query dinámica sobre TRESERVA + vEstadoReserva.
+    /// Regla: BR-REP-018
+    /// </summary>
+    Task<IReadOnlyList<ReservaReporteRow>> ObtenerReservasReporteAsync(
+        ReservaReporteParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_Entregas</c>.
+    /// Legacy: <c>frmRepEntrega.frm</c>
+    /// Regla: BR-REP-019
+    /// </summary>
+    Task<IReadOnlyList<EntregaRow>> ObtenerEntregasAsync(
+        EntregaParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_VentaFecha</c> — Comparativo de venta mensual por día.
+    /// Legacy: <c>frmRepVentaFecha.frm</c>
+    /// Regla: BR-REP-020
+    /// </summary>
+    Task<IReadOnlyList<VentaFechaRow>> ObtenerVentaFechaAsync(
+        VentaFechaParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene la lista de sub-grupos activos (código + descripción + grupo) desde <c>vSubGrupo</c>.
+    /// Usado para poblar el filtro de sub-grupos en <c>frmRepVentaFecha</c>.
+    /// </summary>
+    Task<IReadOnlyList<SubGrupoItem>> ObtenerSubGruposAsync(CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────
@@ -206,6 +294,20 @@ public sealed class PaloteoVentaIntegradoParametros
     public string Boton5 { get; init; } = string.Empty;
     public DateTime FechaInicio { get; init; }
     public DateTime FechaFin { get; init; }
+}
+
+/// <summary>Parámetros para <c>spRep_CtaCteN</c>. Regla: BR-REP-013</summary>
+public sealed class CtaCteOperativaParametros
+{
+    public bool FlagDetalle { get; init; }
+    public bool FlagResumido { get; init; }
+    public bool FlagConsolidado { get; init; }
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+    public string Estado { get; init; } = string.Empty;
+    public string Cliente { get; init; } = string.Empty;
+    public string TipoCtaCte { get; init; } = string.Empty;
+    public string SubTipoCtaCte { get; init; } = string.Empty;
 }
 
 /// <summary>Parámetros para <c>spRep_RankingIntegrado</c>. Regla: BR-REP-008</summary>
@@ -263,4 +365,93 @@ public sealed class AnaliticoMotorizadoIntegradoParametros
     public ExpresionPrecio TipoPrecio { get; init; } = ExpresionPrecio.Venta;
     public DateTime FechaInicio { get; init; }
     public DateTime FechaFin { get; init; }
+}
+
+/// <summary>
+/// Parámetros para <c>spRep_Anulacion</c>. Regla: BR-REP-014
+/// Legacy: <c>frmRepAnulado.frm</c> — "Control de Transacciones"
+/// </summary>
+public sealed class AnulacionParametros
+{
+    /// <summary>true = filtrar por franja horaria sin importar el día</summary>
+    public bool FranjaHoraria { get; init; }
+    /// <summary>Código de turno; string.Empty = todos los turnos</summary>
+    public string Turno { get; init; } = string.Empty;
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+    /// <summary>Incluir ítems facturados (tEstadoItem='N')</summary>
+    public bool FlagFacturados { get; init; } = true;
+    /// <summary>Incluir pedidos anulados (tEstadoPedido='03')</summary>
+    public bool FlagAnulados { get; init; } = true;
+    /// <summary>Incluir ítems/pedidos transferidos</summary>
+    public bool FlagTransferidos { get; init; } = true;
+    /// <summary>Criterio SQL adicional construido por la UI (salon, usuario, motivo, estado impresión)</summary>
+    public string Criterio { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Parámetros para <c>spRep_LiquidacionSuma</c>. Regla: BR-REP-015
+/// Legacy: <c>frmRepLiquidacionTicket.frm</c> — "Liquidación de Cajero por Ticketera"
+/// </summary>
+public sealed class LiquidacionTicketParametros
+{
+    /// <summary>true = consultar todos los turnos por rango de fechas; false = un turno específico</summary>
+    public bool TodosLosTurnos { get; init; }
+    /// <summary>true = filtrar por día contable; false = usar <c>MDOCUMENTO.fRegistro</c></summary>
+    public bool DiaContable { get; init; }
+    /// <summary>Código de turno cuando <see cref="TodosLosTurnos"/> es false.</summary>
+    public string Turno { get; init; } = string.Empty;
+    /// <summary>Usuario opcional; vacío = todos.</summary>
+    public string Usuario { get; init; } = string.Empty;
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+    /// <summary>Sector de venta opcional; vacío = todos.</summary>
+    public string SectorVenta { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Origen de datos para paloteo por ticketera (<c>frmRepPaloteoTicket.frm</c>).
+/// </summary>
+public enum OrigenPaloteoTicket
+{
+    Produccion = 0,
+    Venta = 1,
+    Cortesia = 2,
+    CuentaCorriente = 3,
+    Combinacion = 4,
+    Cargos = 5,
+    PedidosFacturados = 6
+}
+
+/// <summary>
+/// Parámetros para consulta de paloteo por ticketera. Regla: BR-REP-016
+/// Legacy: <c>frmRepPaloteoTicket.frm</c>
+/// </summary>
+public sealed class PaloteoTicketParametros
+{
+    /// <summary>true = filtra por rango de fechas; false = turno específico.</summary>
+    public bool TodosTurnos { get; init; } = true;
+    public string Turno { get; init; } = string.Empty;
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+
+    public string Salon { get; init; } = string.Empty;
+    public string TipoProducto { get; init; } = string.Empty;
+    public string Mozo { get; init; } = string.Empty;
+    public string TipoPedido { get; init; } = string.Empty;
+    public string OrigenVenta { get; init; } = string.Empty;
+    public string Area { get; init; } = string.Empty;
+    public string Grupo { get; init; } = string.Empty;
+    public string SubGrupo { get; init; } = string.Empty;
+    public string CodigoProducto { get; init; } = string.Empty;
+    public string CodigoCliente { get; init; } = string.Empty;
+
+    public OrigenPaloteoTicket Origen { get; init; } = OrigenPaloteoTicket.Produccion;
+    public bool OrdenarPorCodigoProducto { get; init; }
+    public bool MostrarTotalPorProducto { get; init; }
+
+    public string Boton2 { get; init; } = string.Empty;
+    public string Boton3 { get; init; } = string.Empty;
+    public string Boton4 { get; init; } = string.Empty;
+    public string Boton5 { get; init; } = string.Empty;
 }

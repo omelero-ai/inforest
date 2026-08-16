@@ -2,6 +2,7 @@ using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
 using Inforest.Application.Maestros;
 using Inforest.Application.Turno;
+using Inforest.Desktop.Forms.Reportes;
 using Inforest.Desktop.Pedidos;
 using Inforest.Desktop.Turno;
 using Inforest.Domain.Entities.Maestros;
@@ -59,7 +60,17 @@ public class FrmPuntoVenta : Form
         turno.DropDownItems.Add("Abrir turno", null, (_, _) => AbrirTurno());
         turno.DropDownItems.Add("Cerrar turno", null, async (_, _) => await CerrarTurnoAsync());
         menu.Items.Add(turno);
-        menu.Items.Add(new ToolStripMenuItem("Reportes", null, (_, _) => MessageBox.Show("Navegue al módulo de reportes FastReport.", Text)));
+        var reportes = new ToolStripMenuItem("Reportes");
+        reportes.DropDownItems.Add("Estados Cta Cte", null, (_, _) => AbrirReporte<FrmRepCtaCteReporte>());
+        reportes.DropDownItems.Add("Control de Transacciones", null, (_, _) => AbrirReporte<FrmRepAnuladoReporte>());
+        reportes.DropDownItems.Add("Liquidación Ticketera", null, (_, _) => AbrirReporte<FrmRepLiquidacionTicketReporte>());
+        reportes.DropDownItems.Add("Paloteo Ticketera", null, (_, _) => AbrirReporte<FrmRepPaloteoTicketReporte>());
+        reportes.DropDownItems.Add("Cierre Cajeros Delivery", null, (_, _) => AbrirReporte<FrmRepDeliveryTicketReporte>());
+        reportes.DropDownItems.Add("Reporte de Reservas", null, (_, _) => AbrirReporte<FrmRepReservasReporte>());
+        reportes.DropDownItems.Add("Reporte de Entregas", null, (_, _) => AbrirReporte<FrmRepEntregaReporte>());
+        reportes.DropDownItems.Add("Venta Mensual por Fechas", null, (_, _) => AbrirReporte<FrmRepVentaFechaReporte>());
+        reportes.DropDownItems.Add("Cta Cte Integrado", null, (_, _) => AbrirReporte<FrmCtaCteIntegradoReporte>());
+        menu.Items.Add(reportes);
         menu.Items.Add(new ToolStripMenuItem("Administración", null, (_, _) => MessageBox.Show("Abrir FrmAdministracion desde el shell principal.", Text)));
         menu.Items.Add(new ToolStripMenuItem("Salir", null, (_, _) => Close()));
 
@@ -189,6 +200,13 @@ public class FrmPuntoVenta : Form
             boton.DoubleClick += (_, _) => AbrirPedidoMesa(mesa);
             _panelMesas.Controls.Add(boton);
         }
+    }
+
+    private void AbrirReporte<T>() where T : Form
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var form = scope.ServiceProvider.GetRequiredService<T>();
+        form.ShowDialog(this);
     }
 
     private void AbrirTurno()

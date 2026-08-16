@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Reporte Propinas Resumido - Legacy: spRep_Propina / dsrPropinaR.Dsr">
+  <Dictionary>
+    <TableDataSource Name="Propinas" DataType="Inforest.Application.Reportes.PropinaRow" Enabled="true" />
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="56.7">
+      <TextObject Name="Title" Left="0" Top="0" Width="718.2" Height="37.8"
+                  Text="Reporte de Propinas — Resumido"
+                  Font="Arial, 14pt, style=Bold" HorzAlign="Center" />
+      <TextObject Name="SubTitle" Left="0" Top="37.8" Width="718.2" Height="18.9"
+                  Text="Fecha: [System.DateTime.Now.ToString(&quot;dd/MM/yyyy HH:mm&quot;)]"
+                  Font="Arial, 8pt" HorzAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Width="718.2" Height="18.9">
+      <TextObject Name="hTrabajador" Left="0"   Top="0" Width="200" Height="18.9" Text="Trabajador"  Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hTipoPedido" Left="200" Top="0" Width="150" Height="18.9" Text="Tipo Pedido" Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hTarjeta"    Left="350" Top="0" Width="168" Height="18.9" Text="Tarjeta"     Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hPropina"    Left="518" Top="0" Width="100" Height="18.9" Text="Propina"     Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="hRetencion"  Left="618" Top="0" Width="100.2" Height="18.9" Text="Factor Ret." Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" HorzAlign="Right" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="85" Width="718.2" Height="18.9" DataSource="Propinas" EvenStyle="EvenRow">
+      <TextObject Name="dTrabajador" Left="0"   Top="0" Width="200" Height="18.9" Text="[Propinas.Trabajador]"                               Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dTipoPedido" Left="200" Top="0" Width="150" Height="18.9" Text="[Propinas.TipoPedido]"                               Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dTarjeta"    Left="350" Top="0" Width="168" Height="18.9" Text="[Propinas.TDetallado]"                               Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dPropina"    Left="518" Top="0" Width="100" Height="18.9" Text="[Propinas.Propina.ToString(&quot;N2&quot;)]"         Font="Arial, 8pt" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="dRetencion"  Left="618" Top="0" Width="100.2" Height="18.9" Text="[Propinas.NFactorRetencion.ToString(&quot;N4&quot;)]" Font="Arial, 8pt" Border.Lines="All" HorzAlign="Right" />
+    </DataBand>
+    <GroupFooterBand Name="GroupFooter1" Width="718.2" Height="18.9">
+      <TextObject Name="fTotal" Left="350" Top="0" Width="268" Height="18.9"
+                  Text="Total Propinas: [Sum(Propinas.Propina).ToString(&quot;N2&quot;)]"
+                  Font="Arial, 9pt, style=Bold" HorzAlign="Right" Border.Lines="Top" />
+    </GroupFooterBand>
+    <PageFooterBand Name="PageFooter1" Width="718.2" Height="18.9">
+      <TextObject Name="fPage" Left="0" Top="0" Width="718.2" Height="18.9"
+                  Text="Página [PageN] de [TotalPages]"
+                  Font="Arial, 8pt" HorzAlign="Right" />
+    </PageFooterBand>
+  </ReportPage>
+  <Styles>
+    <Style Name="EvenRow" FillColor="AliceBlue" />
+  </Styles>
+</Report>

@@ -1,16 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Reporte Propinas - Legacy: spRep_Propina">
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Reporte Propinas Detallado - Legacy: spRep_Propina / dsrPropinaD.Dsr">
   <Dictionary>
-    <TableDataSource Name="Result" DataType="System.Int32" Enabled="true" />
+    <TableDataSource Name="Propinas" DataType="Inforest.Application.Reportes.PropinaRow" Enabled="true" />
   </Dictionary>
-  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297">
-    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="56.7">
-      <TextObject Name="Title" Left="0" Top="0" Width="718.2" Height="37.8" Text="Reporte de Propinas" Font="Arial, 14pt, style=Bold" HorzAlign="Center" />
-      <TextObject Name="SubTitle" Left="0" Top="37.8" Width="718.2" Height="18.9" Text="Fecha: [System.DateTime.Now.ToShortDateString()]" Font="Arial, 8pt" HorzAlign="Center" />
+  <ReportPage Name="Page1" PaperWidth="297" PaperHeight="210" Landscape="true">
+    <ReportTitleBand Name="ReportTitle1" Width="1039.2" Height="56.7">
+      <TextObject Name="Title" Left="0" Top="0" Width="1039.2" Height="37.8"
+                  Text="Reporte de Propinas — Detallado"
+                  Font="Arial, 14pt, style=Bold" HorzAlign="Center" />
+      <TextObject Name="SubTitle" Left="0" Top="37.8" Width="1039.2" Height="18.9"
+                  Text="Fecha: [System.DateTime.Now.ToString(&quot;dd/MM/yyyy HH:mm&quot;)]"
+                  Font="Arial, 8pt" HorzAlign="Center" />
     </ReportTitleBand>
-    <DataBand Name="Data1" Top="66.15" Width="718.2" Height="18.9" DataSource="Result">
-      <TextObject Name="txtIndice" Left="0" Top="0" Width="60" Height="18.9" Text="[Row#]" />
-      <TextObject Name="txtDetalle" Left="70" Top="0" Width="648.2" Height="18.9" Text="Registro" />
+    <PageHeaderBand Name="PageHeader1" Width="1039.2" Height="18.9">
+      <TextObject Name="hTrabajador" Left="0"   Top="0" Width="130" Height="18.9" Text="Trabajador"     Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hTipoPedido" Left="130" Top="0" Width="100" Height="18.9" Text="Tipo Pedido"    Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hTarjeta"    Left="230" Top="0" Width="130" Height="18.9" Text="Tarjeta"        Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hDocumento"  Left="360" Top="0" Width="100" Height="18.9" Text="Documento"      Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hCorrelat"   Left="460" Top="0" Width="100" Height="18.9" Text="Correlativo"    Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hFecha"      Left="560" Top="0" Width="100" Height="18.9" Text="Fecha"          Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hPropina"    Left="660" Top="0" Width="100" Height="18.9" Text="Propina"        Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="hRetencion"  Left="760" Top="0" Width="100" Height="18.9" Text="Factor Ret."    Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="hMozo"       Left="860" Top="0" Width="90"  Height="18.9" Text="Mesero"         Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+      <TextObject Name="hMotor"      Left="950" Top="0" Width="89.2" Height="18.9" Text="Motorizado"    Font="Arial, 8pt, style=Bold" FillColor="LightGray" Border.Lines="All" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="85" Width="1039.2" Height="18.9" DataSource="Propinas" EvenStyle="EvenRow">
+      <TextObject Name="dTrabajador" Left="0"   Top="0" Width="130" Height="18.9" Text="[Propinas.Trabajador]"                                  Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dTipoPedido" Left="130" Top="0" Width="100" Height="18.9" Text="[Propinas.TipoPedido]"                                  Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dTarjeta"    Left="230" Top="0" Width="130" Height="18.9" Text="[Propinas.TDetallado]"                                  Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dDocumento"  Left="360" Top="0" Width="100" Height="18.9" Text="[Propinas.TDocumento]"                                  Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dCorrelat"   Left="460" Top="0" Width="100" Height="18.9" Text="[Propinas.TCorrelativo]"                                Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dFecha"      Left="560" Top="0" Width="100" Height="18.9" Text="[Propinas.FRegistro]"                                   Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dPropina"    Left="660" Top="0" Width="100" Height="18.9" Text="[Propinas.Propina.ToString(&quot;N2&quot;)]"            Font="Arial, 8pt" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="dRetencion"  Left="760" Top="0" Width="100" Height="18.9" Text="[Propinas.NFactorRetencion.ToString(&quot;N4&quot;)]"   Font="Arial, 8pt" Border.Lines="All" HorzAlign="Right" />
+      <TextObject Name="dMozo"       Left="860" Top="0" Width="90"  Height="18.9" Text="[Propinas.TMozo]"                                       Font="Arial, 8pt" Border.Lines="All" />
+      <TextObject Name="dMotor"      Left="950" Top="0" Width="89.2" Height="18.9" Text="[Propinas.TMotorizado]"                                Font="Arial, 8pt" Border.Lines="All" />
     </DataBand>
+    <GroupFooterBand Name="GroupFooter1" Width="1039.2" Height="18.9">
+      <TextObject Name="fTotal" Left="560" Top="0" Width="200" Height="18.9"
+                  Text="Total Propinas: [Sum(Propinas.Propina).ToString(&quot;N2&quot;)]"
+                  Font="Arial, 9pt, style=Bold" HorzAlign="Right" Border.Lines="Top" />
+    </GroupFooterBand>
+    <PageFooterBand Name="PageFooter1" Width="1039.2" Height="18.9">
+      <TextObject Name="fPage" Left="0" Top="0" Width="1039.2" Height="18.9"
+                  Text="Página [PageN] de [TotalPages]"
+                  Font="Arial, 8pt" HorzAlign="Right" />
+    </PageFooterBand>
   </ReportPage>
+  <Styles>
+    <Style Name="EvenRow" FillColor="AliceBlue" />
+  </Styles>
 </Report>

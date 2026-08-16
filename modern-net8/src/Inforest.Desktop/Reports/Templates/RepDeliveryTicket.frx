@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Cierre de Cajeros Delivery - Legacy: frmRepDeliveryTicket.frm">
+  <Dictionary>
+    <TableDataSource Name="DeliveryTicket" DataType="System.Int32" Enabled="true">
+      <Column Name="TCaja" DataType="System.String" />
+      <Column Name="TTipoPago" DataType="System.String" />
+      <Column Name="TipoPago" DataType="System.String" />
+      <Column Name="TMotorizado" DataType="System.String" />
+      <Column Name="Motorizado" DataType="System.String" />
+      <Column Name="TDocumento" DataType="System.String" />
+      <Column Name="FRegistro" DataType="System.DateTime" />
+      <Column Name="NVenta" DataType="System.Double" />
+      <Column Name="TTurno" DataType="System.String" />
+      <Column Name="TUsuario" DataType="System.String" />
+      <Column Name="TMoneda" DataType="System.String" />
+      <Column Name="Mon" DataType="System.String" />
+      <Column Name="NTipoCambio" DataType="System.Double" />
+      <Column Name="NMonto" DataType="System.Double" />
+      <Column Name="NVuelto" DataType="System.Double" />
+      <Column Name="Tarjeta" DataType="System.String" />
+      <Column Name="TNumero" DataType="System.String" />
+      <Column Name="OtroTipo" DataType="System.String" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="297" PaperHeight="210" Landscape="true">
+    <ReportTitleBand Name="ReportTitle1" Width="1047.06" Height="28.35">
+      <TextObject Name="Title" Width="1047.06" Height="28.35" Text="Cierre de Cajeros Delivery" Font="Arial, 12pt, style=Bold" HorzAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="32.35" Width="1047.06" Height="18.9">
+      <TextObject Name="h1" Width="60" Height="18.9" Text="Caja" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h2" Left="65" Width="100" Height="18.9" Text="Motorizado" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h3" Left="170" Width="110" Height="18.9" Text="Tipo Pago" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h4" Left="285" Width="110" Height="18.9" Text="Documento" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h5" Left="400" Width="130" Height="18.9" Text="Fecha Registro" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h6" Left="535" Width="80" Height="18.9" Text="Venta" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h7" Left="620" Width="80" Height="18.9" Text="Monto" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h8" Left="705" Width="80" Height="18.9" Text="Vuelto" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="h9" Left="790" Width="50" Height="18.9" Text="Mon" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h10" Left="845" Width="100" Height="18.9" Text="Tarjeta" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="h11" Left="950" Width="95" Height="18.9" Text="Número" Font="Arial, 8pt, style=Bold" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="55.25" Width="1047.06" Height="18.9" DataSource="DeliveryTicket">
+      <TextObject Name="d1" Width="60" Height="18.9" Text="[DeliveryTicket.TCaja]" Font="Arial, 8pt" />
+      <TextObject Name="d2" Left="65" Width="100" Height="18.9" Text="[DeliveryTicket.Motorizado]" Font="Arial, 8pt" />
+      <TextObject Name="d3" Left="170" Width="110" Height="18.9" Text="[DeliveryTicket.TipoPago]" Font="Arial, 8pt" />
+      <TextObject Name="d4" Left="285" Width="110" Height="18.9" Text="[DeliveryTicket.TDocumento]" Font="Arial, 8pt" />
+      <TextObject Name="d5" Left="400" Width="130" Height="18.9" Text="[DeliveryTicket.FRegistro]" Format="DateTime" Format.Format="dd/MM/yyyy HH:mm" Font="Arial, 8pt" />
+      <TextObject Name="d6" Left="535" Width="80" Height="18.9" Text="[DeliveryTicket.NVenta]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d7" Left="620" Width="80" Height="18.9" Text="[DeliveryTicket.NMonto]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d8" Left="705" Width="80" Height="18.9" Text="[DeliveryTicket.NVuelto]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="d9" Left="790" Width="50" Height="18.9" Text="[DeliveryTicket.Mon]" Font="Arial, 8pt" />
+      <TextObject Name="d10" Left="845" Width="100" Height="18.9" Text="[DeliveryTicket.Tarjeta]" Font="Arial, 8pt" />
+      <TextObject Name="d11" Left="950" Width="95" Height="18.9" Text="[DeliveryTicket.TNumero]" Font="Arial, 8pt" />
+    </DataBand>
+    <PageFooterBand Name="PageFooter1" Top="78.15" Width="1047.06" Height="18.9">
+      <TextObject Name="pf1" Width="1047.06" Height="18.9" Text="Página [Page#] de [TotalPages#]" HorzAlign="Right" Font="Arial, 8pt" />
+    </PageFooterBand>
+  </ReportPage>
+</Report>

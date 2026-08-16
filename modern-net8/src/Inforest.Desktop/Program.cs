@@ -8,6 +8,7 @@ using Inforest.Desktop.CajaRapida;
 using Inforest.Desktop.Adicion;
 using Inforest.Desktop.Caja;
 using Inforest.Desktop.Motorizado;
+using Inforest.Desktop.Forms.Reportes;
 using Inforest.Application.Interfaces;
 
 namespace Inforest.Desktop;
@@ -69,6 +70,15 @@ static class Program
                 services.AddTransient<FrmCuadreCaja>();
                 services.AddTransient<AsignacionMotorizadoForm>();
                 services.AddTransient<ReasignacionMotorizadoForm>();
+                services.AddTransient<FrmCtaCteIntegradoReporte>();
+                services.AddTransient<FrmRepCtaCteReporte>();
+                services.AddTransient<FrmRepAnuladoReporte>();
+                services.AddTransient<FrmRepLiquidacionTicketReporte>();
+                services.AddTransient<FrmRepPaloteoTicketReporte>();
+                services.AddTransient<FrmRepDeliveryTicketReporte>();
+                services.AddTransient<FrmRepReservasReporte>();
+                services.AddTransient<FrmRepEntregaReporte>();
+                services.AddTransient<FrmRepVentaFechaReporte>();
             });
     }
 }
