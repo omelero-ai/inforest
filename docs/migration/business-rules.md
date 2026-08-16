@@ -1257,7 +1257,29 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
-### BR-REP-006
+### BR-REP-018
+
+**Nombre:** Reporte de Reservas — listado de reservas por rango de fecha/hora y estado
+
+**Origen:** `frmRepReservas.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepReservas.frm`
+
+**Procedimiento/Función:** `ObtenerReservas` + query dinámica sobre `TRESERVA LEFT JOIN vEstadoReserva`
+
+**Descripción:** El formulario emite un listado de reservas filtrado por rango de fecha y hora (`TRESERVA.fFecha + TRESERVA.fHora BETWEEN @fInicio AND @fFinal`). Permite filtrar por estado: Generado ('01', marcado por defecto), Atendido ('02') y Anulado ('03'). El criterio de ordenamiento es configurable: Reserva (tReserva), Nombres (tNombre), Teléfono (tTelefono), Fecha (FFecha), Pax (nPax) o Estado (tEstadoReserva). El resultado incluye la descripción del estado en mayúsculas tomada de `vEstadoReserva`.
+
+**Condición:** Al ejecutar `ObtenerReporteReservasQuery` con los parámetros correspondientes.
+
+**Resultado:** Dataset `ReservaReporteRow` con campos: `TReserva`, `FFecha` (fFecha+fHora), `TApellido`, `Cliente` (apellido+nombre), `TNombre`, `TTelefono`, `NPax`, `TEstadoReserva`, `TObservacion`, `FRegistro`, `EstadoReserva`. Ordenado por el criterio seleccionado ASC.
+
+**Excepciones:** Si FechaHoraInicio > FechaHoraFin se muestra validación. Si no hay datos, se muestra "No hay Datos para Mostrar". Si ningún estado está seleccionado, la cláusula IN queda vacía y no retorna resultados.
+
+**Destino .NET:** `ObtenerReporteReservasHandler`, `ReporteRepository.ObtenerReservasReporteAsync`, `FrmRepReservasReporte.cs`, `RepReservas.frx`
+
+**Estado:** MIGRATED
+
+---
 
 **Nombre:** Paloteo Sub-Productos — apertura por componentes de combo
 

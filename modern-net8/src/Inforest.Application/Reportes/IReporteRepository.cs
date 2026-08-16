@@ -232,6 +232,15 @@ public interface IReporteRepository
     Task<IReadOnlyList<DeliveryTicketRow>> ObtenerDeliveryTicketAsync(
         DeliveryTicketParametros parametros,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene filas del reporte de reservas.
+    /// Legacy: <c>frmRepReservas.frm</c> — query dinámica sobre TRESERVA + vEstadoReserva.
+    /// Regla: BR-REP-018
+    /// </summary>
+    Task<IReadOnlyList<ReservaReporteRow>> ObtenerReservasReporteAsync(
+        ReservaReporteParametros parametros,
+        CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────

@@ -257,6 +257,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmRepDeliveryTicket.frm` | Form | `FrmRepDeliveryTicketReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepDeliveryTicketReporte.cs` |
 | `(query dinámica frmRepDeliveryTicket)` | Query | `ReporteRepository.ObtenerDeliveryTicketAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `frmRepDeliveryTicket.frx` | Form resource | `RepDeliveryTicket.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepDeliveryTicket.frx` |
+| `frmRepReservas.frm` | Form | `FrmRepReservasReporte.cs` | WinForm | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepReservasReporte.cs` |
+| `(query dinámica frmRepReservas: TRESERVA+vEstadoReserva)` | Query | `ReporteRepository.ObtenerReservasReporteAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepReservas.frx` | Form resource | `RepReservas.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepReservas.frx` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |

@@ -448,3 +448,58 @@ public sealed class PaloteoTicketRow
     public double Cantidad { get; init; }
     public double Venta { get; init; }
 }
+
+// ── BR-REP-018 — Reporte de Reservas ─────────────────────────────────────────
+
+/// <summary>
+/// Criterio de ordenamiento del reporte de reservas.
+/// Legacy: <c>frmRepReservas.frm</c> — <c>cboCriterio</c>
+/// Regla: BR-REP-018
+/// </summary>
+public enum OrdenReserva
+{
+    Reserva = 0,
+    Nombre = 1,
+    Telefono = 2,
+    Fecha = 3,
+    Pax = 4,
+    Estado = 5
+}
+
+/// <summary>
+/// Fila del dataset retornado por la consulta dinámica de reservas.
+/// Legacy: <c>frmRepReservas.frm</c> — Sub ObtenerReservas (TRESERVA + vEstadoReserva)
+/// Regla: BR-REP-018
+/// </summary>
+public sealed class ReservaReporteRow
+{
+    public string TReserva { get; init; } = string.Empty;
+    public DateTime FFecha { get; init; }
+    public string TApellido { get; init; } = string.Empty;
+    public string Cliente { get; init; } = string.Empty;
+    public string TNombre { get; init; } = string.Empty;
+    public string TTelefono { get; init; } = string.Empty;
+    public int NPax { get; init; }
+    public string TEstadoReserva { get; init; } = string.Empty;
+    public string TObservacion { get; init; } = string.Empty;
+    public DateTime FRegistro { get; init; }
+    public string EstadoReserva { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Parámetros de filtro para el reporte de reservas.
+/// Legacy: <c>frmRepReservas.frm</c> — dtpFecIni/Fin + dtpHorIni/Fin + chkEstado + cboCriterio
+/// Regla: BR-REP-018
+/// </summary>
+public sealed class ReservaReporteParametros
+{
+    public DateTime FechaHoraInicio { get; init; }
+    public DateTime FechaHoraFin { get; init; }
+    /// <summary>true = incluir estado '01' (Generado)</summary>
+    public bool EstadoGenerado { get; init; } = true;
+    /// <summary>true = incluir estado '02' (Atendido)</summary>
+    public bool EstadoAtendido { get; init; }
+    /// <summary>true = incluir estado '03' (Anulado)</summary>
+    public bool EstadoAnulado { get; init; }
+    public OrdenReserva Orden { get; init; } = OrdenReserva.Reserva;
+}

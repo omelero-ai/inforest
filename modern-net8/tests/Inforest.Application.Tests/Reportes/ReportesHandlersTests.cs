@@ -532,4 +532,63 @@ public class ReportesHandlersTests
         Assert.Empty(resultado.Filas);
         Assert.Equal("RepDeliveryTicket.frx", resultado.NombrePlantilla);
     }
+
+    // ── BR-REP-018 Reservas ───────────────────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteReservasHandler_ConResultados_RetornaNombrePlantillaYFilas()
+    {
+        var parametros = new ReservaReporteParametros
+        {
+            FechaHoraInicio = new DateTime(2026, 8, 1, 8, 0, 0),
+            FechaHoraFin    = new DateTime(2026, 8, 1, 23, 59, 59),
+            EstadoGenerado  = true,
+            EstadoAtendido  = false,
+            EstadoAnulado   = false,
+            Orden           = OrdenReserva.Fecha
+        };
+
+        _repoMock.Setup(r => r.ObtenerReservasReporteAsync(parametros, default))
+            .ReturnsAsync(new List<ReservaReporteRow>
+            {
+                new()
+                {
+                    TReserva = "R001", Cliente = "Garcia Juan",
+                    TTelefono = "999111222", NPax = 4,
+                    FFecha = new DateTime(2026, 8, 1, 20, 0, 0),
+                    TEstadoReserva = "01", EstadoReserva = "GENERADO"
+                }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteReservasHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteReservasQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepReservas.frx", resultado.NombrePlantilla);
+        Assert.Equal("Reservas", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerReservasReporteAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteReservasHandler_SinDatos_RetornaListaVacia()
+    {
+        var parametros = new ReservaReporteParametros
+        {
+            FechaHoraInicio = DateTime.Today,
+            FechaHoraFin    = DateTime.Today.AddHours(23).AddMinutes(59),
+            EstadoGenerado  = true,
+            EstadoAtendido  = true,
+            EstadoAnulado   = true,
+            Orden           = OrdenReserva.Reserva
+        };
+
+        _repoMock.Setup(r => r.ObtenerReservasReporteAsync(parametros, default))
+            .ReturnsAsync(new List<ReservaReporteRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteReservasHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteReservasQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepReservas.frx", resultado.NombrePlantilla);
+    }
 }

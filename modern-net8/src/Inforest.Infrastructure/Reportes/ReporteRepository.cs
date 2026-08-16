@@ -849,4 +849,66 @@ internal sealed class ReporteRepository : IReporteRepository
         var result = await conn.QueryAsync<DeliveryTicketRow>(sql, sqlParams, commandTimeout: 120);
         return result.ToList().AsReadOnly();
     }
+
+    // ── Reservas — Reporte de Reservas ───────────────────────────────────────
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReservaReporteRow>> ObtenerReservasReporteAsync(
+        ReservaReporteParametros p,
+        CancellationToken ct = default)
+    {
+        _logger.LogInformation(
+            "Reporte Reservas: FechaInicio={FechaInicio} FechaFin={FechaFin} Generado={Generado} Atendido={Atendido} Anulado={Anulado} Orden={Orden}",
+            p.FechaHoraInicio, p.FechaHoraFin,
+            p.EstadoGenerado, p.EstadoAtendido, p.EstadoAnulado, p.Orden);
+
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var sqlParams = new DynamicParameters();
+        sqlParams.Add("fInicio", p.FechaHoraInicio);
+        sqlParams.Add("fFinal", p.FechaHoraFin);
+
+        // Filtro de estados equivalente al Legacy chkEstado
+        var estadosFiltro = new List<string>();
+        if (p.EstadoGenerado) estadosFiltro.Add("'01'");
+        if (p.EstadoAtendido) estadosFiltro.Add("'02'");
+        if (p.EstadoAnulado)  estadosFiltro.Add("'03'");
+
+        var whereEstado = estadosFiltro.Count > 0
+            ? $" AND TRESERVA.tEstadoReserva IN({string.Join(", ", estadosFiltro)})"
+            : string.Empty;
+
+        // Columna de ordenamiento — whitelist para evitar SQL injection
+        var orderBy = p.Orden switch
+        {
+            OrdenReserva.Nombre    => "TRESERVA.tNombre",
+            OrdenReserva.Telefono  => "TRESERVA.tTelefono",
+            OrdenReserva.Fecha     => "FFecha",
+            OrdenReserva.Pax       => "TRESERVA.nPax",
+            OrdenReserva.Estado    => "TRESERVA.tEstadoReserva",
+            _                      => "TRESERVA.tReserva"
+        };
+
+        // Query idéntica al Legacy (frmRepReservas.frm Sub ObtenerReservas)
+        var sql = $"""
+            SELECT TRESERVA.tReserva,
+                   TRESERVA.fFecha + TRESERVA.fHora AS FFecha,
+                   TRESERVA.tApellido,
+                   TRESERVA.tApellido + ' ' + TRESERVA.tNombre AS Cliente,
+                   TRESERVA.tNombre,
+                   TRESERVA.tTelefono,
+                   TRESERVA.nPax,
+                   TRESERVA.tEstadoReserva,
+                   TRESERVA.tObservacion,
+                   TRESERVA.fRegistro,
+                   UPPER(vEstadoReserva.Descripcion) AS EstadoReserva
+            FROM TRESERVA
+            LEFT JOIN vEstadoReserva ON TRESERVA.tEstadoReserva = vEstadoReserva.Codigo
+            WHERE (TRESERVA.fFecha + TRESERVA.fHora BETWEEN @fInicio AND @fFinal)
+            {whereEstado}
+            ORDER BY {orderBy} ASC
+            """;
+
+        var result = await conn.QueryAsync<ReservaReporteRow>(new CommandDefinition(sql, sqlParams, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
 }

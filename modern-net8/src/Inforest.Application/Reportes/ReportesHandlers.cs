@@ -597,3 +597,32 @@ public sealed class ObtenerReporteDeliveryTicketHandler
         };
     }
 }
+
+// ── BR-REP-018 — Reporte de Reservas ─────────────────────────────────────────
+
+/// <summary>
+/// Query para obtener el reporte de reservas.
+/// Legacy: <c>frmRepReservas.frm</c> — query dinámica sobre TRESERVA + vEstadoReserva.
+/// Regla: BR-REP-018
+/// </summary>
+public sealed record ObtenerReporteReservasQuery(ReservaReporteParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReporteReservasQuery"/>.</summary>
+public sealed class ObtenerReporteReservasHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReporteReservasHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<ReporteResultado<ReservaReporteRow>> HandleAsync(
+        ObtenerReporteReservasQuery q,
+        CancellationToken ct = default)
+    {
+        var filas = await _repo.ObtenerReservasReporteAsync(q.Parametros, ct);
+        return new ReporteResultado<ReservaReporteRow>
+        {
+            Filas = filas,
+            TituloReporte = "Reservas",
+            NombrePlantilla = "RepReservas.frx"
+        };
+    }
+}
