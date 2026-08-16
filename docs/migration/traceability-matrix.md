@@ -235,8 +235,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | **Etapa 10 — Reportes, Consultas y Salidas Operativas** | | | | | |
 | `spRep_Comanda` | SP | `ReporteRepository.ObtenerComandaAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
-| `dsrComandaD.Dsr` / `dsrComandaR.Dsr` | Crystal | `RepComanda.frx` / `RepComandaDetallado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
-| `frmRepComanda.frm` | Form | `FrmComandaReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmComandaReporte.cs` |
+| `dsrComandaD.Dsr` / `dsrComandaR.Dsr` | Crystal | `RepComanda.frx` (resumido) / `RepComandaDetallado.frx` (detallado) | FastReport | COMPLETED | `src/Inforest.Desktop/Reports/Templates/RepComanda.frx`, `src/Inforest.Desktop/Reports/Templates/RepComandaDetallado.frx` |
+| `frmRepComanda.frm` | Form | `FrmComandaReporte.cs` + `ObtenerReporteComandaHandler` + `ComandaRow` + `ObtenerComandaAsync` + BR-REP-001 + 2 tests | WinForm + Handler + DTO + Repository | COMPLETED | `src/Inforest.Desktop/Forms/Reportes/FrmComandaReporte.cs`, `src/Inforest.Application/Reportes/` |
 | `spRep_Propina` | SP | `ReporteRepository.ObtenerPropinaAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrPropinaD.Dsr` / `dsrPropinaR.Dsr` | Crystal | `RepPropina.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepPropina.frm` | Form | `FrmPropinaReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmPropinaReporte.cs` |

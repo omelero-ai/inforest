@@ -8,54 +8,88 @@ namespace Inforest.Desktop.Forms.Reportes;
 /// Formulario de filtro y emisión del Reporte de Comanda.
 /// <para>
 /// Legacy: <c>frmRepComanda.frm</c> → <c>spRep_Comanda</c>
-/// Crystal: <c>dsrComandaD.Dsr</c>, <c>dsrComandaR.Dsr</c>
-/// FastReport: <c>RepComanda.frx</c>, <c>RepComandaDetallado.frx</c>
+/// Crystal: <c>dsrComandaD.Dsr</c> (detallado), <c>dsrComandaR.Dsr</c> (resumido)
+/// FastReport: <c>RepComandaDetallado.frx</c> (detallado), <c>RepComanda.frx</c> (resumido)
 /// Regla: BR-REP-001
 /// </para>
+/// <remarks>
+/// Filtros heredados del Legacy:
+/// cboMozo / chkTodoMozo → <see cref="_chkTodosMeseros"/> / <see cref="_txtMozo"/>
+/// cboUsuario / chkTodoUsuario → <see cref="_chkTodosUsuarios"/> / <see cref="_txtUsuario"/>
+/// dtpFecIni + dtpHoraIni → <see cref="_dtpInicio"/> (formato dd/MM/yyyy HH:mm)
+/// dtpFecFin + dtpHoraFin → <see cref="_dtpFin"/> (formato dd/MM/yyyy HH:mm)
+/// OptDetalle / OptResumen → <see cref="_rdoDetallado"/> / <see cref="_rdoResumido"/>
+/// cboOrden → <see cref="_cmbOrden"/>
+/// </remarks>
 /// </summary>
-public partial class FrmComandaReporte : Form
+public sealed class FrmComandaReporte : Form
 {
     private readonly ObtenerReporteComandaHandler _handler;
     private readonly ILogger<FrmComandaReporte> _logger;
     private readonly string _rutaPlantillas;
 
+    private DateTimePicker _dtpInicio = null!;
+    private DateTimePicker _dtpFin = null!;
+    private ComboBox _cmbOrden = null!;
+    private RadioButton _rdoDetallado = null!;
+    private RadioButton _rdoResumido = null!;
+    private CheckBox _chkTodosMeseros = null!;
+    private TextBox _txtMozo = null!;
+    private CheckBox _chkTodosUsuarios = null!;
+    private TextBox _txtUsuario = null!;
+    private Label _lblEstado = null!;
+
     public FrmComandaReporte(
         ObtenerReporteComandaHandler handler,
         ILogger<FrmComandaReporte> logger,
-        string rutaPlantillas)
+        string rutaPlantillas = "Reports/Templates")
     {
-        InitializeComponent();
         _handler = handler;
         _logger = logger;
         _rutaPlantillas = rutaPlantillas;
+        InitializeComponent();
     }
 
-    private async void BtnVer_Click(object? sender, EventArgs e)
-    {
-        await EmitirReporteAsync(mostrar: true, imprimir: false);
-    }
+    private async void BtnEmitir_Click(object? sender, EventArgs e)
+        => await EmitirReporteAsync(mostrar: true, imprimir: false);
 
     private async void BtnImprimir_Click(object? sender, EventArgs e)
-    {
-        await EmitirReporteAsync(mostrar: false, imprimir: true);
-    }
+        => await EmitirReporteAsync(mostrar: false, imprimir: true);
 
     private async Task EmitirReporteAsync(bool mostrar, bool imprimir)
     {
-        if (!ValidarFiltros()) return;
+        if (_dtpInicio.Value > _dtpFin.Value)
+        {
+            MessageBox.Show("Error en Rango de Fechas.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        if (!_chkTodosMeseros.Checked && string.IsNullOrWhiteSpace(_txtMozo.Text))
+        {
+            MessageBox.Show("Debe ingresar un Mesero o marcar 'Todos los Meseros'.", Text,
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        if (!_chkTodosUsuarios.Checked && string.IsNullOrWhiteSpace(_txtUsuario.Text))
+        {
+            MessageBox.Show("Debe ingresar un Usuario o marcar 'Todos los Usuarios'.", Text,
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
 
         try
         {
-            BtnVer.Enabled = false;
-            BtnImprimir.Enabled = false;
-            lblEstado.Text = "Generando reporte...";
+            SetBotonesHabilitados(false);
+            _lblEstado.Text = "Generando reporte...";
 
+            var criterio = ConstruirCriterio();
             var query = new ObtenerReporteComandaQuery(
-                FlagTipo: ChkDetallado.Checked,
-                Orden: CmbOrden.SelectedItem?.ToString() ?? string.Empty,
-                FechaInicio: DtpInicio.Value.Date,
-                FechaFin: DtpFin.Value.Date.AddDays(1).AddSeconds(-1),
-                Criterio: TxtCriterio.Text.Trim());
+                FlagTipo: _rdoDetallado.Checked,
+                Orden: _cmbOrden.SelectedItem?.ToString() ?? "PEDIDO",
+                FechaInicio: _dtpInicio.Value,
+                FechaFin: _dtpFin.Value,
+                Criterio: criterio);
 
             var resultado = await _handler.HandleAsync(query);
 
@@ -69,84 +103,141 @@ public partial class FrmComandaReporte : Form
             if (mostrar) viewer.Mostrar();
             else if (imprimir) viewer.Imprimir();
 
-            lblEstado.Text = $"Reporte generado: {resultado.Filas.Count} registros";
+            _lblEstado.Text = $"Reporte generado: {resultado.Filas.Count} registros";
         }
         catch (FileNotFoundException ex)
         {
-            MessageBox.Show($"Plantilla no encontrada: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show($"Plantilla no encontrada: {ex.Message}", "Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al generar reporte Comanda");
-            MessageBox.Show($"Error al generar reporte: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            lblEstado.Text = "Error al generar reporte";
+            MessageBox.Show($"Error al generar reporte: {ex.Message}", "Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _lblEstado.Text = "Error al generar reporte";
         }
         finally
         {
-            BtnVer.Enabled = true;
-            BtnImprimir.Enabled = true;
+            SetBotonesHabilitados(true);
         }
     }
 
-    private bool ValidarFiltros()
+    /// <summary>
+    /// Construye el criterio SQL para <c>@sCriterio</c> del SP.
+    /// Legacy: sCriterio &amp;= " Mozo = '...'" / "usuario = '...'"
+    /// </summary>
+    private string ConstruirCriterio()
     {
-        if (DtpInicio.Value > DtpFin.Value)
-        {
-            MessageBox.Show("La fecha inicio no puede ser mayor a la fecha fin.", "Validación",
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return false;
-        }
-        return true;
+        var partes = new List<string>();
+
+        if (!_chkTodosMeseros.Checked && !string.IsNullOrWhiteSpace(_txtMozo.Text))
+            partes.Add($"Mozo = '{_txtMozo.Text.Trim().Replace("'", "''")}'");
+
+        if (!_chkTodosUsuarios.Checked && !string.IsNullOrWhiteSpace(_txtUsuario.Text))
+            partes.Add($"usuario = '{_txtUsuario.Text.Trim().Replace("'", "''")}'");
+
+        return string.Join(" and ", partes);
+    }
+
+    private void SetBotonesHabilitados(bool habilitado)
+    {
+        foreach (Control c in Controls)
+            if (c is Button btn && btn.Name is "BtnEmitir" or "BtnImprimir")
+                btn.Enabled = habilitado;
     }
 
     private void InitializeComponent()
     {
         Text = "Reporte de Comanda";
-        Size = new Size(520, 340);
+        Size = new Size(680, 400);
         StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
 
-        // ── Controles de filtro ──
-        var lblInicio = new Label { Text = "Fecha Inicio:", Location = new Point(12, 20), AutoSize = true };
-        DtpInicio = new DateTimePicker { Location = new Point(120, 16), Width = 160, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+        var panel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 9,
+            Padding = new Padding(12)
+        };
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200));
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-        var lblFin = new Label { Text = "Fecha Fin:", Location = new Point(12, 54), AutoSize = true };
-        DtpFin = new DateTimePicker { Location = new Point(120, 50), Width = 160, Format = DateTimePickerFormat.Short, Value = DateTime.Today };
+        // ── Fecha Inicio ──
+        _dtpInicio = new DateTimePicker
+        {
+            Format = DateTimePickerFormat.Custom,
+            CustomFormat = "dd/MM/yyyy HH:mm",
+            Value = DateTime.Today
+        };
+        panel.Controls.Add(new Label { Text = "Fecha Inicio:", Anchor = AnchorStyles.Left, AutoSize = true }, 0, 0);
+        panel.Controls.Add(_dtpInicio, 1, 0);
 
-        var lblOrden = new Label { Text = "Ordenar por:", Location = new Point(12, 88), AutoSize = true };
-        CmbOrden = new ComboBox { Location = new Point(120, 84), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
-        CmbOrden.Items.AddRange(["Pedido", "Comanda", "Mozo", "Fecha"]);
-        CmbOrden.SelectedIndex = 0;
+        // ── Fecha Fin ──
+        _dtpFin = new DateTimePicker
+        {
+            Format = DateTimePickerFormat.Custom,
+            CustomFormat = "dd/MM/yyyy HH:mm",
+            Value = DateTime.Today.AddDays(1).AddSeconds(-1)
+        };
+        panel.Controls.Add(new Label { Text = "Fecha Fin:", Anchor = AnchorStyles.Left, AutoSize = true }, 0, 1);
+        panel.Controls.Add(_dtpFin, 1, 1);
 
-        ChkDetallado = new CheckBox { Text = "Detallado (por ítem)", Location = new Point(120, 120), AutoSize = true };
+        // ── Mozo ──
+        _chkTodosMeseros = new CheckBox { Text = "Todos los Meseros", Checked = true, AutoSize = true, Anchor = AnchorStyles.Left };
+        _txtMozo = new TextBox { Enabled = false, Dock = DockStyle.Fill };
+        _chkTodosMeseros.CheckedChanged += (_, _) => _txtMozo.Enabled = !_chkTodosMeseros.Checked;
+        panel.Controls.Add(_chkTodosMeseros, 0, 2);
+        panel.Controls.Add(_txtMozo, 1, 2);
 
-        var lblCriterio = new Label { Text = "Filtro adicional:", Location = new Point(12, 156), AutoSize = true };
-        TxtCriterio = new TextBox { Location = new Point(120, 152), Width = 350, PlaceholderText = "Condición SQL adicional (opcional)" };
+        // ── Usuario ──
+        _chkTodosUsuarios = new CheckBox { Text = "Todos los Usuarios", Checked = true, AutoSize = true, Anchor = AnchorStyles.Left };
+        _txtUsuario = new TextBox { Enabled = false, Dock = DockStyle.Fill };
+        _chkTodosUsuarios.CheckedChanged += (_, _) => _txtUsuario.Enabled = !_chkTodosUsuarios.Checked;
+        panel.Controls.Add(_chkTodosUsuarios, 0, 3);
+        panel.Controls.Add(_txtUsuario, 1, 3);
+
+        // ── Ordenar por ──
+        _cmbOrden = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill };
+        _cmbOrden.Items.AddRange(["PEDIDO", "COMANDA"]);
+        _cmbOrden.SelectedIndex = 0;
+        panel.Controls.Add(new Label { Text = "Ordenar por:", Anchor = AnchorStyles.Left, AutoSize = true }, 0, 4);
+        panel.Controls.Add(_cmbOrden, 1, 4);
+
+        // ── Tipo de Reporte ──
+        _rdoDetallado = new RadioButton { Text = "Detallado", Checked = true, AutoSize = true, Anchor = AnchorStyles.Left };
+        _rdoResumido = new RadioButton { Text = "Resumido", AutoSize = true, Anchor = AnchorStyles.Left };
+        var pnlTipo = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, AutoSize = true };
+        pnlTipo.Controls.Add(_rdoDetallado);
+        pnlTipo.Controls.Add(_rdoResumido);
+        panel.Controls.Add(new Label { Text = "Tipo Reporte:", Anchor = AnchorStyles.Left, AutoSize = true }, 0, 5);
+        panel.Controls.Add(pnlTipo, 1, 5);
+
+        // ── Estado ──
+        _lblEstado = new Label { Dock = DockStyle.Fill, ForeColor = System.Drawing.Color.DimGray, AutoSize = false };
+        panel.SetColumnSpan(_lblEstado, 2);
+        panel.Controls.Add(_lblEstado, 0, 6);
 
         // ── Botones ──
-        BtnVer = new Button { Text = "Ver Reporte", Location = new Point(120, 220), Width = 120 };
-        BtnImprimir = new Button { Text = "Imprimir", Location = new Point(260, 220), Width = 100 };
-        var BtnCerrar = new Button { Text = "Cerrar", Location = new Point(380, 220), Width = 100 };
-        BtnCerrar.Click += (s, e) => Close();
+        var pnlBotones = new FlowLayoutPanel
+        {
+            FlowDirection = FlowDirection.LeftToRight,
+            AutoSize = true,
+            Dock = DockStyle.Fill
+        };
+        var btnEmitir = new Button { Text = "Ver Reporte", Width = 120, Name = "BtnEmitir" };
+        var btnImprimir = new Button { Text = "Imprimir", Width = 100, Name = "BtnImprimir" };
+        var btnCerrar = new Button { Text = "Cerrar", Width = 100 };
+        btnEmitir.Click += BtnEmitir_Click;
+        btnImprimir.Click += BtnImprimir_Click;
+        btnCerrar.Click += (_, _) => Close();
+        pnlBotones.Controls.AddRange([btnEmitir, btnImprimir, btnCerrar]);
+        panel.SetColumnSpan(pnlBotones, 2);
+        panel.Controls.Add(pnlBotones, 0, 7);
 
-        lblEstado = new Label { Location = new Point(12, 264), Width = 480, AutoSize = false, ForeColor = System.Drawing.Color.Gray };
-
-        BtnVer.Click += BtnVer_Click;
-        BtnImprimir.Click += BtnImprimir_Click;
-
-        Controls.AddRange([lblInicio, DtpInicio, lblFin, DtpFin, lblOrden, CmbOrden,
-            ChkDetallado, lblCriterio, TxtCriterio, BtnVer, BtnImprimir, BtnCerrar, lblEstado]);
+        Controls.Add(panel);
     }
-
-    // ── Campos de controles ──
-    private DateTimePicker DtpInicio = null!;
-    private DateTimePicker DtpFin = null!;
-    private ComboBox CmbOrden = null!;
-    private CheckBox ChkDetallado = null!;
-    private TextBox TxtCriterio = null!;
-    private Button BtnVer = null!;
-    private Button BtnImprimir = null!;
-    private Label lblEstado = null!;
 }

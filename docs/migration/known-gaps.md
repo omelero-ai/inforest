@@ -137,3 +137,11 @@
 | GAP-DEL-004 | RappiOrderAdapter HTTP | `RappiOrderAdapter` retorna lista vacía. El conector HTTP real a la API de Rappi no está implementado | `Inforest.Infrastructure/Delivery/RappiOrderAdapter.cs` | NOT_STARTED |
 | GAP-DEL-005 | Reportes FastReport Etapa 9 | 8 reportes del módulo Despachador/Motorizado: RepAnaliticoMotorizado, RepControlMotorizado, RepTiempoDelivery, RepPlanillaMovilidad, RepClienteDelivery, RepPedido, variantes integradas — handlers y repositorio implementados en Etapa 10; plantillas .frx pendientes | `Reportes/` | IN_PROGRESS — Etapa 10 |
 | GAP-DEL-006 | Formularios WinForms faltantes | Pendientes: ClienteDeliveryForm, PedidoDeliveryForm, OrdenesConsolaForm, BusquedaDeliveryForm | `frmClienteDelivery.frm`, `frmPedidoDelivery.frm`, `frmOrdenesConsola.frm`, `frmBusquedaDelivery.frm` | IN_PROGRESS |
+
+---
+
+## POS-FUNC-017 — frmRepComanda (spRep_Comanda)
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-REP-020 | NCantidad no mapeado en modo Resumido | En modo Resumido (`@flagTipo=0`), el SP retorna la columna `Cantidad` (alias de `Sum(DPEDIDO.nCantidad)`). Dapper no la mapea a `ComandaRow.NCantidad` porque los nombres difieren. El valor de cantidad queda en 0 en el DTO Resumido. Se mantiene el mismo DTO `ComandaRow` para ambos modos. Solución futura: SP puede renombrar alias a `nCantidad` o usar un DTO separado `ComandaResumidoRow`. | `5. SP.sql` — `spRep_Comanda` modo `@flagTipo=0` | OPEN — no crítico, afecta solo la columna cantidad en Resumido |
