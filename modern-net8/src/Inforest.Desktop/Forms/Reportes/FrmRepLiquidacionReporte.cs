@@ -95,11 +95,11 @@ public sealed class FrmRepLiquidacionReporte : Form
             await Task.WhenAll(usuariosTask, sectoresTask);
 
             _cboUsuario.Items.Clear();
-            foreach (var u in await usuariosTask)
+            foreach (var u in usuariosTask.Result)
                 _cboUsuario.Items.Add(new FiltroItem(u.Codigo, u.Descripcion));
 
             _cboSectorVenta.Items.Clear();
-            foreach (var s in await sectoresTask)
+            foreach (var s in sectoresTask.Result)
                 _cboSectorVenta.Items.Add(new FiltroItem(s.Codigo, s.Descripcion));
         }
         catch (Exception ex)

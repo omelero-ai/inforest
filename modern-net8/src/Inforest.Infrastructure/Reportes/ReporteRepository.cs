@@ -1157,7 +1157,7 @@ internal sealed class ReporteRepository : IReporteRepository
         using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
         var spName = p.UsarVarianteNc ? "spRep_LiquidacionSuma_NC" : "spRep_LiquidacionSuma";
         var dp = new DynamicParameters();
-        dp.Add("@flagTurno", p.ModoFiltro == LiquidacionModoFiltro.PorTurno ? false : true);
+        dp.Add("@flagTurno", p.ModoFiltro != LiquidacionModoFiltro.PorTurno);
         dp.Add("@flagDiaContable", p.PorDiaContable);
         dp.Add("@sturno", p.Turno);
         dp.Add("@sUsuario", p.Usuario);
@@ -1259,7 +1259,7 @@ internal sealed class ReporteRepository : IReporteRepository
     /// </summary>
     private static void AgregarParametrosLiquidacionBase(DynamicParameters dp, LiquidacionParametros p)
     {
-        dp.Add("@flagTurno", p.ModoFiltro == LiquidacionModoFiltro.PorTurno ? false : true);
+        dp.Add("@flagTurno", p.ModoFiltro != LiquidacionModoFiltro.PorTurno);
         dp.Add("@flagDiaContable", p.PorDiaContable);
         dp.Add("@sturno", p.Turno);
         dp.Add("@sUsuario", p.Usuario);

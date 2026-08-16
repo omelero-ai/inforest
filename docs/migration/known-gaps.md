@@ -145,3 +145,11 @@
 | ID | Gap | Descripción | Archivo Origen | Estado |
 |---|---|---|---|---|
 | GAP-REP-020 | NCantidad no mapeado en modo Resumido | En modo Resumido (`@flagTipo=0`), el SP retorna la columna `Cantidad` (alias de `Sum(DPEDIDO.nCantidad)`). Dapper no la mapea a `ComandaRow.NCantidad` porque los nombres difieren. El valor de cantidad queda en 0 en el DTO Resumido. Se mantiene el mismo DTO `ComandaRow` para ambos modos. Solución futura: SP puede renombrar alias a `nCantidad` o usar un DTO separado `ComandaResumidoRow`. | `5. SP.sql` — `spRep_Comanda` modo `@flagTipo=0` | OPEN — no crítico, afecta solo la columna cantidad en Resumido |
+
+---
+
+## POS-FUNC-017 — frmRepLiquidacion (Liquidación de Cajero)
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-REP-021 | Diálogo búsqueda de turno (frmBusca) | El botón "..." en FrmRepLiquidacionReporte abre `frmBusca` en VB6 mostrando MTURNO con columnas Turno/Caja/FechaInicial/FechaFinal. En .NET 8 el botón solo otorga foco al campo de texto. Pendiente: implementar un diálogo de búsqueda de turnos equivalente a `frmBusca` reutilizable. | `frmRepLiquidacion.frm` — cmdBusca_Click | OPEN — el usuario puede ingresar el código de turno manualmente |
