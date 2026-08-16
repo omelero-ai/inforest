@@ -1028,12 +1028,6 @@ internal sealed class ReporteRepository : IReporteRepository
         return result.ToList().AsReadOnly();
     }
 
-    /// <summary>Devuelve el último día del mes respetando el año bisiesto. Legacy: Select Case CmbMes.</summary>
-    private static int DiasEnMes(int ano, int mes) =>
-        mes switch
-        {
-            2  => ano % 4 == 0 ? 29 : 28,
-            1 or 3 or 5 or 7 or 8 or 10 or 12 => 31,
-            _  => 30
-        };
+    /// <summary>Devuelve el último día del mes usando reglas gregorianas completas. Legacy: Select Case CmbMes.</summary>
+    private static int DiasEnMes(int ano, int mes) => DateTime.DaysInMonth(ano, mes);
 }

@@ -78,6 +78,7 @@ static class Program
                 services.AddTransient<FrmRepDeliveryTicketReporte>();
                 services.AddTransient<FrmRepReservasReporte>();
                 services.AddTransient<FrmRepEntregaReporte>();
+                services.AddTransient<FrmRepVentaFechaReporte>();
             });
     }
 }

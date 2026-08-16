@@ -68,6 +68,7 @@ public class FrmPuntoVenta : Form
         reportes.DropDownItems.Add("Cierre Cajeros Delivery", null, (_, _) => AbrirReporte<FrmRepDeliveryTicketReporte>());
         reportes.DropDownItems.Add("Reporte de Reservas", null, (_, _) => AbrirReporte<FrmRepReservasReporte>());
         reportes.DropDownItems.Add("Reporte de Entregas", null, (_, _) => AbrirReporte<FrmRepEntregaReporte>());
+        reportes.DropDownItems.Add("Venta Mensual por Fechas", null, (_, _) => AbrirReporte<FrmRepVentaFechaReporte>());
         reportes.DropDownItems.Add("Cta Cte Integrado", null, (_, _) => AbrirReporte<FrmCtaCteIntegradoReporte>());
         menu.Items.Add(reportes);
         menu.Items.Add(new ToolStripMenuItem("Administración", null, (_, _) => MessageBox.Show("Abrir FrmAdministracion desde el shell principal.", Text)));
