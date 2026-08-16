@@ -382,6 +382,55 @@ public sealed class LiquidacionTicketRow
 }
 
 /// <summary>
+/// Fila del reporte "Cierre de Cajeros Delivery".
+/// Legacy: <c>frmRepDeliveryTicket.frm</c> (query dinámica sobre MDOCUMENTO/DPREPAGO/MPEDIDO).
+/// Regla: BR-REP-017
+/// </summary>
+public sealed class DeliveryTicketRow
+{
+    public string TCaja { get; init; } = string.Empty;
+    public string TTipoPago { get; init; } = string.Empty;
+    public string TipoPago { get; init; } = string.Empty;
+    public string TMotorizado { get; init; } = string.Empty;
+    public string Motorizado { get; init; } = string.Empty;
+    public string TDocumento { get; init; } = string.Empty;
+    public DateTime FRegistro { get; init; }
+    public double NVenta { get; init; }
+    public string TTurno { get; init; } = string.Empty;
+    public string TUsuario { get; init; } = string.Empty;
+    public string TMoneda { get; init; } = string.Empty;
+    public string Mon { get; init; } = string.Empty;
+    public double NTipoCambio { get; init; }
+    public double NMonto { get; init; }
+    public double NVuelto { get; init; }
+    public string Tarjeta { get; init; } = string.Empty;
+    public string TNumero { get; init; } = string.Empty;
+    public string OtroTipo { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Parámetros de filtro para el reporte "Cierre de Cajeros Delivery".
+/// Legacy: <c>frmRepDeliveryTicket.frm</c> — filtros: turno o rango fechas, caja, motorizado.
+/// Regla: BR-REP-017
+/// </summary>
+public sealed class DeliveryTicketParametros
+{
+    /// <summary>true = filtra por rango de fechas; false = turno específico.</summary>
+    public bool TodosTurnos { get; init; } = true;
+    public string Turno { get; init; } = string.Empty;
+    public DateTime FechaInicio { get; init; }
+    public DateTime FechaFin { get; init; }
+
+    /// <summary>true = todas las cajas; false = sólo <see cref="Caja"/>.</summary>
+    public bool TodasLasCajas { get; init; } = true;
+    public string Caja { get; init; } = string.Empty;
+
+    /// <summary>true = todos los motorizados; false = sólo <see cref="Motorizado"/>.</summary>
+    public bool TodosLosMotorizados { get; init; } = true;
+    public string Motorizado { get; init; } = string.Empty;
+}
+
+/// <summary>
 /// Fila agregada del paloteo por ticketera.
 /// Legacy: <c>frmRepPaloteoTicket.frm</c> (query dinámica sobre MPEDIDO/DPEDIDO/CPEDIDO).
 /// Regla: BR-REP-016

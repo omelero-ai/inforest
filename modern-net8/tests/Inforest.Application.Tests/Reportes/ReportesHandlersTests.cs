@@ -474,4 +474,62 @@ public class ReportesHandlersTests
         Assert.Empty(resultado.Filas);
         Assert.Equal("RepPaloteoTicket.frx", resultado.NombrePlantilla);
     }
+
+    // ── BR-REP-017 DeliveryTicket ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteDeliveryTicketHandler_ConResultados_RetornaNombrePlantillaYFilas()
+    {
+        var parametros = new DeliveryTicketParametros
+        {
+            TodosTurnos = false,
+            Turno = "T001",
+            TodasLasCajas = true,
+            TodosLosMotorizados = true
+        };
+
+        _repoMock.Setup(r => r.ObtenerDeliveryTicketAsync(parametros, default))
+            .ReturnsAsync(new List<DeliveryTicketRow>
+            {
+                new()
+                {
+                    TCaja = "001", TTipoPago = "01", TipoPago = "Efectivo",
+                    TMotorizado = "M001", Motorizado = "Juan", TDocumento = "B001-0001",
+                    FRegistro = DateTime.Today, NVenta = 50.00, NMonto = 50.00, NVuelto = 0,
+                    TMoneda = "01", Mon = "S/.", TTurno = "T001", TUsuario = "USR1"
+                }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReporteDeliveryTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteDeliveryTicketQuery(parametros));
+
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepDeliveryTicket.frx", resultado.NombrePlantilla);
+        Assert.Equal("Cierre de Cajeros Delivery", resultado.TituloReporte);
+        _repoMock.Verify(r => r.ObtenerDeliveryTicketAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteDeliveryTicketHandler_SinResultados_RetornaListaVacia()
+    {
+        var parametros = new DeliveryTicketParametros
+        {
+            TodosTurnos = true,
+            FechaInicio = DateTime.Today.AddDays(-1),
+            FechaFin = DateTime.Today,
+            TodasLasCajas = false,
+            Caja = "002",
+            TodosLosMotorizados = false,
+            Motorizado = "M002"
+        };
+
+        _repoMock.Setup(r => r.ObtenerDeliveryTicketAsync(parametros, default))
+            .ReturnsAsync(new List<DeliveryTicketRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteDeliveryTicketHandler(_repoMock.Object);
+        var resultado = await handler.HandleAsync(new ObtenerReporteDeliveryTicketQuery(parametros));
+
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepDeliveryTicket.frx", resultado.NombrePlantilla);
+    }
 }

@@ -568,3 +568,32 @@ public sealed class ObtenerReportePaloteoTicketHandler
         };
     }
 }
+
+// ── DeliveryTicket — Cierre de Cajeros Delivery ───────────────────────────────
+
+/// <summary>
+/// Query para obtener el reporte "Cierre de Cajeros Delivery".
+/// Legacy: <c>frmRepDeliveryTicket.frm</c>
+/// Regla: BR-REP-017
+/// </summary>
+public sealed record ObtenerReporteDeliveryTicketQuery(DeliveryTicketParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReporteDeliveryTicketQuery"/>.</summary>
+public sealed class ObtenerReporteDeliveryTicketHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReporteDeliveryTicketHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<ReporteResultado<DeliveryTicketRow>> HandleAsync(
+        ObtenerReporteDeliveryTicketQuery q,
+        CancellationToken ct = default)
+    {
+        var filas = await _repo.ObtenerDeliveryTicketAsync(q.Parametros, ct);
+        return new ReporteResultado<DeliveryTicketRow>
+        {
+            Filas = filas,
+            TituloReporte = "Cierre de Cajeros Delivery",
+            NombrePlantilla = "RepDeliveryTicket.frx"
+        };
+    }
+}

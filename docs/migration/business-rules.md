@@ -1233,6 +1233,30 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-REP-017
+
+**Nombre:** Cierre de Cajeros Delivery — pagos delivery agrupados por caja/motorizado/tipo pago
+
+**Origen:** `frmRepDeliveryTicket.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepDeliveryTicket.frm`
+
+**Procedimiento/Función:** `Genera` + query dinámica sobre `MDOCUMENTO/DPREPAGO/MPEDIDO/vMotorizado/vTipoPago/vMoneda/TTARJETACREDITO/vTipoCancelacion`
+
+**Descripción:** El formulario emite el cierre de cajeros del canal delivery, mostrando los comprobantes agrupados por caja, motorizado y tipo de pago. Solo incluye pedidos con `tTipoPedido='02'` (delivery) y documentos con `tEstadoDocumento='01'`. El filtro temporal opera por turno (`MDOCUMENTO.tTurno`) o por rango de fechas/horas (`MDOCUMENTO.fRegistro`). Filtros opcionales por caja y motorizado específicos.
+
+**Condición:** Al ejecutar `ObtenerReporteDeliveryTicketQuery`
+
+**Resultado:** Dataset `DeliveryTicketRow` con campos: `TCaja`, `TTipoPago`, `TipoPago`, `TMotorizado`, `Motorizado`, `TDocumento`, `FRegistro`, `NVenta`, `TTurno`, `TUsuario`, `TMoneda`, `Mon`, `NTipoCambio`, `NMonto`, `NVuelto`, `Tarjeta`, `TNumero`, `OtroTipo`. Ordenado por caja → motorizado → tipo pago → moneda → documento.
+
+**Excepciones:** En modo turno, `Turno` es obligatorio. Si se filtra por caja/motorizado específico, el campo correspondiente es obligatorio. Si no hay filas, el reporte no se emite y se muestra mensaje: "No se tienen Comprobantes pendientes de cobro del Canal Delivery".
+
+**Destino .NET:** `ObtenerReporteDeliveryTicketHandler`, `ReporteRepository.ObtenerDeliveryTicketAsync`, `FrmRepDeliveryTicketReporte.cs`, `RepDeliveryTicket.frx`
+
+**Estado:** MIGRATED
+
+---
+
 ### BR-REP-006
 
 **Nombre:** Paloteo Sub-Productos — apertura por componentes de combo

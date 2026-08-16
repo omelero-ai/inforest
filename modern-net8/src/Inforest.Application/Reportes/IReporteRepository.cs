@@ -223,6 +223,15 @@ public interface IReporteRepository
     Task<IReadOnlyList<PaloteoTicketRow>> ObtenerPaloteoTicketAsync(
         PaloteoTicketParametros parametros,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene filas del reporte "Cierre de Cajeros Delivery".
+    /// Legacy: <c>frmRepDeliveryTicket.frm</c> — query dinámica sobre MDOCUMENTO/DPREPAGO/MPEDIDO.
+    /// Regla: BR-REP-017
+    /// </summary>
+    Task<IReadOnlyList<DeliveryTicketRow>> ObtenerDeliveryTicketAsync(
+        DeliveryTicketParametros parametros,
+        CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────

@@ -746,4 +746,107 @@ internal sealed class ReporteRepository : IReporteRepository
             sqlParams.Add(parametro, valor);
         }
     }
+
+    // ── Delivery Ticket — Cierre de Cajeros Delivery ─────────────────────────
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<DeliveryTicketRow>> ObtenerDeliveryTicketAsync(
+        DeliveryTicketParametros p,
+        CancellationToken ct = default)
+    {
+        _logger.LogInformation(
+            "Reporte DeliveryTicket: TodosTurnos={TodosTurnos} Turno={Turno} TodasCajas={TodasCajas} TodosMotorizados={TodosMotorizados}",
+            p.TodosTurnos,
+            string.IsNullOrWhiteSpace(p.Turno) ? "(todos)" : p.Turno,
+            p.TodasLasCajas,
+            p.TodosLosMotorizados);
+
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var sqlParams = new DynamicParameters();
+
+        // Criterio de tiempo (turno o rango de fechas)
+        string criterioPrincipal;
+        if (!p.TodosTurnos)
+        {
+            criterioPrincipal = "MDOCUMENTO.tTurno = @Turno";
+            sqlParams.Add("Turno", p.Turno);
+        }
+        else
+        {
+            criterioPrincipal = "MDOCUMENTO.fRegistro >= @FechaInicio AND MDOCUMENTO.fRegistro <= @FechaFin";
+            sqlParams.Add("FechaInicio", p.FechaInicio);
+            sqlParams.Add("FechaFin", p.FechaFin);
+        }
+
+        // Filtro caja opcional
+        var filtrosExtra = new List<string>();
+        if (!p.TodasLasCajas && !string.IsNullOrWhiteSpace(p.Caja))
+        {
+            filtrosExtra.Add("MDOCUMENTO.tCaja = @Caja");
+            sqlParams.Add("Caja", p.Caja);
+        }
+
+        // Filtro motorizado opcional
+        if (!p.TodosLosMotorizados && !string.IsNullOrWhiteSpace(p.Motorizado))
+        {
+            filtrosExtra.Add("MPEDIDO.tMotorizado = @Motorizado");
+            sqlParams.Add("Motorizado", p.Motorizado);
+        }
+
+        var whereSuffix = filtrosExtra.Count > 0
+            ? " AND " + string.Join(" AND ", filtrosExtra)
+            : string.Empty;
+
+        // Query idéntica al Legacy (frmRepDeliveryTicket.frm Sub Genera)
+        var sql = $"""
+            SELECT dbo.MDOCUMENTO.tCaja,
+                   dbo.DPREPAGO.tTipoPago,
+                   dbo.vTipoPago.Descripcion AS TipoPago,
+                   dbo.MPEDIDO.tMotorizado,
+                   dbo.vMotorizado.Descripcion AS Motorizado,
+                   dbo.DPREPAGO.tDocumento,
+                   dbo.MDOCUMENTO.fRegistro,
+                   dbo.MDOCUMENTO.nVenta,
+                   dbo.MDOCUMENTO.tTurno,
+                   dbo.MDOCUMENTO.tUsuario,
+                   dbo.DPREPAGO.tMoneda,
+                   dbo.vMoneda.tResumido AS Mon,
+                   dbo.DPREPAGO.nTipoCambio,
+                   dbo.DPREPAGO.nMonto,
+                   dbo.DPREPAGO.nVuelto,
+                   dbo.TTARJETACREDITO.tDetallado AS Tarjeta,
+                   dbo.DPREPAGO.tNumero,
+                   dbo.vTipoCancelacion.Descripcion AS OtroTipo
+            FROM dbo.MPEDIDO
+            LEFT OUTER JOIN dbo.vMotorizado
+                ON dbo.MPEDIDO.tMotorizado = dbo.vMotorizado.Codigo
+            RIGHT OUTER JOIN
+                (SELECT DISTINCT tDocumento, tCodigoPedido FROM DDOCUMENTO) T1
+            INNER JOIN dbo.vMoneda
+            INNER JOIN dbo.vTipoPago
+            INNER JOIN dbo.DPREPAGO
+                ON dbo.vTipoPago.Codigo = dbo.DPREPAGO.tTipoPago
+                ON dbo.vMoneda.Codigo = dbo.DPREPAGO.tMoneda
+            LEFT OUTER JOIN dbo.MDOCUMENTO
+                ON dbo.DPREPAGO.tDocumento = dbo.MDOCUMENTO.tDocumento
+                ON T1.tDocumento = dbo.DPREPAGO.tDocumento
+                ON dbo.MPEDIDO.tCodigoPedido = T1.tCodigoPedido COLLATE Modern_Spanish_CI_AS
+            LEFT OUTER JOIN dbo.TTARJETACREDITO
+                ON dbo.DPREPAGO.tTarjeta = dbo.TTARJETACREDITO.tCodigoTarjeta
+            LEFT OUTER JOIN dbo.vTipoCancelacion
+                ON dbo.DPREPAGO.tOtroTipoPago = dbo.vTipoCancelacion.Codigo
+            WHERE tTipoPedido = '02'
+              AND tEstadoDocumento = '01'
+              AND {criterioPrincipal}
+              {whereSuffix}
+            ORDER BY dbo.MDOCUMENTO.tCaja,
+                     dbo.MPEDIDO.tMotorizado,
+                     dbo.DPREPAGO.tTipoPago,
+                     dbo.DPREPAGO.tMoneda,
+                     dbo.MDOCUMENTO.tDocumento
+            """;
+
+        var result = await conn.QueryAsync<DeliveryTicketRow>(sql, sqlParams, commandTimeout: 120);
+        return result.ToList().AsReadOnly();
+    }
 }
