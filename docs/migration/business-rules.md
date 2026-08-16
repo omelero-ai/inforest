@@ -1063,9 +1063,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** Si `@sCondicion` no está vacío, se añade como AND al WHERE del SQL dinámico.
 
-**Destino .NET:** `ObtenerReportePropinaHandler`, `FrmPropinaReporte.cs`, `RepPropina.frx`
+**Destino .NET:** `ObtenerReportePropinaHandler`, `FrmPropinaReporte.cs`, `RepPropina.frx` (Detallado), `RepPropinaResumido.frx` (Resumido)
 
-**Estado:** IN_PROGRESS
+**Estado:** COMPLETED
 
 ---
 

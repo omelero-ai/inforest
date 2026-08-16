@@ -93,6 +93,30 @@ public class ReportesHandlersTests
         Assert.Equal("RepPropina.frx", resultado.NombrePlantilla);
     }
 
+    [Fact]
+    public async Task ObtenerReportePropinaHandler_EsResumido_RetornaPlantillaResumido()
+    {
+        // Arrange — BR-REP-002 modo Resumido (optOpcion(1) del Legacy)
+        var inicio = new DateTime(2026, 2, 1);
+        var fin = new DateTime(2026, 2, 28);
+        _repoMock.Setup(r => r.ObtenerPropinaAsync(inicio, fin, "tmozo = '01'", default))
+            .ReturnsAsync(new List<PropinaRow>
+            {
+                new() { Propina = 8.50, Trabajador = "Maria", TMozo = "01" }
+            }.AsReadOnly());
+
+        var handler = new ObtenerReportePropinaHandler(_repoMock.Object);
+        var query = new ObtenerReportePropinaQuery(inicio, fin, Condicion: "tmozo = '01'", EsDetallado: false);
+
+        // Act
+        var resultado = await handler.HandleAsync(query);
+
+        // Assert
+        Assert.Single(resultado.Filas);
+        Assert.Equal(8.50, resultado.Filas[0].Propina);
+        Assert.Equal("RepPropinaResumido.frx", resultado.NombrePlantilla);
+    }
+
     // ── BR-REP-003 — PrincipalCliente ────────────────────────────────────────
 
     [Fact]

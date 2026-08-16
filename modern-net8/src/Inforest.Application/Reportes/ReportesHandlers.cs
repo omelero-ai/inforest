@@ -42,11 +42,20 @@ public sealed class ObtenerReporteComandaHandler
 
 // ── BR-REP-002 — Propina ─────────────────────────────────────────────────────
 
-/// <summary>Query para reporte de propina. Legacy: <c>frmRepPropina.frm</c>, <c>spRep_Propina</c></summary>
+/// <summary>
+/// Query para reporte de propina.
+/// Legacy: <c>frmRepPropina.frm</c>, <c>spRep_Propina</c>
+/// Regla: BR-REP-002
+/// </summary>
 public sealed record ObtenerReportePropinaQuery(
     DateTime FechaInicio,
     DateTime FechaFin,
-    string Condicion = "");
+    string Condicion = "",
+    /// <summary>
+    /// true = Detallado (dsrPropinaD); false = Resumido (dsrPropinaR).
+    /// Legacy: optOpcion(0)=Detallado, optOpcion(1)=Resumido
+    /// </summary>
+    bool EsDetallado = true);
 
 /// <summary>Handler para <see cref="ObtenerReportePropinaQuery"/>.</summary>
 public sealed class ObtenerReportePropinaHandler
@@ -63,7 +72,7 @@ public sealed class ObtenerReportePropinaHandler
         {
             Filas = filas,
             TituloReporte = "Reporte de Propinas",
-            NombrePlantilla = "RepPropina.frx"
+            NombrePlantilla = q.EsDetallado ? "RepPropina.frx" : "RepPropinaResumido.frx"
         };
     }
 }
