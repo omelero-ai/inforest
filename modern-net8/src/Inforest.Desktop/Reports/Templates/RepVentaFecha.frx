@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Reporte Venta Mensual por Fechas - Legacy: frmRepVentaFecha.frm / spRep_VentaFecha">
+  <Dictionary>
+    <TableDataSource Name="VentaFecha" DataType="System.Int32" Enabled="true">
+      <Column Name="Dia" DataType="System.Int32" />
+      <Column Name="Salon" DataType="System.Double" />
+      <Column Name="Delivery" DataType="System.Double" />
+      <Column Name="Llevar" DataType="System.Double" />
+      <Column Name="Canal4" DataType="System.Double" />
+      <Column Name="Canal5" DataType="System.Double" />
+      <Column Name="Venta" DataType="System.Double" />
+      <Column Name="Cantidad" DataType="System.Int32" />
+      <Column Name="Pax" DataType="System.Int32" />
+      <Column Name="Fecha" DataType="System.DateTime" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="297" PaperHeight="210" Landscape="true">
+    <ReportTitleBand Name="ReportTitle1" Width="1047.06" Height="28.35">
+      <TextObject Name="Title" Width="1047.06" Height="28.35" Text="Comparativo de Venta Mensual por Fechas" Font="Arial, 12pt, style=Bold" HorzAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="32.35" Width="1047.06" Height="18.9">
+      <TextObject Name="hFecha"  Left="0"   Width="100" Height="18.9" Text="Fecha"    Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="hDia"    Left="105"  Width="50"  Height="18.9" Text="Día"      Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hSalon"  Left="160"  Width="100" Height="18.9" Text="Salón"    Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hDel"    Left="265"  Width="100" Height="18.9" Text="Delivery" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hLlev"   Left="370"  Width="100" Height="18.9" Text="Llevar"   Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hCan4"   Left="475"  Width="100" Height="18.9" Text="Canal 4"  Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hCan5"   Left="580"  Width="100" Height="18.9" Text="Canal 5"  Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hVenta"  Left="685"  Width="110" Height="18.9" Text="Venta"    Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hCant"   Left="800"  Width="70"  Height="18.9" Text="Cantidad" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hPax"    Left="875"  Width="70"  Height="18.9" Text="Pax"      Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Top="55.25" Width="1047.06" Height="18.9" DataSource="VentaFecha">
+      <TextObject Name="dFecha"  Left="0"   Width="100" Height="18.9" Text="[VentaFecha.Fecha]" Format="Date" Format.Pattern="dd/MM/yyyy" Font="Arial, 8pt" />
+      <TextObject Name="dDia"    Left="105"  Width="50"  Height="18.9" Text="[VentaFecha.Dia]"      Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dSalon"  Left="160"  Width="100" Height="18.9" Text="[VentaFecha.Salon]"    Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dDel"    Left="265"  Width="100" Height="18.9" Text="[VentaFecha.Delivery]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dLlev"   Left="370"  Width="100" Height="18.9" Text="[VentaFecha.Llevar]"   Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dCan4"   Left="475"  Width="100" Height="18.9" Text="[VentaFecha.Canal4]"   Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dCan5"   Left="580"  Width="100" Height="18.9" Text="[VentaFecha.Canal5]"   Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dVenta"  Left="685"  Width="110" Height="18.9" Text="[VentaFecha.Venta]"    Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dCant"   Left="800"  Width="70"  Height="18.9" Text="[VentaFecha.Cantidad]" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dPax"    Left="875"  Width="70"  Height="18.9" Text="[VentaFecha.Pax]"      Font="Arial, 8pt" HorzAlign="Right" />
+    </DataBand>
+    <GroupFooterBand Name="Summary1" Top="78.15" Width="1047.06" Height="18.9">
+      <TextObject Name="sTotLabel" Left="580" Width="105" Height="18.9" Text="TOTAL:" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="sTotVenta" Left="685" Width="110" Height="18.9" Text="[Sum(VentaFecha.Venta)]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="sTotCant"  Left="800" Width="70"  Height="18.9" Text="[Sum(VentaFecha.Cantidad)]" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="sTotPax"   Left="875" Width="70"  Height="18.9" Text="[Sum(VentaFecha.Pax)]"      Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+    </GroupFooterBand>
+    <PageFooterBand Name="PageFooter1" Top="101.05" Width="1047.06" Height="18.9">
+      <TextObject Name="pfPage" Left="940" Width="107.06" Height="18.9" Text="Pág [Page] de [TotalPages]" Font="Arial, 7pt" HorzAlign="Right" />
+      <TextObject Name="pfDate" Left="0"   Width="200" Height="18.9" Text="[Date]" Format="Date" Format.Pattern="dd/MM/yyyy HH:mm" Font="Arial, 7pt" />
+    </PageFooterBand>
+  </ReportPage>
+</Report>

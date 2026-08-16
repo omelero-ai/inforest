@@ -954,4 +954,86 @@ internal sealed class ReporteRepository : IReporteRepository
 
         return result.ToList().AsReadOnly();
     }
+
+    // ── BR-REP-020 — Venta Mensual por Fechas ─────────────────────────────────
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<VentaFechaRow>> ObtenerVentaFechaAsync(
+        VentaFechaParametros p,
+        CancellationToken ct = default)
+    {
+        _logger.LogInformation(
+            "Reporte VentaFecha: Ano={Ano} Mes={Mes} HoraCierre={HoraCierre} TipoPrecio={TipoPrecio} EvaluarPorDoc={EvaluarPorDoc} SubGrupos={SubGrupos}",
+            p.Ano, p.Mes, p.HoraCierre, p.TipoPrecio, p.EvaluarPorDocumentos,
+            p.SubGruposFiltro.Count == 0 ? "(todos)" : string.Join(",", p.SubGruposFiltro));
+
+        // Build @sPrecio — mirrors Sub Genera() in frmRepVentaFecha.frm
+        var sPrecio = (p.ValorarPreventaEnCero, p.TipoPrecio) switch
+        {
+            (false, TipoPrecioVentaFecha.Venta) => "dbo.DPEDIDO.nVenta",
+            (false, TipoPrecioVentaFecha.Neto)  => "dbo.DPEDIDO.nPrecioNeto * dbo.DPEDIDO.nCantidad",
+            (true,  TipoPrecioVentaFecha.Venta) => "case when dpedido.lregistroventa=0 then 0 else dbo.DPEDIDO.nVenta end",
+            _                                   => "case when dpedido.lregistroventa=0 then 0 else dbo.DPEDIDO.nPrecioNeto * dbo.DPEDIDO.nCantidad end"
+        };
+
+        // Build @sFecha — mirrors Select Case CmbMes.ListIndex in frmRepVentaFecha.frm
+        var diasMes = DiasEnMes(p.Ano, p.Mes);
+        var sAno = p.Ano.ToString();
+        var sMes = p.Mes.ToString("D2");
+        var sFecha = $"dbo.MPEDIDO.fRegistro >= DATEADD(HH,{p.HoraCierre}, '{sAno}/{sMes}/01')" +
+                     $" and dbo.MPEDIDO.fRegistro <= DATEADD(HH,{24 + p.HoraCierre}, '{sAno}/{sMes}/{diasMes}')";
+
+        // Build @criterio — mirrors OptSel logic in frmRepVentaFecha.frm
+        var criterio = string.Empty;
+        if (p.SubGruposFiltro.Count > 0)
+        {
+            var inList = string.Join(",", p.SubGruposFiltro.Select(c => $"'{c}'"));
+            criterio = $" and tCodigoSubGrupo in ({inList})";
+        }
+
+        var tipooper = p.EvaluarPorDocumentos ? 2 : 1;
+
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<VentaFechaRow>(
+            conn,
+            "spRep_VentaFecha",
+            new
+            {
+                sPrecio,
+                sAno,
+                sMes,
+                sFecha,
+                dHour = (double)p.HoraCierre,
+                criterio,
+                tipooper
+            },
+            cancellationToken: ct);
+
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<SubGrupoItem>> ObtenerSubGruposAsync(CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT tCodigoSubgrupo AS Codigo,
+                   tDetallado AS Descripcion,
+                   tCodigoGrupo AS Grupo
+            FROM vSubGrupo
+            WHERE lActivo = 1
+            ORDER BY tDetallado
+            """;
+        var result = await conn.QueryAsync<SubGrupoItem>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <summary>Devuelve el último día del mes respetando el año bisiesto. Legacy: Select Case CmbMes.</summary>
+    private static int DiasEnMes(int ano, int mes) =>
+        mes switch
+        {
+            2  => ano % 4 == 0 ? 29 : 28,
+            1 or 3 or 5 or 7 or 8 or 10 or 12 => 31,
+            _  => 30
+        };
 }

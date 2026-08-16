@@ -250,6 +250,21 @@ public interface IReporteRepository
     Task<IReadOnlyList<EntregaRow>> ObtenerEntregasAsync(
         EntregaParametros parametros,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_VentaFecha</c> — Comparativo de venta mensual por día.
+    /// Legacy: <c>frmRepVentaFecha.frm</c>
+    /// Regla: BR-REP-020
+    /// </summary>
+    Task<IReadOnlyList<VentaFechaRow>> ObtenerVentaFechaAsync(
+        VentaFechaParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene la lista de sub-grupos activos (código + descripción + grupo) desde <c>vSubGrupo</c>.
+    /// Usado para poblar el filtro de sub-grupos en <c>frmRepVentaFecha</c>.
+    /// </summary>
+    Task<IReadOnlyList<SubGrupoItem>> ObtenerSubGruposAsync(CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────

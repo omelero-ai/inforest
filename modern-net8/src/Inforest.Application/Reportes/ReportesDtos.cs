@@ -562,3 +562,74 @@ public sealed class EntregaParametros
     public string CanalVenta { get; init; } = string.Empty;
     public FormatoReporteEntrega Formato { get; init; } = FormatoReporteEntrega.ResumidoPorProducto;
 }
+
+// ── BR-REP-020 — Venta Mensual por Fechas ─────────────────────────────────────
+
+/// <summary>
+/// Tipo de precio utilizado para el cálculo de venta.
+/// Legacy: <c>frmRepVentaFecha.frm</c> — optValor (0=Precio venta / 1=Precio neto)
+/// Regla: BR-REP-020
+/// </summary>
+public enum TipoPrecioVentaFecha
+{
+    /// <summary>nVenta del detalle de pedido (precio de venta).</summary>
+    Venta = 0,
+    /// <summary>nPrecioNeto * nCantidad del detalle de pedido (precio neto).</summary>
+    Neto = 1
+}
+
+/// <summary>
+/// Fila agregada por día retornada por <c>spRep_VentaFecha</c>.
+/// Legacy: <c>frmRepVentaFecha.frm</c> — columnas Dia/Salon/Delivery/Llevar/Canal4/Canal5/Venta/Cantidad/Pax/Fecha
+/// Regla: BR-REP-020
+/// </summary>
+public sealed class VentaFechaRow
+{
+    public int Dia { get; init; }
+    public double Salon { get; init; }
+    public double Delivery { get; init; }
+    public double Llevar { get; init; }
+    public double Canal4 { get; init; }
+    public double Canal5 { get; init; }
+    public double Venta { get; init; }
+    public int Cantidad { get; init; }
+    public int Pax { get; init; }
+    public DateTime Fecha { get; init; }
+}
+
+/// <summary>
+/// Parámetros de filtro para <c>spRep_VentaFecha</c>.
+/// Legacy: <c>frmRepVentaFecha.frm</c> — dtpAnual/CmbMes/dtpHora/optValor/chkCFacturados/ChkDocumento/OptSel/grdSubGrupos
+/// Regla: BR-REP-020
+/// </summary>
+public sealed class VentaFechaParametros
+{
+    /// <summary>Año del mes a reportar.</summary>
+    public int Ano { get; init; }
+    /// <summary>Mes del año (1–12).</summary>
+    public int Mes { get; init; }
+    /// <summary>Hora de corte para asignación de día contable (0–23). Legacy: dtpHora.</summary>
+    public int HoraCierre { get; init; }
+    /// <summary>Tipo de precio: Venta o Neto.</summary>
+    public TipoPrecioVentaFecha TipoPrecio { get; init; } = TipoPrecioVentaFecha.Venta;
+    /// <summary>Si true, valoriza con cero la pre-venta facturada (chkCFacturados).</summary>
+    public bool ValorarPreventaEnCero { get; init; }
+    /// <summary>Si true, evalúa la venta por documentos emitidos (tipooper=2). Legacy: ChkDocumento.</summary>
+    public bool EvaluarPorDocumentos { get; init; }
+    /// <summary>
+    /// Códigos de sub-grupo para filtrar. Vacío = todos (OptSel(0)="Todos").
+    /// Cuando contiene elementos, aplica filtro tCodigoSubGrupo IN (...).
+    /// </summary>
+    public IReadOnlyList<string> SubGruposFiltro { get; init; } = Array.Empty<string>();
+}
+
+/// <summary>
+/// Ítem de sub-grupo para la UI de filtros.
+/// Legacy: <c>vSubGrupo</c> — columns Codigo/Descripcion/tGrupo
+/// </summary>
+public sealed class SubGrupoItem
+{
+    public string Codigo { get; init; } = string.Empty;
+    public string Descripcion { get; init; } = string.Empty;
+    public string Grupo { get; init; } = string.Empty;
+}

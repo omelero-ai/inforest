@@ -663,4 +663,70 @@ public class ReportesHandlersTests
         Assert.Empty(resultado.Filas);
         Assert.Equal("RepEntregaResumidoProd.frx", resultado.NombrePlantilla);
     }
+
+    // ── BR-REP-020 — Venta Mensual por Fechas ─────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteVentaFechaHandler_TodosLosSubGrupos_LlamaRepositorioYRetornaPlantilla()
+    {
+        // Arrange — BR-REP-020: todos los sub-grupos (SubGruposFiltro vacío)
+        var filas = new List<VentaFechaRow>
+        {
+            new() { Dia = 1, Fecha = new DateTime(2026, 8, 1), Salon = 1500.00, Delivery = 300.00,
+                    Llevar = 100.00, Canal4 = 0, Canal5 = 0, Venta = 1900.00, Cantidad = 45, Pax = 90 }
+        };
+        var parametros = new VentaFechaParametros
+        {
+            Ano = 2026,
+            Mes = 8,
+            HoraCierre = 0,
+            TipoPrecio = TipoPrecioVentaFecha.Venta,
+            ValorarPreventaEnCero = false,
+            EvaluarPorDocumentos = false,
+            SubGruposFiltro = Array.Empty<string>()
+        };
+        _repoMock.Setup(r => r.ObtenerVentaFechaAsync(parametros, default))
+            .ReturnsAsync(filas.AsReadOnly());
+
+        var handler = new ObtenerReporteVentaFechaHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteVentaFechaQuery(parametros));
+
+        // Assert
+        Assert.Single(resultado.Filas);
+        Assert.Equal("RepVentaFecha.frx", resultado.NombrePlantilla);
+        Assert.Contains("agosto", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Precios de Venta", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
+        _repoMock.Verify(r => r.ObtenerVentaFechaAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteVentaFechaHandler_PrecioNeto_TituloIndicaPreciosNetos()
+    {
+        // Arrange — BR-REP-020: precio neto, con sub-grupos filtrados
+        var parametros = new VentaFechaParametros
+        {
+            Ano = 2026,
+            Mes = 3,
+            HoraCierre = 6,
+            TipoPrecio = TipoPrecioVentaFecha.Neto,
+            ValorarPreventaEnCero = true,
+            EvaluarPorDocumentos = true,
+            SubGruposFiltro = new[] { "SG01", "SG02" }
+        };
+        _repoMock.Setup(r => r.ObtenerVentaFechaAsync(parametros, default))
+            .ReturnsAsync(new List<VentaFechaRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteVentaFechaHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteVentaFechaQuery(parametros));
+
+        // Assert
+        Assert.Empty(resultado.Filas);
+        Assert.Equal("RepVentaFecha.frx", resultado.NombrePlantilla);
+        Assert.Contains("Precios Netos", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("marzo", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
+    }
 }

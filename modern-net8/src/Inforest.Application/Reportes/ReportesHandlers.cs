@@ -669,3 +669,36 @@ public sealed class ObtenerReporteEntregaHandler
         };
     }
 }
+
+// ── BR-REP-020 — Venta Mensual por Fechas ─────────────────────────────────────
+
+/// <summary>
+/// Query para reporte comparativo de venta mensual por día.
+/// Legacy: <c>frmRepVentaFecha.frm</c>, <c>spRep_VentaFecha</c>
+/// Regla: BR-REP-020
+/// </summary>
+public sealed record ObtenerReporteVentaFechaQuery(VentaFechaParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReporteVentaFechaQuery"/>.</summary>
+public sealed class ObtenerReporteVentaFechaHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReporteVentaFechaHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<ReporteResultado<VentaFechaRow>> HandleAsync(
+        ObtenerReporteVentaFechaQuery q,
+        CancellationToken ct = default)
+    {
+        var filas = await _repo.ObtenerVentaFechaAsync(q.Parametros, ct);
+        var mesNombre = new System.Globalization.CultureInfo("es-PE").DateTimeFormat.GetMonthName(q.Parametros.Mes);
+        var sufijoPrecio = q.Parametros.TipoPrecio == TipoPrecioVentaFecha.Neto
+            ? "con Precios Netos"
+            : "con Precios de Venta";
+        return new ReporteResultado<VentaFechaRow>
+        {
+            Filas = filas,
+            TituloReporte = $"Comparativo del Mes de : {mesNombre} {sufijoPrecio}",
+            NombrePlantilla = "RepVentaFecha.frx"
+        };
+    }
+}

@@ -1305,6 +1305,30 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-REP-020
+
+**Nombre:** Venta Mensual por Fechas — comparativo diario por canal de venta
+
+**Origen:** `frmRepVentaFecha.frm`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepVentaFecha.frm`
+
+**Procedimiento/Función:** `Genera` + `spRep_VentaFecha`
+
+**Descripción:** Emite el reporte comparativo de venta diaria dentro de un mes seleccionado, desglosado por canal (Salón/Delivery/Llevar/Canal4/Canal5), más totales de venta, cantidad de pedidos y pax. El SP recibe una expresión dinámica de precio (`@sPrecio`), el año/mes, la hora de corte contable (`@dHour`), el rango de fechas calculado (`@sFecha`), el filtro de sub-grupos (`@criterio`) y el modo de operación (`@tipooper`: 1=por pedido, 2=por documentos). La hora de corte establece el límite de cambio de día: ventas registradas antes de esa hora se asignan al día anterior. Si `chkCFacturados` está marcado, la pre-venta con `lregistroventa=0` se valoriza en cero. El filtro de sub-grupos permite seleccionar todos o una lista específica de `tCodigoSubGrupo`.
+
+**Condición:** Al ejecutar `ObtenerReporteVentaFechaQuery` con `VentaFechaParametros`.
+
+**Resultado:** Lista de `VentaFechaRow` (Dia, Salon, Delivery, Llevar, Canal4, Canal5, Venta, Cantidad, Pax, Fecha) agrupada por día del mes. El título del reporte incluye el nombre del mes y el tipo de precio utilizado.
+
+**Excepciones:** Si `OptSel=Selección` y no hay sub-grupos seleccionados, se bloquea la ejecución con mensaje "Debe escoger mínimo un subgrupo"; si no hay filas retornadas se muestra "No hay Datos para Mostrar".
+
+**Destino .NET:** `ObtenerReporteVentaFechaHandler`, `ReporteRepository.ObtenerVentaFechaAsync`, `ReporteRepository.ObtenerSubGruposAsync`, `FrmRepVentaFechaReporte.cs`, `RepVentaFecha.frx`
+
+**Estado:** COMPLETED
+
+---
+
 **Nombre:** Paloteo Sub-Productos — apertura por componentes de combo
 
 **Origen:** `frmRepPaloteoSubProd.frm`

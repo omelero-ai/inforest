@@ -265,6 +265,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `dsrReporteEntrega.Dsr` | Crystal | `RepEntregaFormato1.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepEntregaFormato1.frx` |
 | `dsrReporteEntregaFormato2.Dsr` | Crystal | `RepEntregaFormato2.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepEntregaFormato2.frx` |
 | `dsrReporteEntregaResumidoProd.Dsr` | Crystal | `RepEntregaResumidoProd.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepEntregaResumidoProd.frx` |
+| `spRep_VentaFecha` | SP | `ReporteRepository.ObtenerVentaFechaAsync` + `ReporteRepository.ObtenerSubGruposAsync` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepVentaFecha.frm` | Form | `FrmRepVentaFechaReporte.cs` + `ObtenerReporteVentaFechaHandler` + `VentaFechaRow` + `VentaFechaParametros` + `SubGrupoItem` + BR-REP-020 + 2 tests | WinForm + Handler + DTO + Repository | COMPLETED | `src/Inforest.Desktop/Forms/Reportes/FrmRepVentaFechaReporte.cs`, `src/Inforest.Application/Reportes/` |
+| `frmRepVentaFecha.frx` | Form resource | `RepVentaFecha.frx` | FastReport | COMPLETED | `src/Inforest.Desktop/Reports/Templates/RepVentaFecha.frx` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |
