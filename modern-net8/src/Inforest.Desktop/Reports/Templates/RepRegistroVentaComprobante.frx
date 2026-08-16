@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Registro de Ventas Detallado por Comprobante - Legacy: frmRepRegistroVenta.frm / spRep_ComprobanteDetallado - BR-REP-022">
+  <Dictionary>
+    <TableDataSource Name="RegistroVentaDetallado" DataType="System.Int32" Enabled="true">
+      <Column Name="NumeroInterno" DataType="System.String" />
+      <Column Name="CodigoDocumento" DataType="System.String" />
+      <Column Name="TipoDocumento" DataType="System.String" />
+      <Column Name="NumeroDocumento" DataType="System.String" />
+      <Column Name="Cliente" DataType="System.String" />
+      <Column Name="RazonSocial" DataType="System.String" />
+      <Column Name="CodigoProducto" DataType="System.String" />
+      <Column Name="Descripcion" DataType="System.String" />
+      <Column Name="Cantidad" DataType="System.Double" />
+      <Column Name="PrecioUnitario" DataType="System.Double" />
+      <Column Name="PrecioTotal" DataType="System.Double" />
+      <Column Name="IGV" DataType="System.Double" />
+      <Column Name="Importe" DataType="System.Double" />
+      <Column Name="FRegistro" DataType="System.String" />
+      <Column Name="Estado" DataType="System.String" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" Landscape="true" PaperWidth="297" PaperHeight="210" TopMargin="10" BottomMargin="10" LeftMargin="10" RightMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="1066.8" Height="56.7">
+      <TextObject Name="Title" Left="0" Top="0" Width="1066.8" Height="37.8" Text="REGISTRO DE VENTAS - DETALLADO POR COMPROBANTE" HorzAlign="Center" Font="Segoe UI, 13pt, style=Bold" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Width="1066.8" Height="28.35">
+      <TextObject Name="HNumeroInterno" Left="0" Top="0" Width="80" Height="18.9" Text="N° Interno" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HTipoDocumento" Left="80" Top="0" Width="80" Height="18.9" Text="Tipo Doc." Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HNumeroDocumento" Left="160" Top="0" Width="100" Height="18.9" Text="N° Documento" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HRazonSocial" Left="260" Top="0" Width="150" Height="18.9" Text="Razón Social" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HDescripcion" Left="410" Top="0" Width="150" Height="18.9" Text="Producto" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HCantidad" Left="560" Top="0" Width="60" Height="18.9" Text="Cant." HorzAlign="Right" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HPrecioUnitario" Left="620" Top="0" Width="70" Height="18.9" Text="P. Unitario" HorzAlign="Right" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HIGV" Left="690" Top="0" Width="60" Height="18.9" Text="IGV" HorzAlign="Right" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HImporte" Left="750" Top="0" Width="70" Height="18.9" Text="Importe" HorzAlign="Right" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HEstado" Left="820" Top="0" Width="60" Height="18.9" Text="Estado" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Width="1066.8" Height="18.9" DataSource="RegistroVentaDetallado">
+      <TextObject Name="DNumeroInterno" Left="0" Top="0" Width="80" Height="18.9" Text="[RegistroVentaDetallado.NumeroInterno]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DTipoDocumento" Left="80" Top="0" Width="80" Height="18.9" Text="[RegistroVentaDetallado.TipoDocumento]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DNumeroDocumento" Left="160" Top="0" Width="100" Height="18.9" Text="[RegistroVentaDetallado.NumeroDocumento]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DRazonSocial" Left="260" Top="0" Width="150" Height="18.9" Text="[RegistroVentaDetallado.RazonSocial]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DDescripcion" Left="410" Top="0" Width="150" Height="18.9" Text="[RegistroVentaDetallado.Descripcion]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DCantidad" Left="560" Top="0" Width="60" Height="18.9" Text="[RegistroVentaDetallado.Cantidad]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DPrecioUnitario" Left="620" Top="0" Width="70" Height="18.9" Text="[RegistroVentaDetallado.PrecioUnitario]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DIGV" Left="690" Top="0" Width="60" Height="18.9" Text="[RegistroVentaDetallado.IGV]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DImporte" Left="750" Top="0" Width="70" Height="18.9" Text="[RegistroVentaDetallado.Importe]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DEstado" Left="820" Top="0" Width="60" Height="18.9" Text="[RegistroVentaDetallado.Estado]" Font="Segoe UI, 7.5pt" />
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Width="1066.8" Height="28.35">
+      <TextObject Name="TotalImporte" Left="750" Top="0" Width="70" Height="18.9" Text="[Sum(RegistroVentaDetallado.Importe)]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 9pt, style=Bold" />
+    </ReportSummaryBand>
+    <PageFooterBand Name="PageFooter1" Width="1066.8" Height="18.9">
+      <TextObject Name="PageNumber" Left="950" Top="0" Width="116.8" Height="18.9" Text="Pág. [PageN] de [TotalPages]" HorzAlign="Right" Font="Segoe UI, 8pt" />
+      <TextObject Name="PrintDate" Left="0" Top="0" Width="200" Height="18.9" Text="Impreso: [Date]" Font="Segoe UI, 8pt" />
+    </PageFooterBand>
+  </ReportPage>
+</Report>

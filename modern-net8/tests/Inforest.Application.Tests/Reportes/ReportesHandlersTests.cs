@@ -809,4 +809,63 @@ public class ReportesHandlersTests
         Assert.Contains("CAJERO01", resultado.Titulo);
         Assert.Empty(resultado.Documentos);
     }
+
+    // ── BR-REP-022 — Registro de Ventas ──────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteRegistroVentaHandler_TipoCorrelativoSunat_UsaPlantillaSunatYRetornaFilas()
+    {
+        // Arrange — BR-REP-022: tipo CorrelativoSunat → spRep_RegVentaSunat
+        var parametros = new RegistroVentaParametros
+        {
+            TipoReporte = TipoReporteRegistroVenta.CorrelativoSunat,
+            FechaInicio = new DateTime(2026, 8, 1),
+            FechaFin = new DateTime(2026, 8, 31),
+            SoloRegistroVenta = true
+        };
+
+        var filasEsperadas = new List<RegistroVentaSunatRow>
+        {
+            new() { Voucher = "F001-00001", Serie = "F001", Numero = "00001", TDoc = "01", RazonSocial = "CLIENTE S.A.", ImporteT = 118.0, IGV = 18.0, BaseImOpGra = 100.0 }
+        }.AsReadOnly();
+
+        _repoMock.Setup(r => r.ObtenerRegistroVentaSunatAsync(parametros, default)).ReturnsAsync(filasEsperadas);
+
+        var handler = new ObtenerReporteRegistroVentaHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteRegistroVentaQuery(parametros));
+
+        // Assert
+        Assert.Equal(TipoReporteRegistroVenta.CorrelativoSunat, resultado.TipoReporte);
+        Assert.Equal("RepRegistroVentaSunat.frx", resultado.NombrePlantilla);
+        Assert.Single(resultado.FilasSunat);
+        Assert.Equal(1, resultado.TotalFilas);
+        Assert.Equal("F001-00001", resultado.FilasSunat[0].Voucher);
+        _repoMock.Verify(r => r.ObtenerRegistroVentaSunatAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteRegistroVentaHandler_TipoCorrelativoConFormaPago_RetornaGapSinDatos()
+    {
+        // Arrange — BR-REP-022: tipo CorrelativoConFormaPago → GAP (SP no encontrado en SQL Legacy)
+        var parametros = new RegistroVentaParametros
+        {
+            TipoReporte = TipoReporteRegistroVenta.CorrelativoConFormaPago,
+            FechaInicio = new DateTime(2026, 8, 1),
+            FechaFin = new DateTime(2026, 8, 31)
+        };
+
+        var handler = new ObtenerReporteRegistroVentaHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteRegistroVentaQuery(parametros));
+
+        // Assert — GAP: sin datos, sin plantilla
+        Assert.Equal(TipoReporteRegistroVenta.CorrelativoConFormaPago, resultado.TipoReporte);
+        Assert.Equal(0, resultado.TotalFilas);
+        Assert.Equal(string.Empty, resultado.NombrePlantilla);
+        // El repo no debe ser llamado para este GAP
+        _repoMock.Verify(r => r.ObtenerRegistroVentaSunatAsync(It.IsAny<RegistroVentaParametros>(), default), Times.Never);
+    }
 }

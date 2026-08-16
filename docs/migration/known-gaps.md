@@ -153,3 +153,11 @@
 | ID | Gap | Descripción | Archivo Origen | Estado |
 |---|---|---|---|---|
 | GAP-REP-021 | Diálogo búsqueda de turno (frmBusca) | El botón "..." en FrmRepLiquidacionReporte abre `frmBusca` en VB6 mostrando MTURNO con columnas Turno/Caja/FechaInicial/FechaFinal. En .NET 8 el botón solo otorga foco al campo de texto. Pendiente: implementar un diálogo de búsqueda de turnos equivalente a `frmBusca` reutilizable. | `frmRepLiquidacion.frm` — cmdBusca_Click | OPEN — el usuario puede ingresar el código de turno manualmente |
+
+---
+
+## POS-FUNC-017 — frmRepRegistroVenta (Registro de Ventas)
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-REP-022 | SP `spRep_RegVentaSunat_formaPago` no encontrado | El tipo 7 (Correlativo con Forma de Pago) de `frmRepRegistroVenta.frm` llama a `spRep_RegVentaSunat_formaPago`. Este SP no existe en `5. SP.sql` ni en los scripts opcionales. El handler devuelve resultado vacío para este tipo y la forma muestra un mensaje de advertencia. | `frmRepRegistroVenta.frm` — Sub Genera4() | OPEN — tipo 7 deshabilitado hasta que se encuentre o cree el SP |

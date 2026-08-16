@@ -79,6 +79,7 @@ static class Program
                 services.AddTransient<FrmRepReservasReporte>();
                 services.AddTransient<FrmRepEntregaReporte>();
                 services.AddTransient<FrmRepVentaFechaReporte>();
+                services.AddTransient<FrmRepRegistroVentaReporte>(); // BR-REP-022
             });
     }
 }

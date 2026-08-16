@@ -2863,3 +2863,25 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Si modo=Turno y turno vacío: mensaje de error. Si modo=Fecha y fin < inicio: error de rango. Si usuario no seleccionado y chkUsuario=0: error.
 **Destino .NET:** `ObtenerReporteLiquidacionHandler` + `FrmRepLiquidacionReporte` + `RepLiquidacion.frx`
 **Estado:** MIGRATED
+
+---
+
+## BR-REP-022
+**Nombre:** Registro de Ventas
+**Origen:** Legacy/frmRepRegistroVenta.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepRegistroVenta.frm`
+**Procedimiento/Función:** Sub Genera() / Genera1() / Genera2() / Genera3() / Genera4() — cmdOpcion_Click
+**Descripción:** Genera reportes de los documentos de venta emitidos en 8 modalidades:
+0. **Correlativo SUNAT** (`spRep_RegVentaSunat`): registro formato libro electrónico SUNAT con voucher, serie, número, RUC, razón social, base imponible, exonerada, inafecta, IGV, importe total, tipo de cambio. Permite filtrar transferencias gratuitas.
+1. **Estado de Documentos** (`spRep_RegVenta`, flagEstado=1): listado con estado de cada documento.
+2. **Agrupado por Fechas** (`spRep_RegVenta`, flagAnoMes=1): consolidado mensual con filtro por año/mes y hora de corte.
+3. **Agrupado por Tipo Documento** (`spRep_RegVentaSunatAD`): variante SUNAT con Número1/Número2 para formatos con dos numeraciones.
+4. **Correlativo de Documento** (`spRep_RegVenta`, flagCorrelativo=1): listado correlativo estándar.
+5. **Detallado por Comprobante** (`spRep_ComprobanteDetallado`): detalle de ítem por ítem con producto, cantidad, precio unitario e IGV por comprobante.
+6. **Correlativo Detallado** (`spRep_RegVenta`, flagCorrelativo=1): variante del correlativo con más columnas de detalle.
+7. **Correlativo con Forma de Pago** (`spRep_RegVentaSunat_formaPago`): **GAP** — SP no encontrado en SQL Legacy al momento de la migración.
+**Condición:** Filtros: cliente, tipo de documento, estado, caja, tipo de pago. Rango de fechas con/sin hora, o por año/mes con hora de corte. Opción día contable. Redondeo a 2 decimales o entero. Solo documentos en Registro de Ventas (RegistroVenta=1). Orden: Correlativo / Montos / Fechas.
+**Resultado:** Dataset de documentos con montos (nNeto, nImpuesto1..3, nVenta, nRecargo, nDescuento) según el tipo de reporte seleccionado.
+**Excepciones:** Fecha inicio > fecha fin → error de rango. Tipo 7 → GAP bloqueado (SP no encontrado). Si no hay datos → mensaje "No hay Datos para Mostrar".
+**Destino .NET:** `ObtenerReporteRegistroVentaHandler` + `FrmRepRegistroVentaReporte` + `RepRegistroVentaSunat.frx` / `RepRegistroVentaDetallado.frx` / `RepRegistroVentaConsolidado.frx` / `RepRegistroVentaSunatAd.frx` / `RepRegistroVentaComprobante.frx`
+**Estado:** MIGRATED

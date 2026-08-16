@@ -1268,4 +1268,218 @@ internal sealed class ReporteRepository : IReporteRepository
         dp.Add("@ffinal", p.FechaFin);
         dp.Add("@xFecha", p.FechaInicio.Date);
     }
+
+    // ── BR-REP-022 — Registro de Ventas ──────────────────────────────────────
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Invoca <c>spRep_RegVenta</c> con los flags apropiados según el tipo de reporte.
+    /// Legacy: Sub Genera() en frmRepRegistroVenta.frm
+    /// Tipos: EstadoDocumentos(1), AgrupadoPorFechas(2), CorrelativoDocumento(4), CorrelativoDetallado(6)
+    /// </remarks>
+    public async Task<IReadOnlyList<RegistroVentaRow>> ObtenerRegistroVentaAsync(
+        RegistroVentaParametros p, CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte RegistroVenta tipo={Tipo}: {FechaInicio} – {FechaFin}",
+            p.TipoReporte, p.FechaInicio, p.FechaFin);
+
+        var tipo = p.TipoReporte;
+        bool flagAnoMes = tipo == TipoReporteRegistroVenta.AgrupadoPorFechas;
+        bool flagCorrelativo = tipo == TipoReporteRegistroVenta.CorrelativoDocumento
+                            || tipo == TipoReporteRegistroVenta.CorrelativoDetallado;
+        bool flagEstado = tipo == TipoReporteRegistroVenta.EstadoDocumentos;
+        bool flagAgrupado = tipo == TipoReporteRegistroVenta.AgrupadoPorFechas;
+
+        // Construir sFecha/sFecha2 para modo AñoMes (equivalente a Select Case CmbMes en VB6)
+        (string sFecha, string sFecha2) = flagAnoMes
+            ? ConstruirFechaAnioMes(p.Ano, p.Mes, p.HoraCorte, p.DiaContable)
+            : (string.Empty, string.Empty);
+
+        var dp = new DynamicParameters();
+        dp.Add("@flagTipo", false);
+        dp.Add("@flagRegVenta", p.SoloRegistroVenta);
+        dp.Add("@flagCorrelativo", flagCorrelativo);
+        dp.Add("@flagEstado", flagEstado);
+        dp.Add("@flagAgrupado", flagAgrupado);
+        dp.Add("@flagRedondeo", p.Redondeo);
+        dp.Add("@tCliente", p.CodigoCliente);
+        dp.Add("@tTipoDoc", p.TipoDocumento);
+        dp.Add("@tEstadoDoc", p.EstadoDocumento);
+        dp.Add("@tCaja", p.Caja);
+        dp.Add("@sOrden", p.Orden);
+        dp.Add("@finicio", p.FechaInicio);
+        dp.Add("@ffinal", p.FechaFin);
+        dp.Add("@sAno", p.Ano.ToString());
+        dp.Add("@sMES", p.Mes.ToString("D2"));
+        dp.Add("@sFecha", sFecha);
+        dp.Add("@sFecha2", sFecha2);
+        dp.Add("@dHour", (double)p.HoraCorte);
+        dp.Add("@flagAnoMes", flagAnoMes);
+        dp.Add("@diaContable", p.DiaContable);
+        dp.Add("@tTipoPago", p.TipoPago);
+
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<RegistroVentaRow>(conn, "spRep_RegVenta", dp, cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Invoca <c>spRep_RegVentaSunat</c>.
+    /// Legacy: Sub Genera1() en frmRepRegistroVenta.frm
+    /// </remarks>
+    public async Task<IReadOnlyList<RegistroVentaSunatRow>> ObtenerRegistroVentaSunatAsync(
+        RegistroVentaParametros p, CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte RegistroVentaSunat: {FechaInicio} – {FechaFin}", p.FechaInicio, p.FechaFin);
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<RegistroVentaSunatRow>(
+            conn, "spRep_RegVentaSunat",
+            new
+            {
+                fInicio = p.FechaInicio,
+                fFinal = p.FechaFin,
+                tCliente = p.CodigoCliente,
+                tTipoDoc = p.TipoDocumento,
+                tEstadoDoc = p.EstadoDocumento,
+                tCaja = p.Caja,
+                sOrden = p.Orden,
+                flagRegVenta = p.SoloRegistroVenta,
+                flagRedondeo = p.Redondeo,
+                DiaContable = p.DiaContable,
+                ValorTransGratuita = p.TransferenciaGratuita
+            },
+            cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Invoca <c>spRep_RegVentaSunatAD</c>.
+    /// Legacy: Sub Genera2() en frmRepRegistroVenta.frm
+    /// </remarks>
+    public async Task<IReadOnlyList<RegistroVentaSunatAdRow>> ObtenerRegistroVentaSunatAdAsync(
+        RegistroVentaParametros p, CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte RegistroVentaSunatAD: {FechaInicio} – {FechaFin}", p.FechaInicio, p.FechaFin);
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<RegistroVentaSunatAdRow>(
+            conn, "spRep_RegVentaSunatAD",
+            new
+            {
+                fInicio = p.FechaInicio,
+                fFinal = p.FechaFin,
+                tCliente = p.CodigoCliente,
+                tTipoDoc = p.TipoDocumento,
+                tEstadoDoc = p.EstadoDocumento,
+                tCaja = p.Caja,
+                sOrden = p.Orden,
+                flagRegVenta = p.SoloRegistroVenta,
+                flagRedondeo = p.Redondeo,
+                DiaContable = p.DiaContable
+            },
+            cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Invoca <c>spRep_ComprobanteDetallado</c>.
+    /// Legacy: Sub Genera3() en frmRepRegistroVenta.frm
+    /// </remarks>
+    public async Task<IReadOnlyList<RegistroVentaDetalladoRow>> ObtenerRegistroVentaDetalladoAsync(
+        RegistroVentaParametros p, CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte RegistroVentaDetallado: {FechaInicio} – {FechaFin}", p.FechaInicio, p.FechaFin);
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<RegistroVentaDetalladoRow>(
+            conn, "spRep_ComprobanteDetallado",
+            new
+            {
+                fInicio = p.FechaInicio,
+                fFinal = p.FechaFin,
+                tCliente = p.CodigoCliente,
+                tTipoDoc = p.TipoDocumento,
+                tEstadoDoc = p.EstadoDocumento,
+                tCaja = p.Caja,
+                flagRegVenta = p.SoloRegistroVenta,
+                DiaContable = p.DiaContable
+            },
+            cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposDocumentoAsync(CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT Codigo AS Codigo, Descripcion AS Descripcion
+            FROM vTipoDocumento
+            ORDER BY Descripcion
+            """;
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerEstadosDocumentoAsync(CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT Codigo AS Codigo, Descripcion AS Descripcion
+            FROM vEstadoDocumento
+            ORDER BY Descripcion
+            """;
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerCajasActivasAsync(CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT tCaja AS Codigo, tDescripcion AS Descripcion
+            FROM TCAJA
+            WHERE lActivo = 1
+            ORDER BY tDescripcion
+            """;
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposPagoAsync(CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT Codigo AS Codigo, UPPER(Descripcion) AS Descripcion
+            FROM vTipoPago
+            ORDER BY Descripcion
+            """;
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <summary>
+    /// Construye los strings @sFecha/@sFecha2 para <c>spRep_RegVenta</c> en modo Año/Mes.
+    /// Equivalente al Select Case CmbMes en Sub Genera() de frmRepRegistroVenta.frm.
+    /// Legacy: BR-REP-022 — filtro por mes completo con hora de corte.
+    /// </summary>
+    private static (string sFecha, string sFecha2) ConstruirFechaAnioMes(
+        int ano, int mes, int horaCorte, bool diaContable)
+    {
+        int lastDay = DateTime.DaysInMonth(ano, mes);
+        string sMes = mes.ToString("D2");
+        string sAno = ano.ToString();
+        string campo = diaContable ? "dbo.MDOCUMENTO.fDiaContable" : "dbo.MDOCUMENTO.fRegistro";
+        string campo2 = diaContable ? "dbo.MNOTACREDITO.fDiaContable" : "dbo.MNOTACREDITO.FFECHA";
+
+        string sFecha = $"{campo} >= DATEADD(HH,{horaCorte}, '{sAno}/{sMes}/01') " +
+                        $"and {campo} <= DATEADD(HH,{24 + horaCorte}, '{sAno}/{sMes}/{lastDay}')";
+        string sFecha2 = $"{campo2} >= DATEADD(HH,{horaCorte}, '{sAno}/{sMes}/01') " +
+                         $"and {campo2} <= DATEADD(HH,{24 + horaCorte}, '{sAno}/{sMes}/{lastDay}')";
+        return (sFecha, sFecha2);
+    }
 }

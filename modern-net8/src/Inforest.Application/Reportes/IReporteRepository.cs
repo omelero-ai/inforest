@@ -333,6 +333,61 @@ public interface IReporteRepository
     /// Legacy: vSectorVenta where Activo=1
     /// </summary>
     Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerSectoresVentaAsync(CancellationToken ct = default);
+
+    // ── BR-REP-022 — Registro de Ventas ──────────────────────────────────────
+
+    /// <summary>
+    /// Ejecuta <c>spRep_RegVenta</c> para los tipos: EstadoDocumentos, AgrupadoPorFechas,
+    /// CorrelativoDocumento, CorrelativoDetallado.
+    /// Legacy: Sub Genera() en <c>frmRepRegistroVenta.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<RegistroVentaRow>> ObtenerRegistroVentaAsync(
+        RegistroVentaParametros p, CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_RegVentaSunat</c> para el tipo CorrelativoSunat.
+    /// Legacy: Sub Genera1() en <c>frmRepRegistroVenta.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<RegistroVentaSunatRow>> ObtenerRegistroVentaSunatAsync(
+        RegistroVentaParametros p, CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_RegVentaSunatAD</c> para el tipo AgrupadoPorTipoDocumento.
+    /// Legacy: Sub Genera2() en <c>frmRepRegistroVenta.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<RegistroVentaSunatAdRow>> ObtenerRegistroVentaSunatAdAsync(
+        RegistroVentaParametros p, CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_ComprobanteDetallado</c> para el tipo DetalladoPorComprobante.
+    /// Legacy: Sub Genera3() en <c>frmRepRegistroVenta.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<RegistroVentaDetalladoRow>> ObtenerRegistroVentaDetalladoAsync(
+        RegistroVentaParametros p, CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene tipos de documento para el combo de filtro.
+    /// Legacy: cboCarga en Form_Load de frmRepRegistroVenta / vTipoDocumento
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposDocumentoAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene estados de documento para el combo de filtro.
+    /// Legacy: cboEstado en Form_Load de frmRepRegistroVenta / vEstadoDocumento
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerEstadosDocumentoAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene la lista de cajas activas para el combo de filtro.
+    /// Legacy: cboCaja en frmRepRegistroVenta / TCAJA where lActivo=1
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerCajasActivasAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene los tipos de pago activos para el combo de filtro.
+    /// Legacy: cboTipoPago en frmRepRegistroVenta / vTipoPago
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposPagoAsync(CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────

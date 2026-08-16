@@ -167,6 +167,7 @@ public static class DependencyInjection
         services.AddScoped<ObtenerReporteLiquidacionTicketHandler>();
         services.AddScoped<ObtenerReportePaloteoTicketHandler>();
         services.AddScoped<ObtenerReporteEntregaHandler>();
+        services.AddScoped<ObtenerReporteRegistroVentaHandler>(); // BR-REP-022
 
         // POS-FUNC-018: Recibo Ingresos/Egresos — MINGRESO / MEGRESO
         services.AddScoped<ObtenerIngresosHandler>();

@@ -273,6 +273,17 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `spRep_LiquidacionSuma` | SP | `ReporteRepository.ObtenerLiquidacionTiposPedidoAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `frmRepLiquidacion.frm` | Form | `FrmRepLiquidacionReporte.cs` + `ObtenerReporteLiquidacionHandler` + `LiquidacionParametros` + `LiquidacionOutput` + `LiquidacionRow` + `LiquidacionSumaGrupoRow` + `LiquidacionTarjetaRow` + `LiquidacionTipoPedidoRow` + `LiquidacionOtroTipoRow` + `LiquidacionResultado` + BR-REP-021 + 2 tests | WinForm + Handler + DTOs + Repository | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepLiquidacionReporte.cs`, `src/Inforest.Application/Reportes/` |
 | `dsrLiquidacion.Dsr` / `dsrLiquidacionVenta.Dsr` | Crystal | `RepLiquidacion.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepLiquidacion.frx` |
+| `spRep_RegVenta` | SP | `ReporteRepository.ObtenerRegistroVentaAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_RegVentaSunat` | SP | `ReporteRepository.ObtenerRegistroVentaSunatAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_RegVentaSunatAD` | SP | `ReporteRepository.ObtenerRegistroVentaSunatAdAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_ComprobanteDetallado` | SP | `ReporteRepository.ObtenerRegistroVentaDetalladoAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_RegVentaSunat_formaPago` | SP | — | — | NOT_APPLICABLE (GAP-REP-022) | SP no encontrado en `5. SP.sql` |
+| `frmRepRegistroVenta.frm` | Form | `FrmRepRegistroVentaReporte.cs` + `ObtenerReporteRegistroVentaHandler` + `RegistroVentaParametros` + `RegistroVentaRow` + `RegistroVentaSunatRow` + `RegistroVentaSunatAdRow` + `RegistroVentaDetalladoRow` + `RegistroVentaResultado` + BR-REP-022 + 2 tests | WinForm + Handler + DTOs + Repository | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepRegistroVentaReporte.cs`, `src/Inforest.Application/Reportes/` |
+| `RepRegistroVentaSunat.frx` | FastReport | `RepRegistroVentaSunat.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaSunat.frx` |
+| `RepRegistroVentaDetallado.frx` | FastReport | `RepRegistroVentaDetallado.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaDetallado.frx` |
+| `RepRegistroVentaConsolidado.frx` | FastReport | `RepRegistroVentaConsolidado.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaConsolidado.frx` |
+| `RepRegistroVentaSunatAd.frx` | FastReport | `RepRegistroVentaSunatAd.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaSunatAd.frx` |
+| `RepRegistroVentaComprobante.frx` | FastReport | `RepRegistroVentaComprobante.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaComprobante.frx` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |

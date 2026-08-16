@@ -787,3 +787,118 @@ public sealed class ObtenerReporteLiquidacionHandler
         return $"{rango}\n{usuario}";
     }
 }
+
+// ── BR-REP-022 — Registro de Ventas ──────────────────────────────────────────
+
+/// <summary>Query para el reporte Registro de Ventas. Regla: BR-REP-022</summary>
+public sealed record ObtenerReporteRegistroVentaQuery(RegistroVentaParametros Parametros);
+
+/// <summary>
+/// Maneja el reporte "Registro de Ventas" (<c>frmRepRegistroVenta.frm</c>).
+/// Enruta al SP correcto según el <see cref="TipoReporteRegistroVenta"/>:
+/// <list type="bullet">
+///   <item>CorrelativoSunat (0) → <c>spRep_RegVentaSunat</c></item>
+///   <item>EstadoDocumentos (1), AgrupadoPorFechas (2), CorrelativoDocumento (4), CorrelativoDetallado (6) → <c>spRep_RegVenta</c></item>
+///   <item>AgrupadoPorTipoDocumento (3) → <c>spRep_RegVentaSunatAD</c></item>
+///   <item>DetalladoPorComprobante (5) → <c>spRep_ComprobanteDetallado</c></item>
+///   <item>CorrelativoConFormaPago (7) → GAP: <c>spRep_RegVentaSunat_formaPago</c> no encontrado en SQL Legacy</item>
+/// </list>
+/// Legacy: cmdOpcion_Click + Sub Genera/Genera1/Genera2/Genera3/Genera4 en <c>frmRepRegistroVenta.frm</c>
+/// SQL: spRep_RegVenta, spRep_RegVentaSunat, spRep_RegVentaSunatAD, spRep_ComprobanteDetallado
+/// Regla: BR-REP-022
+/// </summary>
+public sealed class ObtenerReporteRegistroVentaHandler
+{
+    private readonly IReporteRepository _repo;
+
+    public ObtenerReporteRegistroVentaHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<RegistroVentaResultado> HandleAsync(
+        ObtenerReporteRegistroVentaQuery q,
+        CancellationToken ct = default)
+    {
+        var p = q.Parametros;
+        var titulo = ConstruirTitulo(p);
+
+        switch (p.TipoReporte)
+        {
+            case TipoReporteRegistroVenta.CorrelativoSunat:
+            {
+                var filas = await _repo.ObtenerRegistroVentaSunatAsync(p, ct);
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    FilasSunat = filas,
+                    TotalFilas = filas.Count,
+                    NombrePlantilla = "RepRegistroVentaSunat.frx",
+                    TituloReporte = titulo
+                };
+            }
+
+            case TipoReporteRegistroVenta.AgrupadoPorTipoDocumento:
+            {
+                var filas = await _repo.ObtenerRegistroVentaSunatAdAsync(p, ct);
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    FilasSunatAd = filas,
+                    TotalFilas = filas.Count,
+                    NombrePlantilla = "RepRegistroVentaSunatAd.frx",
+                    TituloReporte = titulo
+                };
+            }
+
+            case TipoReporteRegistroVenta.DetalladoPorComprobante:
+            {
+                var filas = await _repo.ObtenerRegistroVentaDetalladoAsync(p, ct);
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    FilasDetallado = filas,
+                    TotalFilas = filas.Count,
+                    NombrePlantilla = "RepRegistroVentaComprobante.frx",
+                    TituloReporte = titulo
+                };
+            }
+
+            case TipoReporteRegistroVenta.CorrelativoConFormaPago:
+                // GAP: spRep_RegVentaSunat_formaPago no encontrado en SQL Legacy — retorna vacío
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    TotalFilas = 0,
+                    NombrePlantilla = string.Empty,
+                    TituloReporte = titulo
+                };
+
+            default: // EstadoDocumentos, AgrupadoPorFechas, CorrelativoDocumento, CorrelativoDetallado
+            {
+                var filas = await _repo.ObtenerRegistroVentaAsync(p, ct);
+                var plantilla = p.TipoReporte == TipoReporteRegistroVenta.AgrupadoPorFechas
+                    ? "RepRegistroVentaConsolidado.frx"
+                    : "RepRegistroVentaDetallado.frx";
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    Filas = filas,
+                    TotalFilas = filas.Count,
+                    NombrePlantilla = plantilla,
+                    TituloReporte = titulo
+                };
+            }
+        }
+    }
+
+    private static string ConstruirTitulo(RegistroVentaParametros p)
+    {
+        if (p.DiaContable)
+            return $"Por Dia Contable del {p.FechaInicio:dd/MM/yyyy} al {p.FechaFin:dd/MM/yyyy}";
+        if (p.TipoReporte == TipoReporteRegistroVenta.AgrupadoPorFechas)
+        {
+            var mes = System.Globalization.CultureInfo.GetCultureInfo("es-PE")
+                .DateTimeFormat.GetMonthName(p.Mes);
+            return $"Año: {p.Ano} — Mes: {mes}";
+        }
+        return $"Del {p.FechaInicio:dd/MM/yyyy HH:mm} Al {p.FechaFin:dd/MM/yyyy HH:mm}";
+    }
+}
