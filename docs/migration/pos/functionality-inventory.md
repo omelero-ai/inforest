@@ -20,7 +20,7 @@
 | POS-FUNC-016 | Impresión pre-cuenta/comanda | `frmPrecuentaImpresora.frm` | Salida térmica operativa | COMPLETED |
 | POS-FUNC-017 | Reportería operativa POS | `frmRep*.frm + Designers DSR` | Consultas y reportes de operación | IN_PROGRESS |
 | POS-FUNC-018 | Recibo de ingresos/egresos | `frmReciboIngreso*.frm / frmReciboEgreso*.frm` | Movimientos de caja adicionales | MIGRATED |
-| POS-FUNC-019 | Control de seguridad y contraseñas | `frmPassword.frm / frmCambiarContrasenia.frm` | Validaciones sensibles de operación | ANALYSIS |
+| POS-FUNC-019 | Control de seguridad y contraseñas | `frmPassword.frm / frmCambiarContrasenia.frm` | Validaciones sensibles de operación | COMPLETED |
 | POS-FUNC-020 | Biometría huella | `frmVerificacionHuella*.frm + OCX` | Autenticación biométrica opcional | BLOCKED |
 | POS-FUNC-021 | Tarjetas RFID / proximidad | `FrmTarjetaAproximidad*.frm / FrmRecargarTarjeta*.frm` | Saldo y consumo con tarjetas | ANALYSIS |
 | POS-FUNC-022 | Balanza y captura de peso | `frmMsComm.frm / frmWinSock.frm / vBalanza` | Captura de productos por peso | ANALYSIS |

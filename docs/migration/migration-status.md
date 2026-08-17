@@ -2,7 +2,7 @@
 
 > Última actualización: 2026-08-17
 >
-> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001..029 parcialmente migrados; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio + POS-FUNC-027 (frmCambio.frm MIGRATED) + POS-FUNC-028 (frmUpdateDatosPedido.frm MIGRATED) + POS-FUNC-029 (frmListaMotivos.frm MIGRATED: MotivoAnulacion + IMotivoAnulacionRepository + MotivoAnulacionRepository + ObtenerMotivosAnulacionHandler + FrmListaMotivos + BR-MOTIVO-001..003 + 5 tests — **550 tests en verde**)**
+> Estado general: **Fase 4 IN_PROGRESS — W1-W15 completados; POS-FUNC-001..029 parcialmente migrados; baseline transversal + configuración + maestros + turno + pedidos + venta + caja + reportes + módulos POS + servicios de dominio + POS-FUNC-027 (frmCambio.frm MIGRATED) + POS-FUNC-028 (frmUpdateDatosPedido.frm MIGRATED) + POS-FUNC-029 (frmListaMotivos.frm MIGRATED: MotivoAnulacion + IMotivoAnulacionRepository + MotivoAnulacionRepository + ObtenerMotivosAnulacionHandler + FrmListaMotivos + BR-MOTIVO-001..003 + 5 tests) + POS-FUNC-019 (frmCambiarContrasenia.frm + frmPassword.frm COMPLETED) — **550 tests en verde****
 
 ---
 
@@ -141,8 +141,9 @@
 16. **MIGRATED:** `frmCambio.frm` migrado (POS-FUNC-027): `CambiarDocumentoCommand` + `CambiarDocumentoHandler` + `ICambioDocumentoRepository` + `CambioDocumentoRepository` (transacción MDOCUMENTO/DDOCUMENTO/DPEDIDO/DPAGODOCUMENTO/TTIPODOCUMENTOIMPRESORA) + `ObtenerTiposDocumentoCambioHandler` + `FrmCambioDocumento` (botones tipo doc + selección cliente + motivo + consumo) + BR-CAMBIO-001..005 + 8 tests nuevos — **545 tests en verde**.
 17. **MIGRATED:** `frmUpdateDatosPedido.frm` migrado (POS-FUNC-028): `ActualizarCortesiaPedidoCommand` + `ActualizarCanalVentaPedidoCommand` + `ActualizarCortesiaPedidoHandler` + `ActualizarCanalVentaPedidoHandler` + `ObtenerDatosPedidoActualizarHandler` + `IActualizarDatosPedidoRepository` + `ActualizarDatosPedidoRepository` (usp_ActualizarCabPeDoc @opcion='1'/'2') + `FrmActualizarDatosPedido` (GroupBox cortesía + GroupBox canal de venta + cliente delivery) + BR-ACTPED-001..003 + 8 tests nuevos — **545 tests en verde**.
 18. **MIGRATED:** `frmListaMotivos.frm` migrado (POS-FUNC-029): `MotivoAnulacion` (domain record) + `IMotivoAnulacionRepository` + `ObtenerMotivosAnulacionHandler` + `MotivoAnulacionRepository` (TTABLA/vMotivoAnulacion — filtra lActivo=1, ordena por Codigo) + `FrmListaMotivos` (modal dialog con botones per-motivo, selección devuelve `MotivoSeleccionado`) + BR-MOTIVO-001..003 + 5 tests nuevos — **550 tests en verde**.
-19. Mantener seguimiento de gaps bloqueantes: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
-20. Completar plantillas FastReport pendientes para los handlers/reportes de Etapa 10 restantes.
+19. **COMPLETED:** `frmCambiarContrasenia.frm` + `frmPassword.frm` validados (POS-FUNC-019): `CambiarPasswordHandler` + `AuthService.CambiarPasswordAsync` alineados a Legacy (`TUSUARIO` activo único por `tResumido`, validaciones de cambio, actualización `tPassword/fRegistro/tUsuarioModifica` y sidecar `TUSUARIO_HASH`) + normalización de login en UI + 8 tests existentes en verde (`CambiarPasswordHandlerTests`).
+20. Mantener seguimiento de gaps bloqueantes: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
+21. Completar plantillas FastReport pendientes para los handlers/reportes de Etapa 10 restantes.
 
 ---
 

@@ -123,19 +123,23 @@ internal sealed class AuthService : IAuthService
         try
         {
             using var connection = await _connectionFactory.CreateOpenConnectionAsync("Infseguridad", cancellationToken);
+            var loginNormalizado = loginUsuario.Trim().ToUpperInvariant();
 
             // Legacy: SELECT count(*) FROM tusuario WHERE tResumido=@Login AND lActivo=1
-            var existe = await connection.ExecuteScalarAsync<int>(
+            var cantidadUsuarios = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM TUSUARIO WHERE tResumido = @Login AND lActivo = 1",
-                new { Login = loginUsuario }) > 0;
+                new { Login = loginNormalizado });
 
-            if (!existe)
+            if (cantidadUsuarios == 0)
                 return Result.Fail("El usuario no está activo o no está registrado.", "SEGURIDAD_USUARIO_INACTIVO");
+
+            if (cantidadUsuarios > 1)
+                return Result.Fail("El Login corresponde a más de un Usuario.", "SEGURIDAD_LOGIN_DUPLICADO");
 
             // Obtener código y hash almacenado
             var codigoUsuario = await connection.ExecuteScalarAsync<string?>(
                 "SELECT tCodigoUsuario FROM TUSUARIO WHERE tResumido = @Login AND lActivo = 1",
-                new { Login = loginUsuario });
+                new { Login = loginNormalizado });
 
             if (codigoUsuario is null)
                 return Result.Fail("No se pudo localizar el usuario.", "SEGURIDAD_USUARIO_NO_ENCONTRADO");
@@ -150,7 +154,7 @@ internal sealed class AuthService : IAuthService
             {
                 var legacyHash = await connection.ExecuteScalarAsync<string?>(
                     "SELECT tPassword FROM TUSUARIO WHERE tResumido = @Login AND lActivo = 1",
-                    new { Login = loginUsuario });
+                    new { Login = loginNormalizado });
 
                 if (!string.IsNullOrWhiteSpace(legacyHash))
                 {
@@ -171,7 +175,7 @@ internal sealed class AuthService : IAuthService
             var encriptadoNuevo = LegacyPasswordCipher.Encrypt(passwordNuevo);
             var claveEnUso = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM TUSUARIO WHERE tPassword = @Password AND tResumido <> @Login",
-                new { Password = encriptadoNuevo, Login = loginUsuario }) > 0;
+                new { Password = encriptadoNuevo, Login = loginNormalizado }) > 0;
 
             if (claveEnUso)
                 return Result.Fail("Clave no permitida, intente de nuevo.", "SEGURIDAD_PASSWORD_NO_PERMITIDO");
@@ -184,9 +188,10 @@ internal sealed class AuthService : IAuthService
                        fRegistro        = GETDATE(),
                        tUsuarioModifica = @UsuarioModifica
                  WHERE tCodigoUsuario = @CodigoUsuario
+                  AND tResumido = @Login
                    AND lActivo = 1
                 """,
-                new { Password = encriptadoNuevo, UsuarioModifica = loginUsuario, CodigoUsuario = codigoUsuario });
+                new { Password = encriptadoNuevo, UsuarioModifica = loginNormalizado, CodigoUsuario = codigoUsuario, Login = loginNormalizado });
 
             // Actualizar hash BCrypt moderno en tabla sidecar TUSUARIO_HASH (ADR-013, SEC-006)
             await _modernPasswordHashStore.UpsertHashAsync(
@@ -194,7 +199,7 @@ internal sealed class AuthService : IAuthService
                 BCrypt.Net.BCrypt.HashPassword(passwordNuevo),
                 cancellationToken);
 
-            _logger.LogInformation("Contraseña cambiada para usuario {Login}.", loginUsuario);
+            _logger.LogInformation("Contraseña cambiada para usuario {Login}.", loginNormalizado);
             return Result.Ok();
         }
         catch (Exception ex)

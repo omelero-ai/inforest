@@ -5,8 +5,8 @@
 | Métrica | Valor |
 |---|---:|
 | Formularios legacy POS (`InfoRest.vbp`) | 120 |
-| Formularios con referencia explícita en .NET | 14 |
-| Formularios sin referencia explícita en .NET | 106 |
+| Formularios con referencia explícita en .NET | 16 |
+| Formularios sin referencia explícita en .NET | 104 |
 | Módulos BAS legacy POS | 18 |
 | Módulos BAS mencionados en .NET | 10 |
 | Clases legacy POS | 10 |
@@ -24,7 +24,6 @@ frmBusquedaRapida.frm
 frmBusquedaRapidaInvitado.frm
 frmBusquedaSocio.frm
 frmBusquedaValeConsumo.frm
-frmCambiarContrasenia.frm
 frmCambio.frm
 frmCambioPropina.frm
 frmCargo.frm
@@ -85,7 +84,6 @@ frmNuevoInvitado.frm
 frmNumPad.frm
 frmPagoMasivo.frm
 frmPagoRapido.frm
-frmPassword.frm
 frmPedidoAnterior.frm
 frmPedidoCorrelativo.frm
 frmPedidoDeliveryNo.frm

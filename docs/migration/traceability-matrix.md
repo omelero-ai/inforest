@@ -2,7 +2,7 @@
 
 > Status: IN_PROGRESS — baseline transversal de Fase 3 validado; la matriz refleja equivalencias parciales y gaps controlados.
 >
-> Última actualización: 2026-08-15
+> Última actualización: 2026-08-17
 
 ---
 
@@ -357,9 +357,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmDocumentoCorrelativo.frm` | Form | `FrmDocumentoCorrelativo` | WinForm | COMPLETED | `src/Inforest.Desktop/Ventas/FrmDocumentoCorrelativo.cs` |
 | `frmPrecuentaImpresora.frm` | Form | `ImprimirPrecuentaHandler` / `FrmPrecuentaImpresora` | Handler + WinForm | COMPLETED | `src/Inforest.Application/Impresion/ImprimirPrecuentaHandler.cs` + `src/Inforest.Desktop/Impresion/FrmPrecuentaImpresora.cs` + `tests/Inforest.Application.Tests/Impresion/ImprimirPrecuentaHandlerTests.cs` |
 | `TIMPRESORA` | Table | `IImpresoraRepository` / `ImpresoraRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Impresion/ImpresoraRepository.cs` |
-| `frmCambiarContrasenia.frm` | Form | `CambiarPasswordHandler` + `FrmCambiarContrasenia` | Handler + WinForm | IN_PROGRESS | `src/Inforest.Application/Seguridad/CambiarPasswordHandler.cs` + `src/Inforest.Desktop/POS/FrmCambiarContrasenia.cs` |
-| `frmPassword.frm` | Form | `FrmPassword` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/POS/FrmPassword.cs` |
-| `AuthService` (cambio password) | Service | `IAuthService.CambiarPasswordAsync` | Service method | IN_PROGRESS | `src/Inforest.Infrastructure/Security/AuthService.cs` |
+| `frmCambiarContrasenia.frm` | Form | `CambiarPasswordHandler` + `FrmCambiarContrasenia` | Handler + WinForm | COMPLETED | `src/Inforest.Application/Seguridad/CambiarPasswordHandler.cs` + `src/Inforest.Desktop/POS/FrmCambiarContrasenia.cs` + `tests/Inforest.Application.Tests/Seguridad/CambiarPasswordHandlerTests.cs` |
+| `frmPassword.frm` | Form | `FrmPassword` | WinForm | COMPLETED | `src/Inforest.Desktop/POS/FrmPassword.cs` |
+| `AuthService` (cambio password) | Service | `IAuthService.CambiarPasswordAsync` | Service method | COMPLETED | `src/Inforest.Infrastructure/Security/AuthService.cs` |
 | `frmLiquidacionDetalle.frm` | Form | `FrmLiquidacionCierre` + `CerrarTurnoHandler` | WinForm + Handler | MIGRATED | `src/Inforest.Desktop/Caja/FrmLiquidacionCierre.cs` + `src/Inforest.Application/Turno/TurnoHandlers.cs` |
 | `CierreTurnoBreakdown` (domain) | — | `CierreTurnoBreakdown` | Value Object | MIGRATED | `src/Inforest.Domain/Entities/Caja/CierreTurnoBreakdown.cs` |
 | `UPDATE MTURNO (cierre completo)` | SQL | `TurnoRepository.CerrarAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Turno/TurnoRepository.cs` |
