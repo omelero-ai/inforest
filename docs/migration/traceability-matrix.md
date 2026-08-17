@@ -566,3 +566,6 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `UPDATE TMESA SET tEstadoMesa` | SQL | `IMesaRepository.CambiarEstadoAsync` + `MesaRepository.CambiarEstadoAsync` | Repository | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/MesaRepository.cs` |
 | `sTipo="V"/"M"/default` | VB6 global var | `ModoConsulta` enum (Visual/Mover/Seleccionar) | Enum | MIGRATED | `src/Inforest.Desktop/Maestros/FrmMesaConsulta.cs` |
 | (tests BR-MESACONSULTA-001..004) | — | `CambiarEstadoMesaHandlerTests` (4) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Maestros/CambiarEstadoMesaHandlerTests.cs` |
+| `frmJuntaMesa.frm` | Form | `FrmJuntaMesa` | WinForms Form | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmJuntaMesa.cs` |
+| `TPEDIDOMESA` (DELETE+INSERT) | Table | `IJuntaMesaRepository.ActualizarJuntaMesasAsync` + `JuntaMesaRepository` | Repository | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/JuntaMesaRepository.cs` |
+| `TPEDIDOMESA` (SELECT) | Table | `IJuntaMesaRepository.ObtenerMesasJuntadasAsync` + `ObtenerMesasJuntadasHandler` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/MaestrosHandlers.cs` |

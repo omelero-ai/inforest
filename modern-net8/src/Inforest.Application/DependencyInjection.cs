@@ -54,6 +54,8 @@ public static class DependencyInjection
         services.AddScoped<CrearMesaHandler>();
         services.AddScoped<ActualizarMesaHandler>();
         services.AddScoped<CambiarEstadoMesaHandler>();
+        services.AddScoped<ObtenerMesasJuntadasHandler>();
+        services.AddScoped<ActualizarJuntaMesasHandler>();
         services.AddScoped<ObtenerSalonPorCodigoHandler>();
         services.AddScoped<ObtenerSalonesActivosHandler>();
         services.AddScoped<CrearSalonHandler>();

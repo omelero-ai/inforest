@@ -670,3 +670,51 @@ public sealed class CambiarEstadoMesaHandler
             : Result.Fail("No se pudo actualizar el estado de la mesa.", "MESA_ESTADO_UPDATE_FALLO");
     }
 }
+
+// ── Junta Mesas ───────────────────────────────────────────────────────────────
+
+/// <summary>Query para obtener las mesas juntas a un pedido.</summary>
+public sealed record ObtenerMesasJuntadasQuery(string CodigoPedido);
+
+/// <summary>Handler de <see cref="ObtenerMesasJuntadasQuery"/>.</summary>
+public sealed class ObtenerMesasJuntadasHandler
+{
+    private readonly IJuntaMesaRepository _repository;
+
+    public ObtenerMesasJuntadasHandler(IJuntaMesaRepository repository)
+        => _repository = repository;
+
+    public async Task<Result<IReadOnlyList<string>>> HandleAsync(ObtenerMesasJuntadasQuery query, CancellationToken ct = default)
+    {
+        var mesas = await _repository.ObtenerMesasJuntadasAsync(query.CodigoPedido, ct);
+        return Result.Ok<IReadOnlyList<string>>(mesas);
+    }
+}
+
+/// <summary>
+/// Comando para actualizar las mesas asignadas a un pedido.
+/// Legacy: frmJuntaMesa.frm — DELETE/INSERT TPEDIDOMESA + UPDATE TMESA estados.
+/// BR-JUNTA-001.
+/// </summary>
+public sealed record ActualizarJuntaMesasCommand(string CodigoPedido, IEnumerable<string> CodigosMesas);
+
+/// <summary>Handler de <see cref="ActualizarJuntaMesasCommand"/>.</summary>
+public sealed class ActualizarJuntaMesasHandler
+{
+    private readonly IJuntaMesaRepository _repository;
+
+    public ActualizarJuntaMesasHandler(IJuntaMesaRepository repository)
+        => _repository = repository;
+
+    /// <summary>
+    /// Actualiza la asignación de mesas del pedido.
+    /// BR-JUNTA-001: limpia mesas previas antes de insertar las nuevas.
+    /// </summary>
+    public async Task<Result> HandleAsync(ActualizarJuntaMesasCommand command, CancellationToken ct = default)
+    {
+        var ok = await _repository.ActualizarJuntaMesasAsync(command.CodigoPedido, command.CodigosMesas, ct);
+        return ok
+            ? Result.Ok()
+            : Result.Fail("No se pudo actualizar la junta de mesas.", "JUNTA_MESA_UPDATE_FALLO");
+    }
+}

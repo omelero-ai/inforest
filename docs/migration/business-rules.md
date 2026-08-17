@@ -3397,3 +3397,29 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Descripción:** En modo default (Seleccionar), la opción "Sin Mesa" permite asignar un pedido sin mesa física. Visible solo en ese modo. Establece `wMesa=True, sCodigo=""`.
 **Destino .NET:** `FrmMesaConsulta.EsSinMesa=true` al hacer clic en "Sin Mesa".
 **Estado:** MIGRATED
+
+---
+
+## Módulo: Junta de Mesas (frmJuntaMesa)
+
+### BR-JUNTA-001
+**Nombre:** Transacción de actualización de junta de mesas
+**Origen:** Legacy/frmJuntaMesa.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmJuntaMesa.frm`
+**Descripción:** Al confirmar la junta: (1) UPDATE TMESA SET tEstadoMesa='01' para las mesas previamente juntas; (2) DELETE TPEDIDOMESA para el pedido; (3) INSERT TPEDIDOMESA + UPDATE TMESA='06' para cada nueva mesa seleccionada. Todo en una transacción.
+**Destino .NET:** `JuntaMesaRepository.ActualizarJuntaMesasAsync` — transacción SQL.
+**Estado:** MIGRATED
+
+### BR-JUNTA-002
+**Nombre:** Mesas elegibles para junta
+**Origen:** Legacy/frmJuntaMesa.frm
+**Descripción:** Solo mesas en estado '01' (Libre) o '04' (Sucia) son elegibles para ser seleccionadas para la junta. Las mesas '02' (Ocupada), '03' (Reservada) y '05' (Bloqueada) no se pueden seleccionar.
+**Destino .NET:** `FrmJuntaMesa.RenderizarMesas()` — `Enabled = esElegible` donde elegible = Libre | Sucia | FueraDeServicio.
+**Estado:** MIGRATED
+
+### BR-JUNTA-003
+**Nombre:** Estado '06' para mesas juntas
+**Origen:** Legacy/frmJuntaMesa.frm
+**Descripción:** Las mesas asignadas a una junta adoptan estado '06' (FueraDeServicio en el enum .NET) en la tabla TMESA. Esto las marca visualmente como parte de una junta y las bloquea para otras asignaciones.
+**Destino .NET:** `JuntaMesaRepository.ActualizarJuntaMesasAsync` — UPDATE TMESA SET tEstadoMesa='06'.
+**Estado:** MIGRATED
