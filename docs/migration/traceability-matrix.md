@@ -535,3 +535,16 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `Form_Load` → RecordCount=0 → MsgBox (BR-MOTIVO-002) | Logic | `ObtenerMotivosAnulacionHandler` | Handler | MIGRATED | `src/Inforest.Application/Ventas/MotivoAnulacionHandlers.cs` |
 | `cmdEliminacion_Click` → `sCodigo` + `sDescrip` + `wEnter=True` (BR-MOTIVO-003) | Logic | `FrmListaMotivos.MotivoSeleccionado` | Property | MIGRATED | `src/Inforest.Desktop/Ventas/FrmListaMotivos.cs` |
 | (tests BR-MOTIVO-001..003) | — | `MotivoAnulacionHandlerTests` (5 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/MotivoAnulacionHandlerTests.cs` |
+
+---
+
+## Componentes POS-FUNC-021 — Tarjetas RFID / Proximidad
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `FrmTarjetaAproximidad.frm` + `FrmTarjetaAproximidadDetalle.frm` | Form | `FrmTarjetaProximidad` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmTarjetaProximidad.cs` |
+| `TTARJETASRFID` | Table | `TarjetaProximidad` + `ITarjetaProximidadRepository` + `TarjetaProximidadRepository` | Entity + Interface + Class | MIGRATED | `src/Inforest.Domain/Entities/Delivery/TarjetaProximidad.cs` + `src/Inforest.Application/Delivery/TarjetaProximidadHandlers.cs` + `src/Inforest.Infrastructure/Delivery/TarjetaProximidadRepository.cs` |
+| `TMOVIMIENTOTARJETASRFID` | Table | `MovimientoTarjetaProximidad` + `ObtenerMovimientosTarjetaProximidadHandler` | Record + Handler | MIGRATED | `src/Inforest.Domain/Entities/Delivery/TarjetaProximidad.cs` + `src/Inforest.Application/Delivery/TarjetaProximidadHandlers.cs` |
+| `TDELIVERY` (búsqueda cliente asociado) | Table | `IClienteDeliveryRepository` + selector modal en `FrmTarjetaProximidad` | Interface + UI | MIGRATED | `src/Inforest.Domain/Repositories/IClienteDeliveryRepository.cs` + `src/Inforest.Desktop/Clientes/FrmTarjetaProximidad.cs` |
+| `FrmRecargarTarjeta.frm` + `FrmRecargarTarjetaDetalle.frm` | Form | — | — | ANALYSIS | Pendiente migrar recarga/anticipo/documento y saldo transaccional |
+| (tests BR-RFID-001..004) | — | `TarjetaProximidadTests` (7) + `TarjetaProximidadHandlerTests` (7) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/Delivery/TarjetaProximidadTests.cs` + `tests/Inforest.Application.Tests/Delivery/TarjetaProximidadHandlerTests.cs` |

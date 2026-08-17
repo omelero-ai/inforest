@@ -161,3 +161,12 @@
 | ID | Gap | Descripción | Archivo Origen | Estado |
 |---|---|---|---|---|
 | GAP-REP-022 | SP `spRep_RegVentaSunat_formaPago` no encontrado | El tipo 7 (Correlativo con Forma de Pago) de `frmRepRegistroVenta.frm` llama a `spRep_RegVentaSunat_formaPago`. Este SP no existe en `5. SP.sql` ni en los scripts opcionales. El handler devuelve resultado vacío para este tipo y la forma muestra un mensaje de advertencia. | `frmRepRegistroVenta.frm` — Sub Genera4() | OPEN — tipo 7 deshabilitado hasta que se encuentre o cree el SP |
+
+---
+
+## POS-FUNC-021 — Tarjetas RFID / Proximidad
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-RFID-001 | Recarga de tarjeta pendiente | El mantenimiento base de `FrmTarjetaAproximidad.frm` + `FrmTarjetaAproximidadDetalle.frm` ya fue migrado, pero `FrmRecargarTarjeta.frm` + `FrmRecargarTarjetaDetalle.frm` siguen pendientes. El Legacy mezcla recarga, anticipo, emisión documental y actualización de saldo en un mismo flujo. | `FrmRecargarTarjeta.frm`, `FrmRecargarTarjetaDetalle.frm` | IN_PROGRESS |
+| GAP-RFID-002 | `FrmMovimientoTarjetas.frm` sin lógica relevante | El formulario `FrmMovimientoTarjetas.frm` aparece en `InfoRest.vbp` como cascarón visual sin código operativo útil. Se mantiene fuera del corte hasta confirmar si corresponde a un flujo real o a una pantalla obsoleta. | `FrmMovimientoTarjetas.frm` | ANALYSIS |

@@ -22,7 +22,7 @@
 | POS-FUNC-018 | Recibo de ingresos/egresos | `frmReciboIngreso*.frm / frmReciboEgreso*.frm` | Movimientos de caja adicionales | MIGRATED |
 | POS-FUNC-019 | Control de seguridad y contraseñas | `frmPassword.frm / frmCambiarContrasenia.frm` | Validaciones sensibles de operación | COMPLETED |
 | POS-FUNC-020 | Biometría huella | `frmVerificacionHuella*.frm + OCX` | Autenticación biométrica opcional | BLOCKED |
-| POS-FUNC-021 | Tarjetas RFID / proximidad | `FrmTarjetaAproximidad*.frm / FrmRecargarTarjeta*.frm` | Saldo y consumo con tarjetas | ANALYSIS |
+| POS-FUNC-021 | Tarjetas RFID / proximidad | `FrmTarjetaAproximidad*.frm / FrmRecargarTarjeta*.frm` | Saldo y consumo con tarjetas | IN_PROGRESS |
 | POS-FUNC-022 | Balanza y captura de peso | `frmMsComm.frm / frmWinSock.frm / vBalanza` | Captura de productos por peso | ANALYSIS |
 | POS-FUNC-023 | Actualizador cliente POS | `FrmActualizacion.frm / frmNoticias.frm` | Actualización y mensajes del cliente POS | ANALYSIS |
 | POS-FUNC-024 | Fiscal Epson (Argentina) | `modImpresoraFiscal.bas + IFEpson.ocx` | Comprobación fiscal hardware | EXCLUDED_BY_SCOPE |

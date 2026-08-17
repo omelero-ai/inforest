@@ -126,5 +126,5 @@ frmWinSock.frm
 
 - `frmMarca.frm`: reglas de marcación no totalmente determinadas.
 - `frmNoticias.frm` + `FrmActualizacion.frm`: criterio de actualización/versionado en operación real pendiente.
-- Flujos RFID (`FrmTarjetaAproximidad*`, `FrmRecargarTarjeta*`): reglas operativas de negocio incompletas.
+- Flujos RFID: `FrmTarjetaAproximidad.frm` + `FrmTarjetaAproximidadDetalle.frm` ya migrados a `FrmTarjetaProximidad`; siguen pendientes `FrmRecargarTarjeta.frm`, `FrmRecargarTarjetaDetalle.frm` y su emisión de anticipo/documento.
 - Integración hotelera (`INFHOTEL.INI`): reglas cross-sistema no cerradas para POS 100%.

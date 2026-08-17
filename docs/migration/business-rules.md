@@ -3151,3 +3151,59 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Ninguna.
 **Destino .NET:** `FrmListaMotivos.MotivoSeleccionado` — `MotivoAnulacion` si seleccionó, `null` si canceló.
 **Estado:** MIGRATED
+
+---
+
+## BR-RFID-001
+**Nombre:** Tarjeta RFID exige datos obligatorios y estado controlado
+**Origen:** Legacy/FrmTarjetaAproximidadDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidadDetalle.frm
+**Procedimiento/Función:** `cmdOpcion_Click(Index=1)`
+**Descripción:** El mantenimiento de tarjeta de proximidad solo permite grabar si el código RFID, la descripción, el cliente delivery y el estado están informados. Los estados válidos son `Free`, `Asignada` y `Bloqueado`.
+**Condición:** Código vacío, descripción vacía, cliente vacío o estado fuera del catálogo permitido.
+**Resultado:** Bloquea el guardado y muestra mensaje funcional; no persiste en `TTARJETASRFID`.
+**Excepciones:** Ninguna.
+**Destino .NET:** `TarjetaProximidad` + `CrearTarjetaProximidadHandler` + `ActualizarTarjetaProximidadHandler` + `FrmTarjetaProximidad`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-002
+**Nombre:** Código RFID debe ser único al crear tarjeta
+**Origen:** Legacy/FrmTarjetaAproximidadDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidadDetalle.frm
+**Procedimiento/Función:** `cmdOpcion_Click(Index=1)` — alta (`Sw=True`)
+**Descripción:** Antes de insertar una tarjeta nueva, el sistema verifica que `CodidoRFID` no exista previamente en `TTARJETASRFID`.
+**Condición:** `CodidoRFID` ya existe en `TTARJETASRFID`.
+**Resultado:** Cancela la inserción y muestra "Codigo de Tarjeta ya existe".
+**Excepciones:** En edición no se revalida unicidad porque el código permanece bloqueado.
+**Destino .NET:** `CrearTarjetaProximidadHandler` + `ITarjetaProximidadRepository.ObtenerPorCodigoAsync`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-003
+**Nombre:** Cliente delivery asociado debe existir
+**Origen:** Legacy/FrmTarjetaAproximidadDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidadDetalle.frm
+**Procedimiento/Función:** `BtnBuscar_Click`, `cmdOpcion_Click(Index=1)`
+**Descripción:** El código de cliente asociado a la tarjeta se valida contra `TDELIVERY`; si no existe, no se permite grabar.
+**Condición:** `CodigoCliente` no encontrado en `TDELIVERY`.
+**Resultado:** Cancela la operación y muestra "Codigo de Cliente no existe".
+**Excepciones:** La UI legacy permite seleccionar cliente desde búsqueda rápida, pero igual revalida antes de persistir.
+**Destino .NET:** `CrearTarjetaProximidadHandler` + `ActualizarTarjetaProximidadHandler` + `IClienteDeliveryRepository` + selector modal en `FrmTarjetaProximidad`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-004
+**Nombre:** Consulta e impresión de últimos 10 movimientos por tarjeta
+**Origen:** Legacy/FrmTarjetaAproximidad.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidad.frm
+**Procedimiento/Función:** `cmdOpcion_Click(Index=5)`, `Genera`
+**Descripción:** El mantenimiento de tarjetas consulta los 10 movimientos más recientes (`MontoIngreso`, `MontoSalida`, `MontoAnterior`, `MontoFinal`) ordenados por fecha descendente para la tarjeta seleccionada y permite imprimirlos.
+**Condición:** Tarjeta seleccionada.
+**Resultado:** Muestra/imprime el historial reciente desde `TMOVIMIENTOTARJETASRFID`.
+**Excepciones:** Si no existen movimientos, informa "No hay Datos para Mostrar".
+**Destino .NET:** `ObtenerMovimientosTarjetaProximidadHandler` + `FrmTarjetaProximidad` (grilla + impresión).
+**Estado:** MIGRATED

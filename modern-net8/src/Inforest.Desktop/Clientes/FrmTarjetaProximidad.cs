@@ -1,5 +1,6 @@
 using System.Drawing.Printing;
 using Inforest.Application.Delivery;
+using Inforest.Domain.Common;
 using Inforest.Domain.Entities.Delivery;
 using Inforest.Domain.Repositories;
 
@@ -406,7 +407,7 @@ public sealed class FrmTarjetaProximidad : Form
 
     private void PrintDocument_PrintPage(object? sender, PrintPageEventArgs e)
     {
-        if (_tarjetaSeleccionada is null)
+        if (_tarjetaSeleccionada is null || e.Graphics is null)
             return;
 
         var titleFont = new Font("Segoe UI", 12, FontStyle.Bold);
