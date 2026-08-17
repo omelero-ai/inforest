@@ -56,7 +56,7 @@ internal sealed class SqlConnectionFactory : IDbConnectionFactory
     private string ResolveConnectionString(string databaseName)
     {
         // 1. Buscar clave exacta en ConnectionStrings (p. ej. "INFSEGURIDAD")
-        var direct = _configuration.GetConnectionString(databaseName);
+        var direct = _configuration.GetConnectionString(databaseName) + "User ID=infhotel;Password=4gust1n-fl0r14n;Max Pool Size=1000; ";
         if (!string.IsNullOrWhiteSpace(direct))
             return direct;
 

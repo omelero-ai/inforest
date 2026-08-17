@@ -133,7 +133,7 @@ public partial class Form1 : Form
 
     private async Task ValidarInicioPosAsync()
     {
-        var codigoCaja = _configuration["Inforest:CodigoCaja"] ?? "01";
+        var codigoCaja = _configuration["Inforest:CodigoCaja"] ?? "001";
         var inicio = await _validarInicioPosHandler.HandleAsync(new ValidarInicioPosQuery(codigoCaja));
         if (!inicio.EsExitoso || inicio.Valor is null)
         {
