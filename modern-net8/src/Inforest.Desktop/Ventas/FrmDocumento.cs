@@ -316,11 +316,6 @@ public class FrmDocumento : Form
         }).ToList();
     }
 
-    private DocumentoPendienteDto? DocumentoSeleccionado =>
-        _grdDocumentos.CurrentRow?.Cells["Documento"]?.Value is string cod
-            ? null // populated from async reload below
-            : null;
-
     private string? CodigoDocumentoSeleccionado =>
         _grdDocumentos.CurrentRow?.Cells["Documento"]?.Value as string;
 
