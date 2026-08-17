@@ -156,8 +156,8 @@
 22. **MIGRATED:** `frmBusquedaRapida.frm` (POS-FUNC-035): `FrmBusquedaRapida` (diálogo modal genérico con filtrado en tiempo real, selección por Enter/doble-clic, Escape para cancelar) + `BusquedaItem` + `BusquedaResultado` + BR-BUSQ-001/002/003 — sin tests (UI pura sin lógica de aplicación).
 23. **MIGRATED:** `frmBusquedaDelivery.frm` (POS-FUNC-036): `FrmBusquedaDelivery` (buscador clientes delivery con grilla filtrable TDELIVERY+vZona, panel detalle vDelivery con saldos fidelización, panel estadísticas toggle "Otros Datos" MPEDIDO/DPEDIDO/MDOCUMENTO, tiendas/sucursales vTienda, nuevo/editar cliente, selección con Enter/doble-clic/Escape) + `IClienteDeliveryReadRepository` + `ClienteDeliveryReadRepository` + 4 DTOs + `FrmBusquedaTiendasDelivery` + 4 handlers + BR-DEL-036-001..005 — sin tests (UI pura) — **577 tests en verde**.
 24. **SIGUIENTE PENDIENTE:** `frmClienteDelivery.frm` o `frmNuevoDelivery.frm` (completar flujo delivery POS-FUNC-012), o cerrar gap RFID POS-FUNC-021 (anticipo/emisión documental/impresión fiscal en recarga).
-24. Mantener seguimiento de gaps bloqueantes: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
-25. Completar plantillas FastReport pendientes para los handlers/reportes de Etapa 10 restantes.
+25. Mantener seguimiento de gaps bloqueantes: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
+26. Completar plantillas FastReport pendientes para los handlers/reportes de Etapa 10 restantes.
 
 ---
 
