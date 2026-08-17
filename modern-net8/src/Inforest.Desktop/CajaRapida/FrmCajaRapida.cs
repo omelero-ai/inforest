@@ -1,11 +1,13 @@
 using System.ComponentModel;
 using Inforest.Application.Caja;
+using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
 using Inforest.Application.Maestros;
 using Inforest.Application.Pedidos;
 using Inforest.Application.Turno;
 using Inforest.Application.Ventas;
 using Inforest.Desktop.Caja;
+using Inforest.Desktop.Ventas;
 using Inforest.Domain.Entities.Maestros;
 using Inforest.Domain.Entities.Ventas;
 
@@ -27,6 +29,9 @@ public class FrmCajaRapida : Form
     private readonly RegistrarPagosMultiplesHandler _registrarPagosMultiplesHandler;
     private readonly ProcesarPagoPinPadHandler _procesarPagoPinPadHandler;
     private readonly ObtenerTerminalesPinPadHandler _obtenerTerminalesPinPadHandler;
+    private readonly ObtenerConfiguracionSistemaHandler _configuracionHandler;
+    private readonly ObtenerClientesActivosHandler _clientesHandler;
+    private readonly ObtenerClienteGeneralBoletaHandler _clienteGeneralBoletaHandler;
 
     private readonly FlowLayoutPanel _catalogoPanel;
     private readonly BindingList<ItemRapidoRow> _items = [];
@@ -43,7 +48,10 @@ public class FrmCajaRapida : Form
         PagarDocumentoHandler pagarHandler,
         RegistrarPagosMultiplesHandler registrarPagosMultiplesHandler,
         ProcesarPagoPinPadHandler procesarPagoPinPadHandler,
-        ObtenerTerminalesPinPadHandler obtenerTerminalesPinPadHandler)
+        ObtenerTerminalesPinPadHandler obtenerTerminalesPinPadHandler,
+        ObtenerConfiguracionSistemaHandler configuracionHandler,
+        ObtenerClientesActivosHandler clientesHandler,
+        ObtenerClienteGeneralBoletaHandler clienteGeneralBoletaHandler)
     {
         _productoRepository = productoRepository;
         _sessionService = sessionService;
@@ -55,6 +63,9 @@ public class FrmCajaRapida : Form
         _registrarPagosMultiplesHandler = registrarPagosMultiplesHandler;
         _procesarPagoPinPadHandler = procesarPagoPinPadHandler;
         _obtenerTerminalesPinPadHandler = obtenerTerminalesPinPadHandler;
+        _configuracionHandler = configuracionHandler;
+        _clientesHandler = clientesHandler;
+        _clienteGeneralBoletaHandler = clienteGeneralBoletaHandler;
 
         Text = "Caja Rápida";
         WindowState = FormWindowState.Maximized;
@@ -188,7 +199,11 @@ public class FrmCajaRapida : Form
         }
 
         // Emitir documento
-        var emitirCommand = new EmitirDocumentoCommand(pedidoResult.Valor!.CodigoPedido, "01", null, 0m, 0m);
+        var clienteBoleta = await ResolverClienteBoletaAsync();
+        if (clienteBoleta.Cancelado)
+            return;
+
+        var emitirCommand = new EmitirDocumentoCommand(pedidoResult.Valor!.CodigoPedido, "01", clienteBoleta.CodigoCliente, 0m, 0m);
         var docResult = await _emitirHandler.HandleAsync(emitirCommand);
         if (!docResult.EsExitoso)
         {
@@ -212,6 +227,19 @@ public class FrmCajaRapida : Form
             ActualizarTotal();
             MessageBox.Show("Venta registrada correctamente.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+    }
+
+    private async Task<(bool Cancelado, string? CodigoCliente)> ResolverClienteBoletaAsync()
+    {
+        var configuracion = await _configuracionHandler.HandleAsync(new ObtenerConfiguracionSistemaQuery());
+        if (!configuracion.EsExitoso || configuracion.Valor is null || !configuracion.Valor.lBODato)
+            return (false, null);
+
+        using var frmSolicitud = new FrmSolicitudBoleta(_clienteGeneralBoletaHandler, _clientesHandler);
+        if (frmSolicitud.ShowDialog(this) != DialogResult.OK || frmSolicitud.ClienteSeleccionado is null)
+            return (true, null);
+
+        return (false, frmSolicitud.ClienteSeleccionado.CodigoCliente);
     }
 
     private sealed record ItemRapidoRow(string CodigoProducto, string Descripcion, int Cantidad, decimal PrecioUnitario)

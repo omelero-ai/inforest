@@ -179,6 +179,8 @@ public static class DependencyInjection
 
         // POS-FUNC-029: Lista Motivos Anulación — vMotivoAnulacion (BR-MOTIVO-001..003)
         services.AddScoped<ObtenerMotivosAnulacionHandler>();
+        // POS-FUNC-030: Solicitud de boleta con/sin datos (frmSolicitudBoleta.frm)
+        services.AddScoped<ObtenerClienteGeneralBoletaHandler>();
 
         return services;
     }

@@ -16,7 +16,11 @@ public interface IMaestroRepository<T>
 
 public interface IGrupoProductoRepository : IMaestroRepository<GrupoProducto>;
 public interface ISubGrupoProductoRepository : IMaestroRepository<SubGrupoProducto>;
-public interface IClienteRepository : IMaestroRepository<Cliente>;
+public interface IClienteRepository : IMaestroRepository<Cliente>
+{
+    Task<Cliente?> ObtenerPorIdentidadAsync(string identidad, CancellationToken ct = default);
+    Task<string> ObtenerProximoCodigoAsync(CancellationToken ct = default);
+}
 public interface IMesaRepository : IMaestroRepository<Mesa>;
 public interface ISalonRepository : IMaestroRepository<Salon>;
 public interface IMozoRepository : IMaestroRepository<Mozo>;

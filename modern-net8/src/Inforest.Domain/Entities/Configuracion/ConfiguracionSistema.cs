@@ -105,6 +105,7 @@ public sealed record ConfiguracionSistema
     public string? tEmailRecordatorio { get; init; }
     public bool lEmailAgradecimiento { get; init; }
     public string? tEmailAgradecimiento { get; init; }
+    public bool lBODato { get; init; }
     public bool lImprimeCodigoBarras { get; init; }
     public bool lEnvioAutomatico { get; init; }
     public bool lControlEnviosProduccion { get; init; }
@@ -275,6 +276,7 @@ public sealed record ConfiguracionSistema
         string? tEmailRecordatorio,
         bool lEmailAgradecimiento,
         string? tEmailAgradecimiento,
+        bool lBODato,
         bool lImprimeCodigoBarras,
         bool lEnvioAutomatico,
         bool lControlEnviosProduccion,
@@ -442,6 +444,7 @@ public sealed record ConfiguracionSistema
             tEmailRecordatorio = tEmailRecordatorio,
             lEmailAgradecimiento = lEmailAgradecimiento,
             tEmailAgradecimiento = tEmailAgradecimiento,
+            lBODato = lBODato,
             lImprimeCodigoBarras = lImprimeCodigoBarras,
             lEnvioAutomatico = lEnvioAutomatico,
             lControlEnviosProduccion = lControlEnviosProduccion,

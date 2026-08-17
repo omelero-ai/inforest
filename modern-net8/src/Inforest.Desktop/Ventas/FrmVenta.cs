@@ -1,7 +1,9 @@
 using System.ComponentModel;
+using Inforest.Application.Configuracion;
 using Inforest.Application.Caja;
 using Inforest.Application.Ventas;
 using Inforest.Desktop.Caja;
+using Inforest.Application.Maestros;
 using Inforest.Domain.Entities.Ventas;
 
 namespace Inforest.Desktop.Ventas;
@@ -20,6 +22,9 @@ public class FrmVenta : Form
     private readonly ProcesarPagoPinPadHandler? _procesarPagoPinPadHandler;
     private readonly ObtenerTerminalesPinPadHandler? _obtenerTerminalesPinPadHandler;
     private readonly AnularDocumentoHandler? _anularHandler;
+    private readonly ObtenerConfiguracionSistemaHandler? _configuracionHandler;
+    private readonly ObtenerClientesActivosHandler? _clientesHandler;
+    private readonly ObtenerClienteGeneralBoletaHandler? _clienteGeneralBoletaHandler;
 
     private readonly BindingList<VentaItemRow> _items = [];
     private readonly Label _lblTotal;
@@ -38,7 +43,10 @@ public class FrmVenta : Form
         RegistrarPagosMultiplesHandler? registrarPagosMultiplesHandler = null,
         ProcesarPagoPinPadHandler? procesarPagoPinPadHandler = null,
         ObtenerTerminalesPinPadHandler? obtenerTerminalesPinPadHandler = null,
-        AnularDocumentoHandler? anularHandler = null)
+        AnularDocumentoHandler? anularHandler = null,
+        ObtenerConfiguracionSistemaHandler? configuracionHandler = null,
+        ObtenerClientesActivosHandler? clientesHandler = null,
+        ObtenerClienteGeneralBoletaHandler? clienteGeneralBoletaHandler = null)
     {
         _pedido = pedido;
         _emitirHandler = emitirHandler;
@@ -48,6 +56,9 @@ public class FrmVenta : Form
         _procesarPagoPinPadHandler = procesarPagoPinPadHandler;
         _obtenerTerminalesPinPadHandler = obtenerTerminalesPinPadHandler;
         _anularHandler = anularHandler;
+        _configuracionHandler = configuracionHandler;
+        _clientesHandler = clientesHandler;
+        _clienteGeneralBoletaHandler = clienteGeneralBoletaHandler;
 
         Text = "Venta / Emisión de Documento";
         Width = 1000;
@@ -161,10 +172,19 @@ public class FrmVenta : Form
         }
 
         var tipoCodigo = _cboTipoDocumento.SelectedIndex == 0 ? "01" : "03";
+        var codigoCliente = string.IsNullOrWhiteSpace(_txtCliente.Text) ? null : _txtCliente.Text.Trim();
+
+        if (tipoCodigo == "01")
+        {
+            codigoCliente = await ResolverClienteBoletaAsync(codigoCliente);
+            if (codigoCliente is null)
+                return;
+        }
+
         var command = new EmitirDocumentoCommand(
             _pedido.CodigoPedido,
             tipoCodigo,
-            string.IsNullOrWhiteSpace(_txtCliente.Text) ? null : _txtCliente.Text.Trim(),
+            codigoCliente,
             _nudPropina.Value,
             _nudDescuento.Value);
 
@@ -192,6 +212,23 @@ public class FrmVenta : Form
             DialogResult = DialogResult.OK;
             Close();
         }
+    }
+
+    private async Task<string?> ResolverClienteBoletaAsync(string? codigoClienteActual)
+    {
+        if (_configuracionHandler is null || _clientesHandler is null || _clienteGeneralBoletaHandler is null)
+            return codigoClienteActual;
+
+        var configuracion = await _configuracionHandler.HandleAsync(new ObtenerConfiguracionSistemaQuery());
+        if (!configuracion.EsExitoso || configuracion.Valor is null || !configuracion.Valor.lBODato)
+            return codigoClienteActual;
+
+        using var frmSolicitud = new FrmSolicitudBoleta(_clienteGeneralBoletaHandler, _clientesHandler);
+        if (frmSolicitud.ShowDialog(this) != DialogResult.OK || frmSolicitud.ClienteSeleccionado is null)
+            return null;
+
+        _txtCliente.Text = frmSolicitud.ClienteSeleccionado.CodigoCliente;
+        return frmSolicitud.ClienteSeleccionado.CodigoCliente;
     }
 
     private sealed record VentaItemRow(

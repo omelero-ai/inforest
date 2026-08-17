@@ -157,6 +157,7 @@ internal sealed class ParametroRepository : IParametroRepository
             GetString(reader, "tEmailRecordatorio"),
             GetBoolean(reader, "lEmailAgradecimiento"),
             GetString(reader, "tEmailAgradecimiento"),
+            GetBoolean(reader, "lBODato"),
             GetBoolean(reader, "lImprimeCodigoBarras"),
             GetBoolean(reader, "lEnvioAutomatico"),
             GetBoolean(reader, "lControlEnviosProduccion"),
