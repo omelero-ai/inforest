@@ -8,6 +8,7 @@ using Inforest.Application.CentralPedidos;
 using Inforest.Application.Reportes;
 using Inforest.Application.Configuracion;
 using Inforest.Application.Maestros;
+using Inforest.Application.Precios;
 using Inforest.Application.Turno;
 using Inforest.Application.Pedidos;
 using Inforest.Application.Ventas;
@@ -206,6 +207,11 @@ public static class DependencyInjection
         services.AddScoped<ObtenerMotivosAnulacionHandler>();
         // POS-FUNC-030: Solicitud de boleta con/sin datos (frmSolicitudBoleta.frm)
         services.AddScoped<ObtenerClienteGeneralBoletaHandler>();
+
+        // POS-FUNC-038: Precios / Descuento por ítem — frmPrecios.frm, frmPreciosDetalle.frm
+        services.AddScoped<ObtenerListadoPreciosHandler>();
+        services.AddScoped<ObtenerItemParaPrecioHandler>();
+        services.AddScoped<ModificarPrecioItemHandler>();
 
         return services;
     }

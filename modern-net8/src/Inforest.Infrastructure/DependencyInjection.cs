@@ -11,6 +11,7 @@ using Inforest.Application.Interfaces.Country;
 using Inforest.Application.Interfaces.Hardware;
 using Inforest.Application.Maestros;
 using Inforest.Application.Pedidos;
+using Inforest.Application.Precios;
 using Inforest.Application.Reportes;
 using Inforest.Application.Turno;
 using Inforest.Application.Ventas;
@@ -25,6 +26,7 @@ using Inforest.Infrastructure.Kitchen;
 using Inforest.Infrastructure.Maestros;
 using Inforest.Infrastructure.Motorizado;
 using Inforest.Infrastructure.Pedidos;
+using Inforest.Infrastructure.Precios;
 using Inforest.Infrastructure.Reportes;
 using Inforest.Infrastructure.Security;
 using Inforest.Infrastructure.Turno;
@@ -137,6 +139,9 @@ public static class DependencyInjection
 
         // POS-FUNC-011: Reservas — TRESERVA
         services.AddScoped<IReservaRepository, ReservaRepository>();
+
+        // POS-FUNC-038: Precios / Descuento por ítem — DPEDIDO, TLOG_MODPRECIO
+        services.AddScoped<IPrecioRepository, PrecioRepository>();
 
         // W14: Almacén — BR-008 (descargo de inventario en venta)
         services.AddScoped<IInventoryGateway, InventoryGateway>();
