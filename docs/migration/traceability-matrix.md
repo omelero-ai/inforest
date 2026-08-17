@@ -355,8 +355,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmDocumentoCorrelativo.frm` + `modPuntoVenta.bas` | Form/Module | `CorrelativoDocumento` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Ventas/CorrelativoDocumento.cs` |
 | `TTIPODOCUMENTOIMPRESORA` | Table | `ICorrelativoRepository` / `CorrelativoRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Ventas/CorrelativoRepository.cs` |
 | `frmDocumentoCorrelativo.frm` | Form | `FrmDocumentoCorrelativo` | WinForm | COMPLETED | `src/Inforest.Desktop/Ventas/FrmDocumentoCorrelativo.cs` |
-| `frmPrecuentaImpresora.frm` | Form | `ImprimirPrecuentaHandler` / `FrmPrecuentaImpresora` | Handler + WinForm | IN_PROGRESS | `src/Inforest.Application/Impresion/ImprimirPrecuentaHandler.cs` + `src/Inforest.Desktop/Impresion/FrmPrecuentaImpresora.cs` |
-| `TIMPRESORA` | Table | `IImpresoraRepository` / `ImpresoraRepository` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Impresion/ImpresoraRepository.cs` |
+| `frmPrecuentaImpresora.frm` | Form | `ImprimirPrecuentaHandler` / `FrmPrecuentaImpresora` | Handler + WinForm | COMPLETED | `src/Inforest.Application/Impresion/ImprimirPrecuentaHandler.cs` + `src/Inforest.Desktop/Impresion/FrmPrecuentaImpresora.cs` + `tests/Inforest.Application.Tests/Impresion/ImprimirPrecuentaHandlerTests.cs` |
+| `TIMPRESORA` | Table | `IImpresoraRepository` / `ImpresoraRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Impresion/ImpresoraRepository.cs` |
 | `frmCambiarContrasenia.frm` | Form | `CambiarPasswordHandler` + `FrmCambiarContrasenia` | Handler + WinForm | IN_PROGRESS | `src/Inforest.Application/Seguridad/CambiarPasswordHandler.cs` + `src/Inforest.Desktop/POS/FrmCambiarContrasenia.cs` |
 | `frmPassword.frm` | Form | `FrmPassword` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/POS/FrmPassword.cs` |
 | `AuthService` (cambio password) | Service | `IAuthService.CambiarPasswordAsync` | Service method | IN_PROGRESS | `src/Inforest.Infrastructure/Security/AuthService.cs` |

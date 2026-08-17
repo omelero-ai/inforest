@@ -110,7 +110,7 @@ public static class DependencyInjection
         services.AddScoped<ICorrelativoRepository, CorrelativoRepository>();
         // POS-FUNC-006: Notas de Crédito (BR-NC-001..006)
         services.AddScoped<INotaCreditoRepository, NotaCreditoRepository>();
-        // POS-FUNC-016: Impresión pre-cuenta — TIMPRESORA (BR-008)
+        // POS-FUNC-016: Impresión pre-cuenta — TIMPRESORA (BR-PRECUENTA-001..003)
         services.AddScoped<IImpresoraRepository, ImpresoraRepository>();
 
         // W6: Caja / Pagos (BR-007, BR-013)

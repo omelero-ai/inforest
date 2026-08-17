@@ -93,7 +93,6 @@ frmPedidoDetalle.frm
 frmPedidosVerPagos.frm
 frmPrecios.frm
 frmPreciosDetalle.frm
-frmPrecuentaImpresora.frm
 frmPrePago.frm
 frmPrograma.frm
 FrmRecargarTarjeta.frm

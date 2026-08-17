@@ -8,7 +8,7 @@ namespace Inforest.Application.Tests.Impresion;
 
 /// <summary>
 /// Tests para ImprimirPrecuentaHandler y ObtenerImpresorasPorCajaHandler.
-/// Legacy: frmPrecuentaImpresora.frm. BR-008.
+/// Legacy: frmPrecuentaImpresora.frm. BR-PRECUENTA-001/002/003.
 /// </summary>
 public class ImprimirPrecuentaHandlerTests
 {
@@ -94,6 +94,43 @@ public class ImprimirPrecuentaHandlerTests
 
         Assert.False(result.EsExitoso);
         Assert.Equal("IMPRESION_PEDIDO_SIN_DETALLES", result.CodigoError);
+    }
+
+    [Fact]
+    public async Task ImprimirPrecuenta_PredeterminadaSinCodigo_Falla()
+    {
+        var handler = BuildHandler();
+        var result = await handler.HandleAsync(new ImprimirPrecuentaCommand(
+            "PED001",
+            string.Empty,
+            UsarImpresoraPredeterminada: true,
+            CodigoImpresoraPredeterminada: null));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("IMPRESION_PRECUENTA_PREDETERMINADA_REQUERIDA", result.CodigoError);
+    }
+
+    [Fact]
+    public async Task ImprimirPrecuenta_PredeterminadaValida_ImprimeConCodigoPredeterminado()
+    {
+        var pedidoRepo = new Mock<IPedidoRepository>();
+        pedidoRepo.Setup(r => r.ObtenerPorCodigoAsync("PED001", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(BuildPedido());
+
+        var impresoraService = new Mock<IImpresoraService>();
+        var handler = BuildHandler(pedidoRepo, impresoraService);
+
+        var result = await handler.HandleAsync(new ImprimirPrecuentaCommand(
+            "PED001",
+            string.Empty,
+            UsarImpresoraPredeterminada: true,
+            CodigoImpresoraPredeterminada: "PRE001"));
+
+        Assert.True(result.EsExitoso);
+        impresoraService.Verify(s => s.ImprimirTicketAsync(
+            It.IsAny<string>(),
+            "PRE001",
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── ObtenerImpresorasPorCajaHandler ───────────────────────────────────────

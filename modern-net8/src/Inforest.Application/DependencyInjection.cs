@@ -91,7 +91,7 @@ public static class DependencyInjection
         services.AddScoped<ObtenerCorrelativosPorCajaHandler>();
         services.AddScoped<ObtenerCorrelativoFacturaHandler>();
         services.AddScoped<ObtenerTodosCorrelativosHandler>();
-        // POS-FUNC-016: Impresión pre-cuenta/comanda (BR-008)
+        // POS-FUNC-016: Impresión pre-cuenta/comanda (BR-PRECUENTA-001..003)
         services.AddScoped<ImprimirPrecuentaHandler>();
         services.AddScoped<ObtenerImpresorasPorCajaHandler>();
 

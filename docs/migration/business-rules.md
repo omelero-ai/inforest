@@ -2885,3 +2885,45 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Fecha inicio > fecha fin → error de rango. Tipo 7 → GAP bloqueado (SP no encontrado). Si no hay datos → mensaje "No hay Datos para Mostrar".
 **Destino .NET:** `ObtenerReporteRegistroVentaHandler` + `FrmRepRegistroVentaReporte` + `RepRegistroVentaSunat.frx` / `RepRegistroVentaDetallado.frx` / `RepRegistroVentaConsolidado.frx` / `RepRegistroVentaSunatAd.frx` / `RepRegistroVentaComprobante.frx`
 **Estado:** MIGRATED
+
+---
+
+## BR-PRECUENTA-001
+**Nombre:** Carga de impresoras disponibles por caja
+**Origen:** Legacy/frmPrecuentaImpresora.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmPrecuentaImpresora.frm`
+**Procedimiento/Función:** `Form_Load`
+**Descripción:** Al abrir el selector de pre-cuenta, se listan las impresoras de la caja actual consultando `TIMPRESORA`.
+**Condición:** `tCaja = sCaja`
+**Resultado:** Lista de impresoras habilitadas para selección manual.
+**Excepciones:** Si no hay impresoras configuradas, se muestra advertencia y se cancela el flujo de selección.
+**Destino .NET:** `ObtenerImpresorasPorCajaHandler` + `ImpresoraRepository` + `FrmPrecuentaImpresora`
+**Estado:** MIGRATED
+
+---
+
+## BR-PRECUENTA-002
+**Nombre:** Impresión de pre-cuenta con impresora seleccionada
+**Origen:** Legacy/frmPrecuentaImpresora.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmPrecuentaImpresora.frm`
+**Procedimiento/Función:** `cmdImpresora_Click`
+**Descripción:** La pre-cuenta se imprime con la impresora elegida por el usuario dentro del selector.
+**Condición:** El usuario selecciona una impresora disponible y confirma la impresión.
+**Resultado:** Se envía ticket de pre-cuenta a la impresora seleccionada.
+**Excepciones:** Si el pedido no existe o no tiene detalle, la impresión se bloquea con mensaje de validación.
+**Destino .NET:** `ImprimirPrecuentaHandler` + `FrmPrecuentaImpresora`
+**Estado:** MIGRATED
+
+---
+
+## BR-PRECUENTA-003
+**Nombre:** Impresión por impresora predeterminada de caja
+**Origen:** Legacy/frmPrecuentaImpresora.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmPrecuentaImpresora.frm`
+**Procedimiento/Función:** `cmdOpcion_Click` (Index = 1, Predeterminada)
+**Descripción:** El usuario puede omitir la selección manual y usar la impresora predeterminada configurada para la caja (`tPrecuenta`).
+**Condición:** Se activa la opción Predeterminada y existe código de impresora por defecto.
+**Resultado:** La pre-cuenta se envía a la impresora predeterminada de la caja.
+**Excepciones:** Si no existe impresora predeterminada configurada, se bloquea la impresión y se informa al usuario.
+**Destino .NET:** `ImprimirPrecuentaHandler` (`UsarImpresoraPredeterminada`) + `FrmPrecuentaImpresora`
+**Estado:** MIGRATED
