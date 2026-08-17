@@ -7,6 +7,7 @@ namespace Inforest.Desktop.Turno;
         private readonly CerrarTurnoHandler? _cerrarTurnoHandler;
         private readonly string _codigoTurno;
         private readonly string _codigoCaja;
+        private readonly string _codigoUsuario;
 
         private Label lblResumen = null!;
         private TextBox txtMontoFinal = null!;

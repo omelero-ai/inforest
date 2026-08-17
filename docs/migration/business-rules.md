@@ -2927,3 +2927,73 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Si no existe impresora predeterminada configurada, se bloquea la impresión y se informa al usuario.
 **Destino .NET:** `ImprimirPrecuentaHandler` (`UsarImpresoraPredeterminada`) + `FrmPrecuentaImpresora`
 **Estado:** MIGRATED
+
+---
+
+## BR-DIV-001
+**Nombre:** Estado de pedido origen para división
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** cmdOpcion_Click (índice 0 — Aceptar)
+**Descripción:** Antes de confirmar la división, el pedido origen debe tener estado "01" (Emitido). Si el estado es diferente se cancela la operación con mensaje informativo.
+**Condición:** `tEstadoPedido <> "01"`
+**Resultado:** Se muestra mensaje "El pedido XXX no puede ser Dividido, Estado del pedido Diferente de Emitido." y se cancela.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ConfirmarDivisionHandler.HandleAsync` + `IDivisionPedidoRepository.ObtenerEstadoPedidoAsync`
+**Estado:** MIGRATED
+
+---
+
+## BR-DIV-002
+**Nombre:** Validación de monto máximo por pedido destino
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** cmdOpcion_Click (índice 0 — Aceptar)
+**Descripción:** Si un pedido destino tiene monto máximo configurado (`montoMaximo > 0`) se valida que la suma de los ítems a mover más la venta actual del pedido no supere ese límite.
+**Condición:** `ventaActual + ventaTemp > montoMaximo`
+**Resultado:** Se cancela la confirmación con mensaje indicando el pedido y monto máximo superado.
+**Excepciones:** Si `montoMaximo = 0` no se aplica restricción.
+**Destino .NET:** `ConfirmarDivisionHandler.HandleAsync` + `IDivisionPedidoRepository.ObtenerMontoMaximoPedidoAsync` + `ObtenerVentaActualPedidoAsync`
+**Estado:** MIGRATED
+
+---
+
+## BR-DIV-003
+**Nombre:** Recalculo proporcional de impuestos al disgregar
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** Sub Disgregar()
+**Descripción:** Al disgregar un ítem, los impuestos (IGV, propina, impuesto3) se recalculan proporcionalmente a la cantidad resultante respecto a la cantidad original.
+**Condición:** `nuevaCantidad < cantidadOriginal`
+**Resultado:** `precioImpuesto1 * (nuevaCantidad / cantidadOriginal)`, ídem impuesto2 e impuesto3. El precio neto no varía, sólo la proporción de impuestos y la venta total.
+**Excepciones:** Si cantidad = 0 el ítem se descarta.
+**Destino .NET:** `ItemDivision.DividirProporcionalmente` + `AjustarCantidad`
+**Estado:** MIGRATED
+
+---
+
+## BR-DIV-004
+**Nombre:** Recalculo proporcional al compartir entre pedidos
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** Sub Compartir()
+**Descripción:** Al usar Compartir, cada ítem del pedido origen se divide entre (nPedidosDestino + 1). El ítem original queda con la fracción proporcional y se crean N copias en cada pedido destino con la misma proporción.
+**Condición:** Siempre que haya al menos un pedido destino activo.
+**Resultado:** Cada ítem queda con cantidad / (N+1) y los impuestos calculados proporcionalmente.
+**Excepciones:** Si no hay pedidos destino configurados, la operación no se permite.
+**Destino .NET:** `SesionDivision.Compartir` + `ItemDivision.ClonarConCantidadProporcional`
+**Estado:** MIGRATED
+
+---
+
+## BR-DIV-005
+**Nombre:** Generación de correlativo para pedidos destino temporales
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** Sub Aceptar() / Function NuevoPedido()
+**Descripción:** Los pedidos destino son inicialmente identificados con códigos temporales de 3 caracteres. Al confirmar la división, se genera un correlativo real en formato `YY+8dígitos` (ej: `2608000001`) consultando el MAX de MPEDIDO para el día contable.
+**Condición:** `LENGTH(tCodigoPedido) = 3` — código temporal que requiere código definitivo.
+**Resultado:** Se inserta un nuevo registro MPEDIDO con el código correlativo generado, copiando los campos de cabecera del pedido origen.
+**Excepciones:** Si no existe pedido con ese día contable, el correlativo empieza en 1 (`YY + "00000001"`).
+**Destino .NET:** `DivisionPedidoRepository.GenerarSiguienteCorrelativoPedidoAsync` + `CrearMpedidoFromOrigenAsync`
+**Estado:** MIGRATED

@@ -121,6 +121,9 @@ public static class DependencyInjection
         services.AddScoped<IReciboIngresoRepository, ReciboIngresoRepository>();
         services.AddScoped<IReciboEgresoRepository, ReciboEgresoRepository>();
 
+        // POS-FUNC-025: División de Pedidos — MPEDIDO/DPEDIDO (BR-DIV-001..005)
+        services.AddScoped<IDivisionPedidoRepository, DivisionPedidoRepository>();
+
         // POS-FUNC-011: Reservas — TRESERVA
         services.AddScoped<IReservaRepository, ReservaRepository>();
 
