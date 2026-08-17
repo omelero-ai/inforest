@@ -100,14 +100,14 @@ internal sealed class ClienteRepository : IClienteRepository
     public async Task<bool> ValidarCompatibilidadDocumentoAsync(string tipoDocumento, string codigoCliente, CancellationToken ct = default)
     {
         using var conn = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
-        const string sql = "EXEC usp_Inforest_ValidaClienteSel @tTipoDoc, @tCodCliente";
         var resultado = await conn.ExecuteScalarAsync<string>(new CommandDefinition(
-            sql,
+            "usp_Inforest_ValidaClienteSel",
             new
             {
                 tTipoDoc = tipoDocumento?.Trim(),
                 tCodCliente = codigoCliente?.Trim()
             },
+            commandType: System.Data.CommandType.StoredProcedure,
             cancellationToken: ct));
 
         return string.Equals(resultado?.Trim(), "ok", StringComparison.OrdinalIgnoreCase);
