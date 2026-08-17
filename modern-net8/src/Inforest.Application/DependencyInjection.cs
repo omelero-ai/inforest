@@ -177,6 +177,9 @@ public static class DependencyInjection
         services.AddScoped<RegistrarEgresoHandler>();
         services.AddScoped<AnularEgresoHandler>();
 
+        // POS-FUNC-029: Lista Motivos Anulación — vMotivoAnulacion (BR-MOTIVO-001..003)
+        services.AddScoped<ObtenerMotivosAnulacionHandler>();
+
         return services;
     }
 }

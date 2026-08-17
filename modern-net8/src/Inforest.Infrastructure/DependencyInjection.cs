@@ -116,6 +116,8 @@ public static class DependencyInjection
         services.AddScoped<ICambioDocumentoRepository, CambioDocumentoRepository>();
         // POS-FUNC-028: Actualizar Datos Pedido — usp_ActualizarCabPeDoc (BR-ACTPED-001..003)
         services.AddScoped<IActualizarDatosPedidoRepository, ActualizarDatosPedidoRepository>();
+        // POS-FUNC-029: Motivos Anulación — vMotivoAnulacion / TTABLA (BR-MOTIVO-001..003)
+        services.AddScoped<IMotivoAnulacionRepository, MotivoAnulacionRepository>();
 
         // W6: Caja / Pagos (BR-007, BR-013)
         services.AddScoped<IPagoRepository, PagoRepository>();

@@ -3109,3 +3109,45 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Para otros canales, el campo cliente delivery se oculta y no es requerido.
 **Destino .NET:** `ActualizarCanalVentaPedidoHandler` valida `CodigoClienteDelivery` cuando `CodigoCanalNuevo == "02"`.
 **Estado:** MIGRATED
+
+---
+
+## BR-MOTIVO-001
+**Nombre:** Motivos de anulación obtenidos de catálogo activo
+**Origen:** Legacy/frmListaMotivos.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmListaMotivos.frm
+**Procedimiento/Función:** Form_Load
+**Descripción:** Los motivos de anulación se obtienen de la vista `vMotivoANULACION` (TTABLA WHERE TTABLA='MOTIVOANULACION') filtrando solo los registros con `lActivo = 1`, ordenados por código.
+**Condición:** Siempre al abrir el formulario de motivos.
+**Resultado:** Lista de motivos activos mostrada al usuario como botones.
+**Excepciones:** Si no hay motivos activos, se dispara BR-MOTIVO-002.
+**Destino .NET:** `ObtenerMotivosAnulacionHandler` / `MotivoAnulacionRepository` sobre `vMotivoAnulacion`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MOTIVO-002
+**Nombre:** Sin motivos configurados — error al abrir lista
+**Origen:** Legacy/frmListaMotivos.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmListaMotivos.frm
+**Procedimiento/Función:** Form_Load → `If RsMotivoEliminacion.RecordCount > 0`
+**Descripción:** Si la vista `vMotivoANULACION` no devuelve registros activos, se muestra el mensaje "No existe Motivos configuradas para esta caja" y se cancela la operación.
+**Condición:** `RsMotivoEliminacion.RecordCount = 0`
+**Resultado:** MsgBox de error + cancelación del formulario.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ObtenerMotivosAnulacionHandler` retorna `Result.Fail("No existe Motivos...", "MOTIVO_VACIO")`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MOTIVO-003
+**Nombre:** Selección de motivo devuelve código y descripción
+**Origen:** Legacy/frmListaMotivos.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmListaMotivos.frm
+**Procedimiento/Función:** cmdEliminacion_Click / CmdOpcion_Click (Index=16)
+**Descripción:** Al hacer clic en un motivo, se asigna `sCodigo` y `sDescrip` globales y se cierra el formulario con `wEnter = True`. Si cancela (Cancelar/ESC), `wEnter = False` y las variables no se modifican.
+**Condición:** Clic en botón de motivo → `wEnter = True` / Cancelar → `wEnter = False`.
+**Resultado:** El llamante obtiene el código y descripción del motivo seleccionado, o null si canceló.
+**Excepciones:** Ninguna.
+**Destino .NET:** `FrmListaMotivos.MotivoSeleccionado` — `MotivoAnulacion` si seleccionó, `null` si canceló.
+**Estado:** MIGRATED

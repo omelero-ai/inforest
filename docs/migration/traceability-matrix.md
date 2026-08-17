@@ -510,3 +510,16 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `usp_ActualizarCabPeDoc` @opcion='1' (cortesía) | SP | `ActualizarCortesiaPedidoHandler` + `IActualizarDatosPedidoRepository.ActualizarCortesiaAsync` (BR-ACTPED-001/002) | Handler + Interface | MIGRATED | `src/Inforest.Application/Ventas/ActualizarDatosPedidoHandlers.cs` + `src/Inforest.Infrastructure/Ventas/ActualizarDatosPedidoRepository.cs` |
 | `usp_ActualizarCabPeDoc` @opcion='2' (canal venta) | SP | `ActualizarCanalVentaPedidoHandler` + `IActualizarDatosPedidoRepository.ActualizarCanalVentaAsync` (BR-ACTPED-001/003) | Handler + Interface | MIGRATED | `src/Inforest.Application/Ventas/ActualizarDatosPedidoHandlers.cs` + `src/Inforest.Infrastructure/Ventas/ActualizarDatosPedidoRepository.cs` |
 | (tests BR-ACTPED-001..003) | — | `ActualizarDatosPedidoHandlerTests` (8 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/ActualizarDatosPedidoHandlerTests.cs` |
+
+---
+
+## Componentes POS-FUNC-029 — Lista Motivos Anulación
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmListaMotivos.frm` | Form | `FrmListaMotivos` | WinForm modal | MIGRATED | `src/Inforest.Desktop/Ventas/FrmListaMotivos.cs` |
+| `vMotivoANULACION` / `TTABLA WHERE TTABLA='MOTIVOANULACION'` | View / Table | `MotivoAnulacion` | Domain Record | MIGRATED | `src/Inforest.Domain/Entities/Configuracion/MotivoAnulacion.cs` |
+| `vMotivoANULACION` | View | `IMotivoAnulacionRepository` + `MotivoAnulacionRepository` | Interface + Class | MIGRATED | `src/Inforest.Application/Interfaces/IMotivoAnulacionRepository.cs` + `src/Inforest.Infrastructure/Ventas/MotivoAnulacionRepository.cs` |
+| `Form_Load` → RecordCount=0 → MsgBox (BR-MOTIVO-002) | Logic | `ObtenerMotivosAnulacionHandler` | Handler | MIGRATED | `src/Inforest.Application/Ventas/MotivoAnulacionHandlers.cs` |
+| `cmdEliminacion_Click` → `sCodigo` + `sDescrip` + `wEnter=True` (BR-MOTIVO-003) | Logic | `FrmListaMotivos.MotivoSeleccionado` | Property | MIGRATED | `src/Inforest.Desktop/Ventas/FrmListaMotivos.cs` |
+| (tests BR-MOTIVO-001..003) | — | `MotivoAnulacionHandlerTests` (5 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/MotivoAnulacionHandlerTests.cs` |
