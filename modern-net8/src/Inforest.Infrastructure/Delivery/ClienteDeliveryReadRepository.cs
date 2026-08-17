@@ -20,6 +20,28 @@ internal sealed class ClienteDeliveryReadRepository : IClienteDeliveryReadReposi
         => _connectionFactory = connectionFactory;
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<ClienteDeliveryListadoItem>> ListarMantenimientoAsync(CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT Codigo                        AS Codigo,
+                   TipoCliente                   AS TipoCliente,
+                   Cliente                       AS Cliente,
+                   tTelefono                     AS Telefono,
+                   tDireccion                    AS Direccion,
+                   ISNULL(nLinea, 0)             AS Linea,
+                   ISNULL(nDescuento, 0)         AS Descuento,
+                   EstadoFrecuente               AS EstadoFrecuente,
+                   CAST(ISNULL(lActivo, 0) AS bit) AS Activo
+            FROM dbo.vDelivery
+            ORDER BY Cliente, Codigo
+            """;
+
+        var rows = await conn.QueryAsync<ClienteDeliveryListadoItem>(sql);
+        return rows.AsList();
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<ClienteDeliveryBusquedaItem>> ListarActivosConZonaAsync(CancellationToken ct = default)
     {
         using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);

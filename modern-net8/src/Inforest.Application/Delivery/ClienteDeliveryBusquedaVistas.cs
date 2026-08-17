@@ -24,6 +24,25 @@ public sealed record ClienteDeliveryBusquedaItem(
     decimal Disponible);
 
 /// <summary>
+/// Ítem de la grilla principal de mantenimiento de clientes delivery.
+/// <para>
+/// Legacy: <c>frmClienteDelivery.frm</c> Form_Load —
+/// <c>SELECT *, str(nDescuento,10,2) as xDescuento, str(nLinea,10,2) as xLinea FROM vDelivery</c>.
+/// Reglas: BR-DEL-037.
+/// </para>
+/// </summary>
+public sealed record ClienteDeliveryListadoItem(
+    string Codigo,
+    string? TipoCliente,
+    string? Cliente,
+    string? Telefono,
+    string? Direccion,
+    decimal Linea,
+    decimal Descuento,
+    string? EstadoFrecuente,
+    bool Activo);
+
+/// <summary>
 /// Detalle completo de un cliente delivery para el panel lateral del formulario.
 /// <para>
 /// Legacy: <c>frmBusquedaDelivery.frm</c> Sub Asigna() — <c>SELECT * FROM vDelivery WHERE Codigo=…</c>.

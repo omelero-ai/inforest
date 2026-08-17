@@ -119,6 +119,23 @@ public class DeliveryHandlersTests
         Assert.Equal("DELIVERY_CLIENTE_NO_ENCONTRADO", result.CodigoError);
     }
 
+    [Fact]
+    public async Task ObtenerListadoMantenimiento_RetornaItems()
+    {
+        var mockReadRepo = new Mock<IClienteDeliveryReadRepository>();
+        mockReadRepo.Setup(r => r.ListarMantenimientoAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([
+                new ClienteDeliveryListadoItem("0000001", "FRECUENTE", "JUAN PEREZ", "999111222", "AV. 1", 12.5m, 0.5m, "ACTIVO", true)
+            ]);
+
+        var handler = new ObtenerClientesDeliveryListadoHandler(mockReadRepo.Object);
+        var result = await handler.HandleAsync(new ObtenerClientesDeliveryListadoQuery());
+
+        Assert.True(result.EsExitoso);
+        Assert.Single(result.Valor!);
+        Assert.Equal("0000001", result.Valor![0].Codigo);
+    }
+
     // ── ActualizarEstadoDeliveryHandler ────────────────────────────────────────
 
     [Fact]

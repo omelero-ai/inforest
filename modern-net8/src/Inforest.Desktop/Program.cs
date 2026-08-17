@@ -87,6 +87,7 @@ static class Program
                 services.AddTransient<FrmRepVentaFechaReporte>();
                 services.AddTransient<FrmRepRegistroVentaReporte>(); // BR-REP-022
                 services.AddTransient<FrmBusquedaDelivery>();       // POS-FUNC-036
+                services.AddTransient<FrmClienteDelivery>();       // POS-FUNC-037
             });
     }
 }

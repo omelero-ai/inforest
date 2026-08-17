@@ -11,6 +11,14 @@ namespace Inforest.Application.Delivery;
 public interface IClienteDeliveryReadRepository
 {
     /// <summary>
+    /// Devuelve el listado principal de mantenimiento de clientes delivery.
+    /// Legacy: <c>frmClienteDelivery.frm</c> Form_Load —
+    /// <c>SELECT … FROM vDelivery</c>.
+    /// Regla BR-DEL-037.
+    /// </summary>
+    Task<IReadOnlyList<ClienteDeliveryListadoItem>> ListarMantenimientoAsync(CancellationToken ct = default);
+
+    /// <summary>
     /// Devuelve todos los clientes delivery activos con descripción de zona para la grilla de búsqueda.
     /// Legacy: Form_Load de <c>frmBusquedaDelivery.frm</c> —
     /// <c>SELECT … FROM TDELIVERY LEFT JOIN vZona … WHERE lActivo=1</c>.

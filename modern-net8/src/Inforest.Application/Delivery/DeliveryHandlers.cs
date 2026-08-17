@@ -592,6 +592,33 @@ public sealed class ObtenerPedidosSeguimientoDeliveryHandler
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// POS-FUNC-037 — Mantenimiento de Clientes Delivery (frmClienteDelivery.frm)
+// ──────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Obtiene el listado principal de clientes delivery para mantenimiento.
+/// Legacy: <c>frmClienteDelivery.frm</c> Form_Load — <c>SELECT … FROM vDelivery</c>.
+/// Reglas: BR-DEL-037.
+/// </summary>
+public sealed record ObtenerClientesDeliveryListadoQuery;
+
+/// <summary>Handler de <see cref="ObtenerClientesDeliveryListadoQuery"/>.</summary>
+public sealed class ObtenerClientesDeliveryListadoHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerClientesDeliveryListadoHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<IReadOnlyList<ClienteDeliveryListadoItem>>> HandleAsync(
+        ObtenerClientesDeliveryListadoQuery _, CancellationToken ct = default)
+    {
+        var items = await _repo.ListarMantenimientoAsync(ct);
+        return Result.Ok(items);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // POS-FUNC-036 — Búsqueda de Clientes Delivery (frmBusquedaDelivery.frm)
 // ──────────────────────────────────────────────────────────────────────────────
 
