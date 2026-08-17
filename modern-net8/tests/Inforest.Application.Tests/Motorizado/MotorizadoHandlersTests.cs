@@ -139,7 +139,7 @@ public class MotorizadoHandlersTests
             tPieDocumento1: null, lAmbienteFE: false, lHuellaDigital: false, lHuellaSecugen: false,
             tAgenteRetencion: null, tFax: null, lLogCajaRapida: false, nTiempoToleranciaAnf: null,
             lEmailConfirmacion: false, tEmailConfirmacion: null, lEmailRecordatorio: false, tEmailRecordatorio: null,
-            lEmailAgradecimiento: false, tEmailAgradecimiento: null, lImprimeCodigoBarras: false, lEnvioAutomatico: false,
+            lEmailAgradecimiento: false, tEmailAgradecimiento: null, lBODato: false, lImprimeCodigoBarras: false, lEnvioAutomatico: false,
             lControlEnviosProduccion: false, lActivaTarjeta: false, lEventos: false, lFEOfisis: false,
             tCodigoEmpresa: null, tCodigoTienda: null, tCodigoMarca: null, tCodigoUbigeo: null, lPagoAntesImpresion: false,
             lCambioContrasena: false, tCajaMesa247: null, tAdicionMesa247: null, tServidorFE: null, tBDFE: null,

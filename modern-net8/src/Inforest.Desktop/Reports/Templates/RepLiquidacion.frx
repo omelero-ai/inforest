@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Liquidación de Cajero - Legacy: frmRepLiquidacion.frm / spRep_LiquidacionOutPut + spRep_Liquidacion + spRep_LiquidacionSuma">
+  <Dictionary>
+    <TableDataSource Name="Documentos" DataType="System.Int32" Enabled="true">
+      <Column Name="TGrupo" DataType="System.String" />
+      <Column Name="Grupo" DataType="System.String" />
+      <Column Name="TSubGrupo" DataType="System.String" />
+      <Column Name="SubGrupo" DataType="System.String" />
+      <Column Name="TDocumento" DataType="System.String" />
+      <Column Name="TUsuario" DataType="System.String" />
+      <Column Name="FFecha" DataType="System.String" />
+      <Column Name="FPago" DataType="System.String" />
+      <Column Name="NTC" DataType="System.Double" />
+      <Column Name="NVenta" DataType="System.Double" />
+      <Column Name="NVenta1" DataType="System.Double" />
+      <Column Name="NVenta2" DataType="System.Double" />
+      <Column Name="TObservacion" DataType="System.String" />
+      <Column Name="TTipoDocumento" DataType="System.String" />
+      <Column Name="Total00" DataType="System.Double" />
+      <Column Name="Total14" DataType="System.Double" />
+      <Column Name="TotalNF" DataType="System.Double" />
+      <Column Name="NVentaME2" DataType="System.Double" />
+      <Column Name="NVentaME3" DataType="System.Double" />
+      <Column Name="NVuelto" DataType="System.Double" />
+    </TableDataSource>
+    <TableDataSource Name="SumasGrupo" DataType="System.Int32" Enabled="true">
+      <Column Name="TGrupo" DataType="System.String" />
+      <Column Name="NVenta1" DataType="System.Double" />
+      <Column Name="NVenta2" DataType="System.Double" />
+      <Column Name="NVenta3" DataType="System.Double" />
+    </TableDataSource>
+    <TableDataSource Name="Tarjetas" DataType="System.Int32" Enabled="true">
+      <Column Name="TSubGrupo" DataType="System.String" />
+      <Column Name="NVenta1" DataType="System.Double" />
+      <Column Name="NVenta2" DataType="System.Double" />
+    </TableDataSource>
+    <TableDataSource Name="TiposPedido" DataType="System.Int32" Enabled="true">
+      <Column Name="TTipoPedido" DataType="System.String" />
+      <Column Name="NNeto" DataType="System.Double" />
+      <Column Name="NImpuesto1" DataType="System.Double" />
+      <Column Name="NImpuesto2" DataType="System.Double" />
+      <Column Name="NImpuesto3" DataType="System.Double" />
+      <Column Name="NVenta" DataType="System.Double" />
+      <Column Name="NTotalPromedio" DataType="System.Double" />
+      <Column Name="Total00" DataType="System.Double" />
+    </TableDataSource>
+    <TableDataSource Name="OtrosTipos" DataType="System.Int32" Enabled="true">
+      <Column Name="Codigo" DataType="System.String" />
+      <Column Name="Descripcion" DataType="System.String" />
+      <Column Name="NVenta1" DataType="System.Double" />
+      <Column Name="NVenta2" DataType="System.Double" />
+      <Column Name="NVenta3" DataType="System.Double" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297">
+    <ReportTitleBand Name="ReportTitle1" Width="740.16" Height="37.8">
+      <TextObject Name="Title" Width="740.16" Height="28.35" Text="Liquidación de Cajero" Font="Arial, 13pt, style=Bold" HorzAlign="Center" VertAlign="Center" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Top="41.8" Width="740.16" Height="18.9">
+      <TextObject Name="hDoc" Width="80" Height="18.9" Text="Documento" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="hUsuario" Left="85" Width="70" Height="18.9" Text="Usuario" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="hFecha" Left="160" Width="90" Height="18.9" Text="Fecha" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="hGrupo" Left="255" Width="100" Height="18.9" Text="Grupo/SubGrupo" Font="Arial, 8pt, style=Bold" />
+      <TextObject Name="hMN" Left="360" Width="85" Height="18.9" Text="Monto MN" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hME" Left="450" Width="85" Height="18.9" Text="Monto ME" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="hTC" Left="540" Width="60" Height="18.9" Text="TC" Font="Arial, 8pt, style=Bold" HorzAlign="Right" />
+    </PageHeaderBand>
+    <DataBand Name="DataDocumentos" Top="64.7" Width="740.16" Height="18.9" DataSource="Documentos">
+      <TextObject Name="dDoc" Width="80" Height="18.9" Text="[Documentos.TDocumento]" Font="Arial, 8pt" />
+      <TextObject Name="dUsuario" Left="85" Width="70" Height="18.9" Text="[Documentos.TUsuario]" Font="Arial, 8pt" />
+      <TextObject Name="dFecha" Left="160" Width="90" Height="18.9" Text="[Documentos.FFecha]" Font="Arial, 8pt" />
+      <TextObject Name="dGrupo" Left="255" Width="100" Height="18.9" Text="[Documentos.Grupo] / [Documentos.SubGrupo]" Font="Arial, 8pt" />
+      <TextObject Name="dMN" Left="360" Width="85" Height="18.9" Text="[Documentos.NVenta1]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dME" Left="450" Width="85" Height="18.9" Text="[Documentos.NVenta2]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 8pt" HorzAlign="Right" />
+      <TextObject Name="dTC" Left="540" Width="60" Height="18.9" Text="[Documentos.NTC]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="4" Font="Arial, 8pt" HorzAlign="Right" />
+    </DataBand>
+    <GroupHeaderBand Name="GrpSumasHeader" Top="87.6" Width="740.16" Height="18.9">
+      <TextObject Name="lblSumas" Width="740.16" Height="18.9" Text="Resumen por Forma de Pago" Font="Arial, 10pt, style=Bold" FillColor="220, 220, 220" />
+    </GroupHeaderBand>
+    <DataBand Name="DataSumas" Top="110.5" Width="740.16" Height="18.9" DataSource="SumasGrupo">
+      <TextObject Name="sGrupo" Width="180" Height="18.9" Text="[SumasGrupo.TGrupo]" Font="Arial, 9pt" />
+      <TextObject Name="sMN" Left="185" Width="100" Height="18.9" Text="[SumasGrupo.NVenta1]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt" HorzAlign="Right" />
+      <TextObject Name="sME" Left="290" Width="100" Height="18.9" Text="[SumasGrupo.NVenta2]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt" HorzAlign="Right" />
+      <TextObject Name="sMEMN" Left="395" Width="100" Height="18.9" Text="[SumasGrupo.NVenta3]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt" HorzAlign="Right" />
+    </DataBand>
+    <GroupHeaderBand Name="GrpTarjetasHeader" Top="133.4" Width="740.16" Height="18.9">
+      <TextObject Name="lblTarjetas" Width="740.16" Height="18.9" Text="Tarjetas de Crédito" Font="Arial, 10pt, style=Bold" FillColor="220, 220, 220" />
+    </GroupHeaderBand>
+    <DataBand Name="DataTarjetas" Top="156.3" Width="740.16" Height="18.9" DataSource="Tarjetas">
+      <TextObject Name="tCod" Width="80" Height="18.9" Text="[Tarjetas.TSubGrupo]" Font="Arial, 9pt" />
+      <TextObject Name="tImporte" Left="85" Width="120" Height="18.9" Text="[Tarjetas.NVenta1]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt" HorzAlign="Right" />
+      <TextObject Name="tPropina" Left="210" Width="120" Height="18.9" Text="[Tarjetas.NVenta2]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt" HorzAlign="Right" />
+    </DataBand>
+    <GroupHeaderBand Name="GrpTiposHeader" Top="179.2" Width="740.16" Height="18.9">
+      <TextObject Name="lblTipos" Width="740.16" Height="18.9" Text="Venta por Tipo de Pedido" Font="Arial, 10pt, style=Bold" FillColor="220, 220, 220" />
+    </GroupHeaderBand>
+    <DataBand Name="DataTipos" Top="202.1" Width="740.16" Height="18.9" DataSource="TiposPedido">
+      <TextObject Name="tpTipo" Width="80" Height="18.9" Text="[TiposPedido.TTipoPedido]" Font="Arial, 9pt" />
+      <TextObject Name="tpNeto" Left="85" Width="90" Height="18.9" Text="[TiposPedido.NNeto]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt" HorzAlign="Right" />
+      <TextObject Name="tpImp1" Left="180" Width="75" Height="18.9" Text="[TiposPedido.NImpuesto1]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt" HorzAlign="Right" />
+      <TextObject Name="tpVenta" Left="260" Width="90" Height="18.9" Text="[TiposPedido.NVenta]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt, style=Bold" HorzAlign="Right" />
+      <TextObject Name="tpDocs" Left="355" Width="70" Height="18.9" Text="[TiposPedido.NTotalPromedio]" Font="Arial, 9pt" HorzAlign="Right" />
+    </DataBand>
+    <GroupHeaderBand Name="GrpOtrosHeader" Top="225" Width="740.16" Height="18.9">
+      <TextObject Name="lblOtros" Width="740.16" Height="18.9" Text="Otros Tipos de Cancelación" Font="Arial, 10pt, style=Bold" FillColor="220, 220, 220" />
+    </GroupHeaderBand>
+    <DataBand Name="DataOtros" Top="247.9" Width="740.16" Height="18.9" DataSource="OtrosTipos">
+      <TextObject Name="oCod" Width="60" Height="18.9" Text="[OtrosTipos.Codigo]" Font="Arial, 9pt" />
+      <TextObject Name="oDesc" Left="65" Width="200" Height="18.9" Text="[OtrosTipos.Descripcion]" Font="Arial, 9pt" />
+      <TextObject Name="oMN" Left="270" Width="100" Height="18.9" Text="[OtrosTipos.NVenta1]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt" HorzAlign="Right" />
+      <TextObject Name="oME" Left="375" Width="100" Height="18.9" Text="[OtrosTipos.NVenta2]" Format="Number" Format.UseLocale="true" Format.DecimalDigits="2" Font="Arial, 9pt" HorzAlign="Right" />
+    </DataBand>
+    <PageFooterBand Name="PageFooter1" Top="700" Width="740.16" Height="18.9">
+      <TextObject Name="PageNum" Left="600" Width="140.16" Height="18.9" Text="Pág. [Page#] de [TotalPages#]" Font="Arial, 8pt" HorzAlign="Right" />
+    </PageFooterBand>
+  </ReportPage>
+</Report>

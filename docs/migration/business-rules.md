@@ -2849,3 +2849,403 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Ninguna.
 **Destino .NET:** Validación en `ReciboEgreso.Registrar()` — lanza `DomainException` si modo es NOTACREDITO y referencia vacía.
 **Estado:** MIGRATED
+
+---
+
+## BR-REP-021
+**Nombre:** Liquidación de Cajero
+**Origen:** Legacy/frmRepLiquidacion.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepLiquidacion.frm`
+**Procedimiento/Función:** Sub Genera() / Sub Genera2() — cmdOpcion_Click
+**Descripción:** Genera el reporte de Liquidación de Cajero que consolida todos los movimientos de caja para un turno o rango de fechas. Incluye: documentos emitidos por forma de pago (efectivo, cheques, tarjetas 01-24, puntos, cortesías, cuentas por cobrar), recibos de ingreso/egreso/anticipo, notas de crédito, y resumen por tipo de pedido (Salón/Delivery/Llevar/Canal4/Canal5/Fiscal). Soporta variante `_NC` cuando `lNcOfisis=True` para operaciones con notas de crédito Ofisis.
+**Condición:** Filtrado por turno específico (`ChkTurno.Value=0`) o rango de fechas con/sin hora (`ChkTurno.Value=1`). Filtros adicionales: usuario (`chkUsuario`), sector de venta (`chkSectorVenta`), día contable (`chkDiaContable`), cortesías (`chkCortesia`).
+**Resultado:** Dataset de documentos agrupados por grupo/subgrupo de pago; escalares de totales (nNeto, nImpuesto1..3, nVenta, nDescuento, nRecargo, nCambio, nAdulto..5, nNino..5); sumas por grupo (01=Efectivo, 03=Cheque, 04=Otro, 05=Puntos, 06=Cortesía, 07=CtaCobrar, 08=Ingreso, 09=IngresoAnticipo, 10=Egreso, 20=NotaCredito); sumas por tarjeta (01-24); sumas por tipo de pedido; otros tipos de cancelación.
+**Excepciones:** Si modo=Turno y turno vacío: mensaje de error. Si modo=Fecha y fin < inicio: error de rango. Si usuario no seleccionado y chkUsuario=0: error.
+**Destino .NET:** `ObtenerReporteLiquidacionHandler` + `FrmRepLiquidacionReporte` + `RepLiquidacion.frx`
+**Estado:** MIGRATED
+
+---
+
+## BR-REP-022
+**Nombre:** Registro de Ventas
+**Origen:** Legacy/frmRepRegistroVenta.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmRepRegistroVenta.frm`
+**Procedimiento/Función:** Sub Genera() / Genera1() / Genera2() / Genera3() / Genera4() — cmdOpcion_Click
+**Descripción:** Genera reportes de los documentos de venta emitidos en 8 modalidades:
+0. **Correlativo SUNAT** (`spRep_RegVentaSunat`): registro formato libro electrónico SUNAT con voucher, serie, número, RUC, razón social, base imponible, exonerada, inafecta, IGV, importe total, tipo de cambio. Permite filtrar transferencias gratuitas.
+1. **Estado de Documentos** (`spRep_RegVenta`, flagEstado=1): listado con estado de cada documento.
+2. **Agrupado por Fechas** (`spRep_RegVenta`, flagAnoMes=1): consolidado mensual con filtro por año/mes y hora de corte.
+3. **Agrupado por Tipo Documento** (`spRep_RegVentaSunatAD`): variante SUNAT con Número1/Número2 para formatos con dos numeraciones.
+4. **Correlativo de Documento** (`spRep_RegVenta`, flagCorrelativo=1): listado correlativo estándar.
+5. **Detallado por Comprobante** (`spRep_ComprobanteDetallado`): detalle de ítem por ítem con producto, cantidad, precio unitario e IGV por comprobante.
+6. **Correlativo Detallado** (`spRep_RegVenta`, flagCorrelativo=1): variante del correlativo con más columnas de detalle.
+7. **Correlativo con Forma de Pago** (`spRep_RegVentaSunat_formaPago`): **GAP** — SP no encontrado en SQL Legacy al momento de la migración.
+**Condición:** Filtros: cliente, tipo de documento, estado, caja, tipo de pago. Rango de fechas con/sin hora, o por año/mes con hora de corte. Opción día contable. Redondeo a 2 decimales o entero. Solo documentos en Registro de Ventas (RegistroVenta=1). Orden: Correlativo / Montos / Fechas.
+**Resultado:** Dataset de documentos con montos (nNeto, nImpuesto1..3, nVenta, nRecargo, nDescuento) según el tipo de reporte seleccionado.
+**Excepciones:** Fecha inicio > fecha fin → error de rango. Tipo 7 → GAP bloqueado (SP no encontrado). Si no hay datos → mensaje "No hay Datos para Mostrar".
+**Destino .NET:** `ObtenerReporteRegistroVentaHandler` + `FrmRepRegistroVentaReporte` + `RepRegistroVentaSunat.frx` / `RepRegistroVentaDetallado.frx` / `RepRegistroVentaConsolidado.frx` / `RepRegistroVentaSunatAd.frx` / `RepRegistroVentaComprobante.frx`
+**Estado:** MIGRATED
+
+---
+
+## BR-PRECUENTA-001
+**Nombre:** Carga de impresoras disponibles por caja
+**Origen:** Legacy/frmPrecuentaImpresora.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmPrecuentaImpresora.frm`
+**Procedimiento/Función:** `Form_Load`
+**Descripción:** Al abrir el selector de pre-cuenta, se listan las impresoras de la caja actual consultando `TIMPRESORA`.
+**Condición:** `tCaja = sCaja`
+**Resultado:** Lista de impresoras habilitadas para selección manual.
+**Excepciones:** Si no hay impresoras configuradas, se muestra advertencia y se cancela el flujo de selección.
+**Destino .NET:** `ObtenerImpresorasPorCajaHandler` + `ImpresoraRepository` + `FrmPrecuentaImpresora`
+**Estado:** MIGRATED
+
+---
+
+## BR-PRECUENTA-002
+**Nombre:** Impresión de pre-cuenta con impresora seleccionada
+**Origen:** Legacy/frmPrecuentaImpresora.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmPrecuentaImpresora.frm`
+**Procedimiento/Función:** `cmdImpresora_Click`
+**Descripción:** La pre-cuenta se imprime con la impresora elegida por el usuario dentro del selector.
+**Condición:** El usuario selecciona una impresora disponible y confirma la impresión.
+**Resultado:** Se envía ticket de pre-cuenta a la impresora seleccionada.
+**Excepciones:** Si el pedido no existe o no tiene detalle, la impresión se bloquea con mensaje de validación.
+**Destino .NET:** `ImprimirPrecuentaHandler` + `FrmPrecuentaImpresora`
+**Estado:** MIGRATED
+
+---
+
+## BR-PRECUENTA-003
+**Nombre:** Impresión por impresora predeterminada de caja
+**Origen:** Legacy/frmPrecuentaImpresora.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmPrecuentaImpresora.frm`
+**Procedimiento/Función:** `cmdOpcion_Click` (Index = 1, Predeterminada)
+**Descripción:** El usuario puede omitir la selección manual y usar la impresora predeterminada configurada para la caja (`tPrecuenta`).
+**Condición:** Se activa la opción Predeterminada y existe código de impresora por defecto.
+**Resultado:** La pre-cuenta se envía a la impresora predeterminada de la caja.
+**Excepciones:** Si no existe impresora predeterminada configurada, se bloquea la impresión y se informa al usuario.
+**Destino .NET:** `ImprimirPrecuentaHandler` (`UsarImpresoraPredeterminada`) + `FrmPrecuentaImpresora`
+**Estado:** MIGRATED
+
+---
+
+## BR-DIV-001
+**Nombre:** Estado de pedido origen para división
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** cmdOpcion_Click (índice 0 — Aceptar)
+**Descripción:** Antes de confirmar la división, el pedido origen debe tener estado "01" (Emitido). Si el estado es diferente se cancela la operación con mensaje informativo.
+**Condición:** `tEstadoPedido <> "01"`
+**Resultado:** Se muestra mensaje "El pedido XXX no puede ser Dividido, Estado del pedido Diferente de Emitido." y se cancela.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ConfirmarDivisionHandler.HandleAsync` + `IDivisionPedidoRepository.ObtenerEstadoPedidoAsync`
+**Estado:** MIGRATED
+
+---
+
+## BR-DIV-002
+**Nombre:** Validación de monto máximo por pedido destino
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** cmdOpcion_Click (índice 0 — Aceptar)
+**Descripción:** Si un pedido destino tiene monto máximo configurado (`montoMaximo > 0`) se valida que la suma de los ítems a mover más la venta actual del pedido no supere ese límite.
+**Condición:** `ventaActual + ventaTemp > montoMaximo`
+**Resultado:** Se cancela la confirmación con mensaje indicando el pedido y monto máximo superado.
+**Excepciones:** Si `montoMaximo = 0` no se aplica restricción.
+**Destino .NET:** `ConfirmarDivisionHandler.HandleAsync` + `IDivisionPedidoRepository.ObtenerMontoMaximoPedidoAsync` + `ObtenerVentaActualPedidoAsync`
+**Estado:** MIGRATED
+
+---
+
+## BR-DIV-003
+**Nombre:** Recalculo proporcional de impuestos al disgregar
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** Sub Disgregar()
+**Descripción:** Al disgregar un ítem, los impuestos (IGV, propina, impuesto3) se recalculan proporcionalmente a la cantidad resultante respecto a la cantidad original.
+**Condición:** `nuevaCantidad < cantidadOriginal`
+**Resultado:** `precioImpuesto1 * (nuevaCantidad / cantidadOriginal)`, ídem impuesto2 e impuesto3. El precio neto no varía, sólo la proporción de impuestos y la venta total.
+**Excepciones:** Si cantidad = 0 el ítem se descarta.
+**Destino .NET:** `ItemDivision.DividirProporcionalmente` + `AjustarCantidad`
+**Estado:** MIGRATED
+
+---
+
+## BR-DIV-004
+**Nombre:** Recalculo proporcional al compartir entre pedidos
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** Sub Compartir()
+**Descripción:** Al usar Compartir, cada ítem del pedido origen se divide entre (nPedidosDestino + 1). El ítem original queda con la fracción proporcional y se crean N copias en cada pedido destino con la misma proporción.
+**Condición:** Siempre que haya al menos un pedido destino activo.
+**Resultado:** Cada ítem queda con cantidad / (N+1) y los impuestos calculados proporcionalmente.
+**Excepciones:** Si no hay pedidos destino configurados, la operación no se permite.
+**Destino .NET:** `SesionDivision.Compartir` + `ItemDivision.ClonarConCantidadProporcional`
+**Estado:** MIGRATED
+
+---
+
+## BR-DIV-005
+**Nombre:** Generación de correlativo para pedidos destino temporales
+**Origen:** Legacy/frmDivision.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmDivision.frm
+**Procedimiento/Función:** Sub Aceptar() / Function NuevoPedido()
+**Descripción:** Los pedidos destino son inicialmente identificados con códigos temporales de 3 caracteres. Al confirmar la división, se genera un correlativo real en formato `YY+8dígitos` (ej: `2608000001`) consultando el MAX de MPEDIDO para el día contable.
+**Condición:** `LENGTH(tCodigoPedido) = 3` — código temporal que requiere código definitivo.
+**Resultado:** Se inserta un nuevo registro MPEDIDO con el código correlativo generado, copiando los campos de cabecera del pedido origen.
+**Excepciones:** Si no existe pedido con ese día contable, el correlativo empieza en 1 (`YY + "00000001"`).
+**Destino .NET:** `DivisionPedidoRepository.GenerarSiguienteCorrelativoPedidoAsync` + `CrearMpedidoFromOrigenAsync`
+**Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-001
+**Nombre:** Validar cliente requerido para tipo de documento
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdTipoDocumento_Click / cmdOpcion_Click(0)
+**Descripción:** Si el tipo de documento destino requiere cliente (campo `lCliente` en vTipoDocumentoImpresora = True), el código de cliente no puede estar vacío al momento de cambiar.
+**Condición:** `lCliente = True AND sClienteNuevo = ""`
+**Resultado:** Error — "Error : Documento sin Cliente"
+**Excepciones:** Ninguna.
+**Destino .NET:** `CambiarDocumentoHandler` — validación implícita por tipo de documento; `FrmCambioDocumento` solicita cliente si tipo requiere.
+**Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-002
+**Nombre:** Validar monto máximo del tipo de documento
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdOpcion_Click(0)
+**Descripción:** Si el tipo de documento tiene un monto máximo configurado (`nMontoMaximo > 0` en vTipoDocumento), el monto del documento origen no puede superar ese máximo.
+**Condición:** `nMontoMaximo > 0 AND nMontoDocumento > nMontoMaximo`
+**Resultado:** Error — "El Monto a Facturar supera al Máximo Permitido al Tipo de Documento"
+**Excepciones:** Si `nMontoMaximo = 0`, no hay límite.
+**Destino .NET:** `CambiarDocumentoHandler.HandleAsync` + `ICambioDocumentoRepository.ObtenerMontosValidacionAsync`
+**Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-003
+**Nombre:** Motivo del cambio obligatorio
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdOpcion_Click(0)
+**Descripción:** El operador debe ingresar un motivo textual para el cambio de documento. Se abre el teclado virtual (frmKeyBoard) y si el motivo queda vacío, la operación se cancela.
+**Condición:** `wEnter = False OR Len(Trim(sDescrip)) = 0`
+**Resultado:** Operación cancelada sin mensaje adicional.
+**Excepciones:** Ninguna.
+**Destino .NET:** `CambiarDocumentoCommand.Motivo` requerido + `CambiarDocumentoHandler` valida `IsNullOrWhiteSpace`.
+**Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-004
+**Nombre:** Documento origen marcado como estado '04' (cambiado)
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdOpcion_Click(0)
+**Descripción:** Tras el cambio, el documento origen queda con tEstadoDocumento='04', tObservacion=motivo, tUsuarioAnulado=usuario, fRegistroAnulado=GETDATE(). Se crea un nuevo documento MDOCUMENTO/DDOCUMENTO con el número nuevo y el tipo de documento destino.
+**Condición:** Siempre que el cambio se ejecute correctamente.
+**Resultado:** MDOCUMENTO origen actualizado + nuevo MDOCUMENTO+DDOCUMENTO insertados.
+**Excepciones:** Operación atómica (transacción). Si falla, nada se persiste.
+**Destino .NET:** `CambioDocumentoRepository.EjecutarCambioAsync` con transacción + `ActualizarEmisionAsync`.
+**Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-005
+**Nombre:** Bolivia: validar autorización y dosificación antes del cambio
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdOpcion_Click(0) — Case pais="001"
+**Descripción:** En Bolivia (pais='001'), antes de ejecutar el cambio se obtiene el número de autorización y la dosificación desde la caja. Si alguno está vacío, el cambio no se puede realizar.
+**Condición:** `pais = "001" AND (tAutorizacion = "" OR tDosificacion = "")`
+**Resultado:** Error — "Error al obtener Número de Autorización o Dosificación. Verifique."
+**Excepciones:** Para otros países (Perú, Ecuador) los campos van vacíos.
+**Destino .NET:** `CambiarDocumentoCommand.Autorizacion` y `.CodigoControl` — a cargo del caller (FrmCambioDocumento) para Bolivia.
+**Estado:** MIGRATED
+
+---
+
+## BR-ACTPED-001
+**Nombre:** Requiere autorización de supervisor para modificar datos del pedido
+**Origen:** Legacy/FrmActualizarPedidos (frmUpdateDatosPedido.frm)
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmUpdateDatosPedido.frm
+**Procedimiento/Función:** BtnActualizar1_Click (nivel 31), Command1_Click (nivel 32)
+**Descripción:** La modificación de cortesía requiere nivel de supervisor "31"; la modificación de canal de venta requiere nivel "32". Validado en UI mediante `Supervisor(nivel)`.
+**Condición:** `Supervisor("31") = False` (cortesía) / `Supervisor("32") = False` (canal)
+**Resultado:** Operación cancelada sin ejecutar el SP.
+**Excepciones:** Si el usuario ya es supervisor del nivel indicado, procede sin modal.
+**Destino .NET:** Validación en `FrmActualizarDatosPedido` (UI) antes de llamar a los handlers.
+**Estado:** MIGRATED
+
+---
+
+## BR-ACTPED-002
+**Nombre:** No se puede modificar cortesía si el documento no tiene cortesía asignada
+**Origen:** Legacy/FrmActualizarPedidos (frmUpdateDatosPedido.frm)
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmUpdateDatosPedido.frm
+**Procedimiento/Función:** BtnActualizar1_Click
+**Descripción:** Si el campo tCortesia del documento está vacío, no se puede asignar/cambiar la cortesía. El mensaje es "El documento no tiene asignado cortesia...".
+**Condición:** `txtCodCortesia.Caption = ""`
+**Resultado:** Error — "El documento no tiene asignado cortesia, por lo cual no se le puede asignar una cortesia"
+**Excepciones:** Ninguna.
+**Destino .NET:** `ActualizarCortesiaPedidoHandler` valida `CodigoCortesiaAnterior` vacío.
+**Estado:** MIGRATED
+
+---
+
+## BR-ACTPED-003
+**Nombre:** Canal Delivery requiere cliente delivery
+**Origen:** Legacy/FrmActualizarPedidos (frmUpdateDatosPedido.frm)
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmUpdateDatosPedido.frm
+**Procedimiento/Función:** CbCanal_Click / Command1_Click
+**Descripción:** Cuando se selecciona el canal '02' (Delivery), se muestra el campo de cliente delivery y es obligatorio completarlo antes de confirmar.
+**Condición:** `CbCanal.BoundText = "02" AND TxtCodCliente.Caption = ""`
+**Resultado:** Error o espera de ingreso de cliente delivery.
+**Excepciones:** Para otros canales, el campo cliente delivery se oculta y no es requerido.
+**Destino .NET:** `ActualizarCanalVentaPedidoHandler` valida `CodigoClienteDelivery` cuando `CodigoCanalNuevo == "02"`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MOTIVO-001
+**Nombre:** Motivos de anulación obtenidos de catálogo activo
+**Origen:** Legacy/frmListaMotivos.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmListaMotivos.frm
+**Procedimiento/Función:** Form_Load
+**Descripción:** Los motivos de anulación se obtienen de la vista `vMotivoANULACION` (TTABLA WHERE TTABLA='MOTIVOANULACION') filtrando solo los registros con `lActivo = 1`, ordenados por código.
+**Condición:** Siempre al abrir el formulario de motivos.
+**Resultado:** Lista de motivos activos mostrada al usuario como botones.
+**Excepciones:** Si no hay motivos activos, se dispara BR-MOTIVO-002.
+**Destino .NET:** `ObtenerMotivosAnulacionHandler` / `MotivoAnulacionRepository` sobre `vMotivoAnulacion`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MOTIVO-002
+**Nombre:** Sin motivos configurados — error al abrir lista
+**Origen:** Legacy/frmListaMotivos.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmListaMotivos.frm
+**Procedimiento/Función:** Form_Load → `If RsMotivoEliminacion.RecordCount > 0`
+**Descripción:** Si la vista `vMotivoANULACION` no devuelve registros activos, se muestra el mensaje "No existe Motivos configuradas para esta caja" y se cancela la operación.
+**Condición:** `RsMotivoEliminacion.RecordCount = 0`
+**Resultado:** MsgBox de error + cancelación del formulario.
+**Excepciones:** Ninguna.
+**Destino .NET:** `ObtenerMotivosAnulacionHandler` retorna `Result.Fail("No existe Motivos...", "MOTIVO_VACIO")`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MOTIVO-003
+**Nombre:** Selección de motivo devuelve código y descripción
+**Origen:** Legacy/frmListaMotivos.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmListaMotivos.frm
+**Procedimiento/Función:** cmdEliminacion_Click / CmdOpcion_Click (Index=16)
+**Descripción:** Al hacer clic en un motivo, se asigna `sCodigo` y `sDescrip` globales y se cierra el formulario con `wEnter = True`. Si cancela (Cancelar/ESC), `wEnter = False` y las variables no se modifican.
+**Condición:** Clic en botón de motivo → `wEnter = True` / Cancelar → `wEnter = False`.
+**Resultado:** El llamante obtiene el código y descripción del motivo seleccionado, o null si canceló.
+**Excepciones:** Ninguna.
+**Destino .NET:** `FrmListaMotivos.MotivoSeleccionado` — `MotivoAnulacion` si seleccionó, `null` si canceló.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-001
+**Nombre:** Tarjeta RFID exige datos obligatorios y estado controlado
+**Origen:** Legacy/FrmTarjetaAproximidadDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidadDetalle.frm
+**Procedimiento/Función:** `cmdOpcion_Click(Index=1)`
+**Descripción:** El mantenimiento de tarjeta de proximidad solo permite grabar si el código RFID, la descripción, el cliente delivery y el estado están informados. Los estados válidos son `Free`, `Asignada` y `Bloqueado`.
+**Condición:** Código vacío, descripción vacía, cliente vacío o estado fuera del catálogo permitido.
+**Resultado:** Bloquea el guardado y muestra mensaje funcional; no persiste en `TTARJETASRFID`.
+**Excepciones:** Ninguna.
+**Destino .NET:** `TarjetaProximidad` + `CrearTarjetaProximidadHandler` + `ActualizarTarjetaProximidadHandler` + `FrmTarjetaProximidad`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-002
+**Nombre:** Código RFID debe ser único al crear tarjeta
+**Origen:** Legacy/FrmTarjetaAproximidadDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidadDetalle.frm
+**Procedimiento/Función:** `cmdOpcion_Click(Index=1)` — alta (`Sw=True`)
+**Descripción:** Antes de insertar una tarjeta nueva, el sistema verifica que `CodidoRFID` no exista previamente en `TTARJETASRFID`.
+**Condición:** `CodidoRFID` ya existe en `TTARJETASRFID`.
+**Resultado:** Cancela la inserción y muestra "Codigo de Tarjeta ya existe".
+**Excepciones:** En edición no se revalida unicidad porque el código permanece bloqueado.
+**Destino .NET:** `CrearTarjetaProximidadHandler` + `ITarjetaProximidadRepository.ObtenerPorCodigoAsync`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-003
+**Nombre:** Cliente delivery asociado debe existir
+**Origen:** Legacy/FrmTarjetaAproximidadDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidadDetalle.frm
+**Procedimiento/Función:** `BtnBuscar_Click`, `cmdOpcion_Click(Index=1)`
+**Descripción:** El código de cliente asociado a la tarjeta se valida contra `TDELIVERY`; si no existe, no se permite grabar.
+**Condición:** `CodigoCliente` no encontrado en `TDELIVERY`.
+**Resultado:** Cancela la operación y muestra "Codigo de Cliente no existe".
+**Excepciones:** La UI legacy permite seleccionar cliente desde búsqueda rápida, pero igual revalida antes de persistir.
+**Destino .NET:** `CrearTarjetaProximidadHandler` + `ActualizarTarjetaProximidadHandler` + `IClienteDeliveryRepository` + selector modal en `FrmTarjetaProximidad`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-004
+**Nombre:** Consulta e impresión de últimos 10 movimientos por tarjeta
+**Origen:** Legacy/FrmTarjetaAproximidad.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidad.frm
+**Procedimiento/Función:** `cmdOpcion_Click(Index=5)`, `Genera`
+**Descripción:** El mantenimiento de tarjetas consulta los 10 movimientos más recientes (`MontoIngreso`, `MontoSalida`, `MontoAnterior`, `MontoFinal`) ordenados por fecha descendente para la tarjeta seleccionada y permite imprimirlos.
+**Condición:** Tarjeta seleccionada.
+**Resultado:** Muestra/imprime el historial reciente desde `TMOVIMIENTOTARJETASRFID`.
+**Excepciones:** Si no existen movimientos, informa "No hay Datos para Mostrar".
+**Destino .NET:** `ObtenerMovimientosTarjetaProximidadHandler` + `FrmTarjetaProximidad` (grilla + impresión).
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-005
+**Nombre:** Listado de recargas por rango de fechas
+**Origen:** Legacy/FrmRecargarTarjeta.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmRecargarTarjeta.frm
+**Procedimiento/Función:** `Form_Load`, `cmdProcesa_Click`
+**Descripción:** El formulario lista recargas de tarjetas ejecutando `usp_Inforest_ObtieneRecargas` por rango de fechas con tipo de movimiento `R`.
+**Condición:** Fecha inicio <= fecha fin.
+**Resultado:** Devuelve movimientos con `DocReferencia`, `MontoIngreso`, `MontoSalida`, `MontoAnterior` y `MontoFinal`.
+**Excepciones:** Si el rango es inválido se bloquea la consulta.
+**Destino .NET:** `ObtenerRecargasTarjetaHandler` + `IRecargaTarjetaRepository.ObtenerMovimientosAsync` + `FrmRecargarTarjeta`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-006
+**Nombre:** Validación obligatoria para registrar recarga
+**Origen:** Legacy/FrmRecargarTarjetaDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmRecargarTarjetaDetalle.frm
+**Procedimiento/Función:** `cmdTipoDocumento_Click`, `txtCodigoTarjeta_KeyPress`
+**Descripción:** No se permite recargar si no existe tarjeta válida, si el monto es menor o igual a cero o si no hay usuario de sesión.
+**Condición:** Tarjeta inexistente/bloqueada, monto no positivo o usuario vacío.
+**Resultado:** Cancela operación y retorna mensaje funcional.
+**Excepciones:** Ninguna.
+**Destino .NET:** `RegistrarRecargaTarjetaHandler` + `FrmRecargarTarjetaDetalle`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-007
+**Nombre:** Recarga actualiza movimiento y saldo en transacción
+**Origen:** Legacy/FrmRecargarTarjetaDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmRecargarTarjetaDetalle.frm
+**Procedimiento/Función:** `cmdTipoDocumento_Click` (bloque `insert TMOVIMIENTOTARJETASRFID` + `update TTARJETASRFID`)
+**Descripción:** Cada recarga registra un movimiento tipo `R` y actualiza el saldo disponible de la tarjeta en la misma operación.
+**Condición:** Recarga aceptada.
+**Resultado:** Inserta en `TMOVIMIENTOTARJETASRFID` y actualiza `TTARJETASRFID.MontoDisponible`.
+**Excepciones:** Si falla la actualización de saldo, se revierte la operación.
+**Destino .NET:** `RecargaTarjetaRepository.RegistrarRecargaAsync` + `RegistrarRecargaTarjetaHandler`.
+**Estado:** MIGRATED

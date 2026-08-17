@@ -89,7 +89,7 @@
 | 72 | `usp_Inforest_ObtieneRecargas` | `FrmRecargarTarjeta.frm` | SQL_ONLY | ANALYSIS |
 | 73 | `usp_Inforest_ObtieneRptGuia` | `frmCtaCteDetalle.frm` | SQL_ONLY | ANALYSIS |
 | 74 | `usp_Inforest_PedidosCentralPedido` | `frmCentralPedidos.frm` | SQL_ONLY | ANALYSIS |
-| 75 | `usp_Inforest_ValidaClienteSel` | `FrmRecargarTarjetaDetalle.frm`, `frmCajaRapida.frm`, `frmCambio.frm`… | SQL_ONLY | ANALYSIS |
+| 75 | `usp_Inforest_ValidaClienteSel` | `FrmRecargarTarjetaDetalle.frm`, `frmCajaRapida.frm`, `frmCambio.frm`, `frmVenta.frm`, `frmSolicitudBoleta.frm`… | SQL_ONLY | MIGRATED |
 | 76 | `usp_ListDocumentosFE` | `frmDocumentoElectronicoCorrelativo.frm`, `frmLiquidacionDetalle.frm` | SQL_ONLY | ANALYSIS |
 | 77 | `usp_RepInforest_DescargoVenta` | `frmDescargo.frm` | SQL_ONLY | ANALYSIS |
 | 78 | `usp_Seg_verConexiones` | `frmConexionesActuales.frm` | SQL_ONLY | ANALYSIS |
@@ -231,7 +231,7 @@
 | 57 | `TMENSAJEUSUARIO` | `frmPedido.frm` | ANALYSIS |
 | 58 | `TMESA` | `FrmRecargarTarjetaDetalle.frm`, `frmCajaRapida.frm`, `frmCargoMozo.frm`… | ANALYSIS |
 | 59 | `TMODULO` | `modAuditoriaIntegral.bas`, `modProcedimiento.bas` | ANALYSIS |
-| 60 | `TMOVIMIENTOTARJETASRFID` | `FrmRecargarTarjetaDetalle.frm`, `FrmTarjetaAproximidad.frm` | ANALYSIS |
+| 60 | `TMOVIMIENTOTARJETASRFID` | `FrmRecargarTarjetaDetalle.frm`, `FrmTarjetaAproximidad.frm` | IN_PROGRESS |
 | 61 | `TOFERTA` | `FrmRecargarTarjetaDetalle.frm`, `frmCajaRapida.frm`, `frmCargoMozo.frm`… | ANALYSIS |
 | 62 | `TOPERADOR` | `frmCajaRapida.frm`, `frmCargoMozo.frm`, `frmDetallePedido.frm`… | ANALYSIS |
 | 63 | `TORIGENCODIGOCONTROL` | `modProcedimiento.bas` | ANALYSIS |
@@ -250,7 +250,7 @@
 | 76 | `TSUBGRUPO` | `FrmRecargarTarjetaDetalle.frm`, `frmCajaRapida.frm`, `frmCargoMozo.frm`… | ANALYSIS |
 | 77 | `TTABLA` | `claCorreoElectronico.cls`, `frmCajaRapida.frm`, `frmDescargo.frm`… | ANALYSIS |
 | 78 | `TTARJETACREDITO` | `FrmRecargarTarjetaDetalle.frm`, `frmDocumento.frm`, `frmDocumentoCorrelativo.frm`… | ANALYSIS |
-| 79 | `TTARJETASRFID` | `FrmRecargarTarjetaDetalle.frm`, `FrmTarjetaAproximidad.frm`, `FrmTarjetaAproximidadDetalle.frm` | ANALYSIS |
+| 79 | `TTARJETASRFID` | `FrmRecargarTarjetaDetalle.frm`, `FrmTarjetaAproximidad.frm`, `FrmTarjetaAproximidadDetalle.frm` | IN_PROGRESS |
 | 80 | `TTERMINAL` | `frmDocumento.frm`, `frmLiquidacionDetalle.frm`, `frmPago.frm`… | ANALYSIS |
 | 81 | `TTIENDA` | `FrmRecargarTarjetaDetalle.frm`, `frmBusquedaDelivery.frm`, `frmCajaRapida.frm`… | ANALYSIS |
 | 82 | `TTIPOCAMBIO` | `frmAcceso.frm`, `frmDocumentoCompra.frm`, `frmDocumentoCorrelativo.frm`… | ANALYSIS |

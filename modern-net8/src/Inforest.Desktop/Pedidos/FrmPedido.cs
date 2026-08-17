@@ -1,4 +1,5 @@
 using Inforest.Application.Caja;
+using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
 using Inforest.Application.Maestros;
 using Inforest.Application.Pedidos;
@@ -29,6 +30,9 @@ public class FrmPedido : Form
     private readonly ProcesarPagoPinPadHandler? _procesarPagoPinPadHandler;
     private readonly ObtenerTerminalesPinPadHandler? _obtenerTerminalesPinPadHandler;
     private readonly AnularDocumentoHandler? _anularHandler;
+    private readonly ObtenerConfiguracionSistemaHandler? _configuracionHandler;
+    private readonly ObtenerClientesActivosHandler? _clientesHandler;
+    private readonly ObtenerClienteGeneralBoletaHandler? _clienteGeneralBoletaHandler;
 
     private DataGridView _dgvProductos = null!;
     private DataGridView _dgvDetalle = null!;
@@ -53,7 +57,10 @@ public class FrmPedido : Form
         RegistrarPagosMultiplesHandler? registrarPagosMultiplesHandler = null,
         ProcesarPagoPinPadHandler? procesarPagoPinPadHandler = null,
         ObtenerTerminalesPinPadHandler? obtenerTerminalesPinPadHandler = null,
-        AnularDocumentoHandler? anularHandler = null)
+        AnularDocumentoHandler? anularHandler = null,
+        ObtenerConfiguracionSistemaHandler? configuracionHandler = null,
+        ObtenerClientesActivosHandler? clientesHandler = null,
+        ObtenerClienteGeneralBoletaHandler? clienteGeneralBoletaHandler = null)
     {
         _mesa = mesa;
         _productoRepository = productoRepository;
@@ -68,6 +75,9 @@ public class FrmPedido : Form
         _procesarPagoPinPadHandler = procesarPagoPinPadHandler;
         _obtenerTerminalesPinPadHandler = obtenerTerminalesPinPadHandler;
         _anularHandler = anularHandler;
+        _configuracionHandler = configuracionHandler;
+        _clientesHandler = clientesHandler;
+        _clienteGeneralBoletaHandler = clienteGeneralBoletaHandler;
         InitializeComponent();
     }
 
@@ -286,7 +296,10 @@ public class FrmPedido : Form
             _registrarPagosMultiplesHandler,
             _procesarPagoPinPadHandler,
             _obtenerTerminalesPinPadHandler,
-            _anularHandler);
+            _anularHandler,
+            _configuracionHandler,
+            _clientesHandler,
+            _clienteGeneralBoletaHandler);
         if (frmVenta.ShowDialog(this) == DialogResult.OK)
             Close();
     }

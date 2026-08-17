@@ -11,15 +11,17 @@ namespace Inforest.Application.Impresion;
 
 /// <summary>
 /// Comando para imprimir la pre-cuenta de un pedido en una impresora específica.
-/// Legacy: frmPrecuentaImpresora.frm + modProcedimiento.bas ImprimirTicket. BR-008.
+/// Legacy: frmPrecuentaImpresora.frm + modProcedimiento.bas ImprimirTicket. BR-PRECUENTA-002/003.
 /// </summary>
 public sealed record ImprimirPrecuentaCommand(
     string CodigoPedido,
-    string CodigoImpresora);
+    string CodigoImpresora,
+    bool UsarImpresoraPredeterminada = false,
+    string? CodigoImpresoraPredeterminada = null);
 
 /// <summary>
 /// Query para obtener las impresoras disponibles de una caja.
-/// Legacy: frmPrecuentaImpresora.frm Form_Load — SELECT tImpresora, tDescripcion FROM TIMPRESORA WHERE tCaja=sCaja
+/// Legacy: frmPrecuentaImpresora.frm Form_Load — SELECT tImpresora, tDescripcion FROM TIMPRESORA WHERE tCaja=sCaja. BR-PRECUENTA-001.
 /// </summary>
 public sealed record ObtenerImpresorasPorCajaQuery(string CodigoCaja);
 
@@ -29,7 +31,7 @@ public sealed record ObtenerImpresorasPorCajaQuery(string CodigoCaja);
 
 /// <summary>
 /// Imprime la pre-cuenta del pedido indicado en la impresora seleccionada.
-/// Legacy: frmPrecuentaImpresora.frm cmdImpresora_Click + modProcedimiento.bas. BR-008.
+/// Legacy: frmPrecuentaImpresora.frm cmdImpresora_Click/cmdOpcion_Click + modProcedimiento.bas. BR-PRECUENTA-002/003.
 /// </summary>
 public sealed class ImprimirPrecuentaHandler
 {
@@ -49,7 +51,14 @@ public sealed class ImprimirPrecuentaHandler
         if (string.IsNullOrWhiteSpace(command.CodigoPedido))
             return Result.Fail("El código de pedido es requerido.", "IMPRESION_PEDIDO_REQUERIDO");
 
-        if (string.IsNullOrWhiteSpace(command.CodigoImpresora))
+        var codigoImpresora = command.UsarImpresoraPredeterminada
+            ? command.CodigoImpresoraPredeterminada
+            : command.CodigoImpresora;
+
+        if (command.UsarImpresoraPredeterminada && string.IsNullOrWhiteSpace(command.CodigoImpresoraPredeterminada))
+            return Result.Fail("No existe impresora predeterminada configurada para esta caja.", "IMPRESION_PRECUENTA_PREDETERMINADA_REQUERIDA");
+
+        if (string.IsNullOrWhiteSpace(codigoImpresora))
             return Result.Fail("Seleccione una impresora.", "IMPRESION_IMPRESORA_REQUERIDA");
 
         var pedido = await _pedidoRepository.ObtenerPorCodigoAsync(command.CodigoPedido, ct);
@@ -60,7 +69,7 @@ public sealed class ImprimirPrecuentaHandler
             return Result.Fail("El pedido no tiene ítems para imprimir.", "IMPRESION_PEDIDO_SIN_DETALLES");
 
         var contenido = BuildPrecuenta(pedido);
-        await _impresoraService.ImprimirTicketAsync(contenido, command.CodigoImpresora, ct);
+        await _impresoraService.ImprimirTicketAsync(contenido, codigoImpresora.Trim(), ct);
         return Result.Ok();
     }
 
@@ -111,7 +120,7 @@ public interface IImpresoraRepository
 
 /// <summary>
 /// Handler para obtener impresoras de una caja (alimenta el combo de frmPrecuentaImpresora).
-/// Legacy: frmPrecuentaImpresora.frm Form_Load. BR-008.
+/// Legacy: frmPrecuentaImpresora.frm Form_Load. BR-PRECUENTA-001.
 /// </summary>
 public sealed class ObtenerImpresorasPorCajaHandler
 {

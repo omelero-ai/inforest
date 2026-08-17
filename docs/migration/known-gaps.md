@@ -145,3 +145,28 @@
 | ID | Gap | Descripción | Archivo Origen | Estado |
 |---|---|---|---|---|
 | GAP-REP-020 | NCantidad no mapeado en modo Resumido | En modo Resumido (`@flagTipo=0`), el SP retorna la columna `Cantidad` (alias de `Sum(DPEDIDO.nCantidad)`). Dapper no la mapea a `ComandaRow.NCantidad` porque los nombres difieren. El valor de cantidad queda en 0 en el DTO Resumido. Se mantiene el mismo DTO `ComandaRow` para ambos modos. Solución futura: SP puede renombrar alias a `nCantidad` o usar un DTO separado `ComandaResumidoRow`. | `5. SP.sql` — `spRep_Comanda` modo `@flagTipo=0` | OPEN — no crítico, afecta solo la columna cantidad en Resumido |
+
+---
+
+## POS-FUNC-017 — frmRepLiquidacion (Liquidación de Cajero)
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-REP-021 | Diálogo búsqueda de turno (frmBusca) | El botón "..." en FrmRepLiquidacionReporte abre `frmBusca` en VB6 mostrando MTURNO con columnas Turno/Caja/FechaInicial/FechaFinal. En .NET 8 el botón solo otorga foco al campo de texto. Pendiente: implementar un diálogo de búsqueda de turnos equivalente a `frmBusca` reutilizable. | `frmRepLiquidacion.frm` — cmdBusca_Click | OPEN — el usuario puede ingresar el código de turno manualmente |
+
+---
+
+## POS-FUNC-017 — frmRepRegistroVenta (Registro de Ventas)
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-REP-022 | SP `spRep_RegVentaSunat_formaPago` no encontrado | El tipo 7 (Correlativo con Forma de Pago) de `frmRepRegistroVenta.frm` llama a `spRep_RegVentaSunat_formaPago`. Este SP no existe en `5. SP.sql` ni en los scripts opcionales. El handler devuelve resultado vacío para este tipo y la forma muestra un mensaje de advertencia. | `frmRepRegistroVenta.frm` — Sub Genera4() | OPEN — tipo 7 deshabilitado hasta que se encuentre o cree el SP |
+
+---
+
+## POS-FUNC-021 — Tarjetas RFID / Proximidad
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-RFID-001 | Flujo de recarga parcial vs legado | `FrmRecargarTarjeta.frm` + `FrmRecargarTarjetaDetalle.frm` ya migran listado de recargas y actualización transaccional de saldo RFID (`TMOVIMIENTOTARJETASRFID` + `TTARJETASRFID`). Sigue pendiente cerrar equivalencia completa del bloque legacy de anticipo/emisión documental/impresión fiscal dentro del mismo flujo. | `FrmRecargarTarjeta.frm`, `FrmRecargarTarjetaDetalle.frm` | IN_PROGRESS |
+| GAP-RFID-002 | `FrmMovimientoTarjetas.frm` sin lógica relevante | El formulario `FrmMovimientoTarjetas.frm` aparece en `InfoRest.vbp` como cascarón visual sin código operativo útil. Se mantiene fuera del corte hasta confirmar si corresponde a un flujo real o a una pantalla obsoleta. | `FrmMovimientoTarjetas.frm` | ANALYSIS |

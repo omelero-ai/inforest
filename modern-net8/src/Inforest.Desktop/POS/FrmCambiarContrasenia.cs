@@ -38,9 +38,10 @@ public class FrmCambiarContrasenia : Form
         _txtUsuario = new TextBox
         {
             Left = 150, Top = 17, Width = 200,
-            Text = loginInicial ?? string.Empty,
+            Text = (loginInicial ?? string.Empty).Trim().ToUpperInvariant(),
             ReadOnly = loginInicial is not null
         };
+        _txtUsuario.Leave += (_, _) => _txtUsuario.Text = _txtUsuario.Text.Trim().ToUpperInvariant();
         _txtActual = new TextBox { Left = 150, Top = 57, Width = 200, UseSystemPasswordChar = true };
         _txtNueva = new TextBox { Left = 150, Top = 97, Width = 200, UseSystemPasswordChar = true };
         _txtConfirmaNueva = new TextBox { Left = 150, Top = 137, Width = 200, UseSystemPasswordChar = true };
@@ -73,6 +74,9 @@ public class FrmCambiarContrasenia : Form
             _txtUsuario, _txtActual, _txtNueva, _txtConfirmaNueva,
             _lblInfo, btnAceptar, btnCancelar
         ]);
+
+        AcceptButton = btnAceptar;
+        CancelButton = btnCancelar;
     }
 
     private async Task AceptarAsync()
@@ -95,6 +99,7 @@ public class FrmCambiarContrasenia : Form
         {
             MessageBox.Show("Contraseña cambiada exitosamente.", "Seguridad",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
+            DialogResult = DialogResult.OK;
             Close();
         }
         else

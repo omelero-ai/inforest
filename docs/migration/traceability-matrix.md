@@ -2,7 +2,7 @@
 
 > Status: IN_PROGRESS — baseline transversal de Fase 3 validado; la matriz refleja equivalencias parciales y gaps controlados.
 >
-> Última actualización: 2026-08-15
+> Última actualización: 2026-08-17
 
 ---
 
@@ -268,6 +268,22 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `spRep_VentaFecha` | SP | `ReporteRepository.ObtenerVentaFechaAsync` + `ReporteRepository.ObtenerSubGruposAsync` | Repository | COMPLETED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `frmRepVentaFecha.frm` | Form | `FrmRepVentaFechaReporte.cs` + `ObtenerReporteVentaFechaHandler` + `VentaFechaRow` + `VentaFechaParametros` + `SubGrupoItem` + BR-REP-020 + 2 tests | WinForm + Handler + DTO + Repository | COMPLETED | `src/Inforest.Desktop/Forms/Reportes/FrmRepVentaFechaReporte.cs`, `src/Inforest.Application/Reportes/` |
 | `frmRepVentaFecha.frx` | Form resource | `RepVentaFecha.frx` | FastReport | COMPLETED | `src/Inforest.Desktop/Reports/Templates/RepVentaFecha.frx` |
+| `spRep_LiquidacionOutPut` | SP | `ReporteRepository.ObtenerLiquidacionOutputAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_Liquidacion` | SP | `ReporteRepository.ObtenerLiquidacionDocumentosAsync` + `ObtenerLiquidacionSumasGrupoAsync` + `ObtenerLiquidacionTarjetasAsync` + `ObtenerLiquidacionOtrosTiposAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_LiquidacionSuma` | SP | `ReporteRepository.ObtenerLiquidacionTiposPedidoAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `frmRepLiquidacion.frm` | Form | `FrmRepLiquidacionReporte.cs` + `ObtenerReporteLiquidacionHandler` + `LiquidacionParametros` + `LiquidacionOutput` + `LiquidacionRow` + `LiquidacionSumaGrupoRow` + `LiquidacionTarjetaRow` + `LiquidacionTipoPedidoRow` + `LiquidacionOtroTipoRow` + `LiquidacionResultado` + BR-REP-021 + 2 tests | WinForm + Handler + DTOs + Repository | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepLiquidacionReporte.cs`, `src/Inforest.Application/Reportes/` |
+| `dsrLiquidacion.Dsr` / `dsrLiquidacionVenta.Dsr` | Crystal | `RepLiquidacion.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepLiquidacion.frx` |
+| `spRep_RegVenta` | SP | `ReporteRepository.ObtenerRegistroVentaAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_RegVentaSunat` | SP | `ReporteRepository.ObtenerRegistroVentaSunatAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_RegVentaSunatAD` | SP | `ReporteRepository.ObtenerRegistroVentaSunatAdAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_ComprobanteDetallado` | SP | `ReporteRepository.ObtenerRegistroVentaDetalladoAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
+| `spRep_RegVentaSunat_formaPago` | SP | — | — | NOT_APPLICABLE (GAP-REP-022) | SP no encontrado en `5. SP.sql` |
+| `frmRepRegistroVenta.frm` | Form | `FrmRepRegistroVentaReporte.cs` + `ObtenerReporteRegistroVentaHandler` + `RegistroVentaParametros` + `RegistroVentaRow` + `RegistroVentaSunatRow` + `RegistroVentaSunatAdRow` + `RegistroVentaDetalladoRow` + `RegistroVentaResultado` + BR-REP-022 + 2 tests | WinForm + Handler + DTOs + Repository | MIGRATED | `src/Inforest.Desktop/Forms/Reportes/FrmRepRegistroVentaReporte.cs`, `src/Inforest.Application/Reportes/` |
+| `RepRegistroVentaSunat.frx` | FastReport | `RepRegistroVentaSunat.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaSunat.frx` |
+| `RepRegistroVentaDetallado.frx` | FastReport | `RepRegistroVentaDetallado.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaDetallado.frx` |
+| `RepRegistroVentaConsolidado.frx` | FastReport | `RepRegistroVentaConsolidado.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaConsolidado.frx` |
+| `RepRegistroVentaSunatAd.frx` | FastReport | `RepRegistroVentaSunatAd.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaSunatAd.frx` |
+| `RepRegistroVentaComprobante.frx` | FastReport | `RepRegistroVentaComprobante.frx` | FastReport | MIGRATED | `src/Inforest.Desktop/Reports/Templates/RepRegistroVentaComprobante.frx` |
 | `spRep_CtaCteIntegrado` | SP | `ReporteRepository.ObtenerCtaCteIntegradoAsync` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Reportes/ReporteRepository.cs` |
 | `dsrRepCtaCteIntegradoConsolidado.Dsr` | Crystal | `RepCtaCteIntegradoConsolidado.frx` | FastReport | NOT_STARTED | `src/Inforest.Desktop/reports/templates/` |
 | `frmRepCtaCteIntegrado.frm` | Form | `FrmCtaCteIntegradoReporte.cs` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Forms/Reportes/FrmCtaCteIntegradoReporte.cs` |
@@ -339,16 +355,28 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmDocumentoCorrelativo.frm` + `modPuntoVenta.bas` | Form/Module | `CorrelativoDocumento` | Domain Entity | COMPLETED | `src/Inforest.Domain/Entities/Ventas/CorrelativoDocumento.cs` |
 | `TTIPODOCUMENTOIMPRESORA` | Table | `ICorrelativoRepository` / `CorrelativoRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Ventas/CorrelativoRepository.cs` |
 | `frmDocumentoCorrelativo.frm` | Form | `FrmDocumentoCorrelativo` | WinForm | COMPLETED | `src/Inforest.Desktop/Ventas/FrmDocumentoCorrelativo.cs` |
-| `frmPrecuentaImpresora.frm` | Form | `ImprimirPrecuentaHandler` / `FrmPrecuentaImpresora` | Handler + WinForm | IN_PROGRESS | `src/Inforest.Application/Impresion/ImprimirPrecuentaHandler.cs` + `src/Inforest.Desktop/Impresion/FrmPrecuentaImpresora.cs` |
-| `TIMPRESORA` | Table | `IImpresoraRepository` / `ImpresoraRepository` | Repository | IN_PROGRESS | `src/Inforest.Infrastructure/Impresion/ImpresoraRepository.cs` |
-| `frmCambiarContrasenia.frm` | Form | `CambiarPasswordHandler` + `FrmCambiarContrasenia` | Handler + WinForm | IN_PROGRESS | `src/Inforest.Application/Seguridad/CambiarPasswordHandler.cs` + `src/Inforest.Desktop/POS/FrmCambiarContrasenia.cs` |
-| `frmPassword.frm` | Form | `FrmPassword` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/POS/FrmPassword.cs` |
-| `AuthService` (cambio password) | Service | `IAuthService.CambiarPasswordAsync` | Service method | IN_PROGRESS | `src/Inforest.Infrastructure/Security/AuthService.cs` |
+| `frmPrecuentaImpresora.frm` | Form | `ImprimirPrecuentaHandler` / `FrmPrecuentaImpresora` | Handler + WinForm | COMPLETED | `src/Inforest.Application/Impresion/ImprimirPrecuentaHandler.cs` + `src/Inforest.Desktop/Impresion/FrmPrecuentaImpresora.cs` + `tests/Inforest.Application.Tests/Impresion/ImprimirPrecuentaHandlerTests.cs` |
+| `TIMPRESORA` | Table | `IImpresoraRepository` / `ImpresoraRepository` | Repository | COMPLETED | `src/Inforest.Infrastructure/Impresion/ImpresoraRepository.cs` |
+| `frmCambiarContrasenia.frm` | Form | `CambiarPasswordHandler` + `FrmCambiarContrasenia` | Handler + WinForm | COMPLETED | `src/Inforest.Application/Seguridad/CambiarPasswordHandler.cs` + `src/Inforest.Desktop/POS/FrmCambiarContrasenia.cs` + `tests/Inforest.Application.Tests/Seguridad/CambiarPasswordHandlerTests.cs` |
+| `frmPassword.frm` | Form | `FrmPassword` | WinForm | COMPLETED | `src/Inforest.Desktop/POS/FrmPassword.cs` |
+| `AuthService` (cambio password) | Service | `IAuthService.CambiarPasswordAsync` | Service method | COMPLETED | `src/Inforest.Infrastructure/Security/AuthService.cs` |
 | `frmLiquidacionDetalle.frm` | Form | `FrmLiquidacionCierre` + `CerrarTurnoHandler` | WinForm + Handler | MIGRATED | `src/Inforest.Desktop/Caja/FrmLiquidacionCierre.cs` + `src/Inforest.Application/Turno/TurnoHandlers.cs` |
 | `CierreTurnoBreakdown` (domain) | — | `CierreTurnoBreakdown` | Value Object | MIGRATED | `src/Inforest.Domain/Entities/Caja/CierreTurnoBreakdown.cs` |
 | `UPDATE MTURNO (cierre completo)` | SQL | `TurnoRepository.CerrarAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Turno/TurnoRepository.cs` |
 | `TCAJA.lObligaCierre` | Flag | `CerrarTurnoHandler` (BR-CAJA-001) | Business Rule | MIGRATED | `src/Inforest.Application/Turno/TurnoHandlers.cs` |
 | `TPARAMETRO.lActivaConsultaDescargo` | Flag | `CerrarTurnoHandler` (BR-CAJA-002) | Business Rule | MIGRATED | `src/Inforest.Application/Turno/TurnoHandlers.cs` |
+
+## Componentes POS-FUNC-004 — Registro de Venta
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmVenta.frm` | Form | `FrmVenta` | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmVenta.cs` |
+| `frmSolicitudBoleta.frm` | Form | `FrmSolicitudBoleta` + `FrmSeleccionClienteBoleta` | WinForm modal | MIGRATED | `src/Inforest.Desktop/Ventas/FrmSolicitudBoleta.cs` + `src/Inforest.Desktop/Ventas/FrmSeleccionClienteBoleta.cs` |
+| `frmSolicitudBoleta.frm` / opción “Sin datos” | Business rule | `ObtenerClienteGeneralBoletaHandler` | Handler | MIGRATED | `src/Inforest.Application/Ventas/SolicitudBoletaHandlers.cs` |
+| `modPuntoVenta.bas` / `CLIENTEGENERAL` + `TCLIENTE` | Config + Table | `IClienteRepository.ObtenerPorIdentidadAsync` + `ObtenerProximoCodigoAsync` + `ClienteRepository` | Interface + Repository | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/ClienteRepository.cs` |
+| `TPARAMETRO.lBODato` | Flag | `ConfiguracionSistema.lBODato` + `ParametroRepository` | Domain Record + Repository | MIGRATED | `src/Inforest.Domain/Entities/Configuracion/ConfiguracionSistema.cs` + `src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs` |
+| `usp_Inforest_ValidaClienteSel` | SP | `IClienteRepository.ValidarCompatibilidadDocumentoAsync` + `ClienteRepository` + `EmitirDocumentoHandler` | Interface + Repository + Handler | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/ClienteRepository.cs` + `src/Inforest.Application/Ventas/VentaHandlers.cs` |
+| (tests BR-BOLETA-001..003) | — | `SolicitudBoletaHandlersTests` + `VentaHandlersTests` | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/SolicitudBoletaHandlersTests.cs` + `tests/Inforest.Application.Tests/Ventas/VentaHandlersTests.cs` |
 
 ## Componentes POS-FUNC-006 — Facturación y Notas de Crédito
 
@@ -457,3 +485,71 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmReciboEgreso.frm` / lógica anular | Business rule | `AnularEgresoHandler` (BR-RECIBO-011) | Handler | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` |
 | `spRep_ReciboEgreso` | SP (report) | `ObtenerEgresosHandler` (reutiliza SP via Dapper) | Handler + Repository | COMPLETED | `src/Inforest.Application/Caja/ReciboEgresoHandlers.cs` + `src/Inforest.Infrastructure/Caja/ReciboEgresoRepository.cs` |
 | (tests BR-RECIBO-001..012) | — | `ReciboIngresoTests` (9) + `ReciboEgresoTests` (8) + `ReciboIngresoHandlerTests` (8) + `ReciboEgresoHandlerTests` (8) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Caja/ReciboIngresoTests.cs`, `tests/Inforest.Domain.Tests/Caja/ReciboEgresoTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboIngresoHandlerTests.cs`, `tests/Inforest.Application.Tests/Caja/ReciboEgresoHandlerTests.cs` |
+| `frmDivision.frm` | Form | `FrmDivision` | WinForm | COMPLETED | `src/Inforest.Desktop/Pedidos/FrmDivision.cs` |
+| `frmDivision.frm` / sesión in-memory | Design pattern | `SesionDivision` + `ItemDivision` | Domain entity | COMPLETED | `src/Inforest.Domain/Entities/Ventas/SesionDivision.cs` + `ItemDivision.cs` |
+| `frmDivision.frm` / lógica Disgregar | Business rule | `DisgregarItemHandler` (BR-DIV-003) | Handler | COMPLETED | `src/Inforest.Application/Pedidos/DivisionPedidoHandlers.cs` |
+| `frmDivision.frm` / lógica Compartir | Business rule | `CompartirPedidoHandler` (BR-DIV-004) | Handler | COMPLETED | `src/Inforest.Application/Pedidos/DivisionPedidoHandlers.cs` |
+| `frmDivision.frm` / lógica Mover | Business rule | `MoverItemHandler` | Handler | COMPLETED | `src/Inforest.Application/Pedidos/DivisionPedidoHandlers.cs` |
+| `frmDivision.frm` / confirmar — validación estado | Business rule | `ConfirmarDivisionHandler` (BR-DIV-001) | Handler | COMPLETED | `src/Inforest.Application/Pedidos/DivisionPedidoHandlers.cs` |
+| `frmDivision.frm` / confirmar — validación monto máximo | Business rule | `ConfirmarDivisionHandler` (BR-DIV-002) | Handler | COMPLETED | `src/Inforest.Application/Pedidos/DivisionPedidoHandlers.cs` |
+| `frmDivision.frm` / confirmar — SQL (DPEDIDO/MPEDIDO) | SQL | `DivisionPedidoRepository.ConfirmarDivisionAsync` (BR-DIV-001..005) | Repository | COMPLETED | `src/Inforest.Infrastructure/Pedidos/DivisionPedidoRepository.cs` |
+| `frmDetallePedido.frm` | Form | `FrmDetallePedido` | WinForm | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmDetallePedido.cs` |
+| `frmDetallePedido.frm` / vPedidoDetalle (BR-PEDIDO-005) | SQL/View | `IPedidoReadRepository.ObtenerDetalleExtendidoAsync` + `PedidoRepository` impl | Repository | MIGRATED | `src/Inforest.Application/Pedidos/IPedidoReadRepository.cs` + `src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` |
+| `frmDetallePedido.frm` / vPedidoCombo (BR-PEDIDO-006) | SQL/View | `IPedidoReadRepository.ObtenerCombosAsync` + `PedidoRepository` impl | Repository | MIGRATED | `src/Inforest.Application/Pedidos/IPedidoReadRepository.cs` + `src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` |
+| `frmDetallePedido.frm` / handler detalle extendido | Business rule | `ObtenerDetallePedidoExtendidoHandler` (BR-PEDIDO-005/BR-PEDIDO-006) | Handler | MIGRATED | `src/Inforest.Application/Pedidos/DetallePedidoHandlers.cs` |
+| `frmDetallePedido.frm` / DTOs vista | Data Transfer | `ItemPedidoVista` + `ComboPedidoVista` + `DetallePedidoExtendidoResultado` | Records | MIGRATED | `src/Inforest.Application/Pedidos/DetallePedidoVista.cs` |
+| `frmJuntarMesas.frm` | Form | `FrmJuntarMesas` | WinForm | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmJuntarMesas.cs` |
+| `frmJuntarMesas.frm` / resultado para caller | Design pattern | `JuntarMesasResult` record (BR-JUNTAR-002/BR-JUNTAR-003) | Record | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmJuntarMesas.cs` |
+| `frmJuntarMesas.frm` / selección visual de mesas | UI Logic | Color-coded buttons por `EstadoMesa` (BR-JUNTAR-001) | WinForms UI | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmJuntarMesas.cs` |
+| `spUpdate_DPEDIDO_Ina` | SP | reutilizado vía Dapper en `DivisionPedidoRepository` | Repository call | COMPLETED | `src/Inforest.Infrastructure/Pedidos/DivisionPedidoRepository.cs` |
+| (tests BR-DIV-001..005) | — | `DivisionPedidoTests` (11 domain) + `DivisionPedidoHandlerTests` (11 handler) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Pedidos/DivisionPedidoTests.cs` + `tests/Inforest.Application.Tests/Pedidos/DivisionPedidoHandlerTests.cs` |
+
+## Componentes POS-FUNC-027 — Cambio de Documento
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmCambio.frm` | Form | `FrmCambioDocumento` | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmCambioDocumento.cs` |
+| `frmCambio.frm` / TTIPODOCUMENTOIMPRESORA + vTipoDocumentoImpresora | SQL | `ICambioDocumentoRepository.ObtenerTiposDocumentoAsync` + `CambioDocumentoRepository` | Interface + Class | MIGRATED | `src/Inforest.Application/Ventas/ICambioDocumentoRepository.cs` + `src/Inforest.Infrastructure/Ventas/CambioDocumentoRepository.cs` |
+| `frmCambio.frm` / cmdOpcion_Click(0) — cambio documento | Business Logic | `CambiarDocumentoHandler` + `CambiarDocumentoCommand` (BR-CAMBIO-001..005) | Handler | MIGRATED | `src/Inforest.Application/Ventas/CambiarDocumentoHandlers.cs` |
+| `frmCambio.frm` / validación monto máximo | BR-CAMBIO-002 | `CambiarDocumentoHandler.ObtenerMontosValidacionAsync` | Handler logic | MIGRATED | `src/Inforest.Application/Ventas/CambiarDocumentoHandlers.cs` |
+| (tests BR-CAMBIO-001..005) | — | `CambiarDocumentoHandlerTests` (8 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/CambiarDocumentoHandlerTests.cs` |
+
+## Componentes POS-FUNC-028 — Actualizar Datos Pedido
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmUpdateDatosPedido.frm` (`FrmActualizarPedidos`) | Form | `FrmActualizarDatosPedido` | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmActualizarDatosPedido.cs` |
+| `usp_ActualizarCabPeDoc` @opcion='1' (cortesía) | SP | `ActualizarCortesiaPedidoHandler` + `IActualizarDatosPedidoRepository.ActualizarCortesiaAsync` (BR-ACTPED-001/002) | Handler + Interface | MIGRATED | `src/Inforest.Application/Ventas/ActualizarDatosPedidoHandlers.cs` + `src/Inforest.Infrastructure/Ventas/ActualizarDatosPedidoRepository.cs` |
+| `usp_ActualizarCabPeDoc` @opcion='2' (canal venta) | SP | `ActualizarCanalVentaPedidoHandler` + `IActualizarDatosPedidoRepository.ActualizarCanalVentaAsync` (BR-ACTPED-001/003) | Handler + Interface | MIGRATED | `src/Inforest.Application/Ventas/ActualizarDatosPedidoHandlers.cs` + `src/Inforest.Infrastructure/Ventas/ActualizarDatosPedidoRepository.cs` |
+| (tests BR-ACTPED-001..003) | — | `ActualizarDatosPedidoHandlerTests` (8 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/ActualizarDatosPedidoHandlerTests.cs` |
+
+---
+
+## Componentes POS-FUNC-029 — Lista Motivos Anulación
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmListaMotivos.frm` | Form | `FrmListaMotivos` | WinForm modal | MIGRATED | `src/Inforest.Desktop/Ventas/FrmListaMotivos.cs` |
+| `vMotivoANULACION` / `TTABLA WHERE TTABLA='MOTIVOANULACION'` | View / Table | `MotivoAnulacion` | Domain Record | MIGRATED | `src/Inforest.Domain/Entities/Configuracion/MotivoAnulacion.cs` |
+| `vMotivoANULACION` | View | `IMotivoAnulacionRepository` + `MotivoAnulacionRepository` | Interface + Class | MIGRATED | `src/Inforest.Application/Interfaces/IMotivoAnulacionRepository.cs` + `src/Inforest.Infrastructure/Ventas/MotivoAnulacionRepository.cs` |
+| `Form_Load` → RecordCount=0 → MsgBox (BR-MOTIVO-002) | Logic | `ObtenerMotivosAnulacionHandler` | Handler | MIGRATED | `src/Inforest.Application/Ventas/MotivoAnulacionHandlers.cs` |
+| `cmdEliminacion_Click` → `sCodigo` + `sDescrip` + `wEnter=True` (BR-MOTIVO-003) | Logic | `FrmListaMotivos.MotivoSeleccionado` | Property | MIGRATED | `src/Inforest.Desktop/Ventas/FrmListaMotivos.cs` |
+| (tests BR-MOTIVO-001..003) | — | `MotivoAnulacionHandlerTests` (5 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/MotivoAnulacionHandlerTests.cs` |
+
+---
+
+## Componentes POS-FUNC-021 — Tarjetas RFID / Proximidad
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `FrmTarjetaAproximidad.frm` + `FrmTarjetaAproximidadDetalle.frm` | Form | `FrmTarjetaProximidad` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmTarjetaProximidad.cs` |
+| `TTARJETASRFID` | Table | `TarjetaProximidad` + `ITarjetaProximidadRepository` + `TarjetaProximidadRepository` | Entity + Interface + Class | MIGRATED | `src/Inforest.Domain/Entities/Delivery/TarjetaProximidad.cs` + `src/Inforest.Application/Delivery/TarjetaProximidadHandlers.cs` + `src/Inforest.Infrastructure/Delivery/TarjetaProximidadRepository.cs` |
+| `TMOVIMIENTOTARJETASRFID` | Table | `MovimientoTarjetaProximidad` + `ObtenerMovimientosTarjetaProximidadHandler` | Record + Handler | MIGRATED | `src/Inforest.Domain/Entities/Delivery/TarjetaProximidad.cs` + `src/Inforest.Application/Delivery/TarjetaProximidadHandlers.cs` |
+| `TDELIVERY` (búsqueda cliente asociado) | Table | `IClienteDeliveryRepository` + selector modal en `FrmTarjetaProximidad` | Interface + UI | MIGRATED | `src/Inforest.Domain/Repositories/IClienteDeliveryRepository.cs` + `src/Inforest.Desktop/Clientes/FrmTarjetaProximidad.cs` |
+| `FrmRecargarTarjeta.frm` | Form | `FrmRecargarTarjeta` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmRecargarTarjeta.cs` |
+| `FrmRecargarTarjetaDetalle.frm` | Form | `FrmRecargarTarjetaDetalle` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmRecargarTarjetaDetalle.cs` |
+| `usp_Inforest_ObtieneRecargas` | Stored Procedure | `ObtenerRecargasTarjetaHandler` + `IRecargaTarjetaRepository.ObtenerMovimientosAsync` | Handler + Interface | MIGRATED | `src/Inforest.Application/Delivery/RecargaTarjetaHandlers.cs` + `src/Inforest.Infrastructure/Delivery/RecargaTarjetaRepository.cs` |
+| `TMOVIMIENTOTARJETASRFID` (tipo `R`) | Table | `IRecargaTarjetaRepository.RegistrarRecargaAsync` | Repository | MIGRATED | `src/Inforest.Infrastructure/Delivery/RecargaTarjetaRepository.cs` |
+| `TTARJETASRFID.MontoDisponible` | Table | `RegistrarRecargaTarjetaHandler` + `RecargaTarjetaRepository` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/RecargaTarjetaHandlers.cs` + `src/Inforest.Infrastructure/Delivery/RecargaTarjetaRepository.cs` |
+| (tests BR-RFID-005..007) | — | `RecargaTarjetaHandlerTests` (3) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Delivery/RecargaTarjetaHandlerTests.cs` |
+| (tests BR-RFID-001..004) | — | `TarjetaProximidadTests` (7) + `TarjetaProximidadHandlerTests` (7) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/Delivery/TarjetaProximidadTests.cs` + `tests/Inforest.Application.Tests/Delivery/TarjetaProximidadHandlerTests.cs` |

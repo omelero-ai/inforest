@@ -265,6 +265,129 @@ public interface IReporteRepository
     /// Usado para poblar el filtro de sub-grupos en <c>frmRepVentaFecha</c>.
     /// </summary>
     Task<IReadOnlyList<SubGrupoItem>> ObtenerSubGruposAsync(CancellationToken ct = default);
+
+    // ── Liquidación de Cajero (BR-REP-021) ─────────────────────────────────────
+
+    /// <summary>
+    /// Ejecuta <c>spRep_LiquidacionOutPut</c> (o variante _NC) y retorna los totales escalares OUTPUT.
+    /// Legacy: <c>frmRepLiquidacion.frm</c> Sub Genera() — oComando.CreateCmdSp("spRep_LiquidacionOutPut")
+    /// Regla: BR-REP-021
+    /// </summary>
+    Task<LiquidacionOutput> ObtenerLiquidacionOutputAsync(
+        LiquidacionParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_Liquidacion</c> (tipo 1 = documentos).
+    /// Legacy: rsReporte — Lib.OpenRecordset("spRep_Liquidacion '1',...")
+    /// Regla: BR-REP-021
+    /// </summary>
+    Task<IReadOnlyList<LiquidacionRow>> ObtenerLiquidacionDocumentosAsync(
+        LiquidacionParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_Liquidacion</c> (tipo 2 = sumas por grupo de pago).
+    /// Legacy: RsSumas — Lib.OpenRecordset("spRep_Liquidacion '2',...")
+    /// Regla: BR-REP-021
+    /// </summary>
+    Task<IReadOnlyList<LiquidacionSumaGrupoRow>> ObtenerLiquidacionSumasGrupoAsync(
+        LiquidacionParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_Liquidacion</c> (tipo 3 = tarjetas de crédito).
+    /// Legacy: RsSumas — Lib.OpenRecordset("spRep_Liquidacion '3',...")
+    /// Regla: BR-REP-021
+    /// </summary>
+    Task<IReadOnlyList<LiquidacionTarjetaRow>> ObtenerLiquidacionTarjetasAsync(
+        LiquidacionParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_LiquidacionSuma</c> para obtener sumas por tipo de pedido (Salón/Delivery/Llevar/Canal4/Canal5/Fiscal).
+    /// Legacy: RsSumas — oComando.CreateCmdSp("spRep_LiquidacionSuma")
+    /// Regla: BR-REP-021
+    /// </summary>
+    Task<IReadOnlyList<LiquidacionTipoPedidoRow>> ObtenerLiquidacionTiposPedidoAsync(
+        LiquidacionParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_Liquidacion</c> (tipo 5 = otros tipos de cancelación).
+    /// Legacy: RsSumas — Lib.OpenRecordset("spRep_Liquidacion '5',...")
+    /// Regla: BR-REP-021
+    /// </summary>
+    Task<IReadOnlyList<LiquidacionOtroTipoRow>> ObtenerLiquidacionOtrosTiposAsync(
+        LiquidacionParametros parametros,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene la lista de usuarios activos para el combo de filtro.
+    /// Legacy: TUSUARIO where lActivo=1 and tGrupoUsuario&lt;&gt;'00'
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerUsuariosActivosAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene la lista de sectores de venta activos para el combo de filtro.
+    /// Legacy: vSectorVenta where Activo=1
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerSectoresVentaAsync(CancellationToken ct = default);
+
+    // ── BR-REP-022 — Registro de Ventas ──────────────────────────────────────
+
+    /// <summary>
+    /// Ejecuta <c>spRep_RegVenta</c> para los tipos: EstadoDocumentos, AgrupadoPorFechas,
+    /// CorrelativoDocumento, CorrelativoDetallado.
+    /// Legacy: Sub Genera() en <c>frmRepRegistroVenta.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<RegistroVentaRow>> ObtenerRegistroVentaAsync(
+        RegistroVentaParametros p, CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_RegVentaSunat</c> para el tipo CorrelativoSunat.
+    /// Legacy: Sub Genera1() en <c>frmRepRegistroVenta.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<RegistroVentaSunatRow>> ObtenerRegistroVentaSunatAsync(
+        RegistroVentaParametros p, CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_RegVentaSunatAD</c> para el tipo AgrupadoPorTipoDocumento.
+    /// Legacy: Sub Genera2() en <c>frmRepRegistroVenta.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<RegistroVentaSunatAdRow>> ObtenerRegistroVentaSunatAdAsync(
+        RegistroVentaParametros p, CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <c>spRep_ComprobanteDetallado</c> para el tipo DetalladoPorComprobante.
+    /// Legacy: Sub Genera3() en <c>frmRepRegistroVenta.frm</c>
+    /// </summary>
+    Task<IReadOnlyList<RegistroVentaDetalladoRow>> ObtenerRegistroVentaDetalladoAsync(
+        RegistroVentaParametros p, CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene tipos de documento para el combo de filtro.
+    /// Legacy: cboCarga en Form_Load de frmRepRegistroVenta / vTipoDocumento
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposDocumentoAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene estados de documento para el combo de filtro.
+    /// Legacy: cboEstado en Form_Load de frmRepRegistroVenta / vEstadoDocumento
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerEstadosDocumentoAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene la lista de cajas activas para el combo de filtro.
+    /// Legacy: cboCaja en frmRepRegistroVenta / TCAJA where lActivo=1
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerCajasActivasAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene los tipos de pago activos para el combo de filtro.
+    /// Legacy: cboTipoPago en frmRepRegistroVenta / vTipoPago
+    /// </summary>
+    Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposPagoAsync(CancellationToken ct = default);
 }
 
 // ── Clases de parámetros para SPs complejos ───────────────────────────────────

@@ -1030,4 +1030,456 @@ internal sealed class ReporteRepository : IReporteRepository
 
     /// <summary>Devuelve el último día del mes usando reglas gregorianas completas. Legacy: Select Case CmbMes.</summary>
     private static int DiasEnMes(int ano, int mes) => DateTime.DaysInMonth(ano, mes);
+
+    // ── Liquidación de Cajero — BR-REP-021 ──────────────────────────────────────
+
+    /// <inheritdoc />
+    public async Task<LiquidacionOutput> ObtenerLiquidacionOutputAsync(
+        LiquidacionParametros p,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var spName = p.UsarVarianteNc ? "spRep_LiquidacionOutPut_NC" : "spRep_LiquidacionOutPut";
+        var dp = new DynamicParameters();
+        AgregarParametrosLiquidacionBase(dp, p);
+        dp.Add("@cortesia", p.IncluirCortesia ? 1 : 0);
+        dp.Add("@Ndolar", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@xDOlar", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nOtroDoc", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nNoCobrado", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nNeto", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nImpuesto1", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nImpuesto2", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nImpuesto3", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nVenta", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nDescuento", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nRecargo", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nCambio", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nAdulto", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nNino", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nAdulto2", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nNino2", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nAdulto3", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nNino3", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nAdulto4", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nNino4", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nAdulto5", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nNino5", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+        dp.Add("@nPagadosEnOtro", dbType: System.Data.DbType.Double, direction: System.Data.ParameterDirection.Output);
+
+        await conn.ExecuteAsync(new CommandDefinition(
+            spName, dp,
+            commandType: System.Data.CommandType.StoredProcedure,
+            commandTimeout: 600,
+            cancellationToken: ct));
+
+        return new LiquidacionOutput
+        {
+            Dolar = dp.Get<double>("@Ndolar"),
+            DolarCambio = dp.Get<double>("@xDOlar"),
+            OtroDoc = dp.Get<double>("@nOtroDoc"),
+            NoCobrado = dp.Get<double>("@nNoCobrado"),
+            Neto = dp.Get<double>("@nNeto"),
+            Impuesto1 = dp.Get<double>("@nImpuesto1"),
+            Impuesto2 = dp.Get<double>("@nImpuesto2"),
+            Impuesto3 = dp.Get<double>("@nImpuesto3"),
+            VentaTotal = dp.Get<double>("@nVenta"),
+            Descuento = dp.Get<double>("@nDescuento"),
+            Recargo = dp.Get<double>("@nRecargo"),
+            TipoCambio = dp.Get<double>("@nCambio"),
+            Adulto = dp.Get<double>("@nAdulto"),
+            Nino = dp.Get<double>("@nNino"),
+            Adulto2 = dp.Get<double>("@nAdulto2"),
+            Nino2 = dp.Get<double>("@nNino2"),
+            Adulto3 = dp.Get<double>("@nAdulto3"),
+            Nino3 = dp.Get<double>("@nNino3"),
+            Adulto4 = dp.Get<double>("@nAdulto4"),
+            Nino4 = dp.Get<double>("@nNino4"),
+            Adulto5 = dp.Get<double>("@nAdulto5"),
+            Nino5 = dp.Get<double>("@nNino5"),
+            PagadosEnOtroTurno = dp.Get<double>("@nPagadosEnOtro")
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<LiquidacionRow>> ObtenerLiquidacionDocumentosAsync(
+        LiquidacionParametros p,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var spName = p.UsarVarianteNc ? "spRep_Liquidacion_NC" : "spRep_Liquidacion";
+        var dp = BuildLiquidacionSpParams(p, "1");
+        var result = await conn.QueryAsync<LiquidacionRow>(new CommandDefinition(
+            spName, dp,
+            commandType: System.Data.CommandType.StoredProcedure,
+            commandTimeout: 600,
+            cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<LiquidacionSumaGrupoRow>> ObtenerLiquidacionSumasGrupoAsync(
+        LiquidacionParametros p,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var spName = p.UsarVarianteNc ? "spRep_Liquidacion_NC" : "spRep_Liquidacion";
+        var dp = BuildLiquidacionSpParams(p, "2");
+        var result = await conn.QueryAsync<LiquidacionSumaGrupoRow>(new CommandDefinition(
+            spName, dp,
+            commandType: System.Data.CommandType.StoredProcedure,
+            commandTimeout: 600,
+            cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<LiquidacionTarjetaRow>> ObtenerLiquidacionTarjetasAsync(
+        LiquidacionParametros p,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var spName = p.UsarVarianteNc ? "spRep_Liquidacion_NC" : "spRep_Liquidacion";
+        var dp = BuildLiquidacionSpParams(p, "3");
+        var result = await conn.QueryAsync<LiquidacionTarjetaRow>(new CommandDefinition(
+            spName, dp,
+            commandType: System.Data.CommandType.StoredProcedure,
+            commandTimeout: 600,
+            cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<LiquidacionTipoPedidoRow>> ObtenerLiquidacionTiposPedidoAsync(
+        LiquidacionParametros p,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var spName = p.UsarVarianteNc ? "spRep_LiquidacionSuma_NC" : "spRep_LiquidacionSuma";
+        var dp = new DynamicParameters();
+        dp.Add("@flagTurno", p.ModoFiltro != LiquidacionModoFiltro.PorTurno);
+        dp.Add("@flagDiaContable", p.PorDiaContable);
+        dp.Add("@sturno", p.Turno);
+        dp.Add("@sUsuario", p.Usuario);
+        dp.Add("@fInicio", p.FechaInicio);
+        dp.Add("@fFinal", p.FechaFin);
+        dp.Add("@sSectorVenta", p.SectorVenta);
+        var result = await conn.QueryAsync<LiquidacionTipoPedidoRow>(new CommandDefinition(
+            spName, dp,
+            commandType: System.Data.CommandType.StoredProcedure,
+            commandTimeout: 600,
+            cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<LiquidacionOtroTipoRow>> ObtenerLiquidacionOtrosTiposAsync(
+        LiquidacionParametros p,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var spName = p.UsarVarianteNc ? "spRep_Liquidacion_NC" : "spRep_Liquidacion";
+        var dp = BuildLiquidacionSpParams(p, "5");
+        var result = await conn.QueryAsync<LiquidacionOtroTipoRow>(new CommandDefinition(
+            spName, dp,
+            commandType: System.Data.CommandType.StoredProcedure,
+            commandTimeout: 600,
+            cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerUsuariosActivosAsync(CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT tCodigoUsuario AS Codigo, tResumido AS Descripcion
+            FROM TUSUARIO
+            WHERE lActivo = 1 AND tGrupoUsuario <> '00'
+            ORDER BY tResumido
+            """;
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerSectoresVentaAsync(CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT Codigo, Resumido AS Descripcion
+            FROM vSectorVenta
+            WHERE Activo = 1
+            ORDER BY Codigo
+            """;
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <summary>
+    /// Construye los parámetros para <c>spRep_Liquidacion</c> con el @flagTipo indicado.
+    /// Legacy: xparametros string construction en Sub Genera().
+    /// </summary>
+    private static DynamicParameters BuildLiquidacionSpParams(LiquidacionParametros p, string flagTipo)
+    {
+        var dp = new DynamicParameters();
+        dp.Add("@flagTipo", flagTipo);
+        dp.Add("@flagTurnoFecha", p.ModoFiltro != LiquidacionModoFiltro.PorTurno);
+        dp.Add("@flagDiaContable", p.PorDiaContable);
+        // chkGenerado = 1 (todos activados) equivale a MostrarTodos
+        bool g = p.MostrarTodos;
+        dp.Add("@flagDocGenerado", g);
+        dp.Add("@flagEfectivo", g);
+        dp.Add("@flagCheque", g);
+        dp.Add("@flagTarjetaCredito", g);
+        dp.Add("@flagPagosVarios", g);
+        dp.Add("@flagPunto", g);
+        dp.Add("@flagPagoCortesia", g);
+        dp.Add("@flagPorCobrar", g);
+        dp.Add("@flagReciboIngreso", g);
+        dp.Add("@flagReciboAnticipo", g);
+        dp.Add("@flagReciboEgreso", g);
+        dp.Add("@flagNoCortesia", g);
+        dp.Add("@flagCortesia", p.IncluirCortesia);
+        dp.Add("@flagCuentaCorriente", g);
+        dp.Add("@flagAnulado", g);
+        dp.Add("@flagPedidoOtroRango", g);
+        dp.Add("@sTurno", p.Turno);
+        dp.Add("@sUsuario", p.Usuario);
+        dp.Add("@sClub", string.Empty);
+        dp.Add("@fechaInicial", p.FechaInicio.Date);
+        dp.Add("@finicio", p.FechaInicio);
+        dp.Add("@ffinal", p.FechaFin);
+        dp.Add("@sSectorVenta", p.SectorVenta);
+        return dp;
+    }
+
+    /// <summary>
+    /// Agrega los parámetros base comunes a <c>spRep_LiquidacionOutPut</c>.
+    /// </summary>
+    private static void AgregarParametrosLiquidacionBase(DynamicParameters dp, LiquidacionParametros p)
+    {
+        dp.Add("@flagTurno", p.ModoFiltro != LiquidacionModoFiltro.PorTurno);
+        dp.Add("@flagDiaContable", p.PorDiaContable);
+        dp.Add("@sturno", p.Turno);
+        dp.Add("@sUsuario", p.Usuario);
+        dp.Add("@sSectorVenta", p.SectorVenta);
+        dp.Add("@finicio", p.FechaInicio);
+        dp.Add("@ffinal", p.FechaFin);
+        dp.Add("@xFecha", p.FechaInicio.Date);
+    }
+
+    // ── BR-REP-022 — Registro de Ventas ──────────────────────────────────────
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Invoca <c>spRep_RegVenta</c> con los flags apropiados según el tipo de reporte.
+    /// Legacy: Sub Genera() en frmRepRegistroVenta.frm
+    /// Tipos: EstadoDocumentos(1), AgrupadoPorFechas(2), CorrelativoDocumento(4), CorrelativoDetallado(6)
+    /// </remarks>
+    public async Task<IReadOnlyList<RegistroVentaRow>> ObtenerRegistroVentaAsync(
+        RegistroVentaParametros p, CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte RegistroVenta tipo={Tipo}: {FechaInicio} – {FechaFin}",
+            p.TipoReporte, p.FechaInicio, p.FechaFin);
+
+        var tipo = p.TipoReporte;
+        bool flagAnoMes = tipo == TipoReporteRegistroVenta.AgrupadoPorFechas;
+        bool flagCorrelativo = tipo == TipoReporteRegistroVenta.CorrelativoDocumento
+                            || tipo == TipoReporteRegistroVenta.CorrelativoDetallado;
+        bool flagEstado = tipo == TipoReporteRegistroVenta.EstadoDocumentos;
+        bool flagAgrupado = tipo == TipoReporteRegistroVenta.AgrupadoPorFechas;
+
+        // Construir sFecha/sFecha2 para modo AñoMes (equivalente a Select Case CmbMes en VB6)
+        (string sFecha, string sFecha2) = flagAnoMes
+            ? ConstruirFechaAnioMes(p.Ano, p.Mes, p.HoraCorte, p.DiaContable)
+            : (string.Empty, string.Empty);
+
+        var dp = new DynamicParameters();
+        dp.Add("@flagTipo", false);
+        dp.Add("@flagRegVenta", p.SoloRegistroVenta);
+        dp.Add("@flagCorrelativo", flagCorrelativo);
+        dp.Add("@flagEstado", flagEstado);
+        dp.Add("@flagAgrupado", flagAgrupado);
+        dp.Add("@flagRedondeo", p.Redondeo);
+        dp.Add("@tCliente", p.CodigoCliente);
+        dp.Add("@tTipoDoc", p.TipoDocumento);
+        dp.Add("@tEstadoDoc", p.EstadoDocumento);
+        dp.Add("@tCaja", p.Caja);
+        dp.Add("@sOrden", p.Orden);
+        dp.Add("@finicio", p.FechaInicio);
+        dp.Add("@ffinal", p.FechaFin);
+        dp.Add("@sAno", p.Ano.ToString());
+        dp.Add("@sMES", p.Mes.ToString("D2"));
+        dp.Add("@sFecha", sFecha);
+        dp.Add("@sFecha2", sFecha2);
+        dp.Add("@dHour", (double)p.HoraCorte);
+        dp.Add("@flagAnoMes", flagAnoMes);
+        dp.Add("@diaContable", p.DiaContable);
+        dp.Add("@tTipoPago", p.TipoPago);
+
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<RegistroVentaRow>(conn, "spRep_RegVenta", dp, cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Invoca <c>spRep_RegVentaSunat</c>.
+    /// Legacy: Sub Genera1() en frmRepRegistroVenta.frm
+    /// </remarks>
+    public async Task<IReadOnlyList<RegistroVentaSunatRow>> ObtenerRegistroVentaSunatAsync(
+        RegistroVentaParametros p, CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte RegistroVentaSunat: {FechaInicio} – {FechaFin}", p.FechaInicio, p.FechaFin);
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<RegistroVentaSunatRow>(
+            conn, "spRep_RegVentaSunat",
+            new
+            {
+                fInicio = p.FechaInicio,
+                fFinal = p.FechaFin,
+                tCliente = p.CodigoCliente,
+                tTipoDoc = p.TipoDocumento,
+                tEstadoDoc = p.EstadoDocumento,
+                tCaja = p.Caja,
+                sOrden = p.Orden,
+                flagRegVenta = p.SoloRegistroVenta,
+                flagRedondeo = p.Redondeo,
+                DiaContable = p.DiaContable,
+                ValorTransGratuita = p.TransferenciaGratuita
+            },
+            cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Invoca <c>spRep_RegVentaSunatAD</c>.
+    /// Legacy: Sub Genera2() en frmRepRegistroVenta.frm
+    /// </remarks>
+    public async Task<IReadOnlyList<RegistroVentaSunatAdRow>> ObtenerRegistroVentaSunatAdAsync(
+        RegistroVentaParametros p, CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte RegistroVentaSunatAD: {FechaInicio} – {FechaFin}", p.FechaInicio, p.FechaFin);
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<RegistroVentaSunatAdRow>(
+            conn, "spRep_RegVentaSunatAD",
+            new
+            {
+                fInicio = p.FechaInicio,
+                fFinal = p.FechaFin,
+                tCliente = p.CodigoCliente,
+                tTipoDoc = p.TipoDocumento,
+                tEstadoDoc = p.EstadoDocumento,
+                tCaja = p.Caja,
+                sOrden = p.Orden,
+                flagRegVenta = p.SoloRegistroVenta,
+                flagRedondeo = p.Redondeo,
+                DiaContable = p.DiaContable
+            },
+            cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Invoca <c>spRep_ComprobanteDetallado</c>.
+    /// Legacy: Sub Genera3() en frmRepRegistroVenta.frm
+    /// </remarks>
+    public async Task<IReadOnlyList<RegistroVentaDetalladoRow>> ObtenerRegistroVentaDetalladoAsync(
+        RegistroVentaParametros p, CancellationToken ct = default)
+    {
+        _logger.LogInformation("Reporte RegistroVentaDetallado: {FechaInicio} – {FechaFin}", p.FechaInicio, p.FechaFin);
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await _spExecutor.QueryAsync<RegistroVentaDetalladoRow>(
+            conn, "spRep_ComprobanteDetallado",
+            new
+            {
+                fInicio = p.FechaInicio,
+                fFinal = p.FechaFin,
+                tCliente = p.CodigoCliente,
+                tTipoDoc = p.TipoDocumento,
+                tEstadoDoc = p.EstadoDocumento,
+                tCaja = p.Caja,
+                flagRegVenta = p.SoloRegistroVenta,
+                DiaContable = p.DiaContable
+            },
+            cancellationToken: ct);
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposDocumentoAsync(CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT Codigo AS Codigo, Descripcion AS Descripcion
+            FROM vTipoDocumento
+            ORDER BY Descripcion
+            """;
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerEstadosDocumentoAsync(CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT Codigo AS Codigo, Descripcion AS Descripcion
+            FROM vEstadoDocumento
+            ORDER BY Descripcion
+            """;
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerCajasActivasAsync(CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT tCaja AS Codigo, tDescripcion AS Descripcion
+            FROM TCAJA
+            WHERE lActivo = 1
+            ORDER BY tDescripcion
+            """;
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ReporteFiltroOpcion>> ObtenerTiposPagoAsync(CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT Codigo AS Codigo, UPPER(Descripcion) AS Descripcion
+            FROM vTipoPago
+            ORDER BY Descripcion
+            """;
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        var result = await conn.QueryAsync<ReporteFiltroOpcion>(new CommandDefinition(sql, cancellationToken: ct));
+        return result.ToList().AsReadOnly();
+    }
+
+    /// <summary>
+    /// Construye los strings @sFecha/@sFecha2 para <c>spRep_RegVenta</c> en modo Año/Mes.
+    /// Equivalente al Select Case CmbMes en Sub Genera() de frmRepRegistroVenta.frm.
+    /// Legacy: BR-REP-022 — filtro por mes completo con hora de corte.
+    /// </summary>
+    private static (string sFecha, string sFecha2) ConstruirFechaAnioMes(
+        int ano, int mes, int horaCorte, bool diaContable)
+    {
+        int lastDay = DateTime.DaysInMonth(ano, mes);
+        string sMes = mes.ToString("D2");
+        string sAno = ano.ToString();
+        string campo = diaContable ? "dbo.MDOCUMENTO.fDiaContable" : "dbo.MDOCUMENTO.fRegistro";
+        string campo2 = diaContable ? "dbo.MNOTACREDITO.fDiaContable" : "dbo.MNOTACREDITO.FFECHA";
+
+        string sFecha = $"{campo} >= DATEADD(HH,{horaCorte}, '{sAno}/{sMes}/01') " +
+                        $"and {campo} <= DATEADD(HH,{24 + horaCorte}, '{sAno}/{sMes}/{lastDay}')";
+        string sFecha2 = $"{campo2} >= DATEADD(HH,{horaCorte}, '{sAno}/{sMes}/01') " +
+                         $"and {campo2} <= DATEADD(HH,{24 + horaCorte}, '{sAno}/{sMes}/{lastDay}')";
+        return (sFecha, sFecha2);
+    }
 }

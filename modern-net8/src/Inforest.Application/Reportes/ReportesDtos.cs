@@ -633,3 +633,401 @@ public sealed class SubGrupoItem
     public string Descripcion { get; init; } = string.Empty;
     public string Grupo { get; init; } = string.Empty;
 }
+
+// ============================================================
+// Liquidación de Cajero — frmRepLiquidacion.frm
+// Legacy: spRep_LiquidacionOutPut, spRep_Liquidacion, spRep_LiquidacionSuma
+// Regla: BR-REP-021
+// ============================================================
+
+/// <summary>
+/// Modo de filtro temporal: por turno específico o por rango de fechas.
+/// Legacy: ChkTurno.Value — 0=Turno, 1=FechaRango
+/// </summary>
+public enum LiquidacionModoFiltro { PorTurno = 0, PorFecha = 1 }
+
+/// <summary>
+/// Parámetros de filtro para el reporte Liquidación de Cajero.
+/// Legacy: <c>frmRepLiquidacion.frm</c>
+/// Regla: BR-REP-021
+/// </summary>
+public sealed class LiquidacionParametros
+{
+    /// <summary>Modo de filtro temporal (Turno o Rango de Fechas). Legacy: ChkTurno.</summary>
+    public LiquidacionModoFiltro ModoFiltro { get; init; } = LiquidacionModoFiltro.PorFecha;
+    /// <summary>Código de turno. Requerido cuando ModoFiltro = PorTurno. Legacy: sTurno.</summary>
+    public string Turno { get; init; } = string.Empty;
+    /// <summary>Fecha/hora inicio. Legacy: dtpFecIni + dtpHorIni.</summary>
+    public DateTime FechaInicio { get; init; }
+    /// <summary>Fecha/hora fin. Legacy: dtpFecFin + dtpHorFin.</summary>
+    public DateTime FechaFin { get; init; }
+    /// <summary>Si true, filtra por día contable (solo fecha, sin hora). Legacy: chkDiaContable.</summary>
+    public bool PorDiaContable { get; init; }
+    /// <summary>Código de usuario. Vacío = todos. Legacy: cboUsuario (chkUsuario).</summary>
+    public string Usuario { get; init; } = string.Empty;
+    /// <summary>Código de sector de venta. Vacío = todos. Legacy: cboSectorVenta (chkSectorVenta).</summary>
+    public string SectorVenta { get; init; } = string.Empty;
+    /// <summary>Si true, incluye cortesías en el cálculo. Legacy: chkCortesia.</summary>
+    public bool IncluirCortesia { get; init; }
+    /// <summary>Si true, muestra todos los tipos de documentos/pagos (chkGenerado = 1). Legacy: chkGenerado.</summary>
+    public bool MostrarTodos { get; init; } = true;
+    /// <summary>Si true, usa SPs variante _NC (nota crédito Ofisis). Legacy: lNcOfisis.</summary>
+    public bool UsarVarianteNc { get; init; }
+}
+
+/// <summary>
+/// Totales escalares devueltos por <c>spRep_LiquidacionOutPut</c> (parámetros OUTPUT).
+/// Legacy: nDolar, nNeto, nImpuesto1..3, nVenta, nDescuento, nRecargo, nCambio, nAdulto..5, nNino..5
+/// </summary>
+public sealed class LiquidacionOutput
+{
+    public double Dolar { get; init; }
+    public double DolarCambio { get; init; }
+    public double OtroDoc { get; init; }
+    public double NoCobrado { get; init; }
+    public double Neto { get; init; }
+    public double Impuesto1 { get; init; }
+    public double Impuesto2 { get; init; }
+    public double Impuesto3 { get; init; }
+    public double VentaTotal { get; init; }
+    public double Descuento { get; init; }
+    public double Recargo { get; init; }
+    public double TipoCambio { get; init; }
+    public double Adulto { get; init; }
+    public double Nino { get; init; }
+    public double Adulto2 { get; init; }
+    public double Nino2 { get; init; }
+    public double Adulto3 { get; init; }
+    public double Nino3 { get; init; }
+    public double Adulto4 { get; init; }
+    public double Nino4 { get; init; }
+    public double Adulto5 { get; init; }
+    public double Nino5 { get; init; }
+    public double PagadosEnOtroTurno { get; init; }
+}
+
+/// <summary>
+/// Fila del dataset principal retornado por <c>spRep_Liquidacion</c> @flagTipo='1' (documentos).
+/// Campos: tGrupo, Grupo, tSubGrupo, SubGrupo, tDocumento, tUsuario, fFecha, fPago,
+///         nTC, nVenta, nVenta1, nVenta2, tObservacion, tTipoDocumento, tInicio, tFinal,
+///         tEmitido, tAnulado, total00, total14, totalNF, nVentaME2, nVentaME3, nVuelto
+/// Legacy: dsrLiquidacion dataset
+/// </summary>
+public sealed class LiquidacionRow
+{
+    public string TGrupo { get; init; } = string.Empty;
+    public string Grupo { get; init; } = string.Empty;
+    public string TSubGrupo { get; init; } = string.Empty;
+    public string SubGrupo { get; init; } = string.Empty;
+    public string TDocumento { get; init; } = string.Empty;
+    public string TUsuario { get; init; } = string.Empty;
+    public string FFecha { get; init; } = string.Empty;
+    public string FPago { get; init; } = string.Empty;
+    public double NTC { get; init; }
+    public double NVenta { get; init; }
+    public double NVenta1 { get; init; }
+    public double NVenta2 { get; init; }
+    public string TObservacion { get; init; } = string.Empty;
+    public string TTipoDocumento { get; init; } = string.Empty;
+    public string TInicio { get; init; } = string.Empty;
+    public string TFinal { get; init; } = string.Empty;
+    public string TEmitido { get; init; } = string.Empty;
+    public string TAnulado { get; init; } = string.Empty;
+    public double Total00 { get; init; }
+    public double Total14 { get; init; }
+    public double TotalNF { get; init; }
+    public double NVentaME2 { get; init; }
+    public double NVentaME3 { get; init; }
+    public double NVuelto { get; init; }
+}
+
+/// <summary>
+/// Fila de sumas por grupo de pago retornada por <c>spRep_Liquidacion</c> @flagTipo='2'.
+/// Campos: tGrupo, nVenta1 (MN), nVenta2 (ME), nVenta3 (ME equivalente MN)
+/// Legacy: RsSumas filtros tGrupo 01=Efectivo, 03=Cheque, 04=Otro, 05=Puntos, 06=Cortesía, 07=CtaCobrar, 08=Ingreso, 09=IngresoAnticipo, 10=Egreso, 20=NotaCredito
+/// </summary>
+public sealed class LiquidacionSumaGrupoRow
+{
+    public string TGrupo { get; init; } = string.Empty;
+    public double NVenta1 { get; init; }
+    public double NVenta2 { get; init; }
+    public double NVenta3 { get; init; }
+}
+
+/// <summary>
+/// Fila de tarjeta de crédito retornada por <c>spRep_Liquidacion</c> @flagTipo='3'.
+/// Campos: tSubGrupo (01-24), nVenta1 (importe tarjeta), nVenta2 (propina)
+/// Legacy: RsSumas iteración i=1..24 tSubGrupo
+/// </summary>
+public sealed class LiquidacionTarjetaRow
+{
+    public string TSubGrupo { get; init; } = string.Empty;
+    public double NVenta1 { get; init; }
+    public double NVenta2 { get; init; }
+}
+
+/// <summary>
+/// Fila por tipo de pedido retornada por <c>spRep_LiquidacionSuma</c>.
+/// Campos: ttipopedido, nNeto, nImpuesto1, nImpuesto2, nImpuesto3, nVenta, nTotalPromedio, total00
+/// Legacy: RsSumas filtros ttipopedido 01=Salón, 02=Delivery, 03=Llevar, 04=Canal4, 05=Canal5, XX=Fiscal
+/// </summary>
+public sealed class LiquidacionTipoPedidoRow
+{
+    public string TTipoPedido { get; init; } = string.Empty;
+    public double NNeto { get; init; }
+    public double NImpuesto1 { get; init; }
+    public double NImpuesto2 { get; init; }
+    public double NImpuesto3 { get; init; }
+    public double NVenta { get; init; }
+    public double NTotalPromedio { get; init; }
+    public double Total00 { get; init; }
+}
+
+/// <summary>
+/// Fila de otros tipos de cancelación retornada por <c>spRep_Liquidacion</c> @flagTipo='5'.
+/// Campos: CODIGO, Descripcion, nVenta1, nVenta2, nVenta3 (MN/ME/MEenMN)
+/// Legacy: RsSumas + vTipoCancelacion iteración i=1..20
+/// </summary>
+public sealed class LiquidacionOtroTipoRow
+{
+    public string Codigo { get; init; } = string.Empty;
+    public string Descripcion { get; init; } = string.Empty;
+    public double NVenta1 { get; init; }
+    public double NVenta2 { get; init; }
+    public double NVenta3 { get; init; }
+}
+
+/// <summary>
+/// Filas de la vista <c>vIngreso</c> por tarjeta para recibos de ingreso/tarjeta.
+/// Legacy: RsTarjetas — select tTarjeta, sum(nMonto) nVenta1 From vIngreso where ... group by tTarjeta
+/// </summary>
+public sealed class LiquidacionIngresoTarjetaRow
+{
+    public string TarjetaCodigo { get; init; } = string.Empty;
+    public double Monto { get; init; }
+}
+
+/// <summary>
+/// Resultado completo del reporte Liquidación de Cajero.
+/// Agrega todos los conjuntos de datos necesarios para renderizar el reporte.
+/// Legacy: dsrLiquidacion / dsrLiquidacionVenta
+/// Regla: BR-REP-021
+/// </summary>
+public sealed class LiquidacionResultado
+{
+    /// <summary>Filas de documentos (spRep_Liquidacion tipo 1).</summary>
+    public IReadOnlyList<LiquidacionRow> Documentos { get; init; } = Array.Empty<LiquidacionRow>();
+    /// <summary>Sumas por grupo de pago (spRep_Liquidacion tipo 2).</summary>
+    public IReadOnlyList<LiquidacionSumaGrupoRow> SumasGrupo { get; init; } = Array.Empty<LiquidacionSumaGrupoRow>();
+    /// <summary>Sumas por tarjeta de crédito (spRep_Liquidacion tipo 3).</summary>
+    public IReadOnlyList<LiquidacionTarjetaRow> Tarjetas { get; init; } = Array.Empty<LiquidacionTarjetaRow>();
+    /// <summary>Sumas por tipo de pedido (spRep_LiquidacionSuma).</summary>
+    public IReadOnlyList<LiquidacionTipoPedidoRow> TiposPedido { get; init; } = Array.Empty<LiquidacionTipoPedidoRow>();
+    /// <summary>Otros tipos de cancelación (spRep_Liquidacion tipo 5).</summary>
+    public IReadOnlyList<LiquidacionOtroTipoRow> OtrosTipos { get; init; } = Array.Empty<LiquidacionOtroTipoRow>();
+    /// <summary>Totales escalares del SP OUTPUT.</summary>
+    public LiquidacionOutput Output { get; init; } = new();
+    /// <summary>Título descriptivo del reporte (turno/fechas/usuario).</summary>
+    public string Titulo { get; init; } = string.Empty;
+}
+
+// ── BR-REP-022 — Registro de Ventas (frmRepRegistroVenta) ─────────────────────
+
+/// <summary>
+/// Tipos de reporte del formulario Registro de Ventas.
+/// Cada tipo selecciona un SP diferente o un conjunto de flags distintos en spRep_RegVenta.
+/// Legacy: <c>optOpcion(0..7)</c> en <c>frmRepRegistroVenta.frm</c>
+/// </summary>
+public enum TipoReporteRegistroVenta
+{
+    /// <summary>Correlativo SUNAT — usa <c>spRep_RegVentaSunat</c>.</summary>
+    CorrelativoSunat = 0,
+    /// <summary>Estado de Documentos — usa <c>spRep_RegVenta</c> con flagEstado=1.</summary>
+    EstadoDocumentos = 1,
+    /// <summary>Agrupado por Fechas — usa <c>spRep_RegVenta</c> con flagAnoMes=1.</summary>
+    AgrupadoPorFechas = 2,
+    /// <summary>Agrupado por Tipo Documento (SUNAT AD) — usa <c>spRep_RegVentaSunatAD</c>.</summary>
+    AgrupadoPorTipoDocumento = 3,
+    /// <summary>Correlativo de Documento — usa <c>spRep_RegVenta</c> con flagCorrelativo=1.</summary>
+    CorrelativoDocumento = 4,
+    /// <summary>Detallado por Comprobante — usa <c>spRep_ComprobanteDetallado</c>.</summary>
+    DetalladoPorComprobante = 5,
+    /// <summary>Correlativo Detallado — usa <c>spRep_RegVenta</c> flagCorrelativo=1 (variante detallada).</summary>
+    CorrelativoDetallado = 6,
+    /// <summary>Correlativo con Forma de Pago — usa <c>spRep_RegVentaSunat_formaPago</c> (GAP: SP no encontrado en SQL).</summary>
+    CorrelativoConFormaPago = 7
+}
+
+/// <summary>
+/// Parámetros comunes para todos los reportes de Registro de Ventas.
+/// Legacy: controles de <c>frmRepRegistroVenta.frm</c>
+/// Regla: BR-REP-022
+/// </summary>
+public sealed class RegistroVentaParametros
+{
+    /// <summary>Tipo de reporte seleccionado. Controla qué SP se invoca.</summary>
+    public TipoReporteRegistroVenta TipoReporte { get; init; } = TipoReporteRegistroVenta.CorrelativoSunat;
+    /// <summary>Código de cliente; vacío = todos. Legacy: sCliente.</summary>
+    public string CodigoCliente { get; init; } = string.Empty;
+    /// <summary>Código de tipo de documento; vacío = todos. Legacy: CboTipoDocumento.BoundText.</summary>
+    public string TipoDocumento { get; init; } = string.Empty;
+    /// <summary>Código de estado de documento; vacío = todos. Legacy: cboEstado.BoundText.</summary>
+    public string EstadoDocumento { get; init; } = string.Empty;
+    /// <summary>Código de caja; vacío = todas. Legacy: cboCaja.BoundText.</summary>
+    public string Caja { get; init; } = string.Empty;
+    /// <summary>Código de tipo de pago; vacío = todos. Legacy: cboTipoPago.BoundText.</summary>
+    public string TipoPago { get; init; } = string.Empty;
+    /// <summary>Orden de resultados: Correlativo / Montos / Fechas. Legacy: cboOrden.Text.</summary>
+    public string Orden { get; init; } = "Correlativo";
+    /// <summary>Fecha/hora de inicio. Legacy: dtpFecIni + dtpHorIni.</summary>
+    public DateTime FechaInicio { get; init; } = DateTime.Today;
+    /// <summary>Fecha/hora de fin. Legacy: dtpFecFin + dtpHorFin.</summary>
+    public DateTime FechaFin { get; init; } = DateTime.Today.AddDays(1).AddSeconds(-1);
+    /// <summary>true = evaluar por día contable; false = por fecha/hora. Legacy: chkDiaContable.</summary>
+    public bool DiaContable { get; init; }
+    /// <summary>true = mostrar solo documentos en Registro de Ventas. Legacy: chkRegistroVenta.</summary>
+    public bool SoloRegistroVenta { get; init; } = true;
+    /// <summary>true = redondear a 2 decimales; false = 10. Legacy: cboRedondeo == "DOS DECIMALES".</summary>
+    public bool Redondeo { get; init; }
+    /// <summary>true = valorizar transferencia gratuita. Legacy: chkTransferenciaG (solo tipo 0).</summary>
+    public bool TransferenciaGratuita { get; init; }
+    // Campos para modo Año/Mes (type 2 / flagAnoMes)
+    /// <summary>Año para modo Año/Mes. Legacy: dtpAnual.</summary>
+    public int Ano { get; init; } = DateTime.Today.Year;
+    /// <summary>Mes (1-12) para modo Año/Mes. Legacy: CmbMes.</summary>
+    public int Mes { get; init; } = DateTime.Today.Month;
+    /// <summary>Hora de corte para modo Año/Mes. Legacy: dtpHora.</summary>
+    public int HoraCorte { get; init; }
+}
+
+/// <summary>
+/// Fila de resultado para <c>spRep_RegVenta</c> (tipos EstadoDocumentos, AgrupadoPorFechas,
+/// CorrelativoDocumento, CorrelativoDetallado).
+/// Legacy: tabla temporal #DBTRANS columnas finales de <c>spRep_RegVenta</c>
+/// </summary>
+public sealed class RegistroVentaRow
+{
+    public DateTime FRegistro { get; init; }
+    public string TDocumento { get; init; } = string.Empty;
+    public string TCodigoCliente { get; init; } = string.Empty;
+    public double NNeto { get; init; }
+    public double NImpuesto1 { get; init; }
+    public double NImpuesto2 { get; init; }
+    public double NImpuesto3 { get; init; }
+    public double NVenta { get; init; }
+    public double NRecargo { get; init; }
+    public double NDescuento { get; init; }
+    public string TEstadoDocumento { get; init; } = string.Empty;
+    public string TTipoDocumento { get; init; } = string.Empty;
+    public string TipoPago { get; init; } = string.Empty;
+    public string TTemporal { get; init; } = string.Empty;
+    public double NNetoSuma { get; init; }
+    public double NImpuestoSuma1 { get; init; }
+    public double NImpuestoSuma2 { get; init; }
+    public double NImpuestoSuma3 { get; init; }
+    public double NVentaSuma { get; init; }
+    public double NRecargoSuma { get; init; }
+    public double NDescuentoSuma { get; init; }
+}
+
+/// <summary>
+/// Fila de resultado para <c>spRep_RegVentaSunat</c> (tipo CorrelativoSunat).
+/// Contiene los campos del registro SUNAT: voucher, serie, número, RUC, importes, IGV, etc.
+/// Legacy: tabla temporal #DBTRANS de <c>spRep_RegVentaSunat</c>
+/// </summary>
+public sealed class RegistroVentaSunatRow
+{
+    public string Voucher { get; init; } = string.Empty;
+    public DateTime FEmision { get; init; }
+    public DateTime FVencim { get; init; }
+    public string TDoc { get; init; } = string.Empty;
+    public string Serie { get; init; } = string.Empty;
+    public string Numero { get; init; } = string.Empty;
+    public string Doc { get; init; } = string.Empty;
+    public string NumeroR { get; init; } = string.Empty;
+    public string RazonSocial { get; init; } = string.Empty;
+    public double ValorFact { get; init; }
+    public double Descuento { get; init; }
+    public double Recargo { get; init; }
+    public double BaseImOpGra { get; init; }
+    public double Exonerada { get; init; }
+    public double Inafecta { get; init; }
+    public double IGV { get; init; }
+    public double OtrosTrib { get; init; }
+    public double ImporteT { get; init; }
+    public double TipoCambio { get; init; }
+    public string Fecha { get; init; } = string.Empty;
+    public string TD { get; init; } = string.Empty;
+    public string SerieN { get; init; } = string.Empty;
+    public string NumeroN { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Fila de resultado para <c>spRep_RegVentaSunatAD</c> (tipo AgrupadoPorTipoDocumento).
+/// Variante del SUNAT con campos serie1/serie2 (Numero1/Numero2).
+/// Legacy: tabla temporal #DBTRANS de <c>spRep_RegVentaSunatAD</c>
+/// </summary>
+public sealed class RegistroVentaSunatAdRow
+{
+    public string Voucher { get; init; } = string.Empty;
+    public string FEmision { get; init; } = string.Empty;
+    public string FVencim { get; init; } = string.Empty;
+    public string TDoc { get; init; } = string.Empty;
+    public string Serie { get; init; } = string.Empty;
+    public string Numero1 { get; init; } = string.Empty;
+    public string Numero2 { get; init; } = string.Empty;
+    public string Doc { get; init; } = string.Empty;
+    public string RazonSocial { get; init; } = string.Empty;
+    public double ValorFact { get; init; }
+    public double Descuento { get; init; }
+    public double Recargo { get; init; }
+    public double BaseImOpGra { get; init; }
+    public double Exonerada { get; init; }
+    public double Inafecta { get; init; }
+    public double IGV { get; init; }
+    public double OtrosTrib { get; init; }
+    public double ImporteT { get; init; }
+    public double TipoCambio { get; init; }
+    public string TD { get; init; } = string.Empty;
+    public string SerieN { get; init; } = string.Empty;
+    public string NumeroN { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Fila de resultado para <c>spRep_ComprobanteDetallado</c> (tipo DetalladoPorComprobante).
+/// Legacy: tabla temporal #DBTRANS de <c>spRep_ComprobanteDetallado</c>
+/// </summary>
+public sealed class RegistroVentaDetalladoRow
+{
+    public string NumeroInterno { get; init; } = string.Empty;
+    public string CodigoDocumento { get; init; } = string.Empty;
+    public string TipoDocumento { get; init; } = string.Empty;
+    public string NumeroDocumento { get; init; } = string.Empty;
+    public string Cliente { get; init; } = string.Empty;
+    public string RazonSocial { get; init; } = string.Empty;
+    public string CodigoProducto { get; init; } = string.Empty;
+    public string Descripcion { get; init; } = string.Empty;
+    public double Cantidad { get; init; }
+    public double PrecioUnitario { get; init; }
+    public double PrecioTotal { get; init; }
+    public double IGV { get; init; }
+    public double Importe { get; init; }
+    public string FRegistro { get; init; } = string.Empty;
+    public string Estado { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Resultado consolidado del reporte Registro de Ventas.
+/// Sólo una de las colecciones tendrá datos según el <see cref="TipoReporte"/>.
+/// </summary>
+public sealed class RegistroVentaResultado
+{
+    public TipoReporteRegistroVenta TipoReporte { get; init; }
+    public IReadOnlyList<RegistroVentaRow> Filas { get; init; } = Array.Empty<RegistroVentaRow>();
+    public IReadOnlyList<RegistroVentaSunatRow> FilasSunat { get; init; } = Array.Empty<RegistroVentaSunatRow>();
+    public IReadOnlyList<RegistroVentaSunatAdRow> FilasSunatAd { get; init; } = Array.Empty<RegistroVentaSunatAdRow>();
+    public IReadOnlyList<RegistroVentaDetalladoRow> FilasDetallado { get; init; } = Array.Empty<RegistroVentaDetalladoRow>();
+    public string NombrePlantilla { get; init; } = string.Empty;
+    public string TituloReporte { get; init; } = string.Empty;
+    public int TotalFilas { get; init; }
+}

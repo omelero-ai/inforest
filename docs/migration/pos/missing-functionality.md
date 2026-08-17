@@ -5,8 +5,8 @@
 | Métrica | Valor |
 |---|---:|
 | Formularios legacy POS (`InfoRest.vbp`) | 120 |
-| Formularios con referencia explícita en .NET | 14 |
-| Formularios sin referencia explícita en .NET | 106 |
+| Formularios con referencia explícita en .NET | 16 |
+| Formularios sin referencia explícita en .NET | 104 |
 | Módulos BAS legacy POS | 18 |
 | Módulos BAS mencionados en .NET | 10 |
 | Clases legacy POS | 10 |
@@ -24,7 +24,6 @@ frmBusquedaRapida.frm
 frmBusquedaRapidaInvitado.frm
 frmBusquedaSocio.frm
 frmBusquedaValeConsumo.frm
-frmCambiarContrasenia.frm
 frmCambio.frm
 frmCambioPropina.frm
 frmCargo.frm
@@ -85,7 +84,6 @@ frmNuevoInvitado.frm
 frmNumPad.frm
 frmPagoMasivo.frm
 frmPagoRapido.frm
-frmPassword.frm
 frmPedidoAnterior.frm
 frmPedidoCorrelativo.frm
 frmPedidoDeliveryNo.frm
@@ -93,7 +91,6 @@ frmPedidoDetalle.frm
 frmPedidosVerPagos.frm
 frmPrecios.frm
 frmPreciosDetalle.frm
-frmPrecuentaImpresora.frm
 frmPrePago.frm
 frmPrograma.frm
 FrmRecargarTarjeta.frm
@@ -106,7 +103,6 @@ frmReserva.frm
 frmReservaDetalle.frm
 FrmSeleccionProductos.frm
 frmServidorEnlace.frm
-frmSolicitudBoleta.frm
 FrmTarjetaAproximidad.frm
 FrmTarjetaAproximidadDetalle.frm
 frmUpdateDatosPedido.frm
@@ -128,8 +124,7 @@ frmWinSock.frm
 
 ## UNKNOWN_BEHAVIOR registrados
 
-- `frmSolicitudBoleta.frm`: flujo funcional exacto pendiente de lectura completa de eventos.
 - `frmMarca.frm`: reglas de marcación no totalmente determinadas.
 - `frmNoticias.frm` + `FrmActualizacion.frm`: criterio de actualización/versionado en operación real pendiente.
-- Flujos RFID (`FrmTarjetaAproximidad*`, `FrmRecargarTarjeta*`): reglas operativas de negocio incompletas.
+- Flujos RFID: `FrmTarjetaAproximidad.frm` + `FrmTarjetaAproximidadDetalle.frm` ya migrados a `FrmTarjetaProximidad`; siguen pendientes `FrmRecargarTarjeta.frm`, `FrmRecargarTarjetaDetalle.frm` y su emisión de anticipo/documento.
 - Integración hotelera (`INFHOTEL.INI`): reglas cross-sistema no cerradas para POS 100%.

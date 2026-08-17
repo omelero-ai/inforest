@@ -702,3 +702,203 @@ public sealed class ObtenerReporteVentaFechaHandler
         };
     }
 }
+
+// ============================================================
+// Liquidación de Cajero — frmRepLiquidacion.frm
+// Legacy: spRep_LiquidacionOutPut, spRep_Liquidacion (tipos 1-5), spRep_LiquidacionSuma
+// Regla: BR-REP-021
+// ============================================================
+
+/// <summary>
+/// Query para el reporte Liquidación de Cajero.
+/// Legacy: <c>frmRepLiquidacion.frm</c>, cmdOpcion_Click → Sub Genera()
+/// Regla: BR-REP-021
+/// SQL: <c>spRep_LiquidacionOutPut</c>, <c>spRep_Liquidacion</c>, <c>spRep_LiquidacionSuma</c>
+/// </summary>
+public sealed record ObtenerReporteLiquidacionQuery(LiquidacionParametros Parametros);
+
+/// <summary>Handler para <see cref="ObtenerReporteLiquidacionQuery"/>.</summary>
+public sealed class ObtenerReporteLiquidacionHandler
+{
+    private readonly IReporteRepository _repo;
+    public ObtenerReporteLiquidacionHandler(IReporteRepository repo) => _repo = repo;
+
+    /// <summary>
+    /// Ejecuta todos los SPs del Legacy necesarios para el reporte de Liquidación de Cajero
+    /// y devuelve el resultado consolidado.
+    /// Legacy: Sub Genera() + Sub Genera2() — spRep_LiquidacionOutPut tipos 1-5 + spRep_LiquidacionSuma
+    /// Regla: BR-REP-021
+    /// </summary>
+    public async Task<LiquidacionResultado> HandleAsync(
+        ObtenerReporteLiquidacionQuery q,
+        CancellationToken ct = default)
+    {
+        var p = q.Parametros;
+
+        // Ejecutar todos los SPs en paralelo para mejorar rendimiento
+        var outputTask = _repo.ObtenerLiquidacionOutputAsync(p, ct);
+        var documentosTask = _repo.ObtenerLiquidacionDocumentosAsync(p, ct);
+        var sumasTask = _repo.ObtenerLiquidacionSumasGrupoAsync(p, ct);
+        var tarjetasTask = _repo.ObtenerLiquidacionTarjetasAsync(p, ct);
+        var tiposPedidoTask = _repo.ObtenerLiquidacionTiposPedidoAsync(p, ct);
+        var otrosTiposTask = _repo.ObtenerLiquidacionOtrosTiposAsync(p, ct);
+
+        await Task.WhenAll(outputTask, documentosTask, sumasTask, tarjetasTask, tiposPedidoTask, otrosTiposTask);
+
+        // Construir título igual que Legacy (sTitulo en Sub cmdOpcion_Click)
+        var titulo = ConstruirTitulo(p);
+
+        return new LiquidacionResultado
+        {
+            Output = await outputTask,
+            Documentos = await documentosTask,
+            SumasGrupo = await sumasTask,
+            Tarjetas = await tarjetasTask,
+            TiposPedido = await tiposPedidoTask,
+            OtrosTipos = await otrosTiposTask,
+            Titulo = titulo
+        };
+    }
+
+    /// <summary>
+    /// Construye el título descriptivo del reporte equivalente al string sTitulo del Legacy.
+    /// Legacy: cmdOpcion_Click — sTitulo = "Turno : " & ... & " Del " & ... & " Al " & ...
+    /// </summary>
+    private static string ConstruirTitulo(LiquidacionParametros p)
+    {
+        string rango;
+        if (p.ModoFiltro == LiquidacionModoFiltro.PorTurno)
+        {
+            rango = $"Turno : {p.Turno}";
+        }
+        else if (p.PorDiaContable)
+        {
+            rango = $"Por Dia Contable, Todos los Turnos del {p.FechaInicio:dd/MM/yyyy} Al {p.FechaFin:dd/MM/yyyy}";
+        }
+        else
+        {
+            rango = $"Turno : Todos los Turnos Del {p.FechaInicio:dd/MM/yyyy} {p.FechaInicio:HH:mm} Hrs Al {p.FechaFin:dd/MM/yyyy} {p.FechaFin:HH:mm} Hrs";
+        }
+
+        var usuario = string.IsNullOrEmpty(p.Usuario)
+            ? "Usuario : Todos los Usuarios"
+            : $"Usuario : {p.Usuario}";
+
+        return $"{rango}\n{usuario}";
+    }
+}
+
+// ── BR-REP-022 — Registro de Ventas ──────────────────────────────────────────
+
+/// <summary>Query para el reporte Registro de Ventas. Regla: BR-REP-022</summary>
+public sealed record ObtenerReporteRegistroVentaQuery(RegistroVentaParametros Parametros);
+
+/// <summary>
+/// Maneja el reporte "Registro de Ventas" (<c>frmRepRegistroVenta.frm</c>).
+/// Enruta al SP correcto según el <see cref="TipoReporteRegistroVenta"/>:
+/// <list type="bullet">
+///   <item>CorrelativoSunat (0) → <c>spRep_RegVentaSunat</c></item>
+///   <item>EstadoDocumentos (1), AgrupadoPorFechas (2), CorrelativoDocumento (4), CorrelativoDetallado (6) → <c>spRep_RegVenta</c></item>
+///   <item>AgrupadoPorTipoDocumento (3) → <c>spRep_RegVentaSunatAD</c></item>
+///   <item>DetalladoPorComprobante (5) → <c>spRep_ComprobanteDetallado</c></item>
+///   <item>CorrelativoConFormaPago (7) → GAP: <c>spRep_RegVentaSunat_formaPago</c> no encontrado en SQL Legacy</item>
+/// </list>
+/// Legacy: cmdOpcion_Click + Sub Genera/Genera1/Genera2/Genera3/Genera4 en <c>frmRepRegistroVenta.frm</c>
+/// SQL: spRep_RegVenta, spRep_RegVentaSunat, spRep_RegVentaSunatAD, spRep_ComprobanteDetallado
+/// Regla: BR-REP-022
+/// </summary>
+public sealed class ObtenerReporteRegistroVentaHandler
+{
+    private readonly IReporteRepository _repo;
+
+    public ObtenerReporteRegistroVentaHandler(IReporteRepository repo) => _repo = repo;
+
+    public async Task<RegistroVentaResultado> HandleAsync(
+        ObtenerReporteRegistroVentaQuery q,
+        CancellationToken ct = default)
+    {
+        var p = q.Parametros;
+        var titulo = ConstruirTitulo(p);
+
+        switch (p.TipoReporte)
+        {
+            case TipoReporteRegistroVenta.CorrelativoSunat:
+            {
+                var filas = await _repo.ObtenerRegistroVentaSunatAsync(p, ct);
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    FilasSunat = filas,
+                    TotalFilas = filas.Count,
+                    NombrePlantilla = "RepRegistroVentaSunat.frx",
+                    TituloReporte = titulo
+                };
+            }
+
+            case TipoReporteRegistroVenta.AgrupadoPorTipoDocumento:
+            {
+                var filas = await _repo.ObtenerRegistroVentaSunatAdAsync(p, ct);
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    FilasSunatAd = filas,
+                    TotalFilas = filas.Count,
+                    NombrePlantilla = "RepRegistroVentaSunatAd.frx",
+                    TituloReporte = titulo
+                };
+            }
+
+            case TipoReporteRegistroVenta.DetalladoPorComprobante:
+            {
+                var filas = await _repo.ObtenerRegistroVentaDetalladoAsync(p, ct);
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    FilasDetallado = filas,
+                    TotalFilas = filas.Count,
+                    NombrePlantilla = "RepRegistroVentaComprobante.frx",
+                    TituloReporte = titulo
+                };
+            }
+
+            case TipoReporteRegistroVenta.CorrelativoConFormaPago:
+                // GAP: spRep_RegVentaSunat_formaPago no encontrado en SQL Legacy — retorna vacío
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    TotalFilas = 0,
+                    NombrePlantilla = string.Empty,
+                    TituloReporte = titulo
+                };
+
+            default: // EstadoDocumentos, AgrupadoPorFechas, CorrelativoDocumento, CorrelativoDetallado
+            {
+                var filas = await _repo.ObtenerRegistroVentaAsync(p, ct);
+                var plantilla = p.TipoReporte == TipoReporteRegistroVenta.AgrupadoPorFechas
+                    ? "RepRegistroVentaConsolidado.frx"
+                    : "RepRegistroVentaDetallado.frx";
+                return new RegistroVentaResultado
+                {
+                    TipoReporte = p.TipoReporte,
+                    Filas = filas,
+                    TotalFilas = filas.Count,
+                    NombrePlantilla = plantilla,
+                    TituloReporte = titulo
+                };
+            }
+        }
+    }
+
+    private static string ConstruirTitulo(RegistroVentaParametros p)
+    {
+        if (p.DiaContable)
+            return $"Por Dia Contable del {p.FechaInicio:dd/MM/yyyy} al {p.FechaFin:dd/MM/yyyy}";
+        if (p.TipoReporte == TipoReporteRegistroVenta.AgrupadoPorFechas)
+        {
+            var mes = System.Globalization.CultureInfo.GetCultureInfo("es-PE")
+                .DateTimeFormat.GetMonthName(p.Mes);
+            return $"Año: {p.Ano} — Mes: {mes}";
+        }
+        return $"Del {p.FechaInicio:dd/MM/yyyy HH:mm} Al {p.FechaFin:dd/MM/yyyy HH:mm}";
+    }
+}

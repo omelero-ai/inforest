@@ -1,4 +1,5 @@
 using Inforest.Application.Interfaces;
+using Inforest.Application.Maestros;
 using Inforest.Domain.Common;
 using Inforest.Domain.Entities.Ventas;
 using Inforest.Domain.Exceptions;
@@ -18,15 +19,18 @@ public sealed class EmitirDocumentoHandler
     private readonly IPedidoRepository _pedidoRepository;
     private readonly IDocumentoRepository _documentoRepository;
     private readonly ISessionService _sessionService;
+    private readonly IClienteRepository _clienteRepository;
 
     public EmitirDocumentoHandler(
         IPedidoRepository pedidoRepository,
         IDocumentoRepository documentoRepository,
-        ISessionService sessionService)
+        ISessionService sessionService,
+        IClienteRepository clienteRepository)
     {
         _pedidoRepository = pedidoRepository;
         _documentoRepository = documentoRepository;
         _sessionService = sessionService;
+        _clienteRepository = clienteRepository;
     }
 
     public async Task<Result<Documento>> HandleAsync(EmitirDocumentoCommand command, CancellationToken ct = default)
@@ -47,6 +51,18 @@ public sealed class EmitirDocumentoHandler
             var codigoDocumento = $"{command.TipoDocumento.Trim()}-{command.CodigoPedido.Trim()}";
             if (await _documentoRepository.ObtenerPorCodigoAsync(codigoDocumento, ct) is not null)
                 return Result.Fail<Documento>("Ya existe un documento emitido para el pedido indicado.", "VENTA_DOCUMENTO_DUPLICADO");
+
+            if (!string.IsNullOrWhiteSpace(command.CodigoCliente))
+            {
+                var clienteValido = await _clienteRepository.ValidarCompatibilidadDocumentoAsync(
+                    command.TipoDocumento,
+                    command.CodigoCliente,
+                    ct);
+                if (!clienteValido)
+                    return Result.Fail<Documento>(
+                        "El tipo de identidad del cliente no corresponde al tipo de documento.",
+                        "VENTA_CLIENTE_TIPO_DOCUMENTO_INVALIDO");
+            }
 
             var neto = pedido.Detalles.Sum(d => d.PrecioNeto * d.Cantidad);
             var impuesto1 = pedido.Detalles.Sum(d => d.Impuesto1 * d.Cantidad);

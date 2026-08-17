@@ -1,4 +1,5 @@
 using Inforest.Application.Caja;
+using Inforest.Application.Delivery;
 using Inforest.Application.Impresion;
 using Inforest.Infrastructure.Almacen;
 using Inforest.Infrastructure.Impresion;
@@ -76,6 +77,8 @@ public static class DependencyInjection
 
         // P3-09: Delivery, Despacho, Motorizados y Centralización
         services.AddScoped<IClienteDeliveryRepository, ClienteDeliveryRepository>();
+        services.AddScoped<ITarjetaProximidadRepository, TarjetaProximidadRepository>();
+        services.AddScoped<IRecargaTarjetaRepository, RecargaTarjetaRepository>();
         services.AddScoped<IPedidoDeliveryRepository, PedidoDeliveryRepository>();
         services.AddScoped<IMotorizadoRepository, MotorizadoRepository>();
         services.AddScoped<ILocalRepository, LocalRepository>();
@@ -110,8 +113,14 @@ public static class DependencyInjection
         services.AddScoped<ICorrelativoRepository, CorrelativoRepository>();
         // POS-FUNC-006: Notas de Crédito (BR-NC-001..006)
         services.AddScoped<INotaCreditoRepository, NotaCreditoRepository>();
-        // POS-FUNC-016: Impresión pre-cuenta — TIMPRESORA (BR-008)
+        // POS-FUNC-016: Impresión pre-cuenta — TIMPRESORA (BR-PRECUENTA-001..003)
         services.AddScoped<IImpresoraRepository, ImpresoraRepository>();
+        // POS-FUNC-027: Cambio de Documento (BR-CAMBIO-001..005)
+        services.AddScoped<ICambioDocumentoRepository, CambioDocumentoRepository>();
+        // POS-FUNC-028: Actualizar Datos Pedido — usp_ActualizarCabPeDoc (BR-ACTPED-001..003)
+        services.AddScoped<IActualizarDatosPedidoRepository, ActualizarDatosPedidoRepository>();
+        // POS-FUNC-029: Motivos Anulación — vMotivoAnulacion / TTABLA (BR-MOTIVO-001..003)
+        services.AddScoped<IMotivoAnulacionRepository, MotivoAnulacionRepository>();
 
         // W6: Caja / Pagos (BR-007, BR-013)
         services.AddScoped<IPagoRepository, PagoRepository>();
@@ -120,6 +129,9 @@ public static class DependencyInjection
         // POS-FUNC-018: Recibo Ingresos / Egresos — MINGRESO / MEGRESO (BR-RECIBO-001..012)
         services.AddScoped<IReciboIngresoRepository, ReciboIngresoRepository>();
         services.AddScoped<IReciboEgresoRepository, ReciboEgresoRepository>();
+
+        // POS-FUNC-025: División de Pedidos — MPEDIDO/DPEDIDO (BR-DIV-001..005)
+        services.AddScoped<IDivisionPedidoRepository, DivisionPedidoRepository>();
 
         // POS-FUNC-011: Reservas — TRESERVA
         services.AddScoped<IReservaRepository, ReservaRepository>();

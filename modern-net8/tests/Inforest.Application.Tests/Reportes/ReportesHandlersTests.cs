@@ -729,4 +729,143 @@ public class ReportesHandlersTests
         Assert.Contains("Precios Netos", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("marzo", resultado.TituloReporte, StringComparison.OrdinalIgnoreCase);
     }
+
+    // ── BR-REP-021: Liquidación de Cajero ──────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteLiquidacionHandler_PorFecha_RetornaResultadoConTitulo()
+    {
+        // Arrange — BR-REP-021: Liquidación por rango de fechas, todos los usuarios
+        var parametros = new LiquidacionParametros
+        {
+            ModoFiltro = LiquidacionModoFiltro.PorFecha,
+            FechaInicio = new DateTime(2026, 8, 1, 0, 0, 0),
+            FechaFin = new DateTime(2026, 8, 1, 23, 59, 0),
+            Usuario = string.Empty,
+            SectorVenta = string.Empty,
+            MostrarTodos = true
+        };
+
+        var output = new LiquidacionOutput { VentaTotal = 1500.50, Neto = 1268.50, Impuesto1 = 228.33, TipoCambio = 3.75 };
+        var documentos = new List<LiquidacionRow>
+        {
+            new() { TGrupo = "01", Grupo = "Efectivo", TDocumento = "B001-0001", TUsuario = "USR01", NVenta1 = 1500.50 }
+        };
+        var sumasGrupo = new List<LiquidacionSumaGrupoRow>
+        {
+            new() { TGrupo = "01", NVenta1 = 1500.50 }
+        };
+
+        _repoMock.Setup(r => r.ObtenerLiquidacionOutputAsync(parametros, default)).ReturnsAsync(output);
+        _repoMock.Setup(r => r.ObtenerLiquidacionDocumentosAsync(parametros, default)).ReturnsAsync(documentos.AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionSumasGrupoAsync(parametros, default)).ReturnsAsync(sumasGrupo.AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionTarjetasAsync(parametros, default)).ReturnsAsync(new List<LiquidacionTarjetaRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionTiposPedidoAsync(parametros, default)).ReturnsAsync(new List<LiquidacionTipoPedidoRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionOtrosTiposAsync(parametros, default)).ReturnsAsync(new List<LiquidacionOtroTipoRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteLiquidacionHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteLiquidacionQuery(parametros));
+
+        // Assert
+        Assert.Single(resultado.Documentos);
+        Assert.Single(resultado.SumasGrupo);
+        Assert.Equal(1500.50, resultado.Output.VentaTotal);
+        Assert.Contains("Todos los Turnos", resultado.Titulo, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Todos los Usuarios", resultado.Titulo, StringComparison.OrdinalIgnoreCase);
+        _repoMock.Verify(r => r.ObtenerLiquidacionOutputAsync(parametros, default), Times.Once);
+        _repoMock.Verify(r => r.ObtenerLiquidacionDocumentosAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteLiquidacionHandler_PorTurno_ConUsuario_TituloContieneAmbos()
+    {
+        // Arrange — BR-REP-021: Liquidación filtrada por turno y usuario específico
+        var parametros = new LiquidacionParametros
+        {
+            ModoFiltro = LiquidacionModoFiltro.PorTurno,
+            Turno = "T-2026-001",
+            FechaInicio = new DateTime(2026, 8, 1),
+            FechaFin = new DateTime(2026, 8, 1),
+            Usuario = "CAJERO01",
+            MostrarTodos = true
+        };
+
+        _repoMock.Setup(r => r.ObtenerLiquidacionOutputAsync(parametros, default)).ReturnsAsync(new LiquidacionOutput());
+        _repoMock.Setup(r => r.ObtenerLiquidacionDocumentosAsync(parametros, default)).ReturnsAsync(new List<LiquidacionRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionSumasGrupoAsync(parametros, default)).ReturnsAsync(new List<LiquidacionSumaGrupoRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionTarjetasAsync(parametros, default)).ReturnsAsync(new List<LiquidacionTarjetaRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionTiposPedidoAsync(parametros, default)).ReturnsAsync(new List<LiquidacionTipoPedidoRow>().AsReadOnly());
+        _repoMock.Setup(r => r.ObtenerLiquidacionOtrosTiposAsync(parametros, default)).ReturnsAsync(new List<LiquidacionOtroTipoRow>().AsReadOnly());
+
+        var handler = new ObtenerReporteLiquidacionHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteLiquidacionQuery(parametros));
+
+        // Assert
+        Assert.Contains("T-2026-001", resultado.Titulo);
+        Assert.Contains("CAJERO01", resultado.Titulo);
+        Assert.Empty(resultado.Documentos);
+    }
+
+    // ── BR-REP-022 — Registro de Ventas ──────────────────────────────────────
+
+    [Fact]
+    public async Task ObtenerReporteRegistroVentaHandler_TipoCorrelativoSunat_UsaPlantillaSunatYRetornaFilas()
+    {
+        // Arrange — BR-REP-022: tipo CorrelativoSunat → spRep_RegVentaSunat
+        var parametros = new RegistroVentaParametros
+        {
+            TipoReporte = TipoReporteRegistroVenta.CorrelativoSunat,
+            FechaInicio = new DateTime(2026, 8, 1),
+            FechaFin = new DateTime(2026, 8, 31),
+            SoloRegistroVenta = true
+        };
+
+        var filasEsperadas = new List<RegistroVentaSunatRow>
+        {
+            new() { Voucher = "F001-00001", Serie = "F001", Numero = "00001", TDoc = "01", RazonSocial = "CLIENTE S.A.", ImporteT = 118.0, IGV = 18.0, BaseImOpGra = 100.0 }
+        }.AsReadOnly();
+
+        _repoMock.Setup(r => r.ObtenerRegistroVentaSunatAsync(parametros, default)).ReturnsAsync(filasEsperadas);
+
+        var handler = new ObtenerReporteRegistroVentaHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteRegistroVentaQuery(parametros));
+
+        // Assert
+        Assert.Equal(TipoReporteRegistroVenta.CorrelativoSunat, resultado.TipoReporte);
+        Assert.Equal("RepRegistroVentaSunat.frx", resultado.NombrePlantilla);
+        Assert.Single(resultado.FilasSunat);
+        Assert.Equal(1, resultado.TotalFilas);
+        Assert.Equal("F001-00001", resultado.FilasSunat[0].Voucher);
+        _repoMock.Verify(r => r.ObtenerRegistroVentaSunatAsync(parametros, default), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerReporteRegistroVentaHandler_TipoCorrelativoConFormaPago_RetornaGapSinDatos()
+    {
+        // Arrange — BR-REP-022: tipo CorrelativoConFormaPago → GAP (SP no encontrado en SQL Legacy)
+        var parametros = new RegistroVentaParametros
+        {
+            TipoReporte = TipoReporteRegistroVenta.CorrelativoConFormaPago,
+            FechaInicio = new DateTime(2026, 8, 1),
+            FechaFin = new DateTime(2026, 8, 31)
+        };
+
+        var handler = new ObtenerReporteRegistroVentaHandler(_repoMock.Object);
+
+        // Act
+        var resultado = await handler.HandleAsync(new ObtenerReporteRegistroVentaQuery(parametros));
+
+        // Assert — GAP: sin datos, sin plantilla
+        Assert.Equal(TipoReporteRegistroVenta.CorrelativoConFormaPago, resultado.TipoReporte);
+        Assert.Equal(0, resultado.TotalFilas);
+        Assert.Equal(string.Empty, resultado.NombrePlantilla);
+        // El repo no debe ser llamado para este GAP
+        _repoMock.Verify(r => r.ObtenerRegistroVentaSunatAsync(It.IsAny<RegistroVentaParametros>(), default), Times.Never);
+    }
 }

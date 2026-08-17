@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Author="INFOREST" ReportInfo.Description="Registro de Ventas SUNAT AD - Agrupado por Tipo Documento - Legacy: frmRepRegistroVenta.frm / spRep_RegVentaSunatAD - BR-REP-022">
+  <Dictionary>
+    <TableDataSource Name="RegistroVentaSunatAd" DataType="System.Int32" Enabled="true">
+      <Column Name="Voucher" DataType="System.String" />
+      <Column Name="FEmision" DataType="System.String" />
+      <Column Name="FVencim" DataType="System.String" />
+      <Column Name="TDoc" DataType="System.String" />
+      <Column Name="Serie" DataType="System.String" />
+      <Column Name="Numero1" DataType="System.String" />
+      <Column Name="Numero2" DataType="System.String" />
+      <Column Name="Doc" DataType="System.String" />
+      <Column Name="RazonSocial" DataType="System.String" />
+      <Column Name="ValorFact" DataType="System.Double" />
+      <Column Name="Descuento" DataType="System.Double" />
+      <Column Name="Recargo" DataType="System.Double" />
+      <Column Name="BaseImOpGra" DataType="System.Double" />
+      <Column Name="Exonerada" DataType="System.Double" />
+      <Column Name="Inafecta" DataType="System.Double" />
+      <Column Name="IGV" DataType="System.Double" />
+      <Column Name="OtrosTrib" DataType="System.Double" />
+      <Column Name="ImporteT" DataType="System.Double" />
+      <Column Name="TipoCambio" DataType="System.Double" />
+      <Column Name="TD" DataType="System.String" />
+      <Column Name="SerieN" DataType="System.String" />
+      <Column Name="NumeroN" DataType="System.String" />
+    </TableDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" Landscape="true" PaperWidth="297" PaperHeight="210" TopMargin="10" BottomMargin="10" LeftMargin="10" RightMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="1066.8" Height="56.7">
+      <TextObject Name="Title" Left="0" Top="0" Width="1066.8" Height="37.8" Text="REGISTRO DE VENTAS - AGRUPADO POR TIPO DE DOCUMENTO (SUNAT AD)" HorzAlign="Center" Font="Segoe UI, 13pt, style=Bold" />
+    </ReportTitleBand>
+    <PageHeaderBand Name="PageHeader1" Width="1066.8" Height="28.35">
+      <TextObject Name="HVoucher" Left="0" Top="0" Width="80" Height="18.9" Text="Voucher" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HFEmision" Left="80" Top="0" Width="70" Height="18.9" Text="F.Emisión" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HTDoc" Left="150" Top="0" Width="40" Height="18.9" Text="T.Doc" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HSerie" Left="190" Top="0" Width="50" Height="18.9" Text="Serie" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HNumero1" Left="240" Top="0" Width="60" Height="18.9" Text="Número 1" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HNumero2" Left="300" Top="0" Width="60" Height="18.9" Text="Número 2" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HRazonSocial" Left="360" Top="0" Width="160" Height="18.9" Text="Razón Social" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HBaseImOpGra" Left="520" Top="0" Width="70" Height="18.9" Text="Base Imp." HorzAlign="Right" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HIGV" Left="590" Top="0" Width="60" Height="18.9" Text="IGV" HorzAlign="Right" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+      <TextObject Name="HImporteT" Left="650" Top="0" Width="70" Height="18.9" Text="Importe Total" HorzAlign="Right" Font="Segoe UI, 8pt, style=Bold" FillColor="220, 220, 220" />
+    </PageHeaderBand>
+    <DataBand Name="Data1" Width="1066.8" Height="18.9" DataSource="RegistroVentaSunatAd">
+      <TextObject Name="DVoucher" Left="0" Top="0" Width="80" Height="18.9" Text="[RegistroVentaSunatAd.Voucher]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DFEmision" Left="80" Top="0" Width="70" Height="18.9" Text="[RegistroVentaSunatAd.FEmision]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DTDoc" Left="150" Top="0" Width="40" Height="18.9" Text="[RegistroVentaSunatAd.TDoc]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DSerie" Left="190" Top="0" Width="50" Height="18.9" Text="[RegistroVentaSunatAd.Serie]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DNumero1" Left="240" Top="0" Width="60" Height="18.9" Text="[RegistroVentaSunatAd.Numero1]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DNumero2" Left="300" Top="0" Width="60" Height="18.9" Text="[RegistroVentaSunatAd.Numero2]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DRazonSocial" Left="360" Top="0" Width="160" Height="18.9" Text="[RegistroVentaSunatAd.RazonSocial]" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DBaseImOpGra" Left="520" Top="0" Width="70" Height="18.9" Text="[RegistroVentaSunatAd.BaseImOpGra]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DIGV" Left="590" Top="0" Width="60" Height="18.9" Text="[RegistroVentaSunatAd.IGV]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 7.5pt" />
+      <TextObject Name="DImporteT" Left="650" Top="0" Width="70" Height="18.9" Text="[RegistroVentaSunatAd.ImporteT]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 7.5pt" />
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Width="1066.8" Height="28.35">
+      <TextObject Name="TotalBaseImOpGra" Left="520" Top="0" Width="70" Height="18.9" Text="[Sum(RegistroVentaSunatAd.BaseImOpGra)]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 9pt, style=Bold" />
+      <TextObject Name="TotalIGV" Left="590" Top="0" Width="60" Height="18.9" Text="[Sum(RegistroVentaSunatAd.IGV)]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 9pt, style=Bold" />
+      <TextObject Name="TotalImporteT" Left="650" Top="0" Width="70" Height="18.9" Text="[Sum(RegistroVentaSunatAd.ImporteT)]" Format="Number" DecimalDigits="2" HorzAlign="Right" Font="Segoe UI, 9pt, style=Bold" />
+    </ReportSummaryBand>
+    <PageFooterBand Name="PageFooter1" Width="1066.8" Height="18.9">
+      <TextObject Name="PageNumber" Left="950" Top="0" Width="116.8" Height="18.9" Text="Pág. [PageN] de [TotalPages]" HorzAlign="Right" Font="Segoe UI, 8pt" />
+      <TextObject Name="PrintDate" Left="0" Top="0" Width="200" Height="18.9" Text="Impreso: [Date]" Font="Segoe UI, 8pt" />
+    </PageFooterBand>
+  </ReportPage>
+</Report>

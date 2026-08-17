@@ -6,7 +6,7 @@ namespace Inforest.Infrastructure.Impresion;
 
 /// <summary>
 /// Repositorio Dapper para impresoras disponibles.
-/// Legacy: TIMPRESORA. frmPrecuentaImpresora.frm Form_Load.
+/// Legacy: TIMPRESORA. frmPrecuentaImpresora.frm Form_Load. BR-PRECUENTA-001.
 /// </summary>
 internal sealed class ImpresoraRepository : IImpresoraRepository
 {

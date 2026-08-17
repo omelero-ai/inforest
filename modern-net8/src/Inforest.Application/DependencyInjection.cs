@@ -91,7 +91,7 @@ public static class DependencyInjection
         services.AddScoped<ObtenerCorrelativosPorCajaHandler>();
         services.AddScoped<ObtenerCorrelativoFacturaHandler>();
         services.AddScoped<ObtenerTodosCorrelativosHandler>();
-        // POS-FUNC-016: Impresión pre-cuenta/comanda (BR-008)
+        // POS-FUNC-016: Impresión pre-cuenta/comanda (BR-PRECUENTA-001..003)
         services.AddScoped<ImprimirPrecuentaHandler>();
         services.AddScoped<ObtenerImpresorasPorCajaHandler>();
 
@@ -117,6 +117,12 @@ public static class DependencyInjection
         services.AddScoped<ActualizarFotoClienteDeliveryHandler>();
         services.AddScoped<BuscarClienteDeliveryHandler>();
         services.AddScoped<ObtenerClientesFrecuentesHandler>();
+        services.AddScoped<ObtenerTarjetasProximidadHandler>();
+        services.AddScoped<ObtenerMovimientosTarjetaProximidadHandler>();
+        services.AddScoped<CrearTarjetaProximidadHandler>();
+        services.AddScoped<ActualizarTarjetaProximidadHandler>();
+        services.AddScoped<ObtenerRecargasTarjetaHandler>();
+        services.AddScoped<RegistrarRecargaTarjetaHandler>();
         services.AddScoped<CrearPedidoDeliveryHandler>();
         services.AddScoped<ActualizarEstadoDeliveryHandler>();
         services.AddScoped<ObtenerDeliveryPendientesHandler>();
@@ -167,6 +173,7 @@ public static class DependencyInjection
         services.AddScoped<ObtenerReporteLiquidacionTicketHandler>();
         services.AddScoped<ObtenerReportePaloteoTicketHandler>();
         services.AddScoped<ObtenerReporteEntregaHandler>();
+        services.AddScoped<ObtenerReporteRegistroVentaHandler>(); // BR-REP-022
 
         // POS-FUNC-018: Recibo Ingresos/Egresos — MINGRESO / MEGRESO
         services.AddScoped<ObtenerIngresosHandler>();
@@ -175,6 +182,11 @@ public static class DependencyInjection
         services.AddScoped<ObtenerEgresosHandler>();
         services.AddScoped<RegistrarEgresoHandler>();
         services.AddScoped<AnularEgresoHandler>();
+
+        // POS-FUNC-029: Lista Motivos Anulación — vMotivoAnulacion (BR-MOTIVO-001..003)
+        services.AddScoped<ObtenerMotivosAnulacionHandler>();
+        // POS-FUNC-030: Solicitud de boleta con/sin datos (frmSolicitudBoleta.frm)
+        services.AddScoped<ObtenerClienteGeneralBoletaHandler>();
 
         return services;
     }

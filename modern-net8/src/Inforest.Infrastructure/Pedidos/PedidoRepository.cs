@@ -304,4 +304,106 @@ internal sealed class PedidoRepository : IPedidoRepository, IPedidoReadRepositor
             ?? throw new InvalidOperationException($"No se encontró la propiedad {propertyName}.");
         property.SetValue(target, value);
     }
+
+    // ── Vista enriquecida (frmDetallePedido.frm) ─────────────────────────────
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ItemPedidoVista>> ObtenerDetalleExtendidoAsync(
+        string codigoPedido, CancellationToken ct = default)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        // Legacy: vPedidoDetalle view — DPEDIDO JOIN TPRODUCTO JOIN vCortesia.
+        // BR-PEDIDO-005: solo ítems activos (tEstadoItem = 'N').
+        const string sql = """
+            SELECT
+                d.tItem                     AS Item,
+                d.tCodigoProducto           AS CodigoProducto,
+                ISNULL(p.tDetallado, d.tCodigoProducto) AS Producto,
+                CAST(ISNULL(d.nPrecioOficial, 0)  AS decimal(18,2)) AS PrecioOficial,
+                CAST(ISNULL(d.nDescuento,    0)   AS decimal(18,2)) AS Descuento,
+                CAST(ISNULL(d.nPrecioVenta,  0)   AS decimal(18,2)) AS PrecioVenta,
+                CAST(ISNULL(d.nCantidad,     0)   AS decimal(18,4)) AS Cantidad,
+                CAST(ISNULL(d.nVenta,        0)   AS decimal(18,2)) AS SubTotal,
+                ISNULL(d.tEstadoItem, 'N')         AS EstadoItem,
+                ISNULL(d.tFacturado, '')            AS Facturado,
+                CAST(ISNULL(d.lImprime, 0)         AS bit)          AS Imprime,
+                CAST(0 AS bit)                     AS TienePropiedad,
+                CAST(CASE WHEN DATALENGTH(d.tObservacion) > 0 THEN 1 ELSE 0 END AS bit) AS TieneObservacion,
+                CAST(ISNULL(d.lCorte, 0)           AS bit)          AS Corte,
+                d.tObservacion                     AS Observacion,
+                d.tDocumento                       AS Documento,
+                d.tusuariod                        AS Usuario,
+                d.fEnvio                           AS FechaEnvio,
+                d.tComanda                         AS Comanda
+            FROM DPEDIDO d
+            LEFT JOIN TPRODUCTO p ON d.tCodigoProducto = p.tCodigoProducto
+            WHERE d.tCodigoPedido = @CodigoPedido
+              AND ISNULL(d.tEstadoItem, 'N') = 'N'
+            ORDER BY d.tItem
+            """;
+
+        var rows = await connection.QueryAsync<ItemPedidoVistaRow>(sql, new { CodigoPedido = codigoPedido });
+        return rows.Select(r => new ItemPedidoVista(
+            Item: r.Item,
+            CodigoProducto: r.CodigoProducto,
+            Producto: r.Producto,
+            PrecioOficial: r.PrecioOficial,
+            Descuento: r.Descuento,
+            PrecioVenta: r.PrecioVenta,
+            Cantidad: r.Cantidad,
+            SubTotal: r.SubTotal,
+            EstadoItem: r.EstadoItem,
+            Facturado: r.Facturado == "S",
+            Imprime: r.Imprime,
+            TienePropiedad: r.TienePropiedad,
+            TieneObservacion: r.TieneObservacion,
+            Corte: r.Corte,
+            Observacion: r.Observacion,
+            Documento: r.Documento,
+            Usuario: r.Usuario,
+            FechaEnvio: r.FechaEnvio,
+            Comanda: r.Comanda))
+        .ToList()
+        .AsReadOnly();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ComboPedidoVista>> ObtenerCombosAsync(
+        string codigoPedido, CancellationToken ct = default)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        // Legacy: vPedidoCombo — CPEDIDO JOIN TPRODUCTO.
+        const string sql = """
+            SELECT
+                c.tItem                     AS Item,
+                c.tItemCombo                AS ItemCombo,
+                c.tProducto                 AS CodigoProducto,
+                c.tProductoCombo            AS CodigoProductoCombo,
+                ISNULL(p.tDetallado, c.tProductoCombo) AS Producto,
+                CAST(ISNULL(c.nCantidad, 0) AS decimal(18,4)) AS Cantidad,
+                CAST(ISNULL(c.lImprime, 0)  AS bit)           AS Imprime,
+                CAST(CASE WHEN DATALENGTH(c.tObservacion) > 0 THEN 1 ELSE 0 END AS bit) AS TieneObservacion,
+                CAST(0 AS bit)              AS TienePropiedad,
+                c.tObservacion              AS Observacion
+            FROM CPEDIDO c
+            LEFT JOIN TPRODUCTO p ON c.tProductoCombo = p.tCodigoProducto
+            WHERE c.tCodigoPedido = @CodigoPedido
+            ORDER BY c.tItem, c.tItemCombo
+            """;
+
+        var rows = await connection.QueryAsync<ComboPedidoVistaRow>(sql, new { CodigoPedido = codigoPedido });
+        return rows.Select(r => new ComboPedidoVista(
+            Item: r.Item,
+            ItemCombo: r.ItemCombo,
+            CodigoProducto: r.CodigoProducto,
+            CodigoProductoCombo: r.CodigoProductoCombo,
+            Producto: r.Producto,
+            Cantidad: r.Cantidad,
+            Imprime: r.Imprime,
+            TieneObservacion: r.TieneObservacion,
+            TienePropiedad: r.TienePropiedad,
+            Observacion: r.Observacion))
+        .ToList()
+        .AsReadOnly();
+    }
 }

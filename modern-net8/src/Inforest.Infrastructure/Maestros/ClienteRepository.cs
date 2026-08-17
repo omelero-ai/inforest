@@ -64,6 +64,55 @@ internal sealed class ClienteRepository : IClienteRepository
         return await conn.QueryFirstOrDefaultAsync<Cliente>(sql, new { Codigo = codigo });
     }
 
+    public async Task<Cliente?> ObtenerPorIdentidadAsync(string identidad, CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        const string sql = """
+            SELECT tCodigoCliente AS CodigoCliente,
+                   tEmpresa AS Empresa,
+                   tIdentidad AS Identidad,
+                   tDireccion AS Direccion,
+                   lActivo AS Activo,
+                   tUsuario AS Usuario,
+                   fRegistro AS FechaRegistro,
+                   tCorreo AS Correo,
+                   tTipoIdentidad AS TipoIdentidad,
+                   tEnlace AS Enlace,
+                   tTipoCliente AS TipoCliente,
+                   tUbigeo AS Ubigeo,
+                   tUrbanizacion AS Urbanizacion,
+                   tTipoResponsable AS TipoResponsable
+            FROM TCLIENTE
+            WHERE tIdentidad = @Identidad
+            ORDER BY tCodigoCliente
+            """;
+        return await conn.QueryFirstOrDefaultAsync<Cliente>(sql, new { Identidad = identidad?.Trim() });
+    }
+
+    public async Task<string> ObtenerProximoCodigoAsync(CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        const string sql = "SELECT ISNULL(MAX(TRY_CONVERT(int, tCodigoCliente)), 0) FROM TCLIENTE";
+        var ultimo = await conn.ExecuteScalarAsync<int>(new CommandDefinition(sql, cancellationToken: ct));
+        return (ultimo + 1).ToString("00000");
+    }
+
+    public async Task<bool> ValidarCompatibilidadDocumentoAsync(string tipoDocumento, string codigoCliente, CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        var resultado = await conn.ExecuteScalarAsync<string>(new CommandDefinition(
+            "usp_Inforest_ValidaClienteSel",
+            new
+            {
+                tTipoDoc = tipoDocumento?.Trim(),
+                tCodCliente = codigoCliente?.Trim()
+            },
+            commandType: System.Data.CommandType.StoredProcedure,
+            cancellationToken: ct));
+
+        return string.Equals(resultado?.Trim(), "ok", StringComparison.OrdinalIgnoreCase);
+    }
+
     public async Task<bool> InsertarAsync(Cliente cliente, CancellationToken ct = default)
     {
         using var conn = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);

@@ -5,7 +5,7 @@ namespace Inforest.Desktop.Impresion;
 
 /// <summary>
 /// Formulario para seleccionar impresora e imprimir la pre-cuenta de un pedido.
-/// Legacy: frmPrecuentaImpresora.frm. BR-008.
+/// Legacy: frmPrecuentaImpresora.frm. BR-PRECUENTA-001/002/003.
 /// </summary>
 public class FrmPrecuentaImpresora : Form
 {
@@ -13,17 +13,20 @@ public class FrmPrecuentaImpresora : Form
     private readonly ImprimirPrecuentaHandler? _imprimirHandler;
     private readonly string _codigoPedido;
     private readonly string _codigoCaja;
+    private readonly string? _codigoImpresoraPredeterminada;
     private readonly ListBox _lstImpresoras;
     private readonly Label _lblEstado;
 
     public FrmPrecuentaImpresora(
         string codigoPedido,
         string codigoCaja,
+        string? codigoImpresoraPredeterminada = null,
         ObtenerImpresorasPorCajaHandler? impresorasHandler = null,
         ImprimirPrecuentaHandler? imprimirHandler = null)
     {
         _codigoPedido = codigoPedido;
         _codigoCaja = codigoCaja;
+        _codigoImpresoraPredeterminada = codigoImpresoraPredeterminada;
         _impresorasHandler = impresorasHandler;
         _imprimirHandler = imprimirHandler;
 
@@ -59,6 +62,9 @@ public class FrmPrecuentaImpresora : Form
         var btnImprimir = new Button { Left = 100, Top = 240, Width = 100, Text = "Imprimir" };
         btnImprimir.Click += async (_, _) => await ImprimirAsync();
 
+        var btnPredeterminada = new Button { Left = 10, Top = 240, Width = 80, Text = "Predet." };
+        btnPredeterminada.Click += async (_, _) => await ImprimirPredeterminadaAsync();
+
         var btnCerrar = new Button
         {
             Left = 210, Top = 240, Width = 100, Text = "Cerrar",
@@ -66,7 +72,7 @@ public class FrmPrecuentaImpresora : Form
         };
         btnCerrar.Click += (_, _) => Close();
 
-        Controls.AddRange([lblTitle, lblImpresoras, _lstImpresoras, _lblEstado, btnImprimir, btnCerrar]);
+        Controls.AddRange([lblTitle, lblImpresoras, _lstImpresoras, _lblEstado, btnPredeterminada, btnImprimir, btnCerrar]);
 
         Load += async (_, _) => await CargarImpresorasAsync();
     }
@@ -134,5 +140,27 @@ public class FrmPrecuentaImpresora : Form
         {
             _lblEstado.Text = result.MensajeError ?? "Error al imprimir.";
         }
+    }
+
+    private async Task ImprimirPredeterminadaAsync()
+    {
+        if (_imprimirHandler is null)
+        {
+            _lblEstado.Text = "Handler de impresión no configurado.";
+            return;
+        }
+
+        _lblEstado.Text = "Imprimiendo...";
+        var result = await _imprimirHandler.HandleAsync(
+            new ImprimirPrecuentaCommand(
+                _codigoPedido,
+                string.Empty,
+                UsarImpresoraPredeterminada: true,
+                CodigoImpresoraPredeterminada: _codigoImpresoraPredeterminada));
+
+        if (result.EsExitoso)
+            Close();
+        else
+            _lblEstado.Text = result.MensajeError ?? "Error al imprimir.";
     }
 }

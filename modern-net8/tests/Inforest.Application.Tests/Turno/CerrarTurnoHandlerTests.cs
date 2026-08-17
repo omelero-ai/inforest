@@ -114,7 +114,7 @@ public class CerrarTurnoHandlerTests
             lEmailConfirmacion: false, tEmailConfirmacion: null,
             lEmailRecordatorio: false, tEmailRecordatorio: null,
             lEmailAgradecimiento: false, tEmailAgradecimiento: null,
-            lImprimeCodigoBarras: false, lEnvioAutomatico: false,
+            lBODato: false, lImprimeCodigoBarras: false, lEnvioAutomatico: false,
             lControlEnviosProduccion: false, lActivaTarjeta: false,
             lEventos: false, lFEOfisis: false, tCodigoEmpresa: null, tCodigoTienda: null,
             tCodigoMarca: null, tCodigoUbigeo: null, lPagoAntesImpresion: false,
