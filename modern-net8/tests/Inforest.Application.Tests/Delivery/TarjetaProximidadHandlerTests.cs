@@ -136,6 +136,9 @@ public sealed class TarjetaProximidadHandlerTests
 
     private sealed class StubClienteDeliveryRepository(bool clienteExiste) : IClienteDeliveryRepository
     {
+        public Task<string?> ObtenerMaximoCodigoAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult<string?>(null);
+
         public Task<ClienteDelivery?> ObtenerPorCodigoAsync(string codigoDelivery, CancellationToken cancellationToken = default)
             => Task.FromResult(clienteExiste ? CrearCliente(codigoDelivery) : null);
 
