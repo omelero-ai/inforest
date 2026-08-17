@@ -3449,3 +3449,54 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Descripción:** Los documentos emitidos/anulados de un pedido se cargan desde `vDocumentoAgrupado` filtrando por tCodigoPedido. Muestra refacturaciones y anulaciones históricas.
 **Destino .NET:** `ObtenerDocumentosAgrupadosPedidoHandler` + `PedidoRepository.ObtenerDocumentosAgrupadosPedidoAsync`
 **Estado:** MIGRATED
+
+---
+
+## Módulo: Movimientos de Tarjeta RFID (FrmMovimientoTarjetas)
+
+### BR-RFID-008
+**Nombre:** Consulta de últimos movimientos de tarjeta
+**Origen:** Legacy/FrmTarjetaAproximidad.frm (Sub Genera)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidad.frm`
+**Procedimiento/Función:** `Genera(tarjeta)` — `SELECT top 10 ... FROM TMOVIMIENTOTARJETASRFID WHERE CodidoRFID = '@rfid' ORDER BY fregistro DESC`
+**Descripción:** Se recuperan los últimos 10 movimientos de una tarjeta RFID ordenados por fecha descendente, mostrando: fRegistro, MontoIngreso, MontoSalida, MontoAnterior, MontoFinal.
+**Condición:** El código de tarjeta (CodidoRFID) es obligatorio.
+**Resultado:** Lista de hasta 10 movimientos recientes presentados en grid.
+**Excepciones:** Si no hay movimientos, el grid queda vacío sin error.
+**Destino .NET:** `ObtenerMovimientosTarjetaProximidadHandler` + `FrmMovimientoTarjetas`
+**Estado:** MIGRATED
+
+---
+
+## Módulo: Búsqueda Rápida Genérica (frmBusquedaRapida)
+
+### BR-BUSQ-001
+**Nombre:** Filtrado en tiempo real por texto
+**Origen:** Legacy/frmBusquedaRapida.frm (Sub Filtrar)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaRapida.frm`
+**Procedimiento/Función:** `Filtrar()` — aplica `.Filter` sobre el Recordset en base al texto ingresado.
+**Descripción:** Al escribir en el campo de búsqueda, la lista se filtra en tiempo real buscando coincidencias en el campo de descripción o código.
+**Condición:** Si el texto está vacío, se muestra la lista completa.
+**Resultado:** La grilla se actualiza dinámicamente mostrando solo los registros que coinciden.
+**Excepciones:** ninguna — si no hay coincidencias, la grilla queda vacía.
+**Destino .NET:** `FrmBusquedaRapida.OnFiltroChanged` — LINQ sobre `IReadOnlyList<BusquedaItem>`
+**Estado:** MIGRATED
+
+### BR-BUSQ-002
+**Nombre:** Selección con Enter o doble clic
+**Origen:** Legacy/frmBusquedaRapida.frm (cmdkey_Click Case 43)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaRapida.frm`
+**Descripción:** El usuario confirma la selección con Enter (en teclado físico o virtual) o con doble clic en la fila. Se capturan `sCodigo` y `sDescrip` del registro activo.
+**Condición:** Debe haber al menos un registro en la lista.
+**Resultado:** `wEnter = True`; se asignan `sCodigo` y `sDescrip`; el formulario se cierra.
+**Excepciones:** Si la lista está vacía, la tecla Enter no tiene efecto.
+**Destino .NET:** `FrmBusquedaRapida.ConfirmarSeleccion()` — devuelve `BusquedaResultado`; `DialogResult = OK`
+**Estado:** MIGRATED
+
+### BR-BUSQ-003
+**Nombre:** Cancelación con Escape
+**Origen:** Legacy/frmBusquedaRapida.frm (cmdkey_Click Case 41)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaRapida.frm`
+**Descripción:** Presionar Escape cierra el diálogo sin seleccionar ningún ítem (`wEnter = False`).
+**Destino .NET:** `FrmBusquedaRapida.OnFormKeyDown` — `DialogResult = Cancel`; `Resultado = null`
+**Estado:** MIGRATED

@@ -543,6 +543,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
 |---|---|---|---|---|---|
 | `FrmTarjetaAproximidad.frm` + `FrmTarjetaAproximidadDetalle.frm` | Form | `FrmTarjetaProximidad` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmTarjetaProximidad.cs` |
+| `FrmMovimientoTarjetas.frm` | Form (shell vacío + funcionalidad en `FrmTarjetaAproximidad.cmdOpcion(5)`) | `FrmMovimientoTarjetas` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmMovimientoTarjetas.cs` |
 | `TTARJETASRFID` | Table | `TarjetaProximidad` + `ITarjetaProximidadRepository` + `TarjetaProximidadRepository` | Entity + Interface + Class | MIGRATED | `src/Inforest.Domain/Entities/Delivery/TarjetaProximidad.cs` + `src/Inforest.Application/Delivery/TarjetaProximidadHandlers.cs` + `src/Inforest.Infrastructure/Delivery/TarjetaProximidadRepository.cs` |
 | `TMOVIMIENTOTARJETASRFID` | Table | `MovimientoTarjetaProximidad` + `ObtenerMovimientosTarjetaProximidadHandler` | Record + Handler | MIGRATED | `src/Inforest.Domain/Entities/Delivery/TarjetaProximidad.cs` + `src/Inforest.Application/Delivery/TarjetaProximidadHandlers.cs` |
 | `TDELIVERY` (búsqueda cliente asociado) | Table | `IClienteDeliveryRepository` + selector modal en `FrmTarjetaProximidad` | Interface + UI | MIGRATED | `src/Inforest.Domain/Repositories/IClienteDeliveryRepository.cs` + `src/Inforest.Desktop/Clientes/FrmTarjetaProximidad.cs` |
@@ -574,3 +575,12 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmPedidoAnterior.frm` | Form | `FrmPedidoCorrelativo` (tab Docs) | Inline Tab Panel | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmPedidoCorrelativo.cs` |
 | `vPedidoCorrelativo` | View | `IPedidoReadRepository.ObtenerCorrelativoAsync` + `PedidoRepository` | Repository | MIGRATED | `src/Inforest.Application/Pedidos/IPedidoReadRepository.cs` + `src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` |
 | `vDocumentoAgrupado` | View | `IPedidoReadRepository.ObtenerDocumentosAgrupadosPedidoAsync` + `PedidoRepository` | Repository | MIGRATED | `src/Inforest.Application/Pedidos/IPedidoReadRepository.cs` + `src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` |
+
+## Componentes POS-FUNC-035 — Búsqueda Rápida Genérica
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmBusquedaRapida.frm` | Form (diálogo genérico de búsqueda) | `FrmBusquedaRapida` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Shared/FrmBusquedaRapida.cs` |
+| `BusquedaItem` | — | `BusquedaItem` record | DTO | MIGRATED | `src/Inforest.Desktop/Shared/BusquedaItem.cs` |
+| `BusquedaResultado` (sCodigo + sDescrip) | Global vars | `BusquedaResultado` record | DTO | MIGRATED | `src/Inforest.Desktop/Shared/BusquedaItem.cs` |
+| (BR-BUSQ-001/002/003) | — | `FrmBusquedaRapida` filtrado + selección + cancelación | UI Logic | MIGRATED | `src/Inforest.Desktop/Shared/FrmBusquedaRapida.cs` |
