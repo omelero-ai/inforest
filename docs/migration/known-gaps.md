@@ -168,5 +168,5 @@
 
 | ID | Gap | Descripción | Archivo Origen | Estado |
 |---|---|---|---|---|
-| GAP-RFID-001 | Recarga de tarjeta pendiente | El mantenimiento base de `FrmTarjetaAproximidad.frm` + `FrmTarjetaAproximidadDetalle.frm` ya fue migrado, pero `FrmRecargarTarjeta.frm` + `FrmRecargarTarjetaDetalle.frm` siguen pendientes. El Legacy mezcla recarga, anticipo, emisión documental y actualización de saldo en un mismo flujo. | `FrmRecargarTarjeta.frm`, `FrmRecargarTarjetaDetalle.frm` | IN_PROGRESS |
+| GAP-RFID-001 | Flujo de recarga parcial vs legado | `FrmRecargarTarjeta.frm` + `FrmRecargarTarjetaDetalle.frm` ya migran listado de recargas y actualización transaccional de saldo RFID (`TMOVIMIENTOTARJETASRFID` + `TTARJETASRFID`). Sigue pendiente cerrar equivalencia completa del bloque legacy de anticipo/emisión documental/impresión fiscal dentro del mismo flujo. | `FrmRecargarTarjeta.frm`, `FrmRecargarTarjetaDetalle.frm` | IN_PROGRESS |
 | GAP-RFID-002 | `FrmMovimientoTarjetas.frm` sin lógica relevante | El formulario `FrmMovimientoTarjetas.frm` aparece en `InfoRest.vbp` como cascarón visual sin código operativo útil. Se mantiene fuera del corte hasta confirmar si corresponde a un flujo real o a una pantalla obsoleta. | `FrmMovimientoTarjetas.frm` | ANALYSIS |

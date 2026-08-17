@@ -3207,3 +3207,45 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Si no existen movimientos, informa "No hay Datos para Mostrar".
 **Destino .NET:** `ObtenerMovimientosTarjetaProximidadHandler` + `FrmTarjetaProximidad` (grilla + impresión).
 **Estado:** MIGRATED
+
+---
+
+## BR-RFID-005
+**Nombre:** Listado de recargas por rango de fechas
+**Origen:** Legacy/FrmRecargarTarjeta.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmRecargarTarjeta.frm
+**Procedimiento/Función:** `Form_Load`, `cmdProcesa_Click`
+**Descripción:** El formulario lista recargas de tarjetas ejecutando `usp_Inforest_ObtieneRecargas` por rango de fechas con tipo de movimiento `R`.
+**Condición:** Fecha inicio <= fecha fin.
+**Resultado:** Devuelve movimientos con `DocReferencia`, `MontoIngreso`, `MontoSalida`, `MontoAnterior` y `MontoFinal`.
+**Excepciones:** Si el rango es inválido se bloquea la consulta.
+**Destino .NET:** `ObtenerRecargasTarjetaHandler` + `IRecargaTarjetaRepository.ObtenerMovimientosAsync` + `FrmRecargarTarjeta`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-006
+**Nombre:** Validación obligatoria para registrar recarga
+**Origen:** Legacy/FrmRecargarTarjetaDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmRecargarTarjetaDetalle.frm
+**Procedimiento/Función:** `cmdTipoDocumento_Click`, `txtCodigoTarjeta_KeyPress`
+**Descripción:** No se permite recargar si no existe tarjeta válida, si el monto es menor o igual a cero o si no hay usuario de sesión.
+**Condición:** Tarjeta inexistente/bloqueada, monto no positivo o usuario vacío.
+**Resultado:** Cancela operación y retorna mensaje funcional.
+**Excepciones:** Ninguna.
+**Destino .NET:** `RegistrarRecargaTarjetaHandler` + `FrmRecargarTarjetaDetalle`.
+**Estado:** MIGRATED
+
+---
+
+## BR-RFID-007
+**Nombre:** Recarga actualiza movimiento y saldo en transacción
+**Origen:** Legacy/FrmRecargarTarjetaDetalle.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/FrmRecargarTarjetaDetalle.frm
+**Procedimiento/Función:** `cmdTipoDocumento_Click` (bloque `insert TMOVIMIENTOTARJETASRFID` + `update TTARJETASRFID`)
+**Descripción:** Cada recarga registra un movimiento tipo `R` y actualiza el saldo disponible de la tarjeta en la misma operación.
+**Condición:** Recarga aceptada.
+**Resultado:** Inserta en `TMOVIMIENTOTARJETASRFID` y actualiza `TTARJETASRFID.MontoDisponible`.
+**Excepciones:** Si falla la actualización de saldo, se revierte la operación.
+**Destino .NET:** `RecargaTarjetaRepository.RegistrarRecargaAsync` + `RegistrarRecargaTarjetaHandler`.
+**Estado:** MIGRATED

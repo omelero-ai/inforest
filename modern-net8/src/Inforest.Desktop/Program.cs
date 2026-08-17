@@ -70,6 +70,7 @@ static class Program
                 services.AddTransient<FrmAdicion>();
                 services.AddTransient<FrmCuadreCaja>();
                 services.AddTransient<FrmTarjetaProximidad>();
+                services.AddTransient<FrmRecargarTarjeta>();
                 services.AddTransient<AsignacionMotorizadoForm>();
                 services.AddTransient<ReasignacionMotorizadoForm>();
                 services.AddTransient<FrmCtaCteIntegradoReporte>();

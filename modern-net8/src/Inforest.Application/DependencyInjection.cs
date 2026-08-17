@@ -121,6 +121,8 @@ public static class DependencyInjection
         services.AddScoped<ObtenerMovimientosTarjetaProximidadHandler>();
         services.AddScoped<CrearTarjetaProximidadHandler>();
         services.AddScoped<ActualizarTarjetaProximidadHandler>();
+        services.AddScoped<ObtenerRecargasTarjetaHandler>();
+        services.AddScoped<RegistrarRecargaTarjetaHandler>();
         services.AddScoped<CrearPedidoDeliveryHandler>();
         services.AddScoped<ActualizarEstadoDeliveryHandler>();
         services.AddScoped<ObtenerDeliveryPendientesHandler>();
