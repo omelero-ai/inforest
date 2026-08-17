@@ -3699,3 +3699,19 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Si el usuario cancela la selección del archivo, no se genera salida.
 **Destino .NET:** `FrmClienteDelivery` (`MostrarVistaPrevia`, `ExportarHtmlAsync`)
 **Estado:** MIGRATED
+
+---
+
+## POS-FUNC-038 — Seguimiento Delivery Entregados (frmPedidoDeliveryNo.frm)
+
+### BR-DEL-038
+**Nombre:** Seguimiento de pedidos delivery entregados por rango con detalle
+**Origen:** Legacy/frmPedidoDeliveryNo.frm (`Form_Load`, `cmdProcesa_Click`, `Asignar`, `Filtrar`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmPedidoDeliveryNo.frm`
+**Procedimiento/Función:** `Form_Load`, `cmdProcesa_Click`, `Asignar`, `Filtrar`
+**Descripción:** El formulario lista pedidos delivery entregados (`tTipoPedido='02'`, `tEstadoPedido='02'`, `fLlegada` informado), permite filtrar por columnas visibles y cargar el detalle de ítems del pedido seleccionado.
+**Condición:** El rango de fechas se aplica sobre `fFecha`; la consulta inicial usa la fecha del servidor y el botón procesar usa fecha inicio/fin seleccionadas.
+**Resultado:** Grilla de cabecera con horas de asignación/salida/llegada y panel de detalle por pedido desde `vPedidoDetalle`.
+**Excepciones:** Si no hay registros, la grilla se mantiene vacía y el detalle se limpia.
+**Destino .NET:** `FrmPedidoDeliveryNo` + `ObtenerPedidosSeguimientoDeliveryEntregadosHandler` + `PedidoDeliveryRepository.ObtenerSeguimientoEntregadosAsync` + `ObtenerDetallePedidoExtendidoHandler`
+**Estado:** MIGRATED

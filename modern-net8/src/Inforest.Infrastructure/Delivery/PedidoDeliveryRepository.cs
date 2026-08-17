@@ -224,7 +224,10 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
             FROM vDespachador
             WHERE tCodigoPedido = @CodigoPedido
             """;
-        return await conn.QueryFirstOrDefaultAsync<PedidoDespachadorResumen>(sql, new { CodigoPedido = codigoPedido });
+        return await conn.QueryFirstOrDefaultAsync<PedidoDespachadorResumen>(new CommandDefinition(
+            sql,
+            new { CodigoPedido = codigoPedido },
+            cancellationToken: ct));
     }
 
     /// <inheritdoc />
@@ -239,7 +242,9 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
               AND Codigo <> '0000'
             ORDER BY Descripcion
             """;
-        var rows = await conn.QueryAsync<OperadorDespachoItem>(sql);
+        var rows = await conn.QueryAsync<OperadorDespachoItem>(new CommandDefinition(
+            sql,
+            cancellationToken: ct));
         return rows.ToList();
     }
 
@@ -254,7 +259,9 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
             WHERE lActivo = 1
             ORDER BY Descripcion
             """;
-        var rows = await conn.QueryAsync<OperadorDespachoItem>(sql);
+        var rows = await conn.QueryAsync<OperadorDespachoItem>(new CommandDefinition(
+            sql,
+            cancellationToken: ct));
         return rows.ToList();
     }
 
@@ -397,11 +404,14 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
                 fEmpacador = GETDATE()
             WHERE tCodigoPedido = @CodigoPedido
             """;
-        await conn.ExecuteAsync(sql, new
-        {
-            CodigoPedido = codigoPedido,
-            CodigoEmpacador = codigoEmpacador
-        });
+        await conn.ExecuteAsync(new CommandDefinition(
+            sql,
+            new
+            {
+                CodigoPedido = codigoPedido,
+                CodigoEmpacador = codigoEmpacador
+            },
+            cancellationToken: ct));
     }
 
     /// <inheritdoc />
@@ -414,7 +424,10 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
                 fEmpacador = NULL
             WHERE tCodigoPedido = @CodigoPedido
             """;
-        await conn.ExecuteAsync(sql, new { CodigoPedido = codigoPedido });
+        await conn.ExecuteAsync(new CommandDefinition(
+            sql,
+            new { CodigoPedido = codigoPedido },
+            cancellationToken: ct));
     }
 
     /// <inheritdoc />
@@ -431,7 +444,10 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
               AND ISNULL(fLlegada, 0) = 0
               AND tMotorizado = @CodigoMotorizado
             """;
-        return await conn.ExecuteScalarAsync<int>(sql, new { CodigoMotorizado = codigoMotorizado });
+        return await conn.ExecuteScalarAsync<int>(new CommandDefinition(
+            sql,
+            new { CodigoMotorizado = codigoMotorizado },
+            cancellationToken: ct));
     }
 
     /// <inheritdoc />
@@ -448,9 +464,10 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
               AND ISNULL(nTarifaExtra, 0) = 0
               AND CONVERT(nvarchar(8), fAsignacion, 112) = @FechaOperacion
             """;
-        return await conn.ExecuteScalarAsync<int>(
+        return await conn.ExecuteScalarAsync<int>(new CommandDefinition(
             sql,
-            new { CodigoMotorizado = codigoMotorizado, FechaOperacion = fechaOperacion.ToString("yyyyMMdd") });
+            new { CodigoMotorizado = codigoMotorizado, FechaOperacion = fechaOperacion.ToString("yyyyMMdd") },
+            cancellationToken: ct));
     }
 
     /// <inheritdoc />
@@ -467,9 +484,10 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
               AND ISNULL(nTarifaExtraN, 0) = 0
               AND CONVERT(nvarchar(8), fAsignacion, 112) = @FechaOperacion
             """;
-        return await conn.ExecuteScalarAsync<int>(
+        return await conn.ExecuteScalarAsync<int>(new CommandDefinition(
             sql,
-            new { CodigoMotorizado = codigoMotorizado, FechaOperacion = fechaOperacion.ToString("yyyyMMdd") });
+            new { CodigoMotorizado = codigoMotorizado, FechaOperacion = fechaOperacion.ToString("yyyyMMdd") },
+            cancellationToken: ct));
     }
 
     /// <inheritdoc />
@@ -571,7 +589,10 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
             FROM vDocumentoAgrupado
             WHERE tCodigoPedido = @CodigoPedido
             """;
-        return await conn.ExecuteScalarAsync<string?>(sql, new { CodigoPedido = codigoPedido });
+        return await conn.ExecuteScalarAsync<string?>(new CommandDefinition(
+            sql,
+            new { CodigoPedido = codigoPedido },
+            cancellationToken: ct));
     }
 
     /// <inheritdoc />
@@ -580,6 +601,9 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
         // Legacy: grdGrilla.Columns(6).Text = "ENTREGADO" from MPEDIDO.lEntregado
         using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
         const string sql = "SELECT ISNULL(lEntregado, 0) FROM MPEDIDO WHERE tCodigoPedido = @CodigoPedido";
-        return await conn.ExecuteScalarAsync<bool>(sql, new { CodigoPedido = codigoPedido });
+        return await conn.ExecuteScalarAsync<bool>(new CommandDefinition(
+            sql,
+            new { CodigoPedido = codigoPedido },
+            cancellationToken: ct));
     }
 }

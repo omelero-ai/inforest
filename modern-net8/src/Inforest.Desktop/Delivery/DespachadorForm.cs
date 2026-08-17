@@ -30,7 +30,7 @@ public sealed class DespachadorForm : Form
     private DateTimePicker _dtpInicio = null!;
     private DateTimePicker _dtpFin = null!;
     private Label _lblRegistro = null!;
-    private Timer _timer = null!;
+    private System.Windows.Forms.Timer _timer = null!;
 
     public DespachadorForm(
         ObtenerPedidosDespachadorHandler obtenerHandler,
@@ -106,7 +106,7 @@ public sealed class DespachadorForm : Form
             new DataGridViewTextBoxColumn { HeaderText = "Cliente", DataPropertyName = nameof(PedidoDespachadorResumen.Cliente), Width = 180 },
             new DataGridViewTextBoxColumn { HeaderText = "Teléfono", DataPropertyName = nameof(PedidoDespachadorResumen.Telefono), Width = 110 },
             new DataGridViewTextBoxColumn { HeaderText = "Dirección", DataPropertyName = nameof(PedidoDespachadorResumen.Direccion), Width = 220 },
-            new DataGridViewTextBoxColumn { HeaderText = "Zona", DataPropertyName = nameof(PedidoDespachadorResumen.Referencia), Width = 130 },
+            new DataGridViewTextBoxColumn { HeaderText = "Referencia", DataPropertyName = nameof(PedidoDespachadorResumen.Referencia), Width = 130 },
             new DataGridViewTextBoxColumn { HeaderText = "Empacador", DataPropertyName = nameof(PedidoDespachadorResumen.Empacador), Width = 110 },
             new DataGridViewTextBoxColumn { HeaderText = "Motorizado", DataPropertyName = nameof(PedidoDespachadorResumen.Motorizado), Width = 110 },
             new DataGridViewTextBoxColumn { HeaderText = "H.Asigna", DataPropertyName = nameof(PedidoDespachadorResumen.FechaAsignacion), Width = 110, DefaultCellStyle = new DataGridViewCellStyle { Format = "dd/MM HH:mm" } },
@@ -161,7 +161,7 @@ public sealed class DespachadorForm : Form
         btnUltimo.Click += (_, _) => SeleccionarIndice(_grid.Rows.Count - 1);
         _grid.CellDoubleClick += (_, _) => MostrarDetalle();
 
-        _timer = new Timer { Interval = 30000 };
+        _timer = new System.Windows.Forms.Timer { Interval = 30000 };
         _timer.Tick += async (_, _) =>
         {
             if (!Visible) return;
@@ -383,7 +383,7 @@ public sealed class DespachadorForm : Form
         detalle.AppendLine($"Cliente: {pedido.Cliente}");
         detalle.AppendLine($"Teléfono: {pedido.Telefono}");
         detalle.AppendLine($"Dirección: {pedido.Direccion}");
-        detalle.AppendLine($"Zona: {pedido.Referencia}");
+        detalle.AppendLine($"Referencia: {pedido.Referencia}");
         detalle.AppendLine($"Empacador: {pedido.Empacador}");
         detalle.AppendLine($"Motorizado: {pedido.Motorizado}");
         detalle.AppendLine($"H.Asigna: {(pedido.FechaAsignacion.HasValue ? pedido.FechaAsignacion.Value.ToString("dd/MM/yyyy HH:mm") : "-")}");
