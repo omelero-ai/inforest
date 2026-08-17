@@ -17,6 +17,7 @@ public interface IPedidoDeliveryRepository
     Task<IEnumerable<PedidoDelivery>> ObtenerPorEstadoAsync(EstadoDelivery estado, DateTime fechaInicio, DateTime fechaFin, CancellationToken cancellationToken = default);
     Task<IEnumerable<PedidoReasignacionMotorizado>> ObtenerPedidosReasignacionAsync(DateTime fechaInicio, DateTime fechaFin, string? criterioPedido, CancellationToken cancellationToken = default);
     Task<IEnumerable<PedidoDelivery>> ObtenerParaDespachadorAsync(DateTime fechaInicio, DateTime fechaFin, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<PedidoDeliverySeguimiento>> ObtenerSeguimientoEntregadosAsync(DateTime fechaInicio, DateTime fechaFin, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<PedidoDespachadorResumen>> ObtenerResumenDespachadorAsync(DateTime fechaInicio, DateTime fechaFin, CancellationToken cancellationToken = default);
     Task<PedidoDespachadorResumen?> ObtenerResumenDespachadorPorPedidoAsync(string codigoPedido, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<OperadorDespachoItem>> ObtenerMotorizadosActivosDespachoAsync(CancellationToken cancellationToken = default);

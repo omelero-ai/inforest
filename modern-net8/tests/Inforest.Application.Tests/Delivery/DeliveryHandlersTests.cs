@@ -201,6 +201,50 @@ public class DeliveryHandlersTests
         Assert.True(result.EsExitoso);
         mockCentral.Verify(r => r.ModificarEstadoDeliveryAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
+
+    [Fact]
+    public async Task ObtenerSeguimientoEntregados_RangoValido_RetornaFilas()
+    {
+        var repo = new Mock<IPedidoDeliveryRepository>();
+        repo.Setup(r => r.ObtenerSeguimientoEntregadosAsync(
+                It.IsAny<DateTime>(),
+                It.IsAny<DateTime>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([
+                new PedidoDeliverySeguimiento("P001", new DateTime(2026, 8, 17, 12, 0, 0), "USR", "001", "999111222", "CLIENTE", "EMP", "MOT",
+                    new DateTime(2026, 8, 17, 12, 10, 0), new DateTime(2026, 8, 17, 12, 12, 0), new DateTime(2026, 8, 17, 12, 30, 0),
+                    "REF", "DIR", "ZONA")
+            ]);
+
+        var handler = new ObtenerPedidosSeguimientoDeliveryEntregadosHandler(repo.Object);
+        var result = await handler.HandleAsync(
+            new ObtenerPedidosSeguimientoDeliveryEntregadosQuery(
+                new DateTime(2026, 8, 17, 9, 30, 0),
+                new DateTime(2026, 8, 17, 10, 45, 0)));
+
+        Assert.True(result.EsExitoso);
+        Assert.Single(result.Valor!);
+        repo.Verify(r => r.ObtenerSeguimientoEntregadosAsync(
+            new DateTime(2026, 8, 17, 0, 0, 0),
+            It.Is<DateTime>(f => f.Date == new DateTime(2026, 8, 17) && f.Hour == 23 && f.Minute == 59 && f.Second == 59),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ObtenerSeguimientoEntregados_RangoInvalido_RetornaError()
+    {
+        var repo = new Mock<IPedidoDeliveryRepository>();
+        var handler = new ObtenerPedidosSeguimientoDeliveryEntregadosHandler(repo.Object);
+
+        var result = await handler.HandleAsync(
+            new ObtenerPedidosSeguimientoDeliveryEntregadosQuery(
+                new DateTime(2026, 8, 18),
+                new DateTime(2026, 8, 17)));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("DELIVERY_RANGO_INVALIDO", result.CodigoError);
+        repo.Verify(r => r.ObtenerSeguimientoEntregadosAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
 }
 
 /// <summary>

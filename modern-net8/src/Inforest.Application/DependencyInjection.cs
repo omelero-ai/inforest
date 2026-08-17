@@ -160,6 +160,7 @@ public static class DependencyInjection
         services.AddScoped<RevertirEntregaCentralHandler>();
         services.AddScoped<ModificarFechaProgramadaDeliveryHandler>();
         services.AddScoped<ObtenerPedidosSeguimientoDeliveryHandler>();
+        services.AddScoped<ObtenerPedidosSeguimientoDeliveryEntregadosHandler>();
         // POS-FUNC-036: Búsqueda de Clientes Delivery
         services.AddScoped<ObtenerClientesDeliveryBusquedaHandler>();
         services.AddScoped<ObtenerDetalleClienteDeliveryHandler>();

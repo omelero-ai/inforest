@@ -129,6 +129,44 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<PedidoDeliverySeguimiento>> ObtenerSeguimientoEntregadosAsync(
+        DateTime fechaInicio,
+        DateTime fechaFin,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT tCodigoPedido AS CodigoPedido,
+                   fFecha AS FechaRegistro,
+                   tUsuario AS Usuario,
+                   tCaja AS Caja,
+                   tTelefono AS Telefono,
+                   Cliente AS Cliente,
+                   Empacador AS Empacador,
+                   Motorizado AS Motorizado,
+                   fAsignacion AS FechaAsignacion,
+                   fSalida AS FechaSalida,
+                   fLlegada AS FechaLlegada,
+                   Referencia AS Referencia,
+                   tDireccion AS Direccion,
+                   Zona AS Zona
+            FROM vDespachador
+            WHERE tTipoPedido = '02'
+              AND tEstadoPedido = '02'
+              AND ISNULL(fLlegada, 0) <> 0
+              AND fFecha >= @FechaInicio
+              AND fFecha <= @FechaFin
+            ORDER BY tCodigoPedido
+            """;
+        var rows = await conn.QueryAsync<PedidoDeliverySeguimiento>(sql, new
+        {
+            FechaInicio = fechaInicio,
+            FechaFin = fechaFin
+        });
+        return rows.ToList();
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<PedidoDespachadorResumen>> ObtenerResumenDespachadorAsync(
         DateTime fechaInicio,
         DateTime fechaFin,
