@@ -92,7 +92,7 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Entidades Pedido, DetallePedido, DetalleCombo
 
-**Estado:** IN_PROGRESS
+**Estado:** COMPLETED
 
 **Evidencia:** CONFIRMED
 
