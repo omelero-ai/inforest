@@ -53,6 +53,9 @@ public static class DependencyInjection
         services.AddScoped<ObtenerMesasActivosHandler>();
         services.AddScoped<CrearMesaHandler>();
         services.AddScoped<ActualizarMesaHandler>();
+        services.AddScoped<CambiarEstadoMesaHandler>();
+        services.AddScoped<ObtenerMesasJuntadasHandler>();
+        services.AddScoped<ActualizarJuntaMesasHandler>();
         services.AddScoped<ObtenerSalonPorCodigoHandler>();
         services.AddScoped<ObtenerSalonesActivosHandler>();
         services.AddScoped<CrearSalonHandler>();
@@ -77,6 +80,9 @@ public static class DependencyInjection
         services.AddScoped<ObtenerPedidoPorCodigoHandler>();
         services.AddScoped<ObtenerPedidosPorTurnoHandler>();
         services.AddScoped<ObtenerPedidosPorMesaHandler>();
+        services.AddScoped<ObtenerPedidosSinMesaHandler>();
+        services.AddScoped<ObtenerPedidosCorrelativoHandler>();
+        services.AddScoped<ObtenerDocumentosAgrupadosPedidoHandler>();
 
         // W5: Venta / Documentos — Handlers CQRS (BR-002, BR-013)
         services.AddScoped<EmitirDocumentoHandler>();
@@ -113,9 +119,11 @@ public static class DependencyInjection
 
         // P3-09: Delivery, Despacho, Motorizados y Centralización — Handlers
         services.AddScoped<CrearClienteDeliveryHandler>();
+        services.AddScoped<ObtenerSiguienteCodigoClienteDeliveryHandler>();
         services.AddScoped<ActualizarClienteDeliveryHandler>();
         services.AddScoped<ActualizarFotoClienteDeliveryHandler>();
         services.AddScoped<BuscarClienteDeliveryHandler>();
+        services.AddScoped<ObtenerClienteDeliveryPorCodigoHandler>();
         services.AddScoped<ObtenerClientesFrecuentesHandler>();
         services.AddScoped<ObtenerTarjetasProximidadHandler>();
         services.AddScoped<ObtenerMovimientosTarjetaProximidadHandler>();
@@ -147,6 +155,11 @@ public static class DependencyInjection
         services.AddScoped<RevertirEntregaCentralHandler>();
         services.AddScoped<ModificarFechaProgramadaDeliveryHandler>();
         services.AddScoped<ObtenerPedidosSeguimientoDeliveryHandler>();
+        // POS-FUNC-036: Búsqueda de Clientes Delivery
+        services.AddScoped<ObtenerClientesDeliveryBusquedaHandler>();
+        services.AddScoped<ObtenerDetalleClienteDeliveryHandler>();
+        services.AddScoped<ObtenerEstadisticasClienteDeliveryHandler>();
+        services.AddScoped<ObtenerTiendasClienteDeliveryHandler>();
 
         // POS-FUNC-014: Importación de pedidos externos desde ALMACEN
         services.AddScoped<ObtenerRequerimientosPendientesHandler>();

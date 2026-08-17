@@ -187,8 +187,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
 |---|---|---|---|---|---|
-| `frmAcceso.frm` | Form | `src/Inforest.Desktop/Form1.cs` | WinForms Form | IN_PROGRESS | `modern-net8/src/Inforest.Desktop/Form1.cs`, `modern-net8/src/Inforest.Desktop/Form1.Designer.cs` |
-| `frmAcceso.frm` / `USUARIO.INI` | Session bootstrap | `ISessionService` + `SessionService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/ISessionService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/SessionService.cs` |
+| `frmAcceso.frm` | Form | `src/Inforest.Desktop/Form1.cs` | WinForms Form | COMPLETED | `modern-net8/src/Inforest.Desktop/Form1.cs`, `modern-net8/src/Inforest.Desktop/Form1.Designer.cs` |
+| `frmAcceso.frm` / `USUARIO.INI` | Session bootstrap | `Form1` + `ISessionService` + `SessionService` | Form + Interface + Class | COMPLETED | `modern-net8/src/Inforest.Desktop/Form1.cs`, `modern-net8/src/Inforest.Application/Interfaces/ISessionService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/SessionService.cs` |
 | `frmDiaContable.frm` / `clsDiaContable.cls` (POS-FUNC-009) | Form + Class | `FrmDiaContable` + `AperturarDiaContableHandler` + `CerrarDiaContableHandler` + `ObtenerDiaContableHandler` + `IDiaContableService` (extendido: `CerrarDiaContableAsync`, `ObtenerFechaMaximaDiaContableAsync`) | WinForm + Handlers + Interface | MIGRATED | `src/Inforest.Desktop/Turno/FrmDiaContable.cs`, `src/Inforest.Application/Turno/DiaContableHandlers.cs`, `src/Inforest.Infrastructure/Turno/DiaContableService.cs` — Tests: `DiaContableHandlerTests` (10) |
 | `frmPedido.frm` (POS-FUNC-003) | Form | `FrmPedido` + `Pedido` + `DetallePedido` + `CreatePedidoHandler` + `UpdatePedidoHandler` + `ObtenerPedidoHandlers` + `PedidoRepository` | WinForm + Domain + Handlers + Repository | MIGRATED | `modern-net8/src/Inforest.Desktop/Pedidos/FrmPedido.cs`, `modern-net8/src/Inforest.Domain/Entities/Ventas/Pedido.cs`, `modern-net8/src/Inforest.Application/Pedidos/`, `modern-net8/src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` — Tests: `CreatePedidoHandlerTests` + `UpdatePedidoHandlerTests` + `ObtenerPedidoHandlerTests` + `PedidoTests` + `PedidoExtendidoTests` |
 | `TACCESO` / `TGRUPOACCESO` | RBAC | `IRbacService` + `RbacService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IRbacService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/RbacService.cs` |
@@ -203,7 +203,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
 |---|---|---|---|---|---|
-| `frmNuevoDelivery.frm` | Form | `NuevoDeliveryForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/NuevoDeliveryForm.cs` |
+| `frmNuevoDelivery.frm` | Form | `NuevoDeliveryForm` + `ObtenerSiguienteCodigoClienteDeliveryHandler` + `ObtenerClienteDeliveryPorCodigoHandler` | WinForm + Handlers | MIGRATED | `src/Inforest.Desktop/Delivery/NuevoDeliveryForm.cs`, `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/ClienteDeliveryRepository.cs` |
+| `frmClienteDelivery.frm` | Form | `FrmClienteDelivery` + `ObtenerClientesDeliveryListadoHandler` + `ClienteDeliveryListadoItem` | WinForm + Handler + DTO | MIGRATED | `src/Inforest.Desktop/Delivery/FrmClienteDelivery.cs`, `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
 | `frmDespachador.frm` | Form | `DespachadorForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/DespachadorForm.cs` |
 | `frmCentralPedidos.frm` | Form | `CentralPedidosForm` (extendido: ConfirmarEntrega + RevertirEntrega + ModificarFecha) | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/CentralPedidosForm.cs` |
 | `frmPedidoDelivery.frm` | Form | `FrmPedidoDelivery` | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/FrmPedidoDelivery.cs` |
@@ -228,6 +229,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `MPEDIDO.lEntregado / tusuarioentregado / fregentregado` | Field | `ConfirmarEntregaCentralHandler` + `RevertirEntregaCentralHandler` + `PedidoDeliveryRepository.ConfirmarEntregaAsync/RevertirEntregaAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/PedidoDeliveryRepository.cs` |
 | `MPEDIDO.fProgramacion / fregistro` (Central) | Field | `ModificarFechaProgramadaDeliveryHandler` + `PedidoDeliveryRepository.ModificarFechaProgramadaAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/PedidoDeliveryRepository.cs` |
 | `vDespachador` (seguimiento) | View | `ObtenerPedidosSeguimientoDeliveryHandler` + `FrmPedidoDelivery` | Handler + WinForm | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Desktop/Delivery/FrmPedidoDelivery.cs` |
+| `vDelivery` (grilla mantenimiento principal) | View | `IClienteDeliveryReadRepository.ListarMantenimientoAsync` + `ClienteDeliveryReadRepository` | Interface + Implementation | MIGRATED | `src/Inforest.Application/Delivery/IClienteDeliveryReadRepository.cs`, `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
 | `spRep_AnaliticoMotorizadoIntegrado` | SP | *(reporte FastReport pendiente)* | Report | NOT_STARTED | — |
 | `frmOrdenesConsola.frm` | Form | `ObtenerOrdenesExternasHandler` + `RappiOrderAdapter` | Handler+Service | IN_PROGRESS | `src/Inforest.Application/Delivery/RappiHandlers.cs` |
 | `(test etapa 9 domain)` | — | `DeliveryDomainTests` (12 tests) + `MotorizadoDomainTests` (11 tests) | xUnit | IN_PROGRESS | `tests/Inforest.Domain.Tests/Delivery/` |
@@ -543,6 +545,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
 |---|---|---|---|---|---|
 | `FrmTarjetaAproximidad.frm` + `FrmTarjetaAproximidadDetalle.frm` | Form | `FrmTarjetaProximidad` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmTarjetaProximidad.cs` |
+| `FrmMovimientoTarjetas.frm` | Form (shell vacío + funcionalidad en `FrmTarjetaAproximidad.cmdOpcion(5)`) | `FrmMovimientoTarjetas` | WinForm | MIGRATED | `src/Inforest.Desktop/Clientes/FrmMovimientoTarjetas.cs` |
 | `TTARJETASRFID` | Table | `TarjetaProximidad` + `ITarjetaProximidadRepository` + `TarjetaProximidadRepository` | Entity + Interface + Class | MIGRATED | `src/Inforest.Domain/Entities/Delivery/TarjetaProximidad.cs` + `src/Inforest.Application/Delivery/TarjetaProximidadHandlers.cs` + `src/Inforest.Infrastructure/Delivery/TarjetaProximidadRepository.cs` |
 | `TMOVIMIENTOTARJETASRFID` | Table | `MovimientoTarjetaProximidad` + `ObtenerMovimientosTarjetaProximidadHandler` | Record + Handler | MIGRATED | `src/Inforest.Domain/Entities/Delivery/TarjetaProximidad.cs` + `src/Inforest.Application/Delivery/TarjetaProximidadHandlers.cs` |
 | `TDELIVERY` (búsqueda cliente asociado) | Table | `IClienteDeliveryRepository` + selector modal en `FrmTarjetaProximidad` | Interface + UI | MIGRATED | `src/Inforest.Domain/Repositories/IClienteDeliveryRepository.cs` + `src/Inforest.Desktop/Clientes/FrmTarjetaProximidad.cs` |
@@ -553,3 +556,51 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `TTARJETASRFID.MontoDisponible` | Table | `RegistrarRecargaTarjetaHandler` + `RecargaTarjetaRepository` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/RecargaTarjetaHandlers.cs` + `src/Inforest.Infrastructure/Delivery/RecargaTarjetaRepository.cs` |
 | (tests BR-RFID-005..007) | — | `RecargaTarjetaHandlerTests` (3) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Delivery/RecargaTarjetaHandlerTests.cs` |
 | (tests BR-RFID-001..004) | — | `TarjetaProximidadTests` (7) + `TarjetaProximidadHandlerTests` (7) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/Delivery/TarjetaProximidadTests.cs` + `tests/Inforest.Application.Tests/Delivery/TarjetaProximidadHandlerTests.cs` |
+| `frmMesas.frm` | Form | `FrmMesas` | WinForms Form | MIGRATED | `src/Inforest.Desktop/Maestros/FrmMesas.cs` |
+| `EstadoMesa` (VB6 '01'..'06') | Enum | `EstadoMesa` (Libre/Ocupada/Reservada/Sucia/Bloqueada/FueraDeServicio/EnCuenta) | Enum | MIGRATED | `src/Inforest.Domain/Entities/Maestros/EstadoMesa.cs` |
+| `TMESA.tEstado` ('01'..'06') | Table column | `MesaRepository` CASE mapping | Repository | MIGRATED | `src/Inforest.Infrastructure/Maestros/MesaRepository.cs` |
+| `MPEDIDO` (activos sin mesa) | Table | `ObtenerPedidosSinMesaHandler` + `IPedidoReadRepository.ObtenerActivosSinMesaAsync` | Handler + Interface | MIGRATED | `src/Inforest.Application/Pedidos/PedidoHandlers.cs` |
+| `PedidoSinMesaVista` | — | `PedidoSinMesaVista` record | DTO | MIGRATED | `src/Inforest.Application/Pedidos/DetallePedidoVista.cs` |
+| (tests BR-MESAS-001..005) | — | `ObtenerPedidosSinMesaHandlerTests` (3) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Pedidos/ObtenerPedidosSinMesaHandlerTests.cs` |
+| `frmNumPad.frm` | Form | `FrmNumPad` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Shared/FrmNumPad.cs` |
+| `frmCambioPropina.frm` | Form | `FrmCambioPropina` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Ventas/FrmCambioPropina.cs` |
+| `tPropina` ('01'/'02') + `nPropina` | VB6 global vars | `FrmCambioPropina.TipoPropina` + `PropinaMN`/`PropinaME` | Properties | MIGRATED | `src/Inforest.Desktop/Ventas/FrmCambioPropina.cs` |
+| `frmMesaConsulta.frm` | Form | `FrmMesaConsulta` | WinForms Form | MIGRATED | `src/Inforest.Desktop/Maestros/FrmMesaConsulta.cs` |
+| `UPDATE TMESA SET tEstadoMesa` | SQL | `IMesaRepository.CambiarEstadoAsync` + `MesaRepository.CambiarEstadoAsync` | Repository | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/MesaRepository.cs` |
+| `sTipo="V"/"M"/default` | VB6 global var | `ModoConsulta` enum (Visual/Mover/Seleccionar) | Enum | MIGRATED | `src/Inforest.Desktop/Maestros/FrmMesaConsulta.cs` |
+| (tests BR-MESACONSULTA-001..004) | — | `CambiarEstadoMesaHandlerTests` (4) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Maestros/CambiarEstadoMesaHandlerTests.cs` |
+| `frmJuntaMesa.frm` | Form | `FrmJuntaMesa` | WinForms Form | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmJuntaMesa.cs` |
+| `TPEDIDOMESA` (DELETE+INSERT) | Table | `IJuntaMesaRepository.ActualizarJuntaMesasAsync` + `JuntaMesaRepository` | Repository | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/JuntaMesaRepository.cs` |
+| `TPEDIDOMESA` (SELECT) | Table | `IJuntaMesaRepository.ObtenerMesasJuntadasAsync` + `ObtenerMesasJuntadasHandler` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/MaestrosHandlers.cs` |
+| `frmPedidoCorrelativo.frm` | Form | `FrmPedidoCorrelativo` | WinForms Form | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmPedidoCorrelativo.cs` |
+| `frmPedidoDetalle.frm` | Form | `FrmPedidoCorrelativo` (tab Ítems) | Inline Tab Panel | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmPedidoCorrelativo.cs` |
+| `frmPedidoAnterior.frm` | Form | `FrmPedidoCorrelativo` (tab Docs) | Inline Tab Panel | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmPedidoCorrelativo.cs` |
+| `vPedidoCorrelativo` | View | `IPedidoReadRepository.ObtenerCorrelativoAsync` + `PedidoRepository` | Repository | MIGRATED | `src/Inforest.Application/Pedidos/IPedidoReadRepository.cs` + `src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` |
+| `vDocumentoAgrupado` | View | `IPedidoReadRepository.ObtenerDocumentosAgrupadosPedidoAsync` + `PedidoRepository` | Repository | MIGRATED | `src/Inforest.Application/Pedidos/IPedidoReadRepository.cs` + `src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` |
+
+## Componentes POS-FUNC-035 — Búsqueda Rápida Genérica
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmBusquedaRapida.frm` | Form (diálogo genérico de búsqueda) | `FrmBusquedaRapida` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Shared/FrmBusquedaRapida.cs` |
+| `BusquedaItem` | — | `BusquedaItem` record | DTO | MIGRATED | `src/Inforest.Desktop/Shared/BusquedaItem.cs` |
+| `BusquedaResultado` (sCodigo + sDescrip) | Global vars | `BusquedaResultado` record | DTO | MIGRATED | `src/Inforest.Desktop/Shared/BusquedaItem.cs` |
+| (BR-BUSQ-001/002/003) | — | `FrmBusquedaRapida` filtrado + selección + cancelación | UI Logic | MIGRATED | `src/Inforest.Desktop/Shared/FrmBusquedaRapida.cs` |
+
+---
+
+## Componentes POS-FUNC-036 — Búsqueda de Cliente Delivery
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmBusquedaDelivery.frm` | Form (búsqueda/selección cliente delivery) | `FrmBusquedaDelivery` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Delivery/FrmBusquedaDelivery.cs` |
+| `TDELIVERY LEFT JOIN vZona` (grilla principal) | SQL Query | `IClienteDeliveryReadRepository.ListarActivosConZonaAsync` + `ClienteDeliveryReadRepository` | Interface + Implementation | MIGRATED | `src/Inforest.Application/Delivery/IClienteDeliveryReadRepository.cs`, `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
+| `vDelivery WHERE Codigo=…` (panel detalle) | SQL Query | `IClienteDeliveryReadRepository.ObtenerDetalleAsync` | Method | MIGRATED | `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
+| `MPEDIDO/DPEDIDO` estadísticas históricas | SQL Query | `IClienteDeliveryReadRepository.ObtenerEstadisticasAsync` | Method | MIGRATED | `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
+| `vTienda WHERE lActivo=1 AND tCodigoDelivery=…` | SQL Query | `IClienteDeliveryReadRepository.ObtenerTiendasAsync` | Method | MIGRATED | `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
+| `frmBusquedaDelivery.frm` DTOs grilla | — | `ClienteDeliveryBusquedaItem` | Record DTO | MIGRATED | `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
+| `frmBusquedaDelivery.frm` panel detalle | — | `ClienteDeliveryDetalleBusqueda` | Record DTO | MIGRATED | `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
+| `frmBusquedaDelivery.frm` "Otros Datos" | — | `EstadisticasClienteDelivery` | Record DTO | MIGRATED | `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
+| `vTienda` item tienda | — | `TiendaDeliveryItem` | Record DTO | MIGRATED | `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
+| Tienda_Click sub-dialog | — | `FrmBusquedaTiendasDelivery` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Delivery/FrmBusquedaTiendasDelivery.cs` |
+| (BR-DEL-036) | — | `ObtenerClientesDeliveryBusquedaHandler` + `ObtenerDetalleClienteDeliveryHandler` + `ObtenerEstadisticasClienteDeliveryHandler` + `ObtenerTiendasClienteDeliveryHandler` | CQRS Handlers | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs` |

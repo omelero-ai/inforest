@@ -22,6 +22,8 @@ public class DeliveryHandlersTests
         var mockRepo = new Mock<IClienteDeliveryRepository>();
         mockRepo.Setup(r => r.ObtenerPorCodigoAsync("DEL001", It.IsAny<CancellationToken>()))
                 .ReturnsAsync((ClienteDelivery?)null);
+        mockRepo.Setup(r => r.ObtenerPorTelefonoAsync("987654321", It.IsAny<CancellationToken>()))
+                .ReturnsAsync((ClienteDelivery?)null);
         mockRepo.Setup(r => r.InsertarAsync(It.IsAny<ClienteDelivery>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -43,6 +45,8 @@ public class DeliveryHandlersTests
         var mockRepo = new Mock<IClienteDeliveryRepository>();
         mockRepo.Setup(r => r.ObtenerPorCodigoAsync("DEL001", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(clienteExistente);
+        mockRepo.Setup(r => r.ObtenerPorTelefonoAsync("987654321", It.IsAny<CancellationToken>()))
+                .ReturnsAsync((ClienteDelivery?)null);
 
         var handler = new CrearClienteDeliveryHandler(mockRepo.Object);
         var cmd = new CrearClienteDeliveryCommand(
@@ -53,6 +57,35 @@ public class DeliveryHandlersTests
 
         Assert.False(result.EsExitoso);
         Assert.Equal("DELIVERY_CLIENTE_YA_EXISTE", result.CodigoError);
+    }
+
+    [Fact]
+    public async Task CrearCliente_SinTelefonoNiIdentidad_RetornaFallo()
+    {
+        var mockRepo = new Mock<IClienteDeliveryRepository>();
+        var handler = new CrearClienteDeliveryHandler(mockRepo.Object);
+        var cmd = new CrearClienteDeliveryCommand(
+            "DEL002", "01", "García", "Juan", null,
+            "Av Lima", null, null, null, null, null, null, null, null, null);
+
+        var result = await handler.HandleAsync(cmd);
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("DELIVERY_TELEFONO_O_IDENTIDAD_REQUERIDO", result.CodigoError);
+    }
+
+    [Fact]
+    public async Task ObtenerSiguienteCodigo_MaximoNumerico_RetornaSiguiente()
+    {
+        var mockRepo = new Mock<IClienteDeliveryRepository>();
+        mockRepo.Setup(r => r.ObtenerMaximoCodigoAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync("0000123");
+
+        var handler = new ObtenerSiguienteCodigoClienteDeliveryHandler(mockRepo.Object);
+        var result = await handler.HandleAsync(new ObtenerSiguienteCodigoClienteDeliveryQuery());
+
+        Assert.True(result.EsExitoso);
+        Assert.Equal("0000124", result.Valor);
     }
 
     [Fact]
@@ -84,6 +117,23 @@ public class DeliveryHandlersTests
 
         Assert.False(result.EsExitoso);
         Assert.Equal("DELIVERY_CLIENTE_NO_ENCONTRADO", result.CodigoError);
+    }
+
+    [Fact]
+    public async Task ObtenerListadoMantenimiento_RetornaItems()
+    {
+        var mockReadRepo = new Mock<IClienteDeliveryReadRepository>();
+        mockReadRepo.Setup(r => r.ListarMantenimientoAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([
+                new ClienteDeliveryListadoItem("0000001", "FRECUENTE", "JUAN PEREZ", "999111222", "AV. 1", 12.5m, 0.5m, "ACTIVO", true)
+            ]);
+
+        var handler = new ObtenerClientesDeliveryListadoHandler(mockReadRepo.Object);
+        var result = await handler.HandleAsync(new ObtenerClientesDeliveryListadoQuery());
+
+        Assert.True(result.EsExitoso);
+        Assert.Single(result.Valor!);
+        Assert.Equal("0000001", result.Valor![0].Codigo);
     }
 
     // ── ActualizarEstadoDeliveryHandler ────────────────────────────────────────

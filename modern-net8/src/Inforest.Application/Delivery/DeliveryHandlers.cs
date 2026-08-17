@@ -33,6 +33,46 @@ public sealed record CrearClienteDeliveryCommand(
     string? Observacion,
     string? Email);
 
+public sealed record ObtenerSiguienteCodigoClienteDeliveryQuery;
+
+public sealed class ObtenerSiguienteCodigoClienteDeliveryHandler
+{
+    private readonly IClienteDeliveryRepository _repo;
+
+    public ObtenerSiguienteCodigoClienteDeliveryHandler(IClienteDeliveryRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<string>> HandleAsync(ObtenerSiguienteCodigoClienteDeliveryQuery _, CancellationToken ct = default)
+    {
+        var maximo = await _repo.ObtenerMaximoCodigoAsync(ct);
+        return Result.Ok(CodigoClienteDeliveryGenerator.Generar(maximo));
+    }
+}
+
+internal static class CodigoClienteDeliveryGenerator
+{
+    public static string Generar(string? maximoActual)
+    {
+        var codigo = (maximoActual ?? string.Empty).Trim().ToUpperInvariant();
+        if (string.IsNullOrWhiteSpace(codigo))
+            return "0000001";
+
+        if (codigo.All(char.IsDigit))
+            return (long.Parse(codigo) + 1).ToString(new string('0', Math.Max(7, codigo.Length)));
+
+        var prefijo = codigo[0];
+        var sufijo = codigo.Length > 1 ? codigo[1..] : "000001";
+        if (!sufijo.All(char.IsDigit))
+            return "0000001";
+
+        var numero = int.Parse(sufijo);
+        if (numero >= int.Parse(new string('9', sufijo.Length)))
+            return $"{(char)(prefijo + 1)}{new string('0', sufijo.Length - 1)}1";
+
+        return $"{prefijo}{(numero + 1).ToString(new string('0', sufijo.Length))}";
+    }
+}
+
 /// <summary>
 /// Handler de <see cref="CrearClienteDeliveryCommand"/>.
 /// </summary>
@@ -45,25 +85,46 @@ public sealed class CrearClienteDeliveryHandler
 
     public async Task<Result> HandleAsync(CrearClienteDeliveryCommand cmd, CancellationToken ct = default)
     {
-        var existente = await _repo.ObtenerPorCodigoAsync(cmd.CodigoDelivery, ct);
+        var codigoDelivery = string.IsNullOrWhiteSpace(cmd.CodigoDelivery)
+            ? CodigoClienteDeliveryGenerator.Generar(await _repo.ObtenerMaximoCodigoAsync(ct))
+            : cmd.CodigoDelivery.Trim().ToUpperInvariant();
+
+        if (string.IsNullOrWhiteSpace(cmd.Telefono) && string.IsNullOrWhiteSpace(cmd.NumeroIdentidad))
+            return Result.Fail("Ingrese el teléfono o número de identidad.", "DELIVERY_TELEFONO_O_IDENTIDAD_REQUERIDO");
+
+        var existente = await _repo.ObtenerPorCodigoAsync(codigoDelivery, ct);
         if (existente is not null)
             return Result.Fail("Ya existe un cliente delivery con ese código.", "DELIVERY_CLIENTE_YA_EXISTE");
 
-        var cliente = ClienteDelivery.Crear(
-            cmd.CodigoDelivery,
-            cmd.TipoCliente,
-            cmd.Apellido,
-            cmd.Nombre,
-            cmd.Telefono,
-            cmd.Direccion,
-            cmd.CodigoZona,
-            cmd.CodigoDistrito);
+        if (!string.IsNullOrWhiteSpace(cmd.Telefono))
+        {
+            var existenteTelefono = await _repo.ObtenerPorTelefonoAsync(cmd.Telefono.Trim(), ct);
+            if (existenteTelefono is not null)
+                return Result.Fail("Teléfono o Id existente.", "DELIVERY_TELEFONO_EXISTENTE");
+        }
 
         if (!string.IsNullOrWhiteSpace(cmd.TipoIdentidad) && !string.IsNullOrWhiteSpace(cmd.NumeroIdentidad))
-            cliente.AsignarIdentidad(cmd.TipoIdentidad, cmd.NumeroIdentidad);
+        {
+            var existenteIdentidad = await _repo.ObtenerPorIdentidadAsync(cmd.TipoIdentidad.Trim(), cmd.NumeroIdentidad.Trim(), ct);
+            if (existenteIdentidad is not null)
+                return Result.Fail("DNI existente.", "DELIVERY_IDENTIDAD_EXISTENTE");
+        }
+
+        var cliente = ClienteDelivery.Crear(
+            codigoDelivery,
+            cmd.TipoCliente?.Trim(),
+            cmd.Apellido?.Trim().ToUpperInvariant(),
+            cmd.Nombre?.Trim().ToUpperInvariant(),
+            cmd.Telefono?.Trim(),
+            cmd.Direccion?.Trim().ToUpperInvariant(),
+            cmd.CodigoZona?.Trim(),
+            cmd.CodigoDistrito?.Trim());
+
+        if (!string.IsNullOrWhiteSpace(cmd.TipoIdentidad) && !string.IsNullOrWhiteSpace(cmd.NumeroIdentidad))
+            cliente.AsignarIdentidad(cmd.TipoIdentidad.Trim(), cmd.NumeroIdentidad.Trim());
 
         if (!string.IsNullOrWhiteSpace(cmd.CodigoTarjeta) && !string.IsNullOrWhiteSpace(cmd.NumeroTarjeta))
-            cliente.AsignarTarjeta(cmd.CodigoTarjeta, cmd.NumeroTarjeta);
+            cliente.AsignarTarjeta(cmd.CodigoTarjeta.Trim(), cmd.NumeroTarjeta.Trim());
 
         await _repo.InsertarAsync(cliente, ct);
         return Result.Ok();
@@ -85,6 +146,8 @@ public sealed record ActualizarClienteDeliveryCommand(
     string? Referencia,
     string? CodigoZona,
     string? CodigoDistrito,
+    string? TipoIdentidad,
+    string? NumeroIdentidad,
     string? Observacion,
     string? Email);
 
@@ -98,14 +161,39 @@ public sealed class ActualizarClienteDeliveryHandler
 
     public async Task<Result> HandleAsync(ActualizarClienteDeliveryCommand cmd, CancellationToken ct = default)
     {
+        if (string.IsNullOrWhiteSpace(cmd.Telefono) && string.IsNullOrWhiteSpace(cmd.NumeroIdentidad))
+            return Result.Fail("Ingrese el teléfono o número de identidad.", "DELIVERY_TELEFONO_O_IDENTIDAD_REQUERIDO");
+
         var cliente = await _repo.ObtenerPorCodigoAsync(cmd.CodigoDelivery, ct);
         if (cliente is null)
             return Result.Fail("No se encontró el cliente delivery.", "DELIVERY_CLIENTE_NO_ENCONTRADO");
 
+        if (!string.IsNullOrWhiteSpace(cmd.Telefono))
+        {
+            var existenteTelefono = await _repo.ObtenerPorTelefonoAsync(cmd.Telefono.Trim(), ct);
+            if (existenteTelefono is not null && !string.Equals(existenteTelefono.CodigoDelivery, cmd.CodigoDelivery, StringComparison.OrdinalIgnoreCase))
+                return Result.Fail("Teléfono o Id existente.", "DELIVERY_TELEFONO_EXISTENTE");
+        }
+
+        if (!string.IsNullOrWhiteSpace(cmd.TipoIdentidad) && !string.IsNullOrWhiteSpace(cmd.NumeroIdentidad))
+        {
+            var existenteIdentidad = await _repo.ObtenerPorIdentidadAsync(cmd.TipoIdentidad.Trim(), cmd.NumeroIdentidad.Trim(), ct);
+            if (existenteIdentidad is not null && !string.Equals(existenteIdentidad.CodigoDelivery, cmd.CodigoDelivery, StringComparison.OrdinalIgnoreCase))
+                return Result.Fail("DNI existente.", "DELIVERY_IDENTIDAD_EXISTENTE");
+
+            cliente.AsignarIdentidad(cmd.TipoIdentidad.Trim(), cmd.NumeroIdentidad.Trim());
+        }
+
         cliente.Actualizar(
-            cmd.Apellido, cmd.Nombre, cmd.Telefono, cmd.Direccion,
-            cmd.Referencia, cmd.CodigoZona, cmd.CodigoDistrito,
-            cmd.Observacion, cmd.Email);
+            cmd.Apellido?.Trim().ToUpperInvariant(),
+            cmd.Nombre?.Trim().ToUpperInvariant(),
+            cmd.Telefono?.Trim(),
+            cmd.Direccion?.Trim().ToUpperInvariant(),
+            cmd.Referencia?.Trim().ToUpperInvariant(),
+            cmd.CodigoZona?.Trim(),
+            cmd.CodigoDistrito?.Trim(),
+            cmd.Observacion?.Trim().ToUpperInvariant(),
+            cmd.Email?.Trim());
 
         await _repo.ActualizarAsync(cliente, ct);
         return Result.Ok();
@@ -270,6 +358,22 @@ public sealed class BuscarClienteDeliveryHandler
     {
         var clientes = await _repo.BuscarAsync(query.Apellido, query.Nombre, query.Telefono, query.CodigoDistrito, ct);
         return Result.Ok(clientes);
+    }
+}
+
+public sealed record ObtenerClienteDeliveryPorCodigoQuery(string CodigoDelivery);
+
+public sealed class ObtenerClienteDeliveryPorCodigoHandler
+{
+    private readonly IClienteDeliveryRepository _repo;
+
+    public ObtenerClienteDeliveryPorCodigoHandler(IClienteDeliveryRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<ClienteDelivery?>> HandleAsync(ObtenerClienteDeliveryPorCodigoQuery query, CancellationToken ct = default)
+    {
+        var cliente = await _repo.ObtenerPorCodigoAsync(query.CodigoDelivery, ct);
+        return Result.Ok(cliente);
     }
 }
 
@@ -484,5 +588,129 @@ public sealed class ObtenerPedidosSeguimientoDeliveryHandler
         var hoy = DateTime.Today;
         var pedidos = await _repo.ObtenerParaDespachadorAsync(hoy, hoy.AddDays(1).AddSeconds(-1), ct);
         return Result.Ok(pedidos);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// POS-FUNC-037 — Mantenimiento de Clientes Delivery (frmClienteDelivery.frm)
+// ──────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Obtiene el listado principal de clientes delivery para mantenimiento.
+/// Legacy: <c>frmClienteDelivery.frm</c> Form_Load — <c>SELECT … FROM vDelivery</c>.
+/// Reglas: BR-DEL-037.
+/// </summary>
+public sealed record ObtenerClientesDeliveryListadoQuery;
+
+/// <summary>Handler de <see cref="ObtenerClientesDeliveryListadoQuery"/>.</summary>
+public sealed class ObtenerClientesDeliveryListadoHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerClientesDeliveryListadoHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<IReadOnlyList<ClienteDeliveryListadoItem>>> HandleAsync(
+        ObtenerClientesDeliveryListadoQuery _, CancellationToken ct = default)
+    {
+        var items = await _repo.ListarMantenimientoAsync(ct);
+        return Result.Ok(items);
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// POS-FUNC-036 — Búsqueda de Clientes Delivery (frmBusquedaDelivery.frm)
+// ──────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Obtiene todos los clientes delivery activos para la grilla de búsqueda.
+/// Legacy: <c>frmBusquedaDelivery.frm</c> Form_Load — TDELIVERY LEFT JOIN vZona WHERE lActivo=1.
+/// Regla BR-DEL-036.
+/// </summary>
+public sealed record ObtenerClientesDeliveryBusquedaQuery;
+
+/// <summary>Handler de <see cref="ObtenerClientesDeliveryBusquedaQuery"/>.</summary>
+public sealed class ObtenerClientesDeliveryBusquedaHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerClientesDeliveryBusquedaHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<IReadOnlyList<ClienteDeliveryBusquedaItem>>> HandleAsync(
+        ObtenerClientesDeliveryBusquedaQuery _, CancellationToken ct = default)
+    {
+        var items = await _repo.ListarActivosConZonaAsync(ct);
+        return Result.Ok(items);
+    }
+}
+
+/// <summary>
+/// Obtiene el detalle de un cliente delivery para el panel lateral.
+/// Legacy: Sub Asigna() de <c>frmBusquedaDelivery.frm</c>.
+/// Regla BR-DEL-036.
+/// </summary>
+public sealed record ObtenerDetalleClienteDeliveryQuery(string CodigoDelivery);
+
+/// <summary>Handler de <see cref="ObtenerDetalleClienteDeliveryQuery"/>.</summary>
+public sealed class ObtenerDetalleClienteDeliveryHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerDetalleClienteDeliveryHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<ClienteDeliveryDetalleBusqueda?>> HandleAsync(
+        ObtenerDetalleClienteDeliveryQuery query, CancellationToken ct = default)
+    {
+        var detalle = await _repo.ObtenerDetalleAsync(query.CodigoDelivery, ct);
+        return Result.Ok(detalle);
+    }
+}
+
+/// <summary>
+/// Obtiene estadísticas históricas de un cliente delivery (panel "Otros Datos").
+/// Legacy: cmdOpcion(3) de <c>frmBusquedaDelivery.frm</c>.
+/// Regla BR-DEL-036.
+/// </summary>
+public sealed record ObtenerEstadisticasClienteDeliveryQuery(
+    string CodigoDelivery,
+    int DiasHistorico = 30);
+
+/// <summary>Handler de <see cref="ObtenerEstadisticasClienteDeliveryQuery"/>.</summary>
+public sealed class ObtenerEstadisticasClienteDeliveryHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerEstadisticasClienteDeliveryHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<EstadisticasClienteDelivery>> HandleAsync(
+        ObtenerEstadisticasClienteDeliveryQuery query, CancellationToken ct = default)
+    {
+        var stats = await _repo.ObtenerEstadisticasAsync(query.CodigoDelivery, query.DiasHistorico, ct);
+        return Result.Ok(stats);
+    }
+}
+
+/// <summary>
+/// Obtiene las tiendas/sucursales activas de un cliente delivery.
+/// Legacy: Tienda_Click de <c>frmBusquedaDelivery.frm</c> — vTienda WHERE lActivo=1 AND tCodigoDelivery=…
+/// </summary>
+public sealed record ObtenerTiendasClienteDeliveryQuery(string CodigoDelivery);
+
+/// <summary>Handler de <see cref="ObtenerTiendasClienteDeliveryQuery"/>.</summary>
+public sealed class ObtenerTiendasClienteDeliveryHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerTiendasClienteDeliveryHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<IReadOnlyList<TiendaDeliveryItem>>> HandleAsync(
+        ObtenerTiendasClienteDeliveryQuery query, CancellationToken ct = default)
+    {
+        var tiendas = await _repo.ObtenerTiendasAsync(query.CodigoDelivery, ct);
+        return Result.Ok(tiendas);
     }
 }

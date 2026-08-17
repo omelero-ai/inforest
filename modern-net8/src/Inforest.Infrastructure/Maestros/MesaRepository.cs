@@ -35,6 +35,8 @@ internal sealed class MesaRepository : IMesaRepository
                        WHEN '02' THEN 1
                        WHEN '03' THEN 2
                        WHEN '04' THEN 3
+                       WHEN '05' THEN 4
+                       WHEN '06' THEN 5
                        ELSE 0
                    END AS Estado
             FROM TMESA
@@ -62,6 +64,8 @@ internal sealed class MesaRepository : IMesaRepository
                        WHEN '02' THEN 1
                        WHEN '03' THEN 2
                        WHEN '04' THEN 3
+                       WHEN '05' THEN 4
+                       WHEN '06' THEN 5
                        ELSE 0
                    END AS Estado
             FROM TMESA
@@ -134,7 +138,27 @@ internal sealed class MesaRepository : IMesaRepository
         {
             EstadoMesa.Ocupada => "02",
             EstadoMesa.Reservada => "03",
-            EstadoMesa.EnCuenta => "04",
+            EstadoMesa.Sucia => "04",
+            EstadoMesa.Bloqueada => "05",
+            EstadoMesa.FueraDeServicio => "06",
+            EstadoMesa.EnCuenta => "02",  // en cuenta: sigue ocupada en legacy
             _ => "01"
         };
+
+    /// <summary>
+    /// Cambia el estado de una mesa directamente.
+    /// Legacy: UPDATE TMESA SET tEstadoMesa='XX' WHERE tCodigoMesa='...' (frmMesaConsulta.frm).
+    /// BR-MESACONSULTA-001.
+    /// </summary>
+    public async Task<bool> CambiarEstadoAsync(string codigoMesa, EstadoMesa nuevoEstado, CancellationToken ct = default)
+    {
+        using var cn = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        const string sql = "UPDATE TMESA SET tEstadoMesa = @Estado WHERE tCodigoMesa = @CodigoMesa";
+        var rows = await cn.ExecuteAsync(sql, new
+        {
+            Estado    = ToLegacyEstado(nuevoEstado),
+            CodigoMesa = codigoMesa
+        });
+        return rows > 0;
+    }
 }

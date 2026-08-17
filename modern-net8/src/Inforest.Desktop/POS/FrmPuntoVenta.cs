@@ -2,6 +2,7 @@ using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
 using Inforest.Application.Maestros;
 using Inforest.Application.Turno;
+using Inforest.Desktop.Delivery;
 using Inforest.Desktop.Forms.Reportes;
 using Inforest.Desktop.Pedidos;
 using Inforest.Desktop.Turno;
@@ -71,6 +72,9 @@ public class FrmPuntoVenta : Form
         reportes.DropDownItems.Add("Venta Mensual por Fechas", null, (_, _) => AbrirReporte<FrmRepVentaFechaReporte>());
         reportes.DropDownItems.Add("Cta Cte Integrado", null, (_, _) => AbrirReporte<FrmCtaCteIntegradoReporte>());
         menu.Items.Add(reportes);
+        var delivery = new ToolStripMenuItem("Delivery");
+        delivery.DropDownItems.Add("Clientes Frecuentes", null, (_, _) => AbrirFormulario<FrmClienteDelivery>());
+        menu.Items.Add(delivery);
         menu.Items.Add(new ToolStripMenuItem("Administración", null, (_, _) => MessageBox.Show("Abrir FrmAdministracion desde el shell principal.", Text)));
         menu.Items.Add(new ToolStripMenuItem("Salir", null, (_, _) => Close()));
 
@@ -203,6 +207,13 @@ public class FrmPuntoVenta : Form
     }
 
     private void AbrirReporte<T>() where T : Form
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var form = scope.ServiceProvider.GetRequiredService<T>();
+        form.ShowDialog(this);
+    }
+
+    private void AbrirFormulario<T>() where T : Form
     {
         using var scope = _serviceProvider.CreateScope();
         var form = scope.ServiceProvider.GetRequiredService<T>();

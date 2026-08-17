@@ -92,7 +92,7 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Destino .NET:** Entidades Pedido, DetallePedido, DetalleCombo
 
-**Estado:** IN_PROGRESS
+**Estado:** COMPLETED
 
 **Evidencia:** CONFIRMED
 
@@ -934,9 +934,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** Si el cliente no existe, no debe ejecutarse la actualización.
 
-**Destino .NET:** `ActualizarFotoClienteDeliveryHandler`, `IClienteDeliveryRepository.ActualizarFotoAsync`, `ClienteDeliveryRepository.ActualizarFotoAsync`
+**Destino .NET:** `ActualizarFotoClienteDeliveryHandler`, `IClienteDeliveryRepository.ActualizarFotoAsync`, `ClienteDeliveryRepository.ActualizarFotoAsync`, `NuevoDeliveryForm`
 
-**Estado:** IN_PROGRESS
+**Estado:** MIGRATED
 
 ---
 
@@ -3248,4 +3248,366 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Resultado:** Inserta en `TMOVIMIENTOTARJETASRFID` y actualiza `TTARJETASRFID.MontoDisponible`.
 **Excepciones:** Si falla la actualización de saldo, se revierte la operación.
 **Destino .NET:** `RecargaTarjetaRepository.RegistrarRecargaAsync` + `RegistrarRecargaTarjetaHandler`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MESAS-001
+**Nombre:** Selección de mesa disponible para nuevo pedido
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `picMesa_Click` / `picAceptar_Click`
+**Descripción:** Solo se puede seleccionar y confirmar una mesa en estado Libre ('01') o Sucia ('04') para crear un nuevo pedido.
+**Condición:** `tEstadoMesa IN ('01', '04')` y usuario hace clic y confirma.
+**Resultado:** Mesa seleccionada con borde oscuro; al confirmar se retorna código de mesa, salón, adultos y niños al formulario llamador.
+**Excepciones:** Si no hay mesa seleccionada, muestra mensaje de advertencia.
+**Destino .NET:** `FrmMesas` + `EstadoMesa.Libre` / `EstadoMesa.Sucia` + evento `MesaSeleccionadaCodigo`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MESAS-002
+**Nombre:** Mesa ocupada abre detalle del pedido activo
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `picMesa_Click` — `Case Is = "02"` (Ocupada)
+**Descripción:** Al hacer clic sobre una mesa ocupada, el sistema obtiene el pedido activo de esa mesa y abre `frmDetallePedido` en modo modal.
+**Condición:** `tEstadoMesa = '02'` (Ocupada).
+**Resultado:** Se consulta `MPEDIDO WHERE tMesa = @mesa AND tEstadoPedido = '01'` y se pasa al detalle.
+**Excepciones:** Ninguna.
+**Destino .NET:** `FrmMesas` evento `MesaOcupadaSeleccionada` → caller abre `FrmDetallePedido`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MESAS-003
+**Nombre:** Mesas no interactivas (reservada, bloqueada, fuera de servicio)
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `picMesa_Click` — `Case Is = "03", "05", "06"`
+**Descripción:** Las mesas en estado Reservada, Bloqueada o Fuera de servicio no permiten ninguna acción al hacer clic.
+**Condición:** `tEstadoMesa IN ('03', '05', '06')`.
+**Resultado:** Sin acción (sin cambio de estado ni apertura de formulario).
+**Excepciones:** Ninguna.
+**Destino .NET:** `FrmMesas.MesaClick` — switch default sin acción.
+**Estado:** MIGRATED
+
+---
+
+## BR-MESAS-004
+**Nombre:** Confirmación con datos de ocupantes al crear pedido con mesa
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `picAceptar_Click`
+**Descripción:** Al aceptar mesa, se solicita confirmación y se captura la cantidad de adultos y niños que ocuparán la mesa.
+**Condición:** Mesa seleccionada en estado Libre o Sucia.
+**Resultado:** Retorna `CodigoMesa`, `CodigoSalon`, `NumAdultos`, `NumNinios` al llamador.
+**Excepciones:** Si usuario cancela confirmación, no se retorna nada.
+**Destino .NET:** `FrmMesas.BtnAceptar_Click` + propiedades `MesaSeleccionadaCodigo`, `NumAdultos`, `NumNinios`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MESAS-005
+**Nombre:** Panel de pedidos sin mesa asignada
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `Form_Load` — `RsGrilla = MPEDIDO WHERE tEstadoPedido='01' AND tTipoPedido<>'04' AND len(rtrim(tMesa))=0 AND tCaja=@caja`
+**Descripción:** El panel lateral muestra los pedidos activos que no tienen mesa asignada (delivery, barra, etc.) de la caja actual.
+**Condición:** Pedidos activos, tipo <> delivery externo ('04'), sin mesa, de la caja actual.
+**Resultado:** Lista de pedidos (código + observación) en panel derecho; doble clic abre el detalle del pedido seleccionado.
+**Excepciones:** Si no hay caja activa, el panel queda vacío.
+**Destino .NET:** `ObtenerPedidosSinMesaHandler` + `PedidoSinMesaVista` + `FrmMesas._lstSinMesa`.
+**Estado:** MIGRATED
+
+---
+
+## Módulo: Teclado Numérico (frmNumPad)
+
+### BR-NUMPAD-001
+**Nombre:** Entrada numérica universal (frmNumPad)
+**Origen:** Legacy/frmNumPad.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNumPad.frm`
+**Descripción:** El teclado numérico modal es el único mecanismo de entrada de valores numéricos en el sistema POS. Todos los formularios que requieran ingresar montos, cantidades o códigos numéricos lo usan. Establece `wEnter=True` al confirmar, `wEnter=False` al cancelar, y guarda el resultado en `sDescrip`.
+**Destino .NET:** `FrmNumPad` (Inforest.Desktop.Shared) — devuelve `Valor` (decimal) y `ValorTexto` (string), `DialogResult.OK` al confirmar.
+**Estado:** MIGRATED
+
+---
+
+## Módulo: Cambio de Propina (frmCambioPropina)
+
+### BR-PROPINA-001
+**Nombre:** Propina en moneda nacional
+**Origen:** Legacy/frmCambioPropina.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCambioPropina.frm`
+**Descripción:** Al seleccionar "Propina MN", se ingresa el monto mediante NumPad y se asigna `tPropina='01'` (moneda nacional). El monto MN se guarda en `nPropina`. El botón ME se resetea a 0.
+**Destino .NET:** `FrmCambioPropina.PropinaMN` + `TipoPropina="01"`
+**Estado:** MIGRATED
+
+### BR-PROPINA-002
+**Nombre:** Propina en moneda extranjera
+**Origen:** Legacy/frmCambioPropina.frm
+**Descripción:** Al seleccionar "Propina ME", se asigna `tPropina='02'` (moneda extranjera). El monto ME en `nPropina`. El botón MN se resetea a 0.
+**Destino .NET:** `FrmCambioPropina.PropinaME` + `TipoPropina="02"`
+**Estado:** MIGRATED
+
+### BR-PROPINA-003
+**Nombre:** Una sola moneda de propina activa
+**Origen:** Legacy/frmCambioPropina.frm
+**Descripción:** Solo puede haber propina en MN o en ME, nunca simultáneamente. Al seleccionar una, la otra se resetea a 0.
+**Destino .NET:** `FrmCambioPropina.IngresarPropina()` — resetea la moneda opuesta.
+**Estado:** MIGRATED
+
+### BR-PROPINA-004
+**Nombre:** Grabar requiere monto mayor a cero
+**Origen:** Legacy/frmCambioPropina.frm
+**Descripción:** El botón "Grabar" solo queda habilitado si el usuario ha ingresado al menos una propina con monto > 0. Si no se ha seleccionado propina (wFlag=False), wEnter queda False al cerrar con "Grabar".
+**Destino .NET:** `FrmCambioPropina._btnGrabar.Enabled` controlado por `PropinaMN > 0 || PropinaME > 0`.
+**Estado:** MIGRATED
+
+---
+
+## Módulo: Mapa de Consulta de Mesas (frmMesaConsulta)
+
+### BR-MESACONSULTA-001
+**Nombre:** No cambiar estado de mesa ocupada
+**Origen:** Legacy/frmMesaConsulta.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMesaConsulta.frm`
+**Descripción:** En modo Visual, el cambio de estado solo está permitido para mesas no ocupadas. Si `tEstadoMesa='02'` (Ocupada), la operación no se realiza y se muestra un mensaje. `IF RsMesa!tEstadoMesa = "02" Then Exit Sub`.
+**Destino .NET:** `CambiarEstadoMesaHandler` valida `mesa.Estado == EstadoMesa.Ocupada` → `Result.Fail("MESA_OCUPADA")`.
+**Estado:** MIGRATED
+
+### BR-MESACONSULTA-002
+**Nombre:** Menú contextual de cambio de estado
+**Origen:** Legacy/frmMesaConsulta.frm
+**Descripción:** Al hacer clic en una mesa en modo Visual, se presentan las opciones de estado disponibles (01-06 excepto el estado actual). La selección ejecuta el UPDATE en TMESA.
+**Destino .NET:** `FrmMesaConsulta.MostrarMenuEstadoAsync()` muestra ContextMenuStrip con estados disponibles.
+**Estado:** MIGRATED
+
+### BR-MESACONSULTA-003
+**Nombre:** Tres modos de operación
+**Origen:** Legacy/frmMesaConsulta.frm
+**Descripción:** El formulario opera en tres modos según `sTipo`: "V"=Visual (cambiar estado), "M"=Mover (seleccionar mesa destino para transferir pedido), default=Seleccionar (elegir mesa para nuevo pedido).
+**Destino .NET:** Enum `ModoConsulta` (Visual, Mover, Seleccionar).
+**Estado:** MIGRATED
+
+### BR-MESACONSULTA-004
+**Nombre:** Opción Sin Mesa
+**Origen:** Legacy/frmMesaConsulta.frm
+**Descripción:** En modo default (Seleccionar), la opción "Sin Mesa" permite asignar un pedido sin mesa física. Visible solo en ese modo. Establece `wMesa=True, sCodigo=""`.
+**Destino .NET:** `FrmMesaConsulta.EsSinMesa=true` al hacer clic en "Sin Mesa".
+**Estado:** MIGRATED
+
+---
+
+## Módulo: Junta de Mesas (frmJuntaMesa)
+
+### BR-JUNTA-001
+**Nombre:** Transacción de actualización de junta de mesas
+**Origen:** Legacy/frmJuntaMesa.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmJuntaMesa.frm`
+**Descripción:** Al confirmar la junta: (1) UPDATE TMESA SET tEstadoMesa='01' para las mesas previamente juntas; (2) DELETE TPEDIDOMESA para el pedido; (3) INSERT TPEDIDOMESA + UPDATE TMESA='06' para cada nueva mesa seleccionada. Todo en una transacción.
+**Destino .NET:** `JuntaMesaRepository.ActualizarJuntaMesasAsync` — transacción SQL.
+**Estado:** MIGRATED
+
+### BR-JUNTA-002
+**Nombre:** Mesas elegibles para junta
+**Origen:** Legacy/frmJuntaMesa.frm
+**Descripción:** Solo mesas en estado '01' (Libre) o '04' (Sucia) son elegibles para ser seleccionadas para la junta. Las mesas '02' (Ocupada), '03' (Reservada) y '05' (Bloqueada) no se pueden seleccionar.
+**Destino .NET:** `FrmJuntaMesa.RenderizarMesas()` — `Enabled = esElegible` donde elegible = Libre | Sucia | FueraDeServicio.
+**Estado:** MIGRATED
+
+### BR-JUNTA-003
+**Nombre:** Estado '06' para mesas juntas
+**Origen:** Legacy/frmJuntaMesa.frm
+**Descripción:** Las mesas asignadas a una junta adoptan estado '06' (FueraDeServicio en el enum .NET) en la tabla TMESA. Esto las marca visualmente como parte de una junta y las bloquea para otras asignaciones.
+**Destino .NET:** `JuntaMesaRepository.ActualizarJuntaMesasAsync` — UPDATE TMESA SET tEstadoMesa='06'.
+**Estado:** MIGRATED
+
+---
+
+## Módulo: Correlativo de Pedidos (frmPedidoCorrelativo)
+
+### BR-CORRPEDIDO-001
+**Nombre:** Rango de fechas para consulta de correlativo
+**Origen:** Legacy/frmPedidoCorrelativo.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmPedidoCorrelativo.frm`
+**Descripción:** La consulta de pedidos filtra por fFecha >= @desde 00:00 y fFecha < @hasta+1 00:00 sobre la vista `vPedidoCorrelativo`, ordenado por tCodigoPedido ascendente.
+**Destino .NET:** `ObtenerPedidosCorrelativoHandler` + `PedidoRepository.ObtenerCorrelativoAsync`
+**Estado:** MIGRATED
+
+### BR-CORRPEDIDO-002
+**Nombre:** Detalle de ítems por pedido
+**Origen:** Legacy/frmPedidoDetalle.frm
+**Descripción:** El detalle de ítems de un pedido seleccionado se carga desde la vista `vPedidoDetalle` filtrando por tCodigoPedido.
+**Destino .NET:** `ObtenerDetallePedidoExtendidoHandler` — reutiliza handler existente
+**Estado:** MIGRATED
+
+### BR-CORRPEDIDO-003
+**Nombre:** Documentos agrupados por pedido
+**Origen:** Legacy/frmPedidoAnterior.frm
+**Descripción:** Los documentos emitidos/anulados de un pedido se cargan desde `vDocumentoAgrupado` filtrando por tCodigoPedido. Muestra refacturaciones y anulaciones históricas.
+**Destino .NET:** `ObtenerDocumentosAgrupadosPedidoHandler` + `PedidoRepository.ObtenerDocumentosAgrupadosPedidoAsync`
+**Estado:** MIGRATED
+
+---
+
+## Módulo: Movimientos de Tarjeta RFID (FrmMovimientoTarjetas)
+
+### BR-RFID-008
+**Nombre:** Consulta de últimos movimientos de tarjeta
+**Origen:** Legacy/FrmTarjetaAproximidad.frm (Sub Genera)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/FrmTarjetaAproximidad.frm`
+**Procedimiento/Función:** `Genera(tarjeta)` — `SELECT top 10 ... FROM TMOVIMIENTOTARJETASRFID WHERE CodidoRFID = '@rfid' ORDER BY fregistro DESC`
+**Descripción:** Se recuperan los últimos 10 movimientos de una tarjeta RFID ordenados por fecha descendente, mostrando: fRegistro, MontoIngreso, MontoSalida, MontoAnterior, MontoFinal.
+**Condición:** El código de tarjeta (CodidoRFID) es obligatorio.
+**Resultado:** Lista de hasta 10 movimientos recientes presentados en grid.
+**Excepciones:** Si no hay movimientos, el grid queda vacío sin error.
+**Destino .NET:** `ObtenerMovimientosTarjetaProximidadHandler` + `FrmMovimientoTarjetas`
+**Estado:** MIGRATED
+
+---
+
+## Módulo: Búsqueda Rápida Genérica (frmBusquedaRapida)
+
+### BR-BUSQ-001
+**Nombre:** Filtrado en tiempo real por texto
+**Origen:** Legacy/frmBusquedaRapida.frm (Sub Filtrar)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaRapida.frm`
+**Procedimiento/Función:** `Filtrar()` — aplica `.Filter` sobre el Recordset en base al texto ingresado.
+**Descripción:** Al escribir en el campo de búsqueda, la lista se filtra en tiempo real buscando coincidencias en el campo de descripción o código.
+**Condición:** Si el texto está vacío, se muestra la lista completa.
+**Resultado:** La grilla se actualiza dinámicamente mostrando solo los registros que coinciden.
+**Excepciones:** ninguna — si no hay coincidencias, la grilla queda vacía.
+**Destino .NET:** `FrmBusquedaRapida.OnFiltroChanged` — LINQ sobre `IReadOnlyList<BusquedaItem>`
+**Estado:** MIGRATED
+
+### BR-BUSQ-002
+**Nombre:** Selección con Enter o doble clic
+**Origen:** Legacy/frmBusquedaRapida.frm (cmdkey_Click Case 43)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaRapida.frm`
+**Descripción:** El usuario confirma la selección con Enter (en teclado físico o virtual) o con doble clic en la fila. Se capturan `sCodigo` y `sDescrip` del registro activo.
+**Condición:** Debe haber al menos un registro en la lista.
+**Resultado:** `wEnter = True`; se asignan `sCodigo` y `sDescrip`; el formulario se cierra.
+**Excepciones:** Si la lista está vacía, la tecla Enter no tiene efecto.
+**Destino .NET:** `FrmBusquedaRapida.ConfirmarSeleccion()` — devuelve `BusquedaResultado`; `DialogResult = OK`
+**Estado:** MIGRATED
+
+### BR-BUSQ-003
+**Nombre:** Cancelación con Escape
+**Origen:** Legacy/frmBusquedaRapida.frm (cmdkey_Click Case 41)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaRapida.frm`
+**Descripción:** Presionar Escape cierra el diálogo sin seleccionar ningún ítem (`wEnter = False`).
+**Destino .NET:** `FrmBusquedaRapida.OnFormKeyDown` — `DialogResult = Cancel`; `Resultado = null`
+**Estado:** MIGRATED
+
+---
+
+## POS-FUNC-036 — Búsqueda de Cliente Delivery (frmBusquedaDelivery.frm)
+
+### BR-DEL-036-001
+**Nombre:** Carga de clientes delivery activos con zona
+**Origen:** Legacy/frmBusquedaDelivery.frm (Form_Load)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `Form_Load` — `SELECT … FROM TDELIVERY LEFT JOIN vZona WHERE lActivo=1`
+**Descripción:** Al abrir el formulario, se cargan todos los clientes delivery activos (`lActivo=1`) con descripción de zona, incluyendo Teléfono, Cliente (Apellido+Nombre), Referencia y Zona.
+**Condición:** Solo clientes con `lActivo=1`.
+**Resultado:** Grilla poblada ordenada por nombre de cliente.
+**Excepciones:** Si no hay clientes, la grilla queda vacía.
+**Destino .NET:** `ObtenerClientesDeliveryBusquedaHandler` + `IClienteDeliveryReadRepository.ListarActivosConZonaAsync` → `FrmBusquedaDelivery` grilla
+**Estado:** MIGRATED
+
+### BR-DEL-036-002
+**Nombre:** Filtrado en tiempo real por columna
+**Origen:** Legacy/frmBusquedaDelivery.frm (Sub Filtrar)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `Filtrar()` — aplica `.Filter` al Recordset según columna activa (tTelefono, Cliente, Zona)
+**Descripción:** Al tipear en el campo de búsqueda, la grilla filtra en tiempo real sobre la columna seleccionada (Teléfono, Cliente o Zona).
+**Condición:** Si el texto está vacío, se muestra la lista completa.
+**Resultado:** Grilla actualizada con coincidencias.
+**Destino .NET:** `FrmBusquedaDelivery.FiltrarGrilla` — LINQ sobre `IReadOnlyList<ClienteDeliveryBusquedaItem>`
+**Estado:** MIGRATED
+
+### BR-DEL-036-003
+**Nombre:** Carga de detalle del cliente seleccionado
+**Origen:** Legacy/frmBusquedaDelivery.frm (Sub Asigna)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `Asigna()` — `SELECT * FROM vDelivery WHERE Codigo=…`
+**Descripción:** Al seleccionar una fila en la grilla, se cargan en el panel lateral: Nombre, Apellido, Teléfono, Dirección, Zona, Referencia, Observación, Descuento, Acumulado, Utilizado, Disponible, TipoCliente.
+**Resultado:** Panel lateral actualizado con datos del cliente seleccionado.
+**Destino .NET:** `ObtenerDetalleClienteDeliveryHandler` + `IClienteDeliveryReadRepository.ObtenerDetalleAsync` → panel detalle de `FrmBusquedaDelivery`
+**Estado:** MIGRATED
+
+### BR-DEL-036-004
+**Nombre:** Estadísticas históricas del cliente ("Otros Datos")
+**Origen:** Legacy/frmBusquedaDelivery.frm (cmdOpcion(3))
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `cmdOpcion(3)` toggle — COUNT/SUM MPEDIDO/DPEDIDO últimos N días + último documento MDOCUMENTO/vCliente
+**Descripción:** El botón "Otros Datos" muestra un panel alternativo con: período de consulta (fecha desde = hoy - nDiasDelivery), número de pedidos activos, total de ventas, fecha/doc/monto/razón social/RUC del último pedido facturado.
+**Condición:** `nDiasDelivery` se lee de `TPARAMETRO.nTiempoMinutoCD` (legacy); en .NET se pasa como `DiasHistorico` (default 30).
+**Resultado:** Panel estadísticas visible/ocultable. Los datos se recalculan cada vez que el panel se abre.
+**Destino .NET:** `ObtenerEstadisticasClienteDeliveryHandler` + `IClienteDeliveryReadRepository.ObtenerEstadisticasAsync` → panel "Otros Datos" de `FrmBusquedaDelivery`
+**Estado:** MIGRATED
+
+### BR-DEL-036-005
+**Nombre:** Selección de tiendas/sucursales del cliente
+**Origen:** Legacy/frmBusquedaDelivery.frm (Tienda_Click)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `Tienda_Click` — `SELECT * FROM vTienda WHERE lActivo=1 AND tCodigoDelivery=… ORDER BY Descripcion`
+**Descripción:** El botón "Tiendas" abre un sub-diálogo con las tiendas/sucursales activas del cliente para seleccionar una.
+**Condición:** Solo tiendas con `lActivo=1`.
+**Resultado:** Diálogo con lista de tiendas; la selección puede afectar la dirección mostrada.
+**Destino .NET:** `ObtenerTiendasClienteDeliveryHandler` + `FrmBusquedaTiendasDelivery`
+**Estado:** MIGRATED
+
+---
+
+## POS-FUNC-037 — Mantenimiento de Clientes Delivery (frmClienteDelivery.frm)
+
+### BR-DEL-037-001
+**Nombre:** Carga del listado principal de clientes delivery
+**Origen:** Legacy/frmClienteDelivery.frm (Form_Load)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmClienteDelivery.frm`
+**Procedimiento/Función:** `Form_Load` — `SELECT *, str(nDescuento,10,2) as xDescuento, str(nLinea,10,2) as xLinea FROM vDelivery`
+**Descripción:** Al abrir el mantenimiento se cargan todos los clientes delivery desde `vDelivery`, incluyendo código, tipo cliente, nombre, teléfono, dirección, línea, descuento, estado frecuente y activo.
+**Condición:** No aplica filtro inicial; la grilla debe mostrarse completa.
+**Resultado:** Grilla poblada y contador `Registro X de Y` inicializado.
+**Excepciones:** Si no existen clientes, la grilla permanece vacía.
+**Destino .NET:** `ObtenerClientesDeliveryListadoHandler` + `IClienteDeliveryReadRepository.ListarMantenimientoAsync` + `FrmClienteDelivery`
+**Estado:** MIGRATED
+
+### BR-DEL-037-002
+**Nombre:** Filtrado y ordenamiento de la grilla de mantenimiento
+**Origen:** Legacy/frmClienteDelivery.frm (`grdGrilla_FilterChange`, `grdGrilla_HeadClick`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmClienteDelivery.frm`
+**Procedimiento/Función:** `grdGrilla_FilterChange`, `grdGrilla_HeadClick`
+**Descripción:** El operador puede filtrar la grilla por columnas visibles y alternar orden ascendente/descendente al pulsar la cabecera.
+**Condición:** Si el filtro está vacío, se muestra el total de registros.
+**Resultado:** La lista se actualiza sin perder la capacidad de navegación por registros.
+**Excepciones:** Caracteres inválidos en el filtro deben limpiar el filtro aplicado.
+**Destino .NET:** `FrmClienteDelivery` (`AplicarFiltro`, `OrdenarPorColumna`, `AplicarOrden`)
+**Estado:** MIGRATED
+
+### BR-DEL-037-003
+**Nombre:** Alta y modificación modal de cliente delivery
+**Origen:** Legacy/frmClienteDelivery.frm (`cmdOpcion_Click` casos 0 y 1, `grdGrilla_DblClick`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmClienteDelivery.frm`
+**Procedimiento/Función:** `cmdOpcion_Click`, `grdGrilla_DblClick`
+**Descripción:** El formulario abre el detalle modal para crear o modificar un cliente y luego refresca el listado principal.
+**Condición:** La modificación requiere que exista una fila seleccionada.
+**Resultado:** Tras cerrar el modal, la grilla se recarga y mantiene la selección del cliente editado o creado.
+**Excepciones:** Si no hay registros para modificar, se muestra "No existe datos ingresados".
+**Destino .NET:** `FrmClienteDelivery` + `NuevoDeliveryForm` + `ObtenerClienteDeliveryPorCodigoHandler` + `CrearClienteDeliveryHandler` + `ActualizarClienteDeliveryHandler` + `ActualizarFotoClienteDeliveryHandler`
+**Estado:** MIGRATED
+
+### BR-DEL-037-004
+**Nombre:** Vista previa y exportación HTML del listado
+**Origen:** Legacy/frmClienteDelivery.frm (`cmdEmite_Click`, `cmdExporta_Click`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmClienteDelivery.frm`
+**Procedimiento/Función:** `cmdEmite_Click`, `cmdExporta_Click`
+**Descripción:** El usuario puede abrir una vista previa del listado actual y exportar la grilla filtrada a un archivo HTML.
+**Condición:** Deben existir registros visibles en la grilla.
+**Resultado:** Se presenta una vista previa del listado o se genera un archivo HTML con los registros filtrados.
+**Excepciones:** Si el usuario cancela la selección del archivo, no se genera salida.
+**Destino .NET:** `FrmClienteDelivery` (`MostrarVistaPrevia`, `ExportarHtmlAsync`)
 **Estado:** MIGRATED

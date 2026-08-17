@@ -25,6 +25,14 @@ internal sealed class ClienteDeliveryRepository : IClienteDeliveryRepository
     }
 
     /// <inheritdoc />
+    public async Task<string?> ObtenerMaximoCodigoAsync(CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = "SELECT MAX(tCodigoDelivery) FROM TDELIVERY";
+        return await conn.ExecuteScalarAsync<string?>(sql);
+    }
+
+    /// <inheritdoc />
     public async Task<ClienteDelivery?> ObtenerPorCodigoAsync(string codigoDelivery, CancellationToken ct = default)
     {
         using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);

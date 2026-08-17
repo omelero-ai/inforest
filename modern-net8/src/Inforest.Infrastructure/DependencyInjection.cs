@@ -77,6 +77,7 @@ public static class DependencyInjection
 
         // P3-09: Delivery, Despacho, Motorizados y Centralización
         services.AddScoped<IClienteDeliveryRepository, ClienteDeliveryRepository>();
+        services.AddScoped<IClienteDeliveryReadRepository, ClienteDeliveryReadRepository>();
         services.AddScoped<ITarjetaProximidadRepository, TarjetaProximidadRepository>();
         services.AddScoped<IRecargaTarjetaRepository, RecargaTarjetaRepository>();
         services.AddScoped<IPedidoDeliveryRepository, PedidoDeliveryRepository>();
@@ -98,6 +99,7 @@ public static class DependencyInjection
         services.AddScoped<ISalonRepository, SalonRepository>();
         services.AddScoped<IMozoRepository, MozoRepository>();
         services.AddScoped<IProductoMaestroRepository, ProductoMaestroRepository>();
+        services.AddScoped<IJuntaMesaRepository, JuntaMesaRepository>();
         services.AddScoped<IInsumoRepository, InsumoRepository>();
 
         // W3: Turno / Día Contable (BR-004, BR-005)
