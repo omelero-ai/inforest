@@ -34,9 +34,13 @@ public sealed class ObtenerDetallePedidoExtendidoHandler
         var pedido = await _pedidoRepository.ObtenerPorCodigoAsync(query.CodigoPedido, ct);
         if (pedido is null)
             return Result.Fail<DetallePedidoExtendidoResultado>("Pedido no encontrado.", "PEDIDO_NO_ENCONTRADO");
-        var items = await _readRepository.ObtenerDetalleExtendidoAsync(query.CodigoPedido, ct);
-        // Combos del pedido
-        var combos = await _readRepository.ObtenerCombosAsync(query.CodigoPedido, ct);
+
+        // Items enriquecidos y combos — queries independientes, lanzadas en paralelo
+        var itemsTask  = _readRepository.ObtenerDetalleExtendidoAsync(query.CodigoPedido, ct);
+        var combosTask = _readRepository.ObtenerCombosAsync(query.CodigoPedido, ct);
+        await Task.WhenAll(itemsTask, combosTask);
+        var items  = itemsTask.Result;
+        var combos = combosTask.Result;
 
         // Legacy: total = sum(nVenta) from DPEDIDO WHERE tEstadoItem='N'
         var total = items.Sum(i => i.SubTotal);
