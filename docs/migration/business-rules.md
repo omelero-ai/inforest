@@ -3364,3 +3364,36 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Descripción:** El botón "Grabar" solo queda habilitado si el usuario ha ingresado al menos una propina con monto > 0. Si no se ha seleccionado propina (wFlag=False), wEnter queda False al cerrar con "Grabar".
 **Destino .NET:** `FrmCambioPropina._btnGrabar.Enabled` controlado por `PropinaMN > 0 || PropinaME > 0`.
 **Estado:** MIGRATED
+
+---
+
+## Módulo: Mapa de Consulta de Mesas (frmMesaConsulta)
+
+### BR-MESACONSULTA-001
+**Nombre:** No cambiar estado de mesa ocupada
+**Origen:** Legacy/frmMesaConsulta.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmMesaConsulta.frm`
+**Descripción:** En modo Visual, el cambio de estado solo está permitido para mesas no ocupadas. Si `tEstadoMesa='02'` (Ocupada), la operación no se realiza y se muestra un mensaje. `IF RsMesa!tEstadoMesa = "02" Then Exit Sub`.
+**Destino .NET:** `CambiarEstadoMesaHandler` valida `mesa.Estado == EstadoMesa.Ocupada` → `Result.Fail("MESA_OCUPADA")`.
+**Estado:** MIGRATED
+
+### BR-MESACONSULTA-002
+**Nombre:** Menú contextual de cambio de estado
+**Origen:** Legacy/frmMesaConsulta.frm
+**Descripción:** Al hacer clic en una mesa en modo Visual, se presentan las opciones de estado disponibles (01-06 excepto el estado actual). La selección ejecuta el UPDATE en TMESA.
+**Destino .NET:** `FrmMesaConsulta.MostrarMenuEstadoAsync()` muestra ContextMenuStrip con estados disponibles.
+**Estado:** MIGRATED
+
+### BR-MESACONSULTA-003
+**Nombre:** Tres modos de operación
+**Origen:** Legacy/frmMesaConsulta.frm
+**Descripción:** El formulario opera en tres modos según `sTipo`: "V"=Visual (cambiar estado), "M"=Mover (seleccionar mesa destino para transferir pedido), default=Seleccionar (elegir mesa para nuevo pedido).
+**Destino .NET:** Enum `ModoConsulta` (Visual, Mover, Seleccionar).
+**Estado:** MIGRATED
+
+### BR-MESACONSULTA-004
+**Nombre:** Opción Sin Mesa
+**Origen:** Legacy/frmMesaConsulta.frm
+**Descripción:** En modo default (Seleccionar), la opción "Sin Mesa" permite asignar un pedido sin mesa física. Visible solo en ese modo. Establece `wMesa=True, sCodigo=""`.
+**Destino .NET:** `FrmMesaConsulta.EsSinMesa=true` al hacer clic en "Sin Mesa".
+**Estado:** MIGRATED

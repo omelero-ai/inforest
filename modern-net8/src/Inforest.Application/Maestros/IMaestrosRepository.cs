@@ -22,7 +22,15 @@ public interface IClienteRepository : IMaestroRepository<Cliente>
     Task<string> ObtenerProximoCodigoAsync(CancellationToken ct = default);
     Task<bool> ValidarCompatibilidadDocumentoAsync(string tipoDocumento, string codigoCliente, CancellationToken ct = default);
 }
-public interface IMesaRepository : IMaestroRepository<Mesa>;
+public interface IMesaRepository : IMaestroRepository<Mesa>
+{
+    /// <summary>
+    /// Cambia el estado de una mesa activa.
+    /// Legacy: UPDATE TMESA SET tEstadoMesa=@estado WHERE tCodigoMesa=@codigo.
+    /// BR-MESACONSULTA-001.
+    /// </summary>
+    Task<bool> CambiarEstadoAsync(string codigoMesa, EstadoMesa nuevoEstado, CancellationToken ct = default);
+}
 public interface ISalonRepository : IMaestroRepository<Salon>;
 public interface IMozoRepository : IMaestroRepository<Mozo>;
 public interface IProductoMaestroRepository : IMaestroRepository<ProductoMaestro>;

@@ -562,3 +562,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmNumPad.frm` | Form | `FrmNumPad` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Shared/FrmNumPad.cs` |
 | `frmCambioPropina.frm` | Form | `FrmCambioPropina` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Ventas/FrmCambioPropina.cs` |
 | `tPropina` ('01'/'02') + `nPropina` | VB6 global vars | `FrmCambioPropina.TipoPropina` + `PropinaMN`/`PropinaME` | Properties | MIGRATED | `src/Inforest.Desktop/Ventas/FrmCambioPropina.cs` |
+| `frmMesaConsulta.frm` | Form | `FrmMesaConsulta` | WinForms Form | MIGRATED | `src/Inforest.Desktop/Maestros/FrmMesaConsulta.cs` |
+| `UPDATE TMESA SET tEstadoMesa` | SQL | `IMesaRepository.CambiarEstadoAsync` + `MesaRepository.CambiarEstadoAsync` | Repository | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/MesaRepository.cs` |
+| `sTipo="V"/"M"/default` | VB6 global var | `ModoConsulta` enum (Visual/Mover/Seleccionar) | Enum | MIGRATED | `src/Inforest.Desktop/Maestros/FrmMesaConsulta.cs` |
+| (tests BR-MESACONSULTA-001..004) | — | `CambiarEstadoMesaHandlerTests` (4) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Maestros/CambiarEstadoMesaHandlerTests.cs` |

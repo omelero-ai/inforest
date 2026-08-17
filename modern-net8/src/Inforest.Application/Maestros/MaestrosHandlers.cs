@@ -632,3 +632,41 @@ public sealed class ActualizarProductoMaestroHandler
             : Result.Fail("No se pudo actualizar el registro.", "PRODUCTOMAESTRO_UPDATE_FALLO");
     }
 }
+
+// ── Mesa — Cambiar Estado ─────────────────────────────────────────────────────
+
+/// <summary>
+/// Comando para cambiar el estado de una mesa.
+/// Legacy: UPDATE TMESA SET tEstadoMesa='XX' WHERE tCodigoMesa='...' en frmMesaConsulta.frm.
+/// BR-MESACONSULTA-001.
+/// </summary>
+public sealed record CambiarEstadoMesaCommand(string CodigoMesa, EstadoMesa NuevoEstado);
+
+/// <summary>Handler de <see cref="CambiarEstadoMesaCommand"/>.</summary>
+public sealed class CambiarEstadoMesaHandler
+{
+    private readonly IMesaRepository _repository;
+
+    public CambiarEstadoMesaHandler(IMesaRepository repository)
+        => _repository = repository;
+
+    /// <summary>
+    /// Cambia el estado de una mesa activa.
+    /// BR-MESACONSULTA-001: no permite cambiar estado de una mesa Ocupada (EstadoMesa.Ocupada).
+    /// </summary>
+    public async Task<Result> HandleAsync(CambiarEstadoMesaCommand command, CancellationToken ct = default)
+    {
+        var mesa = await _repository.ObtenerPorCodigoAsync(command.CodigoMesa, ct);
+        if (mesa is null)
+            return Result.Fail("Mesa no encontrada.", "MESA_NO_ENCONTRADA");
+
+        // BR-MESACONSULTA-001: no cambiar estado a mesas Ocupadas
+        if (mesa.Estado == EstadoMesa.Ocupada)
+            return Result.Fail("No se puede cambiar el estado de una mesa ocupada.", "MESA_OCUPADA");
+
+        var ok = await _repository.CambiarEstadoAsync(command.CodigoMesa, command.NuevoEstado, ct);
+        return ok
+            ? Result.Ok()
+            : Result.Fail("No se pudo actualizar el estado de la mesa.", "MESA_ESTADO_UPDATE_FALLO");
+    }
+}

@@ -28,3 +28,4 @@
 | POS-FUNC-024 | Fiscal Epson (Argentina) | `modImpresoraFiscal.bas + IFEpson.ocx` | Comprobación fiscal hardware | EXCLUDED_BY_SCOPE |
 | POS-FUNC-030 | Mapa Visual de Mesas | `frmMesas.frm` | Mapa interactivo de salones y mesas con color coding por estado; selector de mesa para nuevo pedido | MIGRATED |
 | POS-FUNC-031 | Teclado Numérico + Cambio de Propina | `frmNumPad.frm / frmCambioPropina.frm` | Teclado numérico modal reutilizable + diálogo de cambio de propina MN/ME | MIGRATED |
+| POS-FUNC-032 | Mapa Consulta Mesas | `frmMesaConsulta.frm` | Mapa visual mesas en 3 modos: Visual (cambiar estado), Seleccionar (asignar mesa), Mover (transferir pedido) | MIGRATED |
