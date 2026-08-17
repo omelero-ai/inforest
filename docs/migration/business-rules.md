@@ -2997,3 +2997,115 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Si no existe pedido con ese día contable, el correlativo empieza en 1 (`YY + "00000001"`).
 **Destino .NET:** `DivisionPedidoRepository.GenerarSiguienteCorrelativoPedidoAsync` + `CrearMpedidoFromOrigenAsync`
 **Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-001
+**Nombre:** Validar cliente requerido para tipo de documento
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdTipoDocumento_Click / cmdOpcion_Click(0)
+**Descripción:** Si el tipo de documento destino requiere cliente (campo `lCliente` en vTipoDocumentoImpresora = True), el código de cliente no puede estar vacío al momento de cambiar.
+**Condición:** `lCliente = True AND sClienteNuevo = ""`
+**Resultado:** Error — "Error : Documento sin Cliente"
+**Excepciones:** Ninguna.
+**Destino .NET:** `CambiarDocumentoHandler` — validación implícita por tipo de documento; `FrmCambioDocumento` solicita cliente si tipo requiere.
+**Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-002
+**Nombre:** Validar monto máximo del tipo de documento
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdOpcion_Click(0)
+**Descripción:** Si el tipo de documento tiene un monto máximo configurado (`nMontoMaximo > 0` en vTipoDocumento), el monto del documento origen no puede superar ese máximo.
+**Condición:** `nMontoMaximo > 0 AND nMontoDocumento > nMontoMaximo`
+**Resultado:** Error — "El Monto a Facturar supera al Máximo Permitido al Tipo de Documento"
+**Excepciones:** Si `nMontoMaximo = 0`, no hay límite.
+**Destino .NET:** `CambiarDocumentoHandler.HandleAsync` + `ICambioDocumentoRepository.ObtenerMontosValidacionAsync`
+**Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-003
+**Nombre:** Motivo del cambio obligatorio
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdOpcion_Click(0)
+**Descripción:** El operador debe ingresar un motivo textual para el cambio de documento. Se abre el teclado virtual (frmKeyBoard) y si el motivo queda vacío, la operación se cancela.
+**Condición:** `wEnter = False OR Len(Trim(sDescrip)) = 0`
+**Resultado:** Operación cancelada sin mensaje adicional.
+**Excepciones:** Ninguna.
+**Destino .NET:** `CambiarDocumentoCommand.Motivo` requerido + `CambiarDocumentoHandler` valida `IsNullOrWhiteSpace`.
+**Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-004
+**Nombre:** Documento origen marcado como estado '04' (cambiado)
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdOpcion_Click(0)
+**Descripción:** Tras el cambio, el documento origen queda con tEstadoDocumento='04', tObservacion=motivo, tUsuarioAnulado=usuario, fRegistroAnulado=GETDATE(). Se crea un nuevo documento MDOCUMENTO/DDOCUMENTO con el número nuevo y el tipo de documento destino.
+**Condición:** Siempre que el cambio se ejecute correctamente.
+**Resultado:** MDOCUMENTO origen actualizado + nuevo MDOCUMENTO+DDOCUMENTO insertados.
+**Excepciones:** Operación atómica (transacción). Si falla, nada se persiste.
+**Destino .NET:** `CambioDocumentoRepository.EjecutarCambioAsync` con transacción + `ActualizarEmisionAsync`.
+**Estado:** MIGRATED
+
+---
+
+## BR-CAMBIO-005
+**Nombre:** Bolivia: validar autorización y dosificación antes del cambio
+**Origen:** Legacy/frmCambio.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmCambio.frm
+**Procedimiento/Función:** cmdOpcion_Click(0) — Case pais="001"
+**Descripción:** En Bolivia (pais='001'), antes de ejecutar el cambio se obtiene el número de autorización y la dosificación desde la caja. Si alguno está vacío, el cambio no se puede realizar.
+**Condición:** `pais = "001" AND (tAutorizacion = "" OR tDosificacion = "")`
+**Resultado:** Error — "Error al obtener Número de Autorización o Dosificación. Verifique."
+**Excepciones:** Para otros países (Perú, Ecuador) los campos van vacíos.
+**Destino .NET:** `CambiarDocumentoCommand.Autorizacion` y `.CodigoControl` — a cargo del caller (FrmCambioDocumento) para Bolivia.
+**Estado:** MIGRATED
+
+---
+
+## BR-ACTPED-001
+**Nombre:** Requiere autorización de supervisor para modificar datos del pedido
+**Origen:** Legacy/FrmActualizarPedidos (frmUpdateDatosPedido.frm)
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmUpdateDatosPedido.frm
+**Procedimiento/Función:** BtnActualizar1_Click (nivel 31), Command1_Click (nivel 32)
+**Descripción:** La modificación de cortesía requiere nivel de supervisor "31"; la modificación de canal de venta requiere nivel "32". Validado en UI mediante `Supervisor(nivel)`.
+**Condición:** `Supervisor("31") = False` (cortesía) / `Supervisor("32") = False` (canal)
+**Resultado:** Operación cancelada sin ejecutar el SP.
+**Excepciones:** Si el usuario ya es supervisor del nivel indicado, procede sin modal.
+**Destino .NET:** Validación en `FrmActualizarDatosPedido` (UI) antes de llamar a los handlers.
+**Estado:** MIGRATED
+
+---
+
+## BR-ACTPED-002
+**Nombre:** No se puede modificar cortesía si el documento no tiene cortesía asignada
+**Origen:** Legacy/FrmActualizarPedidos (frmUpdateDatosPedido.frm)
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmUpdateDatosPedido.frm
+**Procedimiento/Función:** BtnActualizar1_Click
+**Descripción:** Si el campo tCortesia del documento está vacío, no se puede asignar/cambiar la cortesía. El mensaje es "El documento no tiene asignado cortesia...".
+**Condición:** `txtCodCortesia.Caption = ""`
+**Resultado:** Error — "El documento no tiene asignado cortesia, por lo cual no se le puede asignar una cortesia"
+**Excepciones:** Ninguna.
+**Destino .NET:** `ActualizarCortesiaPedidoHandler` valida `CodigoCortesiaAnterior` vacío.
+**Estado:** MIGRATED
+
+---
+
+## BR-ACTPED-003
+**Nombre:** Canal Delivery requiere cliente delivery
+**Origen:** Legacy/FrmActualizarPedidos (frmUpdateDatosPedido.frm)
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmUpdateDatosPedido.frm
+**Procedimiento/Función:** CbCanal_Click / Command1_Click
+**Descripción:** Cuando se selecciona el canal '02' (Delivery), se muestra el campo de cliente delivery y es obligatorio completarlo antes de confirmar.
+**Condición:** `CbCanal.BoundText = "02" AND TxtCodCliente.Caption = ""`
+**Resultado:** Error o espera de ingreso de cliente delivery.
+**Excepciones:** Para otros canales, el campo cliente delivery se oculta y no es requerido.
+**Destino .NET:** `ActualizarCanalVentaPedidoHandler` valida `CodigoClienteDelivery` cuando `CodigoCanalNuevo == "02"`.
+**Estado:** MIGRATED

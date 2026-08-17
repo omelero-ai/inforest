@@ -491,3 +491,22 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmJuntarMesas.frm` / selección visual de mesas | UI Logic | Color-coded buttons por `EstadoMesa` (BR-JUNTAR-001) | WinForms UI | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmJuntarMesas.cs` |
 | `spUpdate_DPEDIDO_Ina` | SP | reutilizado vía Dapper en `DivisionPedidoRepository` | Repository call | COMPLETED | `src/Inforest.Infrastructure/Pedidos/DivisionPedidoRepository.cs` |
 | (tests BR-DIV-001..005) | — | `DivisionPedidoTests` (11 domain) + `DivisionPedidoHandlerTests` (11 handler) | xUnit | COMPLETED | `tests/Inforest.Domain.Tests/Pedidos/DivisionPedidoTests.cs` + `tests/Inforest.Application.Tests/Pedidos/DivisionPedidoHandlerTests.cs` |
+
+## Componentes POS-FUNC-027 — Cambio de Documento
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmCambio.frm` | Form | `FrmCambioDocumento` | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmCambioDocumento.cs` |
+| `frmCambio.frm` / TTIPODOCUMENTOIMPRESORA + vTipoDocumentoImpresora | SQL | `ICambioDocumentoRepository.ObtenerTiposDocumentoAsync` + `CambioDocumentoRepository` | Interface + Class | MIGRATED | `src/Inforest.Application/Ventas/ICambioDocumentoRepository.cs` + `src/Inforest.Infrastructure/Ventas/CambioDocumentoRepository.cs` |
+| `frmCambio.frm` / cmdOpcion_Click(0) — cambio documento | Business Logic | `CambiarDocumentoHandler` + `CambiarDocumentoCommand` (BR-CAMBIO-001..005) | Handler | MIGRATED | `src/Inforest.Application/Ventas/CambiarDocumentoHandlers.cs` |
+| `frmCambio.frm` / validación monto máximo | BR-CAMBIO-002 | `CambiarDocumentoHandler.ObtenerMontosValidacionAsync` | Handler logic | MIGRATED | `src/Inforest.Application/Ventas/CambiarDocumentoHandlers.cs` |
+| (tests BR-CAMBIO-001..005) | — | `CambiarDocumentoHandlerTests` (8 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/CambiarDocumentoHandlerTests.cs` |
+
+## Componentes POS-FUNC-028 — Actualizar Datos Pedido
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmUpdateDatosPedido.frm` (`FrmActualizarPedidos`) | Form | `FrmActualizarDatosPedido` | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmActualizarDatosPedido.cs` |
+| `usp_ActualizarCabPeDoc` @opcion='1' (cortesía) | SP | `ActualizarCortesiaPedidoHandler` + `IActualizarDatosPedidoRepository.ActualizarCortesiaAsync` (BR-ACTPED-001/002) | Handler + Interface | MIGRATED | `src/Inforest.Application/Ventas/ActualizarDatosPedidoHandlers.cs` + `src/Inforest.Infrastructure/Ventas/ActualizarDatosPedidoRepository.cs` |
+| `usp_ActualizarCabPeDoc` @opcion='2' (canal venta) | SP | `ActualizarCanalVentaPedidoHandler` + `IActualizarDatosPedidoRepository.ActualizarCanalVentaAsync` (BR-ACTPED-001/003) | Handler + Interface | MIGRATED | `src/Inforest.Application/Ventas/ActualizarDatosPedidoHandlers.cs` + `src/Inforest.Infrastructure/Ventas/ActualizarDatosPedidoRepository.cs` |
+| (tests BR-ACTPED-001..003) | — | `ActualizarDatosPedidoHandlerTests` (8 tests) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/ActualizarDatosPedidoHandlerTests.cs` |

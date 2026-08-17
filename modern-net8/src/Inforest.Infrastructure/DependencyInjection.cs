@@ -112,6 +112,10 @@ public static class DependencyInjection
         services.AddScoped<INotaCreditoRepository, NotaCreditoRepository>();
         // POS-FUNC-016: Impresión pre-cuenta — TIMPRESORA (BR-PRECUENTA-001..003)
         services.AddScoped<IImpresoraRepository, ImpresoraRepository>();
+        // POS-FUNC-027: Cambio de Documento (BR-CAMBIO-001..005)
+        services.AddScoped<ICambioDocumentoRepository, CambioDocumentoRepository>();
+        // POS-FUNC-028: Actualizar Datos Pedido — usp_ActualizarCabPeDoc (BR-ACTPED-001..003)
+        services.AddScoped<IActualizarDatosPedidoRepository, ActualizarDatosPedidoRepository>();
 
         // W6: Caja / Pagos (BR-007, BR-013)
         services.AddScoped<IPagoRepository, PagoRepository>();
