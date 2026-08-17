@@ -3249,3 +3249,73 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Si falla la actualización de saldo, se revierte la operación.
 **Destino .NET:** `RecargaTarjetaRepository.RegistrarRecargaAsync` + `RegistrarRecargaTarjetaHandler`.
 **Estado:** MIGRATED
+
+---
+
+## BR-MESAS-001
+**Nombre:** Selección de mesa disponible para nuevo pedido
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `picMesa_Click` / `picAceptar_Click`
+**Descripción:** Solo se puede seleccionar y confirmar una mesa en estado Libre ('01') o Sucia ('04') para crear un nuevo pedido.
+**Condición:** `tEstadoMesa IN ('01', '04')` y usuario hace clic y confirma.
+**Resultado:** Mesa seleccionada con borde oscuro; al confirmar se retorna código de mesa, salón, adultos y niños al formulario llamador.
+**Excepciones:** Si no hay mesa seleccionada, muestra mensaje de advertencia.
+**Destino .NET:** `FrmMesas` + `EstadoMesa.Libre` / `EstadoMesa.Sucia` + evento `MesaSeleccionadaCodigo`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MESAS-002
+**Nombre:** Mesa ocupada abre detalle del pedido activo
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `picMesa_Click` — `Case Is = "02"` (Ocupada)
+**Descripción:** Al hacer clic sobre una mesa ocupada, el sistema obtiene el pedido activo de esa mesa y abre `frmDetallePedido` en modo modal.
+**Condición:** `tEstadoMesa = '02'` (Ocupada).
+**Resultado:** Se consulta `MPEDIDO WHERE tMesa = @mesa AND tEstadoPedido = '01'` y se pasa al detalle.
+**Excepciones:** Ninguna.
+**Destino .NET:** `FrmMesas` evento `MesaOcupadaSeleccionada` → caller abre `FrmDetallePedido`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MESAS-003
+**Nombre:** Mesas no interactivas (reservada, bloqueada, fuera de servicio)
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `picMesa_Click` — `Case Is = "03", "05", "06"`
+**Descripción:** Las mesas en estado Reservada, Bloqueada o Fuera de servicio no permiten ninguna acción al hacer clic.
+**Condición:** `tEstadoMesa IN ('03', '05', '06')`.
+**Resultado:** Sin acción (sin cambio de estado ni apertura de formulario).
+**Excepciones:** Ninguna.
+**Destino .NET:** `FrmMesas.MesaClick` — switch default sin acción.
+**Estado:** MIGRATED
+
+---
+
+## BR-MESAS-004
+**Nombre:** Confirmación con datos de ocupantes al crear pedido con mesa
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `picAceptar_Click`
+**Descripción:** Al aceptar mesa, se solicita confirmación y se captura la cantidad de adultos y niños que ocuparán la mesa.
+**Condición:** Mesa seleccionada en estado Libre o Sucia.
+**Resultado:** Retorna `CodigoMesa`, `CodigoSalon`, `NumAdultos`, `NumNinios` al llamador.
+**Excepciones:** Si usuario cancela confirmación, no se retorna nada.
+**Destino .NET:** `FrmMesas.BtnAceptar_Click` + propiedades `MesaSeleccionadaCodigo`, `NumAdultos`, `NumNinios`.
+**Estado:** MIGRATED
+
+---
+
+## BR-MESAS-005
+**Nombre:** Panel de pedidos sin mesa asignada
+**Origen:** Legacy/frmMesas.frm
+**Archivo:** legacy-restaurant/restaurant-vb6/Formularios/frmMesas.frm
+**Procedimiento/Función:** `Form_Load` — `RsGrilla = MPEDIDO WHERE tEstadoPedido='01' AND tTipoPedido<>'04' AND len(rtrim(tMesa))=0 AND tCaja=@caja`
+**Descripción:** El panel lateral muestra los pedidos activos que no tienen mesa asignada (delivery, barra, etc.) de la caja actual.
+**Condición:** Pedidos activos, tipo <> delivery externo ('04'), sin mesa, de la caja actual.
+**Resultado:** Lista de pedidos (código + observación) en panel derecho; doble clic abre el detalle del pedido seleccionado.
+**Excepciones:** Si no hay caja activa, el panel queda vacío.
+**Destino .NET:** `ObtenerPedidosSinMesaHandler` + `PedidoSinMesaVista` + `FrmMesas._lstSinMesa`.
+**Estado:** MIGRATED

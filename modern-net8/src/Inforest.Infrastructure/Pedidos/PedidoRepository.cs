@@ -406,4 +406,28 @@ internal sealed class PedidoRepository : IPedidoRepository, IPedidoReadRepositor
         .ToList()
         .AsReadOnly();
     }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<PedidoSinMesaVista>> ObtenerActivosSinMesaAsync(
+        string caja, CancellationToken ct = default)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        // Legacy: frmMesas.frm — pedidos activos sin mesa para el panel lateral.
+        // BR-MESAS-005: tEstadoPedido='01', tTipoPedido<>'04', mesa vacía, ordenado desc por pedido.
+        const string sql = """
+            SELECT tCodigoPedido AS CodigoPedido,
+                   ISNULL(tObservacion, '') AS Observacion
+            FROM MPEDIDO
+            WHERE tEstadoPedido = '01'
+              AND tTipoPedido   <> '04'
+              AND LEN(RTRIM(ISNULL(tMesa, ''))) = 0
+              AND tCaja = @Caja
+            ORDER BY tCodigoPedido DESC
+            """;
+        var rows = await connection.QueryAsync(sql, new { Caja = caja });
+        return rows.Select(r => new PedidoSinMesaVista(
+            CodigoPedido: (string)r.CodigoPedido,
+            Observacion: (string)r.Observacion))
+            .ToList().AsReadOnly();
+    }
 }

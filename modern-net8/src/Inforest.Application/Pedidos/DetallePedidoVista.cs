@@ -55,3 +55,12 @@ public sealed record DetallePedidoExtendidoResultado(
     decimal Total,
     IReadOnlyList<ItemPedidoVista> Items,
     IReadOnlyList<ComboPedidoVista> Combos);
+
+/// <summary>
+/// Vista ligera de pedido activo sin mesa asignada.
+/// Legacy: MPEDIDO — tCodigoPedido + tObservacion (frmMesas.frm panel derecho).
+/// Regla BR-MESAS-005.
+/// </summary>
+public sealed record PedidoSinMesaVista(
+    string CodigoPedido,
+    string Observacion);

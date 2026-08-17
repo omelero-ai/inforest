@@ -42,3 +42,22 @@ public sealed class ObtenerPedidosPorMesaHandler
     public async Task<Result<IReadOnlyList<Pedido>>> HandleAsync(ObtenerPedidosPorMesaQuery query, CancellationToken ct = default)
         => Result.Ok(await _pedidoRepository.ObtenerPorMesaAsync(query.CodigoMesa, ct));
 }
+
+public sealed record ObtenerPedidosSinMesaQuery(string Caja);
+
+/// <summary>
+/// Obtiene pedidos activos sin mesa asignada para el panel lateral del mapa de mesas.
+/// Legacy: frmMesas.frm — MPEDIDO WHERE tEstadoPedido='01' AND tTipoPedido &lt;&gt; '04' AND LEN(RTRIM(tMesa))=0 AND tCaja=@caja.
+/// Regla BR-MESAS-005.
+/// </summary>
+public sealed class ObtenerPedidosSinMesaHandler
+{
+    private readonly IPedidoReadRepository _repository;
+
+    public ObtenerPedidosSinMesaHandler(IPedidoReadRepository repository)
+        => _repository = repository;
+
+    public async Task<Result<IReadOnlyList<PedidoSinMesaVista>>> HandleAsync(
+        ObtenerPedidosSinMesaQuery query, CancellationToken ct = default)
+        => Result.Ok(await _repository.ObtenerActivosSinMesaAsync(query.Caja, ct));
+}

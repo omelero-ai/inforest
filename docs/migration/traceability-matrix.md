@@ -553,3 +553,9 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `TTARJETASRFID.MontoDisponible` | Table | `RegistrarRecargaTarjetaHandler` + `RecargaTarjetaRepository` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/RecargaTarjetaHandlers.cs` + `src/Inforest.Infrastructure/Delivery/RecargaTarjetaRepository.cs` |
 | (tests BR-RFID-005..007) | — | `RecargaTarjetaHandlerTests` (3) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Delivery/RecargaTarjetaHandlerTests.cs` |
 | (tests BR-RFID-001..004) | — | `TarjetaProximidadTests` (7) + `TarjetaProximidadHandlerTests` (7) | xUnit | MIGRATED | `tests/Inforest.Domain.Tests/Delivery/TarjetaProximidadTests.cs` + `tests/Inforest.Application.Tests/Delivery/TarjetaProximidadHandlerTests.cs` |
+| `frmMesas.frm` | Form | `FrmMesas` | WinForms Form | MIGRATED | `src/Inforest.Desktop/Maestros/FrmMesas.cs` |
+| `EstadoMesa` (VB6 '01'..'06') | Enum | `EstadoMesa` (Libre/Ocupada/Reservada/Sucia/Bloqueada/FueraDeServicio/EnCuenta) | Enum | MIGRATED | `src/Inforest.Domain/Entities/Maestros/EstadoMesa.cs` |
+| `TMESA.tEstado` ('01'..'06') | Table column | `MesaRepository` CASE mapping | Repository | MIGRATED | `src/Inforest.Infrastructure/Maestros/MesaRepository.cs` |
+| `MPEDIDO` (activos sin mesa) | Table | `ObtenerPedidosSinMesaHandler` + `IPedidoReadRepository.ObtenerActivosSinMesaAsync` | Handler + Interface | MIGRATED | `src/Inforest.Application/Pedidos/PedidoHandlers.cs` |
+| `PedidoSinMesaVista` | — | `PedidoSinMesaVista` record | DTO | MIGRATED | `src/Inforest.Application/Pedidos/DetallePedidoVista.cs` |
+| (tests BR-MESAS-001..005) | — | `ObtenerPedidosSinMesaHandlerTests` (3) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Pedidos/ObtenerPedidosSinMesaHandlerTests.cs` |

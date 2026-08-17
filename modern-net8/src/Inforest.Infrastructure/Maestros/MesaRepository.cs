@@ -35,6 +35,8 @@ internal sealed class MesaRepository : IMesaRepository
                        WHEN '02' THEN 1
                        WHEN '03' THEN 2
                        WHEN '04' THEN 3
+                       WHEN '05' THEN 4
+                       WHEN '06' THEN 5
                        ELSE 0
                    END AS Estado
             FROM TMESA
@@ -62,6 +64,8 @@ internal sealed class MesaRepository : IMesaRepository
                        WHEN '02' THEN 1
                        WHEN '03' THEN 2
                        WHEN '04' THEN 3
+                       WHEN '05' THEN 4
+                       WHEN '06' THEN 5
                        ELSE 0
                    END AS Estado
             FROM TMESA
@@ -134,7 +138,10 @@ internal sealed class MesaRepository : IMesaRepository
         {
             EstadoMesa.Ocupada => "02",
             EstadoMesa.Reservada => "03",
-            EstadoMesa.EnCuenta => "04",
+            EstadoMesa.Sucia => "04",
+            EstadoMesa.Bloqueada => "05",
+            EstadoMesa.FueraDeServicio => "06",
+            EstadoMesa.EnCuenta => "02",  // en cuenta: sigue ocupada en legacy
             _ => "01"
         };
 }

@@ -20,4 +20,11 @@ public interface IPedidoReadRepository
     /// Legacy: vPedidoCombo (CPEDIDO JOIN TPRODUCTO).
     /// </summary>
     Task<IReadOnlyList<ComboPedidoVista>> ObtenerCombosAsync(string codigoPedido, CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene pedidos activos (tEstadoPedido='01') sin mesa asignada de una caja.
+    /// Legacy: frmMesas.frm — MPEDIDO WHERE tEstadoPedido='01' AND tTipoPedido &lt;&gt; '04' AND LEN(RTRIM(tMesa))=0 AND tCaja=@caja.
+    /// Regla BR-MESAS-005.
+    /// </summary>
+    Task<IReadOnlyList<PedidoSinMesaVista>> ObtenerActivosSinMesaAsync(string caja, CancellationToken ct = default);
 }
