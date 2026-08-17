@@ -170,3 +170,13 @@
 |---|---|---|---|---|
 | GAP-RFID-001 | Flujo de recarga parcial vs legado | `FrmRecargarTarjeta.frm` + `FrmRecargarTarjetaDetalle.frm` ya migran listado de recargas y actualización transaccional de saldo RFID (`TMOVIMIENTOTARJETASRFID` + `TTARJETASRFID`). Sigue pendiente cerrar equivalencia completa del bloque legacy de anticipo/emisión documental/impresión fiscal dentro del mismo flujo. | `FrmRecargarTarjeta.frm`, `FrmRecargarTarjetaDetalle.frm` | IN_PROGRESS |
 | GAP-RFID-002 | `FrmMovimientoTarjetas.frm` sin lógica relevante | El formulario `FrmMovimientoTarjetas.frm` aparece en `InfoRest.vbp` como cascarón visual sin código operativo útil. Se mantiene fuera del corte hasta confirmar si corresponde a un flujo real o a una pantalla obsoleta. | `FrmMovimientoTarjetas.frm` | ANALYSIS |
+
+---
+
+## POS-FUNC-006 — Generación de Documentos (frmDocumento.frm)
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-DOC-001 | Anulación de pagos de documento | `cmdOpcion_Click` Case 11 en frmDocumento.frm implementa la anulación de pagos con un flujo transaccional complejo: requiere supervisor "05", anula los registros en DPAGODOCUMENTO, revierte tEstadoDocumento a '01', y re-abre el pedido. En .NET 8 este flujo no está migrado. El botón "Anulación de Pagos" está temporalmente excluido de FrmDocumento. | `frmDocumento.frm` — cmdOpcion_Click Case 11 | OPEN |
+| GAP-DOC-002 | Permiso de supervisor en reimpresión | En la versión legacy, `cmdOpcion_Click` Case 7 (Reimprimir) requiere validar `Supervisor("12")` antes de proceder. En .NET 8 la validación de permisos por código de supervisor no está implementada en FrmDocumento. | `frmDocumento.frm` — cmdOpcion_Click Case 7 | OPEN |
+| GAP-DOC-003 | Integración Niubiz/Izipay en operaciones | frmDocumento.frm verifica integración con Niubiz (TCAJA.lActivaIntegracionNiubiz) antes de permitir ciertas operaciones. En .NET 8 esta comprobación no está implementada en FrmDocumento. | `frmDocumento.frm` — cmdOpcion_Click (validación lActivaIntegracionNiubiz) | OPEN |

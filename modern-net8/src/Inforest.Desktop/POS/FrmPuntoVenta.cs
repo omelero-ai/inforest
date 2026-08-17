@@ -74,6 +74,8 @@ public class FrmPuntoVenta : Form
         menu.Items.Add(reportes);
         var delivery = new ToolStripMenuItem("Delivery");
         delivery.DropDownItems.Add("Clientes Frecuentes", null, (_, _) => AbrirFormulario<FrmClienteDelivery>());
+        delivery.DropDownItems.Add("Seguimiento Delivery", null, (_, _) => AbrirFormulario<FrmPedidoDelivery>());
+        delivery.DropDownItems.Add("Seguimiento Delivery Entregados", null, (_, _) => AbrirFormulario<FrmPedidoDeliveryNo>());
         menu.Items.Add(delivery);
         menu.Items.Add(new ToolStripMenuItem("Administración", null, (_, _) => MessageBox.Show("Abrir FrmAdministracion desde el shell principal.", Text)));
         menu.Items.Add(new ToolStripMenuItem("Salir", null, (_, _) => Close()));

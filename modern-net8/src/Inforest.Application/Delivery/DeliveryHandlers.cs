@@ -591,6 +591,38 @@ public sealed class ObtenerPedidosSeguimientoDeliveryHandler
     }
 }
 
+/// <summary>
+/// Query para obtener pedidos delivery entregados desde <c>vDespachador</c>.
+/// <para>
+/// Legacy: <c>frmPedidoDeliveryNo.frm</c> (<c>Form_Load</c>, <c>cmdProcesa_Click</c>).
+/// SQL: <c>tTipoPedido='02' and tEstadoPedido='02' and isnull(fLlegada,0)<>0</c>.
+/// </para>
+/// Regla: BR-DEL-038.
+/// </summary>
+public sealed record ObtenerPedidosSeguimientoDeliveryEntregadosQuery(DateTime FechaInicio, DateTime FechaFin);
+
+/// <summary>Handler de <see cref="ObtenerPedidosSeguimientoDeliveryEntregadosQuery"/>.</summary>
+public sealed class ObtenerPedidosSeguimientoDeliveryEntregadosHandler
+{
+    private readonly IPedidoDeliveryRepository _repo;
+
+    public ObtenerPedidosSeguimientoDeliveryEntregadosHandler(IPedidoDeliveryRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<IReadOnlyList<PedidoDeliverySeguimiento>>> HandleAsync(
+        ObtenerPedidosSeguimientoDeliveryEntregadosQuery query,
+        CancellationToken ct = default)
+    {
+        var inicio = query.FechaInicio.Date;
+        var fin = query.FechaFin.Date.AddDays(1).AddTicks(-1);
+        if (fin < inicio)
+            return Result.Fail<IReadOnlyList<PedidoDeliverySeguimiento>>("Rango de fechas inválido.", "DELIVERY_RANGO_INVALIDO");
+
+        var rows = await _repo.ObtenerSeguimientoEntregadosAsync(inicio, fin, ct);
+        return Result.Ok(rows);
+    }
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // POS-FUNC-037 — Mantenimiento de Clientes Delivery (frmClienteDelivery.frm)
 // ──────────────────────────────────────────────────────────────────────────────

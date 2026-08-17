@@ -109,7 +109,7 @@
 | 7 | `vCortesia` | `frmCajaRapida.frm`, `frmCtaCteDetalle.frm`, `frmDetallePedido.frm`… | ANALYSIS |
 | 8 | `vCtaCte` | `frmCajaRapida.frm`, `frmCtaCteDetalle.frm`, `frmVenta.frm` | ANALYSIS |
 | 9 | `vDelivery` | `frmBusquedaDelivery.frm`, `frmBusquedaSocio.frm`, `frmCajaRapida.frm`… | ANALYSIS |
-| 10 | `vDespachador` | `frmPedidoDelivery.frm`, `frmPedidoDeliveryNo.frm` | ANALYSIS |
+| 10 | `vDespachador` | `frmDespachador.frm`, `frmPedidoDelivery.frm`, `frmPedidoDeliveryNo.frm` | MIGRATED |
 | 11 | `vDistrito` | `frmNuevoDelivery.frm` | ANALYSIS |
 | 12 | `vDocumento` | `frmCuentaCobrarDetalle.frm`, `modImpresoraFiscal.bas`, `modProcedimiento.bas` | ANALYSIS |
 | 13 | `vDocumentoAgrupado` | `frmBusquedaCentralPedido.frm`, `frmCentralPedidos.frm`, `frmPedidoAnterior.frm`… | ANALYSIS |

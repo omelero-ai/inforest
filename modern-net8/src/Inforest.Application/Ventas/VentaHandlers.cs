@@ -158,3 +158,67 @@ public sealed class AnularDocumentoHandler
         }
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Consulta: ítems de un pedido pendientes de facturar
+// Legacy: frmDocumento.frm Form_Load — SELECT DPEDIDO+TPRODUCTO where tFacturado='' AND tEstadoItem='N'
+// BR-DOC-001
+// ─────────────────────────────────────────────────────────────────────────────
+
+public sealed record ObtenerItemsPendientesFacturacionQuery(string CodigoPedido);
+
+public sealed class ObtenerItemsPendientesFacturacionHandler
+{
+    private readonly IDocumentoRepository _documentoRepository;
+
+    public ObtenerItemsPendientesFacturacionHandler(IDocumentoRepository documentoRepository)
+        => _documentoRepository = documentoRepository;
+
+    public Task<IReadOnlyList<ItemPendienteFacturacionDto>> HandleAsync(
+        ObtenerItemsPendientesFacturacionQuery query,
+        CancellationToken ct = default)
+        => _documentoRepository.ObtenerItemsPendientesFacturacionAsync(query.CodigoPedido, ct);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Consulta: documentos pendientes de cobro para una caja
+// Legacy: frmDocumento.frm Form_Load — SELECT MDOCUMENTO where tEstadoDocumento='01' AND tCaja=?
+// BR-DOC-008
+// ─────────────────────────────────────────────────────────────────────────────
+
+public sealed record ObtenerDocumentosPendientesCajaQuery(string CodigoCaja);
+
+public sealed class ObtenerDocumentosPendientesCajaHandler
+{
+    private readonly IDocumentoRepository _documentoRepository;
+
+    public ObtenerDocumentosPendientesCajaHandler(IDocumentoRepository documentoRepository)
+        => _documentoRepository = documentoRepository;
+
+    public Task<IReadOnlyList<DocumentoPendienteDto>> HandleAsync(
+        ObtenerDocumentosPendientesCajaQuery query,
+        CancellationToken ct = default)
+        => _documentoRepository.ObtenerDocumentosPendientesCajaAsync(query.CodigoCaja, ct);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Comando: reimpresión de documento
+// Legacy: frmDocumento.frm CmdOpcion 7 — EXEC usp_Inforest_Impresion @doc, @modo
+// BR-DOC-005
+// ─────────────────────────────────────────────────────────────────────────────
+
+public sealed record ReimprimirDocumentoCommand(string CodigoDocumento, int Modo = 3);
+
+public sealed class ReimprimirDocumentoHandler
+{
+    private readonly IDocumentoRepository _documentoRepository;
+
+    public ReimprimirDocumentoHandler(IDocumentoRepository documentoRepository)
+        => _documentoRepository = documentoRepository;
+
+    public async Task<Result> HandleAsync(ReimprimirDocumentoCommand command, CancellationToken ct = default)
+    {
+        var ok = await _documentoRepository.ReimprimirAsync(command.CodigoDocumento, command.Modo, ct);
+        return ok ? Result.Ok() : Result.Fail("No se pudo reimprimir el documento.", "VENTA_REIMPRESION_FALLIDA");
+    }
+}

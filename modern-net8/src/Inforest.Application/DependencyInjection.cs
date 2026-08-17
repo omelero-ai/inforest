@@ -8,6 +8,7 @@ using Inforest.Application.CentralPedidos;
 using Inforest.Application.Reportes;
 using Inforest.Application.Configuracion;
 using Inforest.Application.Maestros;
+using Inforest.Application.Precios;
 using Inforest.Application.Turno;
 using Inforest.Application.Pedidos;
 using Inforest.Application.Ventas;
@@ -88,6 +89,10 @@ public static class DependencyInjection
         services.AddScoped<EmitirDocumentoHandler>();
         services.AddScoped<ObtenerDocumentoHandler>();
         services.AddScoped<AnularDocumentoHandler>();
+        // POS-FUNC-006: Generación documentos completa (BR-DOC-001..010)
+        services.AddScoped<ObtenerItemsPendientesFacturacionHandler>();
+        services.AddScoped<ObtenerDocumentosPendientesCajaHandler>();
+        services.AddScoped<ReimprimirDocumentoHandler>();
         // POS-FUNC-006: Notas de Crédito (BR-NC-001..006)
         services.AddScoped<EmitirNotaCreditoHandler>();
         services.AddScoped<AnularNotaCreditoHandler>();
@@ -136,7 +141,12 @@ public static class DependencyInjection
         services.AddScoped<ObtenerDeliveryPendientesHandler>();
         services.AddScoped<ObtenerPedidosDespachadorHandler>();
         services.AddScoped<ExportarDespachadorHandler>();
-        services.AddScoped<EmitirDespachoPedidoHandler>();
+        services.AddScoped<ObtenerMotorizadosDespachoHandler>();
+        services.AddScoped<ObtenerEmpacadoresDespachoHandler>();
+        services.AddScoped<AsignarMotorizadoDespachoHandler>();
+        services.AddScoped<DesasignarMotorizadoDespachoHandler>();
+        services.AddScoped<AsignarEmpacadorDespachoHandler>();
+        services.AddScoped<DesasignarEmpacadorDespachoHandler>();
         services.AddScoped<ObtenerMotorizadosActivosHandler>();
         services.AddScoped<ObtenerPedidosReasignacionHandler>();
         services.AddScoped<ObtenerTarifaMotorizadoHandler>();
@@ -155,6 +165,7 @@ public static class DependencyInjection
         services.AddScoped<RevertirEntregaCentralHandler>();
         services.AddScoped<ModificarFechaProgramadaDeliveryHandler>();
         services.AddScoped<ObtenerPedidosSeguimientoDeliveryHandler>();
+        services.AddScoped<ObtenerPedidosSeguimientoDeliveryEntregadosHandler>();
         // POS-FUNC-036: Búsqueda de Clientes Delivery
         services.AddScoped<ObtenerClientesDeliveryBusquedaHandler>();
         services.AddScoped<ObtenerDetalleClienteDeliveryHandler>();
@@ -200,6 +211,11 @@ public static class DependencyInjection
         services.AddScoped<ObtenerMotivosAnulacionHandler>();
         // POS-FUNC-030: Solicitud de boleta con/sin datos (frmSolicitudBoleta.frm)
         services.AddScoped<ObtenerClienteGeneralBoletaHandler>();
+
+        // POS-FUNC-038: Precios / Descuento por ítem — frmPrecios.frm, frmPreciosDetalle.frm
+        services.AddScoped<ObtenerListadoPreciosHandler>();
+        services.AddScoped<ObtenerItemParaPrecioHandler>();
+        services.AddScoped<ModificarPrecioItemHandler>();
 
         return services;
     }
