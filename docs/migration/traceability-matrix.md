@@ -559,3 +559,6 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `MPEDIDO` (activos sin mesa) | Table | `ObtenerPedidosSinMesaHandler` + `IPedidoReadRepository.ObtenerActivosSinMesaAsync` | Handler + Interface | MIGRATED | `src/Inforest.Application/Pedidos/PedidoHandlers.cs` |
 | `PedidoSinMesaVista` | — | `PedidoSinMesaVista` record | DTO | MIGRATED | `src/Inforest.Application/Pedidos/DetallePedidoVista.cs` |
 | (tests BR-MESAS-001..005) | — | `ObtenerPedidosSinMesaHandlerTests` (3) | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Pedidos/ObtenerPedidosSinMesaHandlerTests.cs` |
+| `frmNumPad.frm` | Form | `FrmNumPad` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Shared/FrmNumPad.cs` |
+| `frmCambioPropina.frm` | Form | `FrmCambioPropina` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Ventas/FrmCambioPropina.cs` |
+| `tPropina` ('01'/'02') + `nPropina` | VB6 global vars | `FrmCambioPropina.TipoPropina` + `PropinaMN`/`PropinaME` | Properties | MIGRATED | `src/Inforest.Desktop/Ventas/FrmCambioPropina.cs` |

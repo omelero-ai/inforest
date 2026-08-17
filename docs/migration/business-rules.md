@@ -3319,3 +3319,48 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Si no hay caja activa, el panel queda vacío.
 **Destino .NET:** `ObtenerPedidosSinMesaHandler` + `PedidoSinMesaVista` + `FrmMesas._lstSinMesa`.
 **Estado:** MIGRATED
+
+---
+
+## Módulo: Teclado Numérico (frmNumPad)
+
+### BR-NUMPAD-001
+**Nombre:** Entrada numérica universal (frmNumPad)
+**Origen:** Legacy/frmNumPad.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmNumPad.frm`
+**Descripción:** El teclado numérico modal es el único mecanismo de entrada de valores numéricos en el sistema POS. Todos los formularios que requieran ingresar montos, cantidades o códigos numéricos lo usan. Establece `wEnter=True` al confirmar, `wEnter=False` al cancelar, y guarda el resultado en `sDescrip`.
+**Destino .NET:** `FrmNumPad` (Inforest.Desktop.Shared) — devuelve `Valor` (decimal) y `ValorTexto` (string), `DialogResult.OK` al confirmar.
+**Estado:** MIGRATED
+
+---
+
+## Módulo: Cambio de Propina (frmCambioPropina)
+
+### BR-PROPINA-001
+**Nombre:** Propina en moneda nacional
+**Origen:** Legacy/frmCambioPropina.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmCambioPropina.frm`
+**Descripción:** Al seleccionar "Propina MN", se ingresa el monto mediante NumPad y se asigna `tPropina='01'` (moneda nacional). El monto MN se guarda en `nPropina`. El botón ME se resetea a 0.
+**Destino .NET:** `FrmCambioPropina.PropinaMN` + `TipoPropina="01"`
+**Estado:** MIGRATED
+
+### BR-PROPINA-002
+**Nombre:** Propina en moneda extranjera
+**Origen:** Legacy/frmCambioPropina.frm
+**Descripción:** Al seleccionar "Propina ME", se asigna `tPropina='02'` (moneda extranjera). El monto ME en `nPropina`. El botón MN se resetea a 0.
+**Destino .NET:** `FrmCambioPropina.PropinaME` + `TipoPropina="02"`
+**Estado:** MIGRATED
+
+### BR-PROPINA-003
+**Nombre:** Una sola moneda de propina activa
+**Origen:** Legacy/frmCambioPropina.frm
+**Descripción:** Solo puede haber propina en MN o en ME, nunca simultáneamente. Al seleccionar una, la otra se resetea a 0.
+**Destino .NET:** `FrmCambioPropina.IngresarPropina()` — resetea la moneda opuesta.
+**Estado:** MIGRATED
+
+### BR-PROPINA-004
+**Nombre:** Grabar requiere monto mayor a cero
+**Origen:** Legacy/frmCambioPropina.frm
+**Descripción:** El botón "Grabar" solo queda habilitado si el usuario ha ingresado al menos una propina con monto > 0. Si no se ha seleccionado propina (wFlag=False), wEnter queda False al cerrar con "Grabar".
+**Destino .NET:** `FrmCambioPropina._btnGrabar.Enabled` controlado por `PropinaMN > 0 || PropinaME > 0`.
+**Estado:** MIGRATED
