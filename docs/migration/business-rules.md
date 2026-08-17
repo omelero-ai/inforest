@@ -940,6 +940,94 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ---
 
+### BR-DEL-DESP-001
+
+**Nombre:** Asignación de motorizado en despacho exige empacador y valida topes
+
+**Origen:** `frmDespachador.frm: cmdOpcion_Click(0)`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDespachador.frm`
+
+**Descripción:** Antes de asignar motorizado, el pedido debe tener empacador; además valida monto máximo por motorizado (`TPARAMETRO.nAsignacionMotorizado`) y tope de pedidos activos por motorizado (`TPARAMETRO.tMaxMotorizado`), permitiendo autorización explícita para tarifa extra.
+
+**Condición:** Al seleccionar “Mot” en el panel Despachador.
+
+**Resultado:** Actualiza `TTABLA` (`MOTORIZADO`) y `MPEDIDO` (`nTarifaMotorizado`, `nTarifaExtra`, `fSalida`, `fAsignacion`, `tMotorizado`).
+
+**Excepciones:** Bloquea si no existe empacador, si ya está asignado, si supera tope sin autorización o si excede máximo de pedidos por motorizado.
+
+**Destino .NET:** `AsignarMotorizadoDespachoHandler` + `PedidoDeliveryRepository.AsignarMotorizadoDespachoAsync`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-DESP-002
+
+**Nombre:** Desasignación de motorizado limpia asignación activa y banderas
+
+**Origen:** `frmDespachador.frm: cmdOpcion_Click(1)`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDespachador.frm`
+
+**Descripción:** Al desasignar se limpian campos de asignación en `MPEDIDO`. Si el motorizado ya no tiene pedidos activos pendientes, se restablece la bandera operativa en `TTABLA`.
+
+**Condición:** Al seleccionar “No Mot” y confirmar operación.
+
+**Resultado:** `MPEDIDO.nTarifaMotorizado/nTarifaExtra/fAsignacion/fSalida = NULL`, `tMotorizado='0000'`; `TTABLA.nTamano=0` cuando corresponde.
+
+**Excepciones:** Si el pedido no estaba asignado, bloquea la operación.
+
+**Destino .NET:** `DesasignarMotorizadoDespachoHandler` + `PedidoDeliveryRepository.DesasignarMotorizadoDespachoAsync`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-DESP-003
+
+**Nombre:** Gestión de empacador con bloqueo si pedido está en camino
+
+**Origen:** `frmDespachador.frm: cmdOpcion_Click(8/9)`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDespachador.frm`
+
+**Descripción:** Permite asignar y desasignar empacador sobre `MPEDIDO`; no permite quitar empacador cuando el pedido ya tiene motorizado asignado y está en ruta.
+
+**Condición:** Al seleccionar “Emp” o “No Emp” en el panel Despachador.
+
+**Resultado:** `MPEDIDO.tEmpacador/fEmpacador` se actualizan según acción.
+
+**Excepciones:** Bloquea si ya estaba empacado, si no estaba empacado o si ya está en camino.
+
+**Destino .NET:** `AsignarEmpacadorDespachoHandler`, `DesasignarEmpacadorDespachoHandler`, `PedidoDeliveryRepository.AsignarEmpacadorDespachoAsync`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-DEL-DESP-004
+
+**Nombre:** Panel de despacho filtra pendientes por rango y exporta HTML
+
+**Origen:** `frmDespachador.frm: Form_Load`, `cmdProcesa_Click`, `cmdExporta_Click`
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDespachador.frm`
+
+**Descripción:** El panel consulta `vDespachador` por rango de fechas, `tEstadoPedido='02'`, `fLlegada IS NULL`, permite orden y genera exportación HTML de la grilla activa.
+
+**Condición:** Al abrir, filtrar o exportar el panel Despachador.
+
+**Resultado:** Lista operativa de pedidos pendientes y archivo HTML con el resultado filtrado.
+
+**Excepciones:** Si no hay datos, muestra grilla vacía sin error.
+
+**Destino .NET:** `ObtenerPedidosDespachadorHandler`, `ExportarDespachadorHandler`, `DespachadorForm`
+
+**Estado:** MIGRATED
+
+---
+
 ### BR-DEL-012
 
 **Nombre:** Confirmar y revertir entrega de pedido (lEntregado) — frmCentralPedidos

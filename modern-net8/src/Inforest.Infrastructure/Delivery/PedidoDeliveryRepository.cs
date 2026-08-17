@@ -129,6 +129,98 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<PedidoDespachadorResumen>> ObtenerResumenDespachadorAsync(
+        DateTime fechaInicio,
+        DateTime fechaFin,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT tCodigoPedido AS CodigoPedido,
+                   fFecha AS FechaRegistro,
+                   tUsuario AS Usuario,
+                   tCaja AS Caja,
+                   Cliente AS Cliente,
+                   tTelefono AS Telefono,
+                   tDireccion AS Direccion,
+                   Referencia AS Referencia,
+                   Empacador AS Empacador,
+                   Motorizado AS Motorizado,
+                   fAsignacion AS FechaAsignacion,
+                   CAST(ISNULL(nMonto, 0) AS decimal(18,2)) AS MontoTotal
+            FROM vDespachador
+            WHERE tTipoPedido IN (SELECT Codigo FROM vTipoPedido WHERE lActivo = 1 AND lCanalDelivery = 1)
+              AND tEstadoPedido = '02'
+              AND ISNULL(fLlegada, 0) = 0
+              AND fFecha >= @FechaInicio
+              AND fFecha <= @FechaFin
+            ORDER BY lEmpacador, fFecha ASC
+            """;
+        var rows = await conn.QueryAsync<PedidoDespachadorResumen>(sql, new
+        {
+            FechaInicio = fechaInicio,
+            FechaFin = fechaFin
+        });
+        return rows.ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<PedidoDespachadorResumen?> ObtenerResumenDespachadorPorPedidoAsync(
+        string codigoPedido,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT TOP 1 tCodigoPedido AS CodigoPedido,
+                   fFecha AS FechaRegistro,
+                   tUsuario AS Usuario,
+                   tCaja AS Caja,
+                   Cliente AS Cliente,
+                   tTelefono AS Telefono,
+                   tDireccion AS Direccion,
+                   Referencia AS Referencia,
+                   Empacador AS Empacador,
+                   Motorizado AS Motorizado,
+                   fAsignacion AS FechaAsignacion,
+                   CAST(ISNULL(nMonto, 0) AS decimal(18,2)) AS MontoTotal
+            FROM vDespachador
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+        return await conn.QueryFirstOrDefaultAsync<PedidoDespachadorResumen>(sql, new { CodigoPedido = codigoPedido });
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<OperadorDespachoItem>> ObtenerMotorizadosActivosDespachoAsync(
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT Codigo, Descripcion
+            FROM vMotorizado
+            WHERE lActivo = 1
+              AND Codigo <> '0000'
+            ORDER BY Descripcion
+            """;
+        var rows = await conn.QueryAsync<OperadorDespachoItem>(sql);
+        return rows.ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<OperadorDespachoItem>> ObtenerEmpacadoresActivosDespachoAsync(
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT Codigo, Descripcion
+            FROM vEmpacador
+            WHERE lActivo = 1
+            ORDER BY Descripcion
+            """;
+        var rows = await conn.QueryAsync<OperadorDespachoItem>(sql);
+        return rows.ToList();
+    }
+
+    /// <inheritdoc />
     public async Task InsertarAsync(PedidoDelivery pedido, CancellationToken ct = default)
     {
         using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
@@ -159,6 +251,149 @@ internal sealed class PedidoDeliveryRepository : IPedidoDeliveryRepository
         using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
         const string sql = "UPDATE MPEDIDO SET tMotorizado = @Motorizado WHERE tCodigoPedido = @CodigoPedido";
         await conn.ExecuteAsync(sql, new { CodigoPedido = codigoPedido, Motorizado = codigoMotorizado });
+    }
+
+    /// <inheritdoc />
+    public async Task AsignarMotorizadoDespachoAsync(
+        string codigoPedido,
+        string codigoMotorizado,
+        decimal tarifaDiaria,
+        bool esTarifaExtra,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        using var tx = conn.BeginTransaction();
+
+        const string sqlMarcaMotorizado = """
+            UPDATE TTABLA
+            SET ntamano = 1,
+                lreplica = 1
+            WHERE tTABLA = 'MOTORIZADO'
+              AND tCodigo = @CodigoMotorizado
+            """;
+
+        const string sqlPedido = """
+            UPDATE MPEDIDO
+            SET nTarifaMotorizado = @TarifaDiaria,
+                nTarifaExtra = @TarifaExtra,
+                fSalida = GETDATE(),
+                fAsignacion = GETDATE(),
+                tMotorizado = @CodigoMotorizado
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+
+        try
+        {
+            await conn.ExecuteAsync(sqlMarcaMotorizado, new { CodigoMotorizado = codigoMotorizado }, tx);
+            await conn.ExecuteAsync(sqlPedido, new
+            {
+                CodigoPedido = codigoPedido,
+                CodigoMotorizado = codigoMotorizado,
+                TarifaDiaria = tarifaDiaria,
+                TarifaExtra = esTarifaExtra ? 1 : 0
+            }, tx);
+
+            tx.Commit();
+        }
+        catch
+        {
+            tx.Rollback();
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task DesasignarMotorizadoDespachoAsync(
+        string codigoPedido,
+        string codigoMotorizado,
+        bool liberarBanderaMotorizado,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        using var tx = conn.BeginTransaction();
+
+        try
+        {
+            if (liberarBanderaMotorizado)
+            {
+                const string sqlTabla = """
+                    UPDATE TTABLA
+                    SET ntamano = 0,
+                        lreplica = 1
+                    WHERE tTABLA = 'MOTORIZADO'
+                      AND tCodigo = @CodigoMotorizado
+                    """;
+                await conn.ExecuteAsync(sqlTabla, new { CodigoMotorizado = codigoMotorizado }, tx);
+            }
+
+            const string sqlPedido = """
+                UPDATE MPEDIDO
+                SET nTarifaMotorizado = NULL,
+                    nTarifaExtra = NULL,
+                    fAsignacion = NULL,
+                    fSalida = NULL,
+                    tMotorizado = '0000'
+                WHERE tCodigoPedido = @CodigoPedido
+                """;
+            await conn.ExecuteAsync(sqlPedido, new { CodigoPedido = codigoPedido }, tx);
+
+            tx.Commit();
+        }
+        catch
+        {
+            tx.Rollback();
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task AsignarEmpacadorDespachoAsync(
+        string codigoPedido,
+        string codigoEmpacador,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            UPDATE MPEDIDO
+            SET tEmpacador = @CodigoEmpacador,
+                fEmpacador = GETDATE()
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+        await conn.ExecuteAsync(sql, new
+        {
+            CodigoPedido = codigoPedido,
+            CodigoEmpacador = codigoEmpacador
+        });
+    }
+
+    /// <inheritdoc />
+    public async Task DesasignarEmpacadorDespachoAsync(string codigoPedido, CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            UPDATE MPEDIDO
+            SET tEmpacador = '',
+                fEmpacador = NULL
+            WHERE tCodigoPedido = @CodigoPedido
+            """;
+        await conn.ExecuteAsync(sql, new { CodigoPedido = codigoPedido });
+    }
+
+    /// <inheritdoc />
+    public async Task<int> ContarPedidosActivosMotorizadoAsync(
+        string codigoMotorizado,
+        CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT COUNT(1)
+            FROM vDespachador
+            WHERE tTipoPedido = '02'
+              AND tEstadoPedido = '02'
+              AND ISNULL(fLlegada, 0) = 0
+              AND tMotorizado = @CodigoMotorizado
+            """;
+        return await conn.ExecuteScalarAsync<int>(sql, new { CodigoMotorizado = codigoMotorizado });
     }
 
     /// <inheritdoc />

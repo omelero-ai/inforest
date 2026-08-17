@@ -136,7 +136,12 @@ public static class DependencyInjection
         services.AddScoped<ObtenerDeliveryPendientesHandler>();
         services.AddScoped<ObtenerPedidosDespachadorHandler>();
         services.AddScoped<ExportarDespachadorHandler>();
-        services.AddScoped<EmitirDespachoPedidoHandler>();
+        services.AddScoped<ObtenerMotorizadosDespachoHandler>();
+        services.AddScoped<ObtenerEmpacadoresDespachoHandler>();
+        services.AddScoped<AsignarMotorizadoDespachoHandler>();
+        services.AddScoped<DesasignarMotorizadoDespachoHandler>();
+        services.AddScoped<AsignarEmpacadorDespachoHandler>();
+        services.AddScoped<DesasignarEmpacadorDespachoHandler>();
         services.AddScoped<ObtenerMotorizadosActivosHandler>();
         services.AddScoped<ObtenerPedidosReasignacionHandler>();
         services.AddScoped<ObtenerTarifaMotorizadoHandler>();
