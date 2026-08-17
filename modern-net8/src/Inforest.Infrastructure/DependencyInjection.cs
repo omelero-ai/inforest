@@ -76,6 +76,7 @@ public static class DependencyInjection
 
         // P3-09: Delivery, Despacho, Motorizados y Centralización
         services.AddScoped<IClienteDeliveryRepository, ClienteDeliveryRepository>();
+        services.AddScoped<ITarjetaProximidadRepository, TarjetaProximidadRepository>();
         services.AddScoped<IPedidoDeliveryRepository, PedidoDeliveryRepository>();
         services.AddScoped<IMotorizadoRepository, MotorizadoRepository>();
         services.AddScoped<ILocalRepository, LocalRepository>();

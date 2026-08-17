@@ -117,6 +117,10 @@ public static class DependencyInjection
         services.AddScoped<ActualizarFotoClienteDeliveryHandler>();
         services.AddScoped<BuscarClienteDeliveryHandler>();
         services.AddScoped<ObtenerClientesFrecuentesHandler>();
+        services.AddScoped<ObtenerTarjetasProximidadHandler>();
+        services.AddScoped<ObtenerMovimientosTarjetaProximidadHandler>();
+        services.AddScoped<CrearTarjetaProximidadHandler>();
+        services.AddScoped<ActualizarTarjetaProximidadHandler>();
         services.AddScoped<CrearPedidoDeliveryHandler>();
         services.AddScoped<ActualizarEstadoDeliveryHandler>();
         services.AddScoped<ObtenerDeliveryPendientesHandler>();
