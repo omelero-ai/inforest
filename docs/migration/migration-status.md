@@ -155,9 +155,10 @@
 21. **MIGRATED:** `FrmMovimientoTarjetas.frm` (POS-FUNC-021 completion): form standalone de movimientos RFID usando `ObtenerMovimientosTarjetaProximidadHandler` — BR-RFID-008 documentado. El shell VB6 no tenía código; la funcionalidad se extrae de `FrmTarjetaAproximidad.cmdOpcion(5)`.
 22. **MIGRATED:** `frmBusquedaRapida.frm` (POS-FUNC-035): `FrmBusquedaRapida` (diálogo modal genérico con filtrado en tiempo real, selección por Enter/doble-clic, Escape para cancelar) + `BusquedaItem` + `BusquedaResultado` + BR-BUSQ-001/002/003 — sin tests (UI pura sin lógica de aplicación).
 23. **MIGRATED:** `frmBusquedaDelivery.frm` (POS-FUNC-036): `FrmBusquedaDelivery` (buscador clientes delivery con grilla filtrable TDELIVERY+vZona, panel detalle vDelivery con saldos fidelización, panel estadísticas toggle "Otros Datos" MPEDIDO/DPEDIDO/MDOCUMENTO, tiendas/sucursales vTienda, nuevo/editar cliente, selección con Enter/doble-clic/Escape) + `IClienteDeliveryReadRepository` + `ClienteDeliveryReadRepository` + 4 DTOs + `FrmBusquedaTiendasDelivery` + 4 handlers + BR-DEL-036-001..005 — sin tests (UI pura) — **577 tests en verde**.
-24. **SIGUIENTE PENDIENTE:** `frmClienteDelivery.frm` o `frmNuevoDelivery.frm` (completar flujo delivery POS-FUNC-012), o cerrar gap RFID POS-FUNC-021 (anticipo/emisión documental/impresión fiscal en recarga).
-25. Mantener seguimiento de gaps bloqueantes: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
-26. Completar plantillas FastReport pendientes para los handlers/reportes de Etapa 10 restantes.
+24. **MIGRATED:** `frmNuevoDelivery.frm` (InfoRest.vbp): `NuevoDeliveryForm` completo para alta/edición de cliente frecuente (validaciones legacy de teléfono/identidad y tipo cliente, normalización, selección de foto) + `ObtenerSiguienteCodigoClienteDeliveryHandler` (correlativo `tCodigoDelivery`) + `ObtenerClienteDeliveryPorCodigoHandler` + validaciones de duplicidad en `CrearClienteDeliveryHandler`/`ActualizarClienteDeliveryHandler` + `IClienteDeliveryRepository.ObtenerMaximoCodigoAsync` + BR-DEL-001/BR-DEL-011 — **578 tests en verde**.
+25. **SIGUIENTE PENDIENTE:** `frmClienteDelivery.frm` (mantenimiento/listado principal) o `frmDespachador.frm` (flujo operativo de despacho), manteniendo etapa actual.
+26. Mantener seguimiento de gaps bloqueantes: HardKey físico, SecuGen, Epson fiscal y conectores FE/Rappi reales.
+27. Completar plantillas FastReport pendientes para los handlers/reportes de Etapa 10 restantes.
 
 ---
 

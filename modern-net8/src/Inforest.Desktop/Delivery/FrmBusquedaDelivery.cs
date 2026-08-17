@@ -20,10 +20,11 @@ public partial class FrmBusquedaDelivery : Form
     private readonly ObtenerDetalleClienteDeliveryHandler _detalleHandler;
     private readonly ObtenerEstadisticasClienteDeliveryHandler _statsHandler;
     private readonly ObtenerTiendasClienteDeliveryHandler _tiendasHandler;
+    private readonly ObtenerSiguienteCodigoClienteDeliveryHandler _codigoClienteHandler;
+    private readonly ObtenerClienteDeliveryPorCodigoHandler _clientePorCodigoHandler;
     private readonly CrearClienteDeliveryHandler _crearHandler;
     private readonly ActualizarClienteDeliveryHandler _actualizarHandler;
     private readonly ActualizarFotoClienteDeliveryHandler _actualizarFotoHandler;
-    private readonly BuscarClienteDeliveryHandler _buscarHandler;
 
     private IReadOnlyList<ClienteDeliveryBusquedaItem> _todosClientes = [];
     private IReadOnlyList<ClienteDeliveryBusquedaItem> _clientesFiltrados = [];
@@ -59,19 +60,21 @@ public partial class FrmBusquedaDelivery : Form
         ObtenerDetalleClienteDeliveryHandler detalleHandler,
         ObtenerEstadisticasClienteDeliveryHandler statsHandler,
         ObtenerTiendasClienteDeliveryHandler tiendasHandler,
+        ObtenerSiguienteCodigoClienteDeliveryHandler codigoClienteHandler,
+        ObtenerClienteDeliveryPorCodigoHandler clientePorCodigoHandler,
         CrearClienteDeliveryHandler crearHandler,
         ActualizarClienteDeliveryHandler actualizarHandler,
-        ActualizarFotoClienteDeliveryHandler actualizarFotoHandler,
-        BuscarClienteDeliveryHandler buscarHandler)
+        ActualizarFotoClienteDeliveryHandler actualizarFotoHandler)
     {
         _listarHandler = listarHandler;
         _detalleHandler = detalleHandler;
         _statsHandler = statsHandler;
         _tiendasHandler = tiendasHandler;
+        _codigoClienteHandler = codigoClienteHandler;
+        _clientePorCodigoHandler = clientePorCodigoHandler;
         _crearHandler = crearHandler;
         _actualizarHandler = actualizarHandler;
         _actualizarFotoHandler = actualizarFotoHandler;
-        _buscarHandler = buscarHandler;
         InitializeComponent();
     }
 
@@ -369,10 +372,17 @@ public partial class FrmBusquedaDelivery : Form
 
     private async Task AbrirNuevoClienteAsync(bool esNuevo)
     {
-        using var dlg = new NuevoDeliveryForm(_crearHandler, _actualizarHandler, _actualizarFotoHandler, _buscarHandler)
-        {
-            Text = esNuevo ? "Agregar Cliente Frecuente" : "Modificar Cliente Delivery"
-        };
+        var codigoEdicion = esNuevo ? null : ObtenerCodigoSeleccionado();
+        if (!esNuevo && string.IsNullOrWhiteSpace(codigoEdicion))
+            return;
+
+        using var dlg = new NuevoDeliveryForm(
+            _codigoClienteHandler,
+            _clientePorCodigoHandler,
+            _crearHandler,
+            _actualizarHandler,
+            _actualizarFotoHandler,
+            codigoEdicion);
         dlg.ShowDialog(this);
 
         // Recargar la grilla con los datos actualizados

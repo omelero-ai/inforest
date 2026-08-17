@@ -119,9 +119,11 @@ public static class DependencyInjection
 
         // P3-09: Delivery, Despacho, Motorizados y Centralización — Handlers
         services.AddScoped<CrearClienteDeliveryHandler>();
+        services.AddScoped<ObtenerSiguienteCodigoClienteDeliveryHandler>();
         services.AddScoped<ActualizarClienteDeliveryHandler>();
         services.AddScoped<ActualizarFotoClienteDeliveryHandler>();
         services.AddScoped<BuscarClienteDeliveryHandler>();
+        services.AddScoped<ObtenerClienteDeliveryPorCodigoHandler>();
         services.AddScoped<ObtenerClientesFrecuentesHandler>();
         services.AddScoped<ObtenerTarjetasProximidadHandler>();
         services.AddScoped<ObtenerMovimientosTarjetaProximidadHandler>();

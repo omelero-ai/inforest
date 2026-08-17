@@ -203,7 +203,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
 |---|---|---|---|---|---|
-| `frmNuevoDelivery.frm` | Form | `NuevoDeliveryForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/NuevoDeliveryForm.cs` |
+| `frmNuevoDelivery.frm` | Form | `NuevoDeliveryForm` + `ObtenerSiguienteCodigoClienteDeliveryHandler` + `ObtenerClienteDeliveryPorCodigoHandler` | WinForm + Handlers | MIGRATED | `src/Inforest.Desktop/Delivery/NuevoDeliveryForm.cs`, `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/ClienteDeliveryRepository.cs` |
 | `frmDespachador.frm` | Form | `DespachadorForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/DespachadorForm.cs` |
 | `frmCentralPedidos.frm` | Form | `CentralPedidosForm` (extendido: ConfirmarEntrega + RevertirEntrega + ModificarFecha) | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/CentralPedidosForm.cs` |
 | `frmPedidoDelivery.frm` | Form | `FrmPedidoDelivery` | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/FrmPedidoDelivery.cs` |

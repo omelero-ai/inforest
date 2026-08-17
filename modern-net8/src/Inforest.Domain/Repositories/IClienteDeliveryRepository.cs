@@ -11,6 +11,7 @@ namespace Inforest.Domain.Repositories;
 /// </summary>
 public interface IClienteDeliveryRepository
 {
+    Task<string?> ObtenerMaximoCodigoAsync(CancellationToken cancellationToken = default);
     Task<ClienteDelivery?> ObtenerPorCodigoAsync(string codigoDelivery, CancellationToken cancellationToken = default);
     Task<ClienteDelivery?> ObtenerPorTelefonoAsync(string telefono, CancellationToken cancellationToken = default);
     Task<ClienteDelivery?> ObtenerPorIdentidadAsync(string tipoIdentidad, string numeroIdentidad, CancellationToken cancellationToken = default);

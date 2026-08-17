@@ -934,9 +934,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** Si el cliente no existe, no debe ejecutarse la actualización.
 
-**Destino .NET:** `ActualizarFotoClienteDeliveryHandler`, `IClienteDeliveryRepository.ActualizarFotoAsync`, `ClienteDeliveryRepository.ActualizarFotoAsync`
+**Destino .NET:** `ActualizarFotoClienteDeliveryHandler`, `IClienteDeliveryRepository.ActualizarFotoAsync`, `ClienteDeliveryRepository.ActualizarFotoAsync`, `NuevoDeliveryForm`
 
-**Estado:** IN_PROGRESS
+**Estado:** MIGRATED
 
 ---
 
