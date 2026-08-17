@@ -3715,3 +3715,127 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Excepciones:** Si no hay registros, la grilla se mantiene vacía y el detalle se limpia.
 **Destino .NET:** `FrmPedidoDeliveryNo` + `ObtenerPedidosSeguimientoDeliveryEntregadosHandler` + `PedidoDeliveryRepository.ObtenerSeguimientoEntregadosAsync` + `ObtenerDetallePedidoExtendidoHandler`
 **Estado:** MIGRATED
+
+---
+
+## POS-FUNC-006 — Generación de Documentos (frmDocumento.frm)
+
+### BR-DOC-001
+**Nombre:** Carga de ítems pendientes de facturación
+**Origen:** Legacy/frmDocumento.frm (`Form_Load`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `Form_Load` — SELECT DPEDIDO INNER JOIN TPRODUCTO WHERE tCodigoPedido=@p AND (ISNULL(tFacturado,'0')='0' OR LEN(LTRIM(tFacturado))=0) AND tEstadoItem='N'
+**Descripción:** Al abrir el formulario con un pedido activo, carga los ítems de DPEDIDO que aún no han sido facturados (tFacturado vacío/nulo y estado='N') en la lista "Por Facturar".
+**Condición:** Se requiere un codigoPedido válido.
+**Resultado:** Lista izquierda con ítems pendientes; lista derecha vacía.
+**Excepciones:** Si no hay ítems, la lista queda vacía.
+**Destino .NET:** `IDocumentoRepository.ObtenerItemsPendientesFacturacionAsync` + `ObtenerItemsPendientesFacturacionHandler` + `FrmDocumento`
+**Estado:** MIGRATED
+
+### BR-DOC-002
+**Nombre:** Selección de ítems para facturar
+**Origen:** Legacy/frmDocumento.frm (`cmdMovimiento_Click`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `cmdMovimiento_Click` — UPDATE @temporal SET Estado='X'/'  ' by tItem+tCodigoPedido
+**Descripción:** El usuario mueve ítems entre la lista "Por Facturar" y "Seleccionados" mediante botones de movimiento individual/total.
+**Condición:** Debe haber un ítem seleccionado en la grilla origen.
+**Resultado:** Ítem se traslada a la lista destino; totales se actualizan.
+**Excepciones:** Si no hay selección, el botón individual no hace nada.
+**Destino .NET:** `FrmDocumento` (listas en memoria `_itemsPendientes`, `_itemsSeleccionados`)
+**Estado:** MIGRATED
+
+### BR-DOC-003
+**Nombre:** Generación de documento desde ítems seleccionados
+**Origen:** Legacy/frmDocumento.frm (`cmdOpcion_Click` Case 2)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `cmdOpcion_Click` Case 2 — `frmGeneracion.Show vbModal`
+**Descripción:** Con ítems seleccionados, abre el formulario de generación (frmGeneracion/FrmVenta) para crear el documento de venta y procesarlo.
+**Condición:** Debe haber al menos un ítem en lista "Seleccionados".
+**Resultado:** Se genera el documento; la lista de documentos y la de ítems se actualizan.
+**Excepciones:** Si no hay ítems seleccionados, muestra mensaje y no continúa.
+**Destino .NET:** `FrmDocumento.GenerarDocumentoAsync` → `ObtenerPedidoPorCodigoHandler` + `FrmVenta`
+**Estado:** MIGRATED
+
+### BR-DOC-004
+**Nombre:** Pago de documento pendiente
+**Origen:** Legacy/frmDocumento.frm (`cmdOpcion_Click` Case 6)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `cmdOpcion_Click` Case 6 — `frmPago.Show vbModal`
+**Descripción:** Con un documento seleccionado en la lista inferior, abre la pantalla de cobro (frmPago).
+**Condición:** Debe existir un documento seleccionado con tEstadoDocumento≠'02' (no cobrado). tTipoDocumento≠'00'.
+**Resultado:** Se registra el pago; la lista de documentos se actualiza.
+**Excepciones:** Si ya tiene pago en dpagodocumento, muestra advertencia y no continúa.
+**Destino .NET:** `FrmDocumento.PagarDocumentoAsync` → `FrmPago`
+**Estado:** MIGRATED
+
+### BR-DOC-005
+**Nombre:** Reimpresión de documento
+**Origen:** Legacy/frmDocumento.frm (`cmdOpcion_Click` Case 7)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `cmdOpcion_Click` Case 7 — `EXEC usp_Inforest_Impresion @doc, @modo`
+**Descripción:** Con un documento seleccionado, solicita confirmación y llama al SP usp_Inforest_Impresion con modo 3 (sin agrupación) ó 1 (agrupado) para reenviar a impresora.
+**Condición:** Debe existir un documento seleccionado. Requiere permiso de supervisor "12".
+**Resultado:** El documento se reimprime en la impresora configurada.
+**Excepciones:** Si no hay configuración de caja, muestra error.
+**Destino .NET:** `IDocumentoRepository.ReimprimirAsync` + `ReimprimirDocumentoHandler` + `FrmDocumento.ReimprimirDocumentoAsync`
+**Estado:** MIGRATED
+
+### BR-DOC-006
+**Nombre:** Anulación de documento
+**Origen:** Legacy/frmDocumento.frm (`cmdOpcion_Click` Case 9)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `cmdOpcion_Click` Case 9 — `AnularDocumentoHandler`
+**Descripción:** Con documento seleccionado, solicita motivo de anulación y llama al handler de anulación que actualiza MDOCUMENTO.tEstadoDocumento='AN'.
+**Condición:** Debe existir un documento seleccionado.
+**Resultado:** Documento marcado como anulado; lista de documentos actualizada.
+**Excepciones:** Si ya está anulado, el dominio lanza DomainException.
+**Destino .NET:** `AnularDocumentoHandler` + `FrmDocumento.AnularDocumentoAsync`
+**Estado:** MIGRATED
+
+### BR-DOC-007
+**Nombre:** Visibilidad de botón Notas de Crédito
+**Origen:** Legacy/frmDocumento.frm (`Form_Load`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `Form_Load` — `If RsTparametro!lAnula = True Then cmdNotasCredito.Visible = True`
+**Descripción:** El botón de Notas de Crédito se muestra únicamente si TPARAMETRO.lAnula = true.
+**Condición:** Se evalúa TPARAMETRO.lAnula en el momento de apertura del formulario.
+**Resultado:** Botón visible u oculto según configuración.
+**Excepciones:** Si no se puede leer TPARAMETRO, el botón queda oculto.
+**Destino .NET:** `FrmDocumento` parámetro `permiteNotasCredito` (inyectado desde el caller que lee TPARAMETRO)
+**Estado:** MIGRATED
+
+### BR-DOC-008
+**Nombre:** Lista de documentos pendientes de cobro de la caja
+**Origen:** Legacy/frmDocumento.frm (`Form_Load`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `Form_Load` — SELECT MDOCUMENTO WHERE tEstadoDocumento='01' AND tCaja=@caja ORDER BY tDocumento
+**Descripción:** Al cargar el formulario, se muestra la lista de documentos emitidos pero no cobrados de la caja actual.
+**Condición:** Se filtra por tCaja = sCaja global y tEstadoDocumento = '01'.
+**Resultado:** Grilla inferior con documentos, mesa, motorizado, observación, pedido, total, fecha, cliente.
+**Excepciones:** Si no hay documentos, la grilla queda vacía.
+**Destino .NET:** `IDocumentoRepository.ObtenerDocumentosPendientesCajaAsync` + `ObtenerDocumentosPendientesCajaHandler` + `FrmDocumento`
+**Estado:** MIGRATED
+
+### BR-DOC-009
+**Nombre:** División de total entre N documentos
+**Origen:** Legacy/frmDocumento.frm (`cmdOpcion_Click` Case 4/5)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `cmdOpcion_Click` Case 4 (sumar) / Case 5 (restar)
+**Descripción:** El usuario puede dividir el total de ítems seleccionados entre N partes (mínimo 1). Al generar documento, el divisor se pasa para calcular el monto parcial.
+**Condición:** Divisor mínimo 1, máximo sin límite.
+**Resultado:** El campo "= Total ÷ N" muestra el monto por parte.
+**Excepciones:** Si divisor es 0, no calcula (protección por condición > 0).
+**Destino .NET:** `FrmDocumento._divisor` + `ActualizarDivisor()` + botones +/−
+**Estado:** MIGRATED
+
+### BR-DOC-010
+**Nombre:** Anulación de pagos de documento
+**Origen:** Legacy/frmDocumento.frm (`cmdOpcion_Click` Case 11)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmDocumento.frm`
+**Procedimiento/Función:** `cmdOpcion_Click` Case 11 — SELECT MDOCUMENTO+DPAGODOCUMENTO+DDOCUMENTO; requiere Supervisor "05"
+**Descripción:** Permite anular los pagos registrados de un documento y revertir el pedido a estado abierto. Flujo complejo con múltiples tablas.
+**Condición:** Requiere permiso de supervisor "05". El documento debe tener pagos registrados.
+**Resultado:** Pagos anulados, documento vuelve a estado '01', pedido vuelve a estado abierto.
+**Excepciones:** Sin pago registrado no procede.
+**Destino .NET:** GAP — pendiente de migración (complejidad transaccional alta; ver known-gaps.md GAP-DOC-001)
+**Estado:** NOT_STARTED

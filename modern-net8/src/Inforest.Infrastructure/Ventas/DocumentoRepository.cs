@@ -224,6 +224,86 @@ internal sealed class DocumentoRepository : IDocumentoRepository
         return rows > 0;
     }
 
+    /// <inheritdoc/>
+    /// Legacy: SELECT DPEDIDO+TPRODUCTO WHERE tCodigoPedido=@p AND (ISNULL(tFacturado,'0')='0' OR LEN(LTRIM(tFacturado))=0) AND tEstadoItem='N'. BR-DOC-001.
+    public async Task<IReadOnlyList<ItemPendienteFacturacionDto>> ObtenerItemsPendientesFacturacionAsync(
+        string codigoPedido, CancellationToken ct = default)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT
+                dp.tCodigoPedido AS CodigoPedido,
+                dp.tItem AS Item,
+                dp.tCodigoProducto AS CodigoProducto,
+                ISNULL(tp.tResumido, dp.tCodigoProducto) AS NombreProducto,
+                dp.nPrecioVenta AS PrecioVenta,
+                dp.nCantidad AS Cantidad,
+                dp.nVenta AS Venta,
+                dp.tArea AS Area
+            FROM DPEDIDO dp
+            INNER JOIN TPRODUCTO tp ON tp.tCodigoProducto = dp.tCodigoProducto
+            WHERE dp.tCodigoPedido = @Pedido
+              AND (ISNULL(dp.tFacturado, '0') = '0' OR LEN(LTRIM(ISNULL(dp.tFacturado,''))) = 0)
+              AND dp.tEstadoItem = 'N'
+            ORDER BY dp.nOrden, dp.tItem
+            """;
+
+        var rows = await connection.QueryAsync<ItemPendienteFacturacionDto>(
+            new CommandDefinition(sql, new { Pedido = codigoPedido }, cancellationToken: ct));
+
+        return rows.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc/>
+    /// Legacy: SELECT MDOCUMENTO+TCLIENTE+TMESA+MPEDIDO WHERE tEstadoDocumento='01' AND tCaja=@caja. BR-DOC-008.
+    public async Task<IReadOnlyList<DocumentoPendienteDto>> ObtenerDocumentosPendientesCajaAsync(
+        string codigoCaja, CancellationToken ct = default)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        const string sql = """
+            SELECT
+                md.tDocumento AS CodigoDocumento,
+                MAX(tm.tResumido) AS Mesa,
+                MAX(vm.Descripcion) AS Motorizado,
+                MAX(mp.tObservacion) AS Observacion,
+                MAX(dd.tCodigoPedido) AS CodigoPedido,
+                md.nVenta AS Total,
+                MAX(md.fRegistro) AS FechaRegistro,
+                MAX(tc.tEmpresa) AS Cliente,
+                MAX(mp.tTipoPedido) AS TipoPedido,
+                md.tTipoDocumento AS TipoDocumento,
+                md.tEstadoDocumento AS EstadoDocumento
+            FROM MDOCUMENTO md
+            LEFT JOIN TCLIENTE tc ON md.tCodigoCliente = tc.tCodigoCliente
+            LEFT JOIN DDOCUMENTO dd ON dd.tDocumento = md.tDocumento
+            LEFT JOIN MPEDIDO mp ON mp.tCodigoPedido = dd.tCodigoPedido
+            LEFT JOIN TMESA tm ON tm.tCodigoMesa = mp.tMesa
+            LEFT JOIN vMotorizado vm ON vm.Codigo = mp.tMotorizado
+            WHERE md.tEstadoDocumento = '01'
+              AND md.tCaja = @Caja
+            GROUP BY md.tDocumento, md.nVenta, md.tTipoDocumento, md.tEstadoDocumento
+            ORDER BY md.tDocumento
+            """;
+
+        var rows = await connection.QueryAsync<DocumentoPendienteDto>(
+            new CommandDefinition(sql, new { Caja = codigoCaja }, cancellationToken: ct));
+
+        return rows.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc/>
+    /// Legacy: frmDocumento CmdOpcion 7 — EXEC usp_Inforest_Impresion @doc, @modo. BR-DOC-005.
+    public async Task<bool> ReimprimirAsync(string codigoDocumento, int modo = 3, CancellationToken ct = default)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        await connection.ExecuteAsync(new CommandDefinition(
+            "usp_Inforest_Impresion",
+            new { tDocumento = codigoDocumento, nModo = modo },
+            commandType: System.Data.CommandType.StoredProcedure,
+            cancellationToken: ct));
+        return true;
+    }
+
     private sealed record DocumentoRow(
         string CodigoDocumento,
         string TipoDocumento,

@@ -89,6 +89,10 @@ public static class DependencyInjection
         services.AddScoped<EmitirDocumentoHandler>();
         services.AddScoped<ObtenerDocumentoHandler>();
         services.AddScoped<AnularDocumentoHandler>();
+        // POS-FUNC-006: Generación documentos completa (BR-DOC-001..010)
+        services.AddScoped<ObtenerItemsPendientesFacturacionHandler>();
+        services.AddScoped<ObtenerDocumentosPendientesCajaHandler>();
+        services.AddScoped<ReimprimirDocumentoHandler>();
         // POS-FUNC-006: Notas de Crédito (BR-NC-001..006)
         services.AddScoped<EmitirNotaCreditoHandler>();
         services.AddScoped<AnularNotaCreditoHandler>();

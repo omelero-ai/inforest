@@ -7,7 +7,7 @@
 | POS-FUNC-003 | Gestión de pedidos salón | `frmPedido.frm / frmDetallePedido.frm / frmJuntarMesas.frm` | Crear/editar/agrupar pedidos | MIGRATED |
 | POS-FUNC-004 | Registro de venta | `frmVenta.frm / frmSolicitudBoleta.frm` | Emitir venta desde pedido/canal y resolver boleta con/sin datos | MIGRATED |
 | POS-FUNC-005 | Cobro y pagos | `frmPago.frm / frmPagoMasivo.frm / frmPagoPinPad.frm` | Registrar pagos por distintos medios | MIGRATED |
-| POS-FUNC-006 | Facturación y documentos | `frmDocumento.frm / frmFactura.frm / frmNotaCredito*.frm` | Emitir comprobantes y NC | ANALYSIS |
+| POS-FUNC-006 | Facturación y documentos | `frmDocumento.frm / frmFactura.frm / frmNotaCredito*.frm` | Emitir comprobantes y NC | MIGRATED |
 | POS-FUNC-007 | Correlativos de comprobante | `frmDocumentoCorrelativo*.frm / modPuntoVenta.bas` | Control numeración por caja/tipo | COMPLETED |
 | POS-FUNC-008 | Caja y cierre | `frmCajaRapida.frm / frmLiquidacionDetalle.frm` | Control de caja y liquidaciones | MIGRATED |
 | POS-FUNC-009 | Turno/Día contable | `frmDiaContable.frm / clsDiaContable.cls` | Apertura/cierre día operativo | IN_PROGRESS |

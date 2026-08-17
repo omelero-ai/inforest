@@ -207,8 +207,11 @@ public class FrmVenta : Form
             _obtenerTerminalesPinPadHandler);
         if (frmPago.ShowDialog(this) == DialogResult.OK)
         {
-            using var frmDocumento = new FrmDocumento(documento, _anularHandler);
-            frmDocumento.ShowDialog(this);
+            MessageBox.Show(
+                $"Documento {documento.CodigoDocumento} cobrado correctamente.",
+                "Venta",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
         }
