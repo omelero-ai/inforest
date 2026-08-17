@@ -89,7 +89,7 @@
 | 72 | `usp_Inforest_ObtieneRecargas` | `FrmRecargarTarjeta.frm` | SQL_ONLY | ANALYSIS |
 | 73 | `usp_Inforest_ObtieneRptGuia` | `frmCtaCteDetalle.frm` | SQL_ONLY | ANALYSIS |
 | 74 | `usp_Inforest_PedidosCentralPedido` | `frmCentralPedidos.frm` | SQL_ONLY | ANALYSIS |
-| 75 | `usp_Inforest_ValidaClienteSel` | `FrmRecargarTarjetaDetalle.frm`, `frmCajaRapida.frm`, `frmCambio.frm`… | SQL_ONLY | ANALYSIS |
+| 75 | `usp_Inforest_ValidaClienteSel` | `FrmRecargarTarjetaDetalle.frm`, `frmCajaRapida.frm`, `frmCambio.frm`, `frmVenta.frm`, `frmSolicitudBoleta.frm`… | SQL_ONLY | MIGRATED |
 | 76 | `usp_ListDocumentosFE` | `frmDocumentoElectronicoCorrelativo.frm`, `frmLiquidacionDetalle.frm` | SQL_ONLY | ANALYSIS |
 | 77 | `usp_RepInforest_DescargoVenta` | `frmDescargo.frm` | SQL_ONLY | ANALYSIS |
 | 78 | `usp_Seg_verConexiones` | `frmConexionesActuales.frm` | SQL_ONLY | ANALYSIS |

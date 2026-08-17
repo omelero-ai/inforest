@@ -5,7 +5,7 @@
 | POS-FUNC-001 | Inicio de sesión POS | `frmAcceso.frm + modPuntoVenta.bas` | Autenticar usuario y habilitar MDI POS | MIGRATED |
 | POS-FUNC-002 | Apertura MDI Punto de Venta | `mdiPuntoVenta.frm` | Contenedor principal de operaciones POS | MIGRATED |
 | POS-FUNC-003 | Gestión de pedidos salón | `frmPedido.frm / frmDetallePedido.frm / frmJuntarMesas.frm` | Crear/editar/agrupar pedidos | MIGRATED |
-| POS-FUNC-004 | Registro de venta | `frmVenta.frm` | Emitir venta desde pedido/canal | MIGRATED |
+| POS-FUNC-004 | Registro de venta | `frmVenta.frm / frmSolicitudBoleta.frm` | Emitir venta desde pedido/canal y resolver boleta con/sin datos | MIGRATED |
 | POS-FUNC-005 | Cobro y pagos | `frmPago.frm / frmPagoMasivo.frm / frmPagoPinPad.frm` | Registrar pagos por distintos medios | MIGRATED |
 | POS-FUNC-006 | Facturación y documentos | `frmDocumento.frm / frmFactura.frm / frmNotaCredito*.frm` | Emitir comprobantes y NC | ANALYSIS |
 | POS-FUNC-007 | Correlativos de comprobante | `frmDocumentoCorrelativo*.frm / modPuntoVenta.bas` | Control numeración por caja/tipo | COMPLETED |

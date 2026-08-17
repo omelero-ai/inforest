@@ -103,7 +103,6 @@ frmReserva.frm
 frmReservaDetalle.frm
 FrmSeleccionProductos.frm
 frmServidorEnlace.frm
-frmSolicitudBoleta.frm
 FrmTarjetaAproximidad.frm
 FrmTarjetaAproximidadDetalle.frm
 frmUpdateDatosPedido.frm
@@ -125,7 +124,6 @@ frmWinSock.frm
 
 ## UNKNOWN_BEHAVIOR registrados
 
-- `frmSolicitudBoleta.frm`: flujo funcional exacto pendiente de lectura completa de eventos.
 - `frmMarca.frm`: reglas de marcación no totalmente determinadas.
 - `frmNoticias.frm` + `FrmActualizacion.frm`: criterio de actualización/versionado en operación real pendiente.
 - Flujos RFID (`FrmTarjetaAproximidad*`, `FrmRecargarTarjeta*`): reglas operativas de negocio incompletas.

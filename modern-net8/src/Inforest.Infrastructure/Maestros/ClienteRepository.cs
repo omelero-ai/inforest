@@ -97,6 +97,22 @@ internal sealed class ClienteRepository : IClienteRepository
         return (ultimo + 1).ToString("00000");
     }
 
+    public async Task<bool> ValidarCompatibilidadDocumentoAsync(string tipoDocumento, string codigoCliente, CancellationToken ct = default)
+    {
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        const string sql = "EXEC usp_Inforest_ValidaClienteSel @tTipoDoc, @tCodCliente";
+        var resultado = await conn.ExecuteScalarAsync<string>(new CommandDefinition(
+            sql,
+            new
+            {
+                tTipoDoc = tipoDocumento?.Trim(),
+                tCodCliente = codigoCliente?.Trim()
+            },
+            cancellationToken: ct));
+
+        return string.Equals(resultado?.Trim(), "ok", StringComparison.OrdinalIgnoreCase);
+    }
+
     public async Task<bool> InsertarAsync(Cliente cliente, CancellationToken ct = default)
     {
         using var conn = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);

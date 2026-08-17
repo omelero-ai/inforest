@@ -1,4 +1,5 @@
 using Inforest.Application.Interfaces;
+using Inforest.Application.Maestros;
 using Inforest.Application.Ventas;
 using Inforest.Domain.Entities.Ventas;
 using Inforest.Domain.Repositories;
@@ -33,8 +34,9 @@ public class EmitirDocumentoHandlerTests
         var sessionService = new Mock<ISessionService>();
         sessionService.Setup(s => s.SesionActual)
             .Returns(BuildSesion("CAJ01"));
+        var clienteRepo = new Mock<IClienteRepository>();
 
-        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object);
+        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object, clienteRepo.Object);
         var result = await handler.HandleAsync(new EmitirDocumentoCommand("PED001", "01", null, 0m, 0m));
 
         Assert.True(result.EsExitoso);
@@ -56,8 +58,9 @@ public class EmitirDocumentoHandlerTests
         var sessionService = new Mock<ISessionService>();
         sessionService.Setup(s => s.SesionActual)
             .Returns(BuildSesion("CAJ01"));
+        var clienteRepo = new Mock<IClienteRepository>();
 
-        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object);
+        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object, clienteRepo.Object);
         var result = await handler.HandleAsync(new EmitirDocumentoCommand("PED002", "01", null, 0m, 0m));
 
         Assert.False(result.EsExitoso);
@@ -74,8 +77,9 @@ public class EmitirDocumentoHandlerTests
         var docRepo = new Mock<IDocumentoRepository>();
         var sessionService = new Mock<ISessionService>();
         sessionService.Setup(s => s.SesionActual).Returns(BuildSesion("CAJ01"));
+        var clienteRepo = new Mock<IClienteRepository>();
 
-        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object);
+        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object, clienteRepo.Object);
         var result = await handler.HandleAsync(new EmitirDocumentoCommand("PED_NOPE", "01", null, 0m, 0m));
 
         Assert.False(result.EsExitoso);
@@ -97,8 +101,9 @@ public class EmitirDocumentoHandlerTests
 
         var sessionService = new Mock<ISessionService>();
         sessionService.Setup(s => s.SesionActual).Returns((Domain.Entities.Seguridad.SesionOperativa?)null);
+        var clienteRepo = new Mock<IClienteRepository>();
 
-        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object);
+        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object, clienteRepo.Object);
         var result = await handler.HandleAsync(new EmitirDocumentoCommand("PED001", "01", null, 0m, 0m));
 
         Assert.False(result.EsExitoso);
@@ -121,12 +126,41 @@ public class EmitirDocumentoHandlerTests
 
         var sessionService = new Mock<ISessionService>();
         sessionService.Setup(s => s.SesionActual).Returns(BuildSesion("CAJ01"));
+        var clienteRepo = new Mock<IClienteRepository>();
 
-        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object);
+        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object, clienteRepo.Object);
         var result = await handler.HandleAsync(new EmitirDocumentoCommand("PED001", "01", null, 0m, 0m));
 
         Assert.False(result.EsExitoso);
         Assert.Equal("VENTA_DOCUMENTO_DUPLICADO", result.CodigoError);
+    }
+
+    [Fact]
+    public async Task EmitirDocumento_ClienteIncompatible_RetornaError()
+    {
+        var pedido = BuildPedidoConDetalle();
+
+        var pedidoRepo = new Mock<IPedidoRepository>();
+        pedidoRepo.Setup(r => r.ObtenerPorCodigoAsync("PED001", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(pedido);
+
+        var docRepo = new Mock<IDocumentoRepository>();
+        docRepo.Setup(r => r.ObtenerPorCodigoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Documento?)null);
+
+        var sessionService = new Mock<ISessionService>();
+        sessionService.Setup(s => s.SesionActual).Returns(BuildSesion("CAJ01"));
+
+        var clienteRepo = new Mock<IClienteRepository>();
+        clienteRepo.Setup(r => r.ValidarCompatibilidadDocumentoAsync("03", "CLI001", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        var handler = new EmitirDocumentoHandler(pedidoRepo.Object, docRepo.Object, sessionService.Object, clienteRepo.Object);
+        var result = await handler.HandleAsync(new EmitirDocumentoCommand("PED001", "03", "CLI001", 0m, 0m));
+
+        Assert.False(result.EsExitoso);
+        Assert.Equal("VENTA_CLIENTE_TIPO_DOCUMENTO_INVALIDO", result.CodigoError);
+        docRepo.Verify(r => r.InsertarAsync(It.IsAny<Documento>(), It.IsAny<IReadOnlyList<DetalleDocumento>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static Domain.Entities.Seguridad.SesionOperativa BuildSesion(string codigoCaja)

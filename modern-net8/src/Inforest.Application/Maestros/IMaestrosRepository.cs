@@ -20,6 +20,7 @@ public interface IClienteRepository : IMaestroRepository<Cliente>
 {
     Task<Cliente?> ObtenerPorIdentidadAsync(string identidad, CancellationToken ct = default);
     Task<string> ObtenerProximoCodigoAsync(CancellationToken ct = default);
+    Task<bool> ValidarCompatibilidadDocumentoAsync(string tipoDocumento, string codigoCliente, CancellationToken ct = default);
 }
 public interface IMesaRepository : IMaestroRepository<Mesa>;
 public interface ISalonRepository : IMaestroRepository<Salon>;

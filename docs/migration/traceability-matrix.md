@@ -366,6 +366,18 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `TCAJA.lObligaCierre` | Flag | `CerrarTurnoHandler` (BR-CAJA-001) | Business Rule | MIGRATED | `src/Inforest.Application/Turno/TurnoHandlers.cs` |
 | `TPARAMETRO.lActivaConsultaDescargo` | Flag | `CerrarTurnoHandler` (BR-CAJA-002) | Business Rule | MIGRATED | `src/Inforest.Application/Turno/TurnoHandlers.cs` |
 
+## Componentes POS-FUNC-004 — Registro de Venta
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmVenta.frm` | Form | `FrmVenta` | WinForm | MIGRATED | `src/Inforest.Desktop/Ventas/FrmVenta.cs` |
+| `frmSolicitudBoleta.frm` | Form | `FrmSolicitudBoleta` + `FrmSeleccionClienteBoleta` | WinForm modal | MIGRATED | `src/Inforest.Desktop/Ventas/FrmSolicitudBoleta.cs` + `src/Inforest.Desktop/Ventas/FrmSeleccionClienteBoleta.cs` |
+| `frmSolicitudBoleta.frm` / opción “Sin datos” | Business rule | `ObtenerClienteGeneralBoletaHandler` | Handler | MIGRATED | `src/Inforest.Application/Ventas/SolicitudBoletaHandlers.cs` |
+| `modPuntoVenta.bas` / `CLIENTEGENERAL` + `TCLIENTE` | Config + Table | `IClienteRepository.ObtenerPorIdentidadAsync` + `ObtenerProximoCodigoAsync` + `ClienteRepository` | Interface + Repository | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/ClienteRepository.cs` |
+| `TPARAMETRO.lBODato` | Flag | `ConfiguracionSistema.lBODato` + `ParametroRepository` | Domain Record + Repository | MIGRATED | `src/Inforest.Domain/Entities/Configuracion/ConfiguracionSistema.cs` + `src/Inforest.Infrastructure/Configuracion/ParametroRepository.cs` |
+| `usp_Inforest_ValidaClienteSel` | SP | `IClienteRepository.ValidarCompatibilidadDocumentoAsync` + `ClienteRepository` + `EmitirDocumentoHandler` | Interface + Repository + Handler | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/ClienteRepository.cs` + `src/Inforest.Application/Ventas/VentaHandlers.cs` |
+| (tests BR-BOLETA-001..003) | — | `SolicitudBoletaHandlersTests` + `VentaHandlersTests` | xUnit | MIGRATED | `tests/Inforest.Application.Tests/Ventas/SolicitudBoletaHandlersTests.cs` + `tests/Inforest.Application.Tests/Ventas/VentaHandlersTests.cs` |
+
 ## Componentes POS-FUNC-006 — Facturación y Notas de Crédito
 
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
