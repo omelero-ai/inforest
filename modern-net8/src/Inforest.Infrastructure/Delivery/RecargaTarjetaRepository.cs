@@ -129,32 +129,32 @@ internal sealed class RecargaTarjetaRepository : IRecargaTarjetaRepository
 
     private static RecargaTarjetaMovimiento MapRow(RecargaMovimientoRow row)
     {
-        var fecha = DateTime.TryParse(row.fregistro, out var parsed)
+        var fecha = DateTime.TryParse(row.FRegistro, out var parsed)
             ? parsed
             : DateTime.MinValue;
 
         return new RecargaTarjetaMovimiento(
-            row.id,
-            row.CODIDORFID ?? string.Empty,
-            row.tipo ?? string.Empty,
-            row.docreferencia ?? string.Empty,
+            row.Id,
+            row.CodigoRfid ?? string.Empty,
+            row.Tipo ?? string.Empty,
+            row.DocReferencia ?? string.Empty,
             fecha,
-            row.montoingreso,
-            row.montosalida,
-            row.montoanterior,
-            row.montofinal);
+            row.MontoIngreso,
+            row.MontoSalida,
+            row.MontoAnterior,
+            row.MontoFinal);
     }
 
     private sealed class RecargaMovimientoRow
     {
-        public int id { get; init; }
-        public string? CODIDORFID { get; init; }
-        public string? tipo { get; init; }
-        public string? docreferencia { get; init; }
-        public string? fregistro { get; init; }
-        public decimal montoingreso { get; init; }
-        public decimal montosalida { get; init; }
-        public decimal montoanterior { get; init; }
-        public decimal montofinal { get; init; }
+        public int Id { get; init; }
+        public string? CodigoRfid { get; init; }
+        public string? Tipo { get; init; }
+        public string? DocReferencia { get; init; }
+        public string? FRegistro { get; init; }
+        public decimal MontoIngreso { get; init; }
+        public decimal MontoSalida { get; init; }
+        public decimal MontoAnterior { get; init; }
+        public decimal MontoFinal { get; init; }
     }
 }
