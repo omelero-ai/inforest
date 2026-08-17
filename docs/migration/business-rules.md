@@ -3500,3 +3500,62 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Descripción:** Presionar Escape cierra el diálogo sin seleccionar ningún ítem (`wEnter = False`).
 **Destino .NET:** `FrmBusquedaRapida.OnFormKeyDown` — `DialogResult = Cancel`; `Resultado = null`
 **Estado:** MIGRATED
+
+---
+
+## POS-FUNC-036 — Búsqueda de Cliente Delivery (frmBusquedaDelivery.frm)
+
+### BR-DEL-036-001
+**Nombre:** Carga de clientes delivery activos con zona
+**Origen:** Legacy/frmBusquedaDelivery.frm (Form_Load)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `Form_Load` — `SELECT … FROM TDELIVERY LEFT JOIN vZona WHERE lActivo=1`
+**Descripción:** Al abrir el formulario, se cargan todos los clientes delivery activos (`lActivo=1`) con descripción de zona, incluyendo Teléfono, Cliente (Apellido+Nombre), Referencia y Zona.
+**Condición:** Solo clientes con `lActivo=1`.
+**Resultado:** Grilla poblada ordenada por nombre de cliente.
+**Excepciones:** Si no hay clientes, la grilla queda vacía.
+**Destino .NET:** `ObtenerClientesDeliveryBusquedaHandler` + `IClienteDeliveryReadRepository.ListarActivosConZonaAsync` → `FrmBusquedaDelivery` grilla
+**Estado:** MIGRATED
+
+### BR-DEL-036-002
+**Nombre:** Filtrado en tiempo real por columna
+**Origen:** Legacy/frmBusquedaDelivery.frm (Sub Filtrar)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `Filtrar()` — aplica `.Filter` al Recordset según columna activa (tTelefono, Cliente, Zona)
+**Descripción:** Al tipear en el campo de búsqueda, la grilla filtra en tiempo real sobre la columna seleccionada (Teléfono, Cliente o Zona).
+**Condición:** Si el texto está vacío, se muestra la lista completa.
+**Resultado:** Grilla actualizada con coincidencias.
+**Destino .NET:** `FrmBusquedaDelivery.FiltrarGrilla` — LINQ sobre `IReadOnlyList<ClienteDeliveryBusquedaItem>`
+**Estado:** MIGRATED
+
+### BR-DEL-036-003
+**Nombre:** Carga de detalle del cliente seleccionado
+**Origen:** Legacy/frmBusquedaDelivery.frm (Sub Asigna)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `Asigna()` — `SELECT * FROM vDelivery WHERE Codigo=…`
+**Descripción:** Al seleccionar una fila en la grilla, se cargan en el panel lateral: Nombre, Apellido, Teléfono, Dirección, Zona, Referencia, Observación, Descuento, Acumulado, Utilizado, Disponible, TipoCliente.
+**Resultado:** Panel lateral actualizado con datos del cliente seleccionado.
+**Destino .NET:** `ObtenerDetalleClienteDeliveryHandler` + `IClienteDeliveryReadRepository.ObtenerDetalleAsync` → panel detalle de `FrmBusquedaDelivery`
+**Estado:** MIGRATED
+
+### BR-DEL-036-004
+**Nombre:** Estadísticas históricas del cliente ("Otros Datos")
+**Origen:** Legacy/frmBusquedaDelivery.frm (cmdOpcion(3))
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `cmdOpcion(3)` toggle — COUNT/SUM MPEDIDO/DPEDIDO últimos N días + último documento MDOCUMENTO/vCliente
+**Descripción:** El botón "Otros Datos" muestra un panel alternativo con: período de consulta (fecha desde = hoy - nDiasDelivery), número de pedidos activos, total de ventas, fecha/doc/monto/razón social/RUC del último pedido facturado.
+**Condición:** `nDiasDelivery` se lee de `TPARAMETRO.nTiempoMinutoCD` (legacy); en .NET se pasa como `DiasHistorico` (default 30).
+**Resultado:** Panel estadísticas visible/ocultable. Los datos se recalculan cada vez que el panel se abre.
+**Destino .NET:** `ObtenerEstadisticasClienteDeliveryHandler` + `IClienteDeliveryReadRepository.ObtenerEstadisticasAsync` → panel "Otros Datos" de `FrmBusquedaDelivery`
+**Estado:** MIGRATED
+
+### BR-DEL-036-005
+**Nombre:** Selección de tiendas/sucursales del cliente
+**Origen:** Legacy/frmBusquedaDelivery.frm (Tienda_Click)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmBusquedaDelivery.frm`
+**Procedimiento/Función:** `Tienda_Click` — `SELECT * FROM vTienda WHERE lActivo=1 AND tCodigoDelivery=… ORDER BY Descripcion`
+**Descripción:** El botón "Tiendas" abre un sub-diálogo con las tiendas/sucursales activas del cliente para seleccionar una.
+**Condición:** Solo tiendas con `lActivo=1`.
+**Resultado:** Diálogo con lista de tiendas; la selección puede afectar la dirección mostrada.
+**Destino .NET:** `ObtenerTiendasClienteDeliveryHandler` + `FrmBusquedaTiendasDelivery`
+**Estado:** MIGRATED

@@ -31,3 +31,5 @@
 | POS-FUNC-032 | Mapa Consulta Mesas | `frmMesaConsulta.frm` | Mapa visual mesas en 3 modos: Visual (cambiar estado), Seleccionar (asignar mesa), Mover (transferir pedido) | MIGRATED |
 | POS-FUNC-033 | Junta de Mesas — TPEDIDOMESA | `frmJuntaMesa.frm` | Gestión de mesas físicas asignadas a un pedido; tabla TPEDIDOMESA con transacción Delete+Insert | MIGRATED |
 | POS-FUNC-034 | Correlativo de Pedidos | `frmPedidoCorrelativo.frm + frmPedidoDetalle.frm + frmPedidoAnterior.frm` | Consulta de pedidos por rango de fechas con drill-down a ítems (vPedidoDetalle) y documentos (vDocumentoAgrupado) en paneles integrados | MIGRATED |
+| POS-FUNC-035 | Búsqueda Rápida Genérica | `frmBusquedaRapida.frm` | Diálogo modal genérico de búsqueda con filtrado en tiempo real, selección y cancelación | MIGRATED |
+| POS-FUNC-036 | Búsqueda de Cliente Delivery | `frmBusquedaDelivery.frm` | Buscador principal de clientes delivery (TDELIVERY + vZona), grilla filtrable, panel detalle con saldos de fidelización, panel estadísticas, gestión crear/editar cliente y tiendas | MIGRATED |

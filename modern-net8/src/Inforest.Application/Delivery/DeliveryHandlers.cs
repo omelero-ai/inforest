@@ -486,3 +486,100 @@ public sealed class ObtenerPedidosSeguimientoDeliveryHandler
         return Result.Ok(pedidos);
     }
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// POS-FUNC-036 — Búsqueda de Clientes Delivery (frmBusquedaDelivery.frm)
+// ──────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Obtiene todos los clientes delivery activos para la grilla de búsqueda.
+/// Legacy: <c>frmBusquedaDelivery.frm</c> Form_Load — TDELIVERY LEFT JOIN vZona WHERE lActivo=1.
+/// Regla BR-DEL-036.
+/// </summary>
+public sealed record ObtenerClientesDeliveryBusquedaQuery;
+
+/// <summary>Handler de <see cref="ObtenerClientesDeliveryBusquedaQuery"/>.</summary>
+public sealed class ObtenerClientesDeliveryBusquedaHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerClientesDeliveryBusquedaHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<IReadOnlyList<ClienteDeliveryBusquedaItem>>> HandleAsync(
+        ObtenerClientesDeliveryBusquedaQuery _, CancellationToken ct = default)
+    {
+        var items = await _repo.ListarActivosConZonaAsync(ct);
+        return Result.Ok(items);
+    }
+}
+
+/// <summary>
+/// Obtiene el detalle de un cliente delivery para el panel lateral.
+/// Legacy: Sub Asigna() de <c>frmBusquedaDelivery.frm</c>.
+/// Regla BR-DEL-036.
+/// </summary>
+public sealed record ObtenerDetalleClienteDeliveryQuery(string CodigoDelivery);
+
+/// <summary>Handler de <see cref="ObtenerDetalleClienteDeliveryQuery"/>.</summary>
+public sealed class ObtenerDetalleClienteDeliveryHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerDetalleClienteDeliveryHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<ClienteDeliveryDetalleBusqueda?>> HandleAsync(
+        ObtenerDetalleClienteDeliveryQuery query, CancellationToken ct = default)
+    {
+        var detalle = await _repo.ObtenerDetalleAsync(query.CodigoDelivery, ct);
+        return Result.Ok(detalle);
+    }
+}
+
+/// <summary>
+/// Obtiene estadísticas históricas de un cliente delivery (panel "Otros Datos").
+/// Legacy: cmdOpcion(3) de <c>frmBusquedaDelivery.frm</c>.
+/// Regla BR-DEL-036.
+/// </summary>
+public sealed record ObtenerEstadisticasClienteDeliveryQuery(
+    string CodigoDelivery,
+    int DiasHistorico = 30);
+
+/// <summary>Handler de <see cref="ObtenerEstadisticasClienteDeliveryQuery"/>.</summary>
+public sealed class ObtenerEstadisticasClienteDeliveryHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerEstadisticasClienteDeliveryHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<EstadisticasClienteDelivery>> HandleAsync(
+        ObtenerEstadisticasClienteDeliveryQuery query, CancellationToken ct = default)
+    {
+        var stats = await _repo.ObtenerEstadisticasAsync(query.CodigoDelivery, query.DiasHistorico, ct);
+        return Result.Ok(stats);
+    }
+}
+
+/// <summary>
+/// Obtiene las tiendas/sucursales activas de un cliente delivery.
+/// Legacy: Tienda_Click de <c>frmBusquedaDelivery.frm</c> — vTienda WHERE lActivo=1 AND tCodigoDelivery=…
+/// </summary>
+public sealed record ObtenerTiendasClienteDeliveryQuery(string CodigoDelivery);
+
+/// <summary>Handler de <see cref="ObtenerTiendasClienteDeliveryQuery"/>.</summary>
+public sealed class ObtenerTiendasClienteDeliveryHandler
+{
+    private readonly IClienteDeliveryReadRepository _repo;
+
+    public ObtenerTiendasClienteDeliveryHandler(IClienteDeliveryReadRepository repo)
+        => _repo = repo;
+
+    public async Task<Result<IReadOnlyList<TiendaDeliveryItem>>> HandleAsync(
+        ObtenerTiendasClienteDeliveryQuery query, CancellationToken ct = default)
+    {
+        var tiendas = await _repo.ObtenerTiendasAsync(query.CodigoDelivery, ct);
+        return Result.Ok(tiendas);
+    }
+}

@@ -12,6 +12,7 @@ using Inforest.Desktop.Maestros;
 using Inforest.Desktop.Motorizado;
 using Inforest.Desktop.Forms.Reportes;
 using Inforest.Application.Interfaces;
+using Inforest.Desktop.Delivery;
 
 namespace Inforest.Desktop;
 
@@ -85,6 +86,7 @@ static class Program
                 services.AddTransient<FrmRepEntregaReporte>();
                 services.AddTransient<FrmRepVentaFechaReporte>();
                 services.AddTransient<FrmRepRegistroVentaReporte>(); // BR-REP-022
+                services.AddTransient<FrmBusquedaDelivery>();       // POS-FUNC-036
             });
     }
 }

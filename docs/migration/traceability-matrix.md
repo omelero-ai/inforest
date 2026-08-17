@@ -584,3 +584,21 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `BusquedaItem` | — | `BusquedaItem` record | DTO | MIGRATED | `src/Inforest.Desktop/Shared/BusquedaItem.cs` |
 | `BusquedaResultado` (sCodigo + sDescrip) | Global vars | `BusquedaResultado` record | DTO | MIGRATED | `src/Inforest.Desktop/Shared/BusquedaItem.cs` |
 | (BR-BUSQ-001/002/003) | — | `FrmBusquedaRapida` filtrado + selección + cancelación | UI Logic | MIGRATED | `src/Inforest.Desktop/Shared/FrmBusquedaRapida.cs` |
+
+---
+
+## Componentes POS-FUNC-036 — Búsqueda de Cliente Delivery
+
+| Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
+|---|---|---|---|---|---|
+| `frmBusquedaDelivery.frm` | Form (búsqueda/selección cliente delivery) | `FrmBusquedaDelivery` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Delivery/FrmBusquedaDelivery.cs` |
+| `TDELIVERY LEFT JOIN vZona` (grilla principal) | SQL Query | `IClienteDeliveryReadRepository.ListarActivosConZonaAsync` + `ClienteDeliveryReadRepository` | Interface + Implementation | MIGRATED | `src/Inforest.Application/Delivery/IClienteDeliveryReadRepository.cs`, `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
+| `vDelivery WHERE Codigo=…` (panel detalle) | SQL Query | `IClienteDeliveryReadRepository.ObtenerDetalleAsync` | Method | MIGRATED | `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
+| `MPEDIDO/DPEDIDO` estadísticas históricas | SQL Query | `IClienteDeliveryReadRepository.ObtenerEstadisticasAsync` | Method | MIGRATED | `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
+| `vTienda WHERE lActivo=1 AND tCodigoDelivery=…` | SQL Query | `IClienteDeliveryReadRepository.ObtenerTiendasAsync` | Method | MIGRATED | `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
+| `frmBusquedaDelivery.frm` DTOs grilla | — | `ClienteDeliveryBusquedaItem` | Record DTO | MIGRATED | `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
+| `frmBusquedaDelivery.frm` panel detalle | — | `ClienteDeliveryDetalleBusqueda` | Record DTO | MIGRATED | `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
+| `frmBusquedaDelivery.frm` "Otros Datos" | — | `EstadisticasClienteDelivery` | Record DTO | MIGRATED | `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
+| `vTienda` item tienda | — | `TiendaDeliveryItem` | Record DTO | MIGRATED | `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
+| Tienda_Click sub-dialog | — | `FrmBusquedaTiendasDelivery` | WinForms Dialog | MIGRATED | `src/Inforest.Desktop/Delivery/FrmBusquedaTiendasDelivery.cs` |
+| (BR-DEL-036) | — | `ObtenerClientesDeliveryBusquedaHandler` + `ObtenerDetalleClienteDeliveryHandler` + `ObtenerEstadisticasClienteDeliveryHandler` + `ObtenerTiendasClienteDeliveryHandler` | CQRS Handlers | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs` |
