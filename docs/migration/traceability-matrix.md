@@ -204,6 +204,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
 |---|---|---|---|---|---|
 | `frmNuevoDelivery.frm` | Form | `NuevoDeliveryForm` + `ObtenerSiguienteCodigoClienteDeliveryHandler` + `ObtenerClienteDeliveryPorCodigoHandler` | WinForm + Handlers | MIGRATED | `src/Inforest.Desktop/Delivery/NuevoDeliveryForm.cs`, `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/ClienteDeliveryRepository.cs` |
+| `frmClienteDelivery.frm` | Form | `FrmClienteDelivery` + `ObtenerClientesDeliveryListadoHandler` + `ClienteDeliveryListadoItem` | WinForm + Handler + DTO | MIGRATED | `src/Inforest.Desktop/Delivery/FrmClienteDelivery.cs`, `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Application/Delivery/ClienteDeliveryBusquedaVistas.cs` |
 | `frmDespachador.frm` | Form | `DespachadorForm` | WinForm | IN_PROGRESS | `src/Inforest.Desktop/Delivery/DespachadorForm.cs` |
 | `frmCentralPedidos.frm` | Form | `CentralPedidosForm` (extendido: ConfirmarEntrega + RevertirEntrega + ModificarFecha) | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/CentralPedidosForm.cs` |
 | `frmPedidoDelivery.frm` | Form | `FrmPedidoDelivery` | WinForm | MIGRATED | `src/Inforest.Desktop/Delivery/FrmPedidoDelivery.cs` |
@@ -228,6 +229,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `MPEDIDO.lEntregado / tusuarioentregado / fregentregado` | Field | `ConfirmarEntregaCentralHandler` + `RevertirEntregaCentralHandler` + `PedidoDeliveryRepository.ConfirmarEntregaAsync/RevertirEntregaAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/PedidoDeliveryRepository.cs` |
 | `MPEDIDO.fProgramacion / fregistro` (Central) | Field | `ModificarFechaProgramadaDeliveryHandler` + `PedidoDeliveryRepository.ModificarFechaProgramadaAsync` | Handler + Repository | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Infrastructure/Delivery/PedidoDeliveryRepository.cs` |
 | `vDespachador` (seguimiento) | View | `ObtenerPedidosSeguimientoDeliveryHandler` + `FrmPedidoDelivery` | Handler + WinForm | MIGRATED | `src/Inforest.Application/Delivery/DeliveryHandlers.cs`, `src/Inforest.Desktop/Delivery/FrmPedidoDelivery.cs` |
+| `vDelivery` (grilla mantenimiento principal) | View | `IClienteDeliveryReadRepository.ListarMantenimientoAsync` + `ClienteDeliveryReadRepository` | Interface + Implementation | MIGRATED | `src/Inforest.Application/Delivery/IClienteDeliveryReadRepository.cs`, `src/Inforest.Infrastructure/Delivery/ClienteDeliveryReadRepository.cs` |
 | `spRep_AnaliticoMotorizadoIntegrado` | SP | *(reporte FastReport pendiente)* | Report | NOT_STARTED | — |
 | `frmOrdenesConsola.frm` | Form | `ObtenerOrdenesExternasHandler` + `RappiOrderAdapter` | Handler+Service | IN_PROGRESS | `src/Inforest.Application/Delivery/RappiHandlers.cs` |
 | `(test etapa 9 domain)` | — | `DeliveryDomainTests` (12 tests) + `MotorizadoDomainTests` (11 tests) | xUnit | IN_PROGRESS | `tests/Inforest.Domain.Tests/Delivery/` |

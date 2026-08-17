@@ -3559,3 +3559,55 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Resultado:** Diálogo con lista de tiendas; la selección puede afectar la dirección mostrada.
 **Destino .NET:** `ObtenerTiendasClienteDeliveryHandler` + `FrmBusquedaTiendasDelivery`
 **Estado:** MIGRATED
+
+---
+
+## POS-FUNC-037 — Mantenimiento de Clientes Delivery (frmClienteDelivery.frm)
+
+### BR-DEL-037-001
+**Nombre:** Carga del listado principal de clientes delivery
+**Origen:** Legacy/frmClienteDelivery.frm (Form_Load)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmClienteDelivery.frm`
+**Procedimiento/Función:** `Form_Load` — `SELECT *, str(nDescuento,10,2) as xDescuento, str(nLinea,10,2) as xLinea FROM vDelivery`
+**Descripción:** Al abrir el mantenimiento se cargan todos los clientes delivery desde `vDelivery`, incluyendo código, tipo cliente, nombre, teléfono, dirección, línea, descuento, estado frecuente y activo.
+**Condición:** No aplica filtro inicial; la grilla debe mostrarse completa.
+**Resultado:** Grilla poblada y contador `Registro X de Y` inicializado.
+**Excepciones:** Si no existen clientes, la grilla permanece vacía.
+**Destino .NET:** `ObtenerClientesDeliveryListadoHandler` + `IClienteDeliveryReadRepository.ListarMantenimientoAsync` + `FrmClienteDelivery`
+**Estado:** MIGRATED
+
+### BR-DEL-037-002
+**Nombre:** Filtrado y ordenamiento de la grilla de mantenimiento
+**Origen:** Legacy/frmClienteDelivery.frm (`grdGrilla_FilterChange`, `grdGrilla_HeadClick`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmClienteDelivery.frm`
+**Procedimiento/Función:** `grdGrilla_FilterChange`, `grdGrilla_HeadClick`
+**Descripción:** El operador puede filtrar la grilla por columnas visibles y alternar orden ascendente/descendente al pulsar la cabecera.
+**Condición:** Si el filtro está vacío, se muestra el total de registros.
+**Resultado:** La lista se actualiza sin perder la capacidad de navegación por registros.
+**Excepciones:** Caracteres inválidos en el filtro deben limpiar el filtro aplicado.
+**Destino .NET:** `FrmClienteDelivery` (`AplicarFiltro`, `OrdenarPorColumna`, `AplicarOrden`)
+**Estado:** MIGRATED
+
+### BR-DEL-037-003
+**Nombre:** Alta y modificación modal de cliente delivery
+**Origen:** Legacy/frmClienteDelivery.frm (`cmdOpcion_Click` casos 0 y 1, `grdGrilla_DblClick`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmClienteDelivery.frm`
+**Procedimiento/Función:** `cmdOpcion_Click`, `grdGrilla_DblClick`
+**Descripción:** El formulario abre el detalle modal para crear o modificar un cliente y luego refresca el listado principal.
+**Condición:** La modificación requiere que exista una fila seleccionada.
+**Resultado:** Tras cerrar el modal, la grilla se recarga y mantiene la selección del cliente editado o creado.
+**Excepciones:** Si no hay registros para modificar, se muestra "No existe datos ingresados".
+**Destino .NET:** `FrmClienteDelivery` + `NuevoDeliveryForm` + `ObtenerClienteDeliveryPorCodigoHandler` + `CrearClienteDeliveryHandler` + `ActualizarClienteDeliveryHandler` + `ActualizarFotoClienteDeliveryHandler`
+**Estado:** MIGRATED
+
+### BR-DEL-037-004
+**Nombre:** Vista previa y exportación HTML del listado
+**Origen:** Legacy/frmClienteDelivery.frm (`cmdEmite_Click`, `cmdExporta_Click`)
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmClienteDelivery.frm`
+**Procedimiento/Función:** `cmdEmite_Click`, `cmdExporta_Click`
+**Descripción:** El usuario puede abrir una vista previa del listado actual y exportar la grilla filtrada a un archivo HTML.
+**Condición:** Deben existir registros visibles en la grilla.
+**Resultado:** Se presenta una vista previa del listado o se genera un archivo HTML con los registros filtrados.
+**Excepciones:** Si el usuario cancela la selección del archivo, no se genera salida.
+**Destino .NET:** `FrmClienteDelivery` (`MostrarVistaPrevia`, `ExportarHtmlAsync`)
+**Estado:** MIGRATED

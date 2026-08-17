@@ -22,7 +22,7 @@ internal sealed class ClienteDeliveryReadRepository : IClienteDeliveryReadReposi
     /// <inheritdoc />
     public async Task<IReadOnlyList<ClienteDeliveryListadoItem>> ListarMantenimientoAsync(CancellationToken ct = default)
     {
-        using var conn = await _connectionFactory.CreateOpenConnectionAsync(ct);
+        using var conn = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
         const string sql = """
             SELECT Codigo                        AS Codigo,
                    TipoCliente                   AS TipoCliente,

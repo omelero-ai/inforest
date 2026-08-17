@@ -136,7 +136,7 @@
 | GAP-DEL-003 | ADR-010 pendiente | Integración Rappi: actualmente stub. Definir si se mantiene adaptador embebido o se expone endpoint | `frmOrdenesConsola.frm`, `frmEnvioDatosRappi.frm` | OPEN |
 | GAP-DEL-004 | RappiOrderAdapter HTTP | `RappiOrderAdapter` retorna lista vacía. El conector HTTP real a la API de Rappi no está implementado | `Inforest.Infrastructure/Delivery/RappiOrderAdapter.cs` | NOT_STARTED |
 | GAP-DEL-005 | Reportes FastReport Etapa 9 | 8 reportes del módulo Despachador/Motorizado: RepAnaliticoMotorizado, RepControlMotorizado, RepTiempoDelivery, RepPlanillaMovilidad, RepClienteDelivery, RepPedido, variantes integradas — handlers y repositorio implementados en Etapa 10; plantillas .frx pendientes | `Reportes/` | IN_PROGRESS — Etapa 10 |
-| GAP-DEL-006 | Formularios WinForms faltantes | Pendientes: ClienteDeliveryForm, PedidoDeliveryForm, OrdenesConsolaForm, BusquedaDeliveryForm | `frmClienteDelivery.frm`, `frmPedidoDelivery.frm`, `frmOrdenesConsola.frm`, `frmBusquedaDelivery.frm` | IN_PROGRESS |
+| GAP-DEL-006 | Formularios WinForms faltantes | Pendiente operacional principal en Delivery: `OrdenesConsolaForm`. `FrmClienteDelivery`, `FrmPedidoDelivery` y `FrmBusquedaDelivery` ya fueron migrados. | `frmOrdenesConsola.frm` | IN_PROGRESS |
 
 ---
 
