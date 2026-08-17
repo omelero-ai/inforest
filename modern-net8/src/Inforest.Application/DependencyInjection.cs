@@ -81,6 +81,8 @@ public static class DependencyInjection
         services.AddScoped<ObtenerPedidosPorTurnoHandler>();
         services.AddScoped<ObtenerPedidosPorMesaHandler>();
         services.AddScoped<ObtenerPedidosSinMesaHandler>();
+        services.AddScoped<ObtenerPedidosCorrelativoHandler>();
+        services.AddScoped<ObtenerDocumentosAgrupadosPedidoHandler>();
 
         // W5: Venta / Documentos — Handlers CQRS (BR-002, BR-013)
         services.AddScoped<EmitirDocumentoHandler>();

@@ -64,3 +64,36 @@ public sealed record DetallePedidoExtendidoResultado(
 public sealed record PedidoSinMesaVista(
     string CodigoPedido,
     string Observacion);
+
+/// <summary>
+/// Vista de una fila del correlativo de pedidos, por rango de fechas.
+/// Legacy: vPedidoCorrelativo — frmPedidoCorrelativo.frm.
+/// Columnas: tCodigoPedido, tCaja, tTurno, fFecha, Mesa, Mozo, nVenta, TipoPedido, Estado, Documento, tObservacion, nAdulto.
+/// </summary>
+public sealed record PedidoCorrelativoVista(
+    string CodigoPedido,
+    string Caja,
+    string Turno,
+    DateTime Fecha,
+    string Mesa,
+    string Mozo,
+    decimal Venta,
+    string TipoPedido,
+    string Estado,
+    string Documento,
+    string Observacion,
+    decimal Adultos);
+
+/// <summary>
+/// Vista de un documento agrupado por pedido.
+/// Legacy: vDocumentoAgrupado — frmPedidoAnterior.frm.
+/// Columnas: tDocumento, nVenta, Estado, tTurno, tObservacion, tUsuarioAnulado, fRegistroAnulado.
+/// </summary>
+public sealed record DocumentoAgrupadoVista(
+    string Documento,
+    decimal Venta,
+    string Estado,
+    string Turno,
+    string ObservacionAnulacion,
+    string UsuarioAnulado,
+    DateTime? FechaAnulacion);

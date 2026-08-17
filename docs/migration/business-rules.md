@@ -3423,3 +3423,29 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 **Descripción:** Las mesas asignadas a una junta adoptan estado '06' (FueraDeServicio en el enum .NET) en la tabla TMESA. Esto las marca visualmente como parte de una junta y las bloquea para otras asignaciones.
 **Destino .NET:** `JuntaMesaRepository.ActualizarJuntaMesasAsync` — UPDATE TMESA SET tEstadoMesa='06'.
 **Estado:** MIGRATED
+
+---
+
+## Módulo: Correlativo de Pedidos (frmPedidoCorrelativo)
+
+### BR-CORRPEDIDO-001
+**Nombre:** Rango de fechas para consulta de correlativo
+**Origen:** Legacy/frmPedidoCorrelativo.frm
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmPedidoCorrelativo.frm`
+**Descripción:** La consulta de pedidos filtra por fFecha >= @desde 00:00 y fFecha < @hasta+1 00:00 sobre la vista `vPedidoCorrelativo`, ordenado por tCodigoPedido ascendente.
+**Destino .NET:** `ObtenerPedidosCorrelativoHandler` + `PedidoRepository.ObtenerCorrelativoAsync`
+**Estado:** MIGRATED
+
+### BR-CORRPEDIDO-002
+**Nombre:** Detalle de ítems por pedido
+**Origen:** Legacy/frmPedidoDetalle.frm
+**Descripción:** El detalle de ítems de un pedido seleccionado se carga desde la vista `vPedidoDetalle` filtrando por tCodigoPedido.
+**Destino .NET:** `ObtenerDetallePedidoExtendidoHandler` — reutiliza handler existente
+**Estado:** MIGRATED
+
+### BR-CORRPEDIDO-003
+**Nombre:** Documentos agrupados por pedido
+**Origen:** Legacy/frmPedidoAnterior.frm
+**Descripción:** Los documentos emitidos/anulados de un pedido se cargan desde `vDocumentoAgrupado` filtrando por tCodigoPedido. Muestra refacturaciones y anulaciones históricas.
+**Destino .NET:** `ObtenerDocumentosAgrupadosPedidoHandler` + `PedidoRepository.ObtenerDocumentosAgrupadosPedidoAsync`
+**Estado:** MIGRATED

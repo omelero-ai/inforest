@@ -61,3 +61,42 @@ public sealed class ObtenerPedidosSinMesaHandler
         ObtenerPedidosSinMesaQuery query, CancellationToken ct = default)
         => Result.Ok(await _repository.ObtenerActivosSinMesaAsync(query.Caja, ct));
 }
+
+// ── POS-FUNC-034 ─────────────────────────────────────────────────────────────
+
+public sealed record ObtenerPedidosCorrelativoQuery(DateOnly Desde, DateOnly Hasta);
+
+/// <summary>
+/// Obtiene el correlativo de pedidos por rango de fechas.
+/// Legacy: frmPedidoCorrelativo.frm — vPedidoCorrelativo WHERE fFecha BETWEEN @desde AND @hasta.
+/// Regla BR-CORRPEDIDO-001.
+/// </summary>
+public sealed class ObtenerPedidosCorrelativoHandler
+{
+    private readonly IPedidoReadRepository _repository;
+
+    public ObtenerPedidosCorrelativoHandler(IPedidoReadRepository repository)
+        => _repository = repository;
+
+    public async Task<Result<IReadOnlyList<PedidoCorrelativoVista>>> HandleAsync(
+        ObtenerPedidosCorrelativoQuery query, CancellationToken ct = default)
+        => Result.Ok(await _repository.ObtenerCorrelativoAsync(query.Desde, query.Hasta, ct));
+}
+
+public sealed record ObtenerDocumentosAgrupadosPedidoQuery(string CodigoPedido);
+
+/// <summary>
+/// Obtiene documentos agrupados por pedido (refacturados / anulados).
+/// Legacy: frmPedidoAnterior.frm — vDocumentoAgrupado WHERE tCodigoPedido = @codigoPedido.
+/// </summary>
+public sealed class ObtenerDocumentosAgrupadosPedidoHandler
+{
+    private readonly IPedidoReadRepository _repository;
+
+    public ObtenerDocumentosAgrupadosPedidoHandler(IPedidoReadRepository repository)
+        => _repository = repository;
+
+    public async Task<Result<IReadOnlyList<DocumentoAgrupadoVista>>> HandleAsync(
+        ObtenerDocumentosAgrupadosPedidoQuery query, CancellationToken ct = default)
+        => Result.Ok(await _repository.ObtenerDocumentosAgrupadosPedidoAsync(query.CodigoPedido, ct));
+}

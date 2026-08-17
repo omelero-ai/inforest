@@ -27,4 +27,17 @@ public interface IPedidoReadRepository
     /// Regla BR-MESAS-005.
     /// </summary>
     Task<IReadOnlyList<PedidoSinMesaVista>> ObtenerActivosSinMesaAsync(string caja, CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene el correlativo de pedidos por rango de fechas.
+    /// Legacy: frmPedidoCorrelativo.frm — vPedidoCorrelativo WHERE fFecha BETWEEN @desde AND @hasta ORDER BY tCodigoPedido.
+    /// Regla BR-CORRPEDIDO-001.
+    /// </summary>
+    Task<IReadOnlyList<PedidoCorrelativoVista>> ObtenerCorrelativoAsync(DateOnly desde, DateOnly hasta, CancellationToken ct = default);
+
+    /// <summary>
+    /// Obtiene los documentos agrupados de un pedido (documentos refacturados/anulados).
+    /// Legacy: frmPedidoAnterior.frm — vDocumentoAgrupado WHERE tCodigoPedido = @codigoPedido.
+    /// </summary>
+    Task<IReadOnlyList<DocumentoAgrupadoVista>> ObtenerDocumentosAgrupadosPedidoAsync(string codigoPedido, CancellationToken ct = default);
 }

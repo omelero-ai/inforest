@@ -430,4 +430,81 @@ internal sealed class PedidoRepository : IPedidoRepository, IPedidoReadRepositor
             Observacion: (string)r.Observacion))
             .ToList().AsReadOnly();
     }
+
+    // ── POS-FUNC-034 ──────────────────────────────────────────────────────────
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<PedidoCorrelativoVista>> ObtenerCorrelativoAsync(
+        DateOnly desde, DateOnly hasta, CancellationToken ct = default)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        // Legacy: frmPedidoCorrelativo.frm — vPedidoCorrelativo WHERE fFecha BETWEEN @desde AND @hasta.
+        // BR-CORRPEDIDO-001: rango de fechas de día completo (00:00 - 23:59).
+        const string sql = """
+            SELECT tCodigoPedido      AS CodigoPedido,
+                   ISNULL(tCaja,'')   AS Caja,
+                   ISNULL(tTurno,'')  AS Turno,
+                   fFecha             AS Fecha,
+                   ISNULL(Mesa,'')    AS Mesa,
+                   ISNULL(Mozo,'')    AS Mozo,
+                   ISNULL(nVenta,0)   AS Venta,
+                   ISNULL(TipoPedido,'') AS TipoPedido,
+                   ISNULL(Estado,'')  AS Estado,
+                   ISNULL(Documento,'') AS Documento,
+                   ISNULL(tObservacion,'') AS Observacion,
+                   ISNULL(nAdulto,0)  AS Adultos
+            FROM vPedidoCorrelativo
+            WHERE fFecha >= @Desde AND fFecha < @HastaExclusivo
+            ORDER BY tCodigoPedido
+            """;
+        var rows = await connection.QueryAsync(sql, new
+        {
+            Desde = desde.ToDateTime(TimeOnly.MinValue),
+            HastaExclusivo = hasta.ToDateTime(TimeOnly.MinValue).AddDays(1)
+        });
+        return rows.Select(r => new PedidoCorrelativoVista(
+            CodigoPedido: (string)r.CodigoPedido,
+            Caja: (string)r.Caja,
+            Turno: (string)r.Turno,
+            Fecha: (DateTime)r.Fecha,
+            Mesa: (string)r.Mesa,
+            Mozo: (string)r.Mozo,
+            Venta: (decimal)r.Venta,
+            TipoPedido: (string)r.TipoPedido,
+            Estado: (string)r.Estado,
+            Documento: (string)r.Documento,
+            Observacion: (string)r.Observacion,
+            Adultos: (decimal)r.Adultos))
+            .ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<DocumentoAgrupadoVista>> ObtenerDocumentosAgrupadosPedidoAsync(
+        string codigoPedido, CancellationToken ct = default)
+    {
+        using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", ct);
+        // Legacy: frmPedidoAnterior.frm — vDocumentoAgrupado WHERE tCodigoPedido = @codigoPedido.
+        const string sql = """
+            SELECT tDocumento                      AS Documento,
+                   ISNULL(nVenta,0)                AS Venta,
+                   ISNULL(Estado,'')               AS Estado,
+                   ISNULL(tTurno,'')               AS Turno,
+                   ISNULL(tObservacion,'')         AS ObservacionAnulacion,
+                   ISNULL(tUsuarioAnulado,'')      AS UsuarioAnulado,
+                   fRegistroAnulado                AS FechaAnulacion
+            FROM vDocumentoAgrupado
+            WHERE tCodigoPedido = @CodigoPedido
+            ORDER BY tDocumento
+            """;
+        var rows = await connection.QueryAsync(sql, new { CodigoPedido = codigoPedido });
+        return rows.Select(r => new DocumentoAgrupadoVista(
+            Documento: (string)r.Documento,
+            Venta: (decimal)r.Venta,
+            Estado: (string)r.Estado,
+            Turno: (string)r.Turno,
+            ObservacionAnulacion: (string)r.ObservacionAnulacion,
+            UsuarioAnulado: (string)r.UsuarioAnulado,
+            FechaAnulacion: (DateTime?)r.FechaAnulacion))
+            .ToList().AsReadOnly();
+    }
 }

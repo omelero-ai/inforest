@@ -569,3 +569,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `frmJuntaMesa.frm` | Form | `FrmJuntaMesa` | WinForms Form | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmJuntaMesa.cs` |
 | `TPEDIDOMESA` (DELETE+INSERT) | Table | `IJuntaMesaRepository.ActualizarJuntaMesasAsync` + `JuntaMesaRepository` | Repository | MIGRATED | `src/Inforest.Application/Maestros/IMaestrosRepository.cs` + `src/Inforest.Infrastructure/Maestros/JuntaMesaRepository.cs` |
 | `TPEDIDOMESA` (SELECT) | Table | `IJuntaMesaRepository.ObtenerMesasJuntadasAsync` + `ObtenerMesasJuntadasHandler` | Handler + Repository | MIGRATED | `src/Inforest.Application/Maestros/MaestrosHandlers.cs` |
+| `frmPedidoCorrelativo.frm` | Form | `FrmPedidoCorrelativo` | WinForms Form | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmPedidoCorrelativo.cs` |
+| `frmPedidoDetalle.frm` | Form | `FrmPedidoCorrelativo` (tab Ítems) | Inline Tab Panel | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmPedidoCorrelativo.cs` |
+| `frmPedidoAnterior.frm` | Form | `FrmPedidoCorrelativo` (tab Docs) | Inline Tab Panel | MIGRATED | `src/Inforest.Desktop/Pedidos/FrmPedidoCorrelativo.cs` |
+| `vPedidoCorrelativo` | View | `IPedidoReadRepository.ObtenerCorrelativoAsync` + `PedidoRepository` | Repository | MIGRATED | `src/Inforest.Application/Pedidos/IPedidoReadRepository.cs` + `src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` |
+| `vDocumentoAgrupado` | View | `IPedidoReadRepository.ObtenerDocumentosAgrupadosPedidoAsync` + `PedidoRepository` | Repository | MIGRATED | `src/Inforest.Application/Pedidos/IPedidoReadRepository.cs` + `src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` |
