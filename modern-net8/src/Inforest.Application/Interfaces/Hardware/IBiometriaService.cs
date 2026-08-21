@@ -18,6 +18,16 @@ public interface IBiometriaService
     /// Legacy: SDK FpLibX — matching de template almacenado vs capturado.
     /// </summary>
     Task<BiometriaResult> VerificarUsuarioAsync(string codigoUsuario, byte[] templateHuella, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Identifica al usuario en base de datos por huella dactilar (matching 1:N).
+    /// Legacy: frmVerificacionHuellaSup.frm — escanea huella, compara contra TUSUARIO.tHuella
+    /// y retorna tResumido del usuario identificado (variable global sVar1).
+    /// Regla BR-PERIPH-004.
+    /// </summary>
+    /// <param name="modulo">Código de módulo activo ("01" POS, "02" Administración, "03" Consultas).</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    Task<BiometriaIdentificacionResult> IdentificarUsuarioAsync(string modulo, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -35,5 +45,23 @@ public sealed record BiometriaResult(
         => new(true, 0, "OK", puntuacion, template);
 
     public static BiometriaResult Fallido(int codigoError, string mensaje)
+        => new(false, codigoError, mensaje);
+}
+
+/// <summary>
+/// Resultado de identificación biométrica 1:N.
+/// Legacy: frmVerificacionHuellaSup.frm — wenterHuellaSup + sVar1 (tResumido del usuario identificado).
+/// Regla BR-PERIPH-004.
+/// </summary>
+public sealed record BiometriaIdentificacionResult(
+    bool EsExitoso,
+    int CodigoError,
+    string Mensaje,
+    string? LoginIdentificado = null)
+{
+    public static BiometriaIdentificacionResult Identificado(string login)
+        => new(true, 0, "OK", login);
+
+    public static BiometriaIdentificacionResult Fallido(int codigoError, string mensaje)
         => new(false, codigoError, mensaje);
 }

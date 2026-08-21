@@ -1,7 +1,9 @@
 using Inforest.Application.Interfaces;
+using Inforest.Application.Interfaces.Hardware;
 using Inforest.Application.Configuracion;
 using Inforest.Application.Seguridad;
 using Inforest.Desktop.POS;
+using Inforest.Desktop.Shared;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -12,7 +14,16 @@ namespace Inforest.Desktop;
 /// <summary>
 /// Formulario inicial de acceso.
 /// Legacy: frmAcceso.frm.
-/// Reglas: BR-006, BR-POS-006-LOCK.
+/// Reglas: BR-006, BR-POS-006-LOCK, BR-PERIPH-004.
+/// Flujos migrados:
+///   cmdOpcion[0]/imgOpcion[0] — login usuario+contraseña ✓
+///   cmdOpcion[1]/imgOpcion[1] — cancelar ✓
+///   imgOpcion[2]              — teclado en pantalla (usuario) → btnTecladoUsuario ✓
+///   imgOpcion[3]              — teclado en pantalla (password) → btnTecladoPassword ✓
+///   imgOpcion[4]              — login biométrico huella (1:N) → btnHuella ✓ (BLOCKED: OCX)
+///   imgNewProceso / Case 5    — marcación biométrica → btnMarcacion ✓ (BLOCKED: OCX)
+///   imgNewOpcion              — cambiar contraseña → btnCambiarContrasena ✓
+///   Image1_Click              — acerca de → MostrarAcercaDe ✓
 /// </summary>
 public partial class FrmAcceso : Form
 {
@@ -25,6 +36,7 @@ public partial class FrmAcceso : Form
     private readonly ObtenerConfiguracionSistemaHandler _obtenerConfiguracionSistemaHandler;
     private readonly IConfiguration _configuration;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IBiometriaService _biometriaService;
     private InicioPosValidado? _inicioPos;
     private int _intentosFallidos;
     private bool _cambioContrasenaHabilitado;
@@ -37,7 +49,8 @@ public partial class FrmAcceso : Form
         ValidarInicioPosHandler validarInicioPosHandler,
         ObtenerConfiguracionSistemaHandler obtenerConfiguracionSistemaHandler,
         IConfiguration configuration,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IBiometriaService biometriaService)
     {
         _authService = authService;
         _licenseService = licenseService;
@@ -47,6 +60,7 @@ public partial class FrmAcceso : Form
         _obtenerConfiguracionSistemaHandler = obtenerConfiguracionSistemaHandler;
         _configuration = configuration;
         _serviceProvider = serviceProvider;
+        _biometriaService = biometriaService;
         InitializeComponent();
     }
 
@@ -462,4 +476,138 @@ public partial class FrmAcceso : Form
             ? ResolveDatabaseName()
             : builder.InitialCatalog;
     }
+
+    // ── Biometría — login por huella (imgOpcion Index=4) ─────────────────────
+
+    /// <summary>
+    /// Inicia sesión por identificación biométrica 1:N (huella dactilar).
+    /// Legacy: imgOpcion_Click Case 4 — frmVerificacionHuellaSup.Opcion lModulo.
+    /// GAP-004: sgfplibx.ocx OCX 32-bit — NullBiometriaService activo hasta SDK .NET disponible.
+    /// BR-PERIPH-004.
+    /// </summary>
+    private async void btnHuella_Click(object sender, EventArgs e)
+    {
+        btnHuella.Enabled = false;
+        lblEstado.Text    = "Capturando huella...";
+        try
+        {
+            var modulo = ResolverCodigoModulo(_configuration["Inforest:Modulo"] ?? "INFOREST");
+            var result = await _biometriaService.IdentificarUsuarioAsync(modulo);
+            if (!result.EsExitoso || string.IsNullOrWhiteSpace(result.LoginIdentificado))
+            {
+                lblEstado.Text = result.Mensaje;
+                return;
+            }
+
+            var login = NormalizarLogin(result.LoginIdentificado);
+            txtUsuario.Text = login;
+            PersistirUltimoUsuario(login);
+            AbrirShellPrincipal();
+        }
+        finally
+        {
+            btnHuella.Enabled = true;
+        }
+    }
+
+    // ── Biometría — marcación de asistencia (imgNewProceso) ──────────────────
+
+    /// <summary>
+    /// Registra marcación de asistencia por huella.
+    /// Legacy: imgNewProceso_Click — marcacion=1, imgOpcion_Click Case 5 — frmVerificarHuellaMarcacion.
+    /// GAP-004: sgfplibx.ocx OCX 32-bit — stub hasta SDK .NET disponible.
+    /// BR-PERIPH-004.
+    /// </summary>
+    private async void btnMarcacion_Click(object sender, EventArgs e)
+    {
+        btnMarcacion.Enabled = false;
+        lblEstado.Text       = "Capturando huella para marcación...";
+        try
+        {
+            var resultado = await _biometriaService.CapturarHuellaAsync();
+            lblEstado.Text = resultado.EsExitoso
+                ? "Marcación registrada."
+                : resultado.Mensaje;
+
+            if (resultado.EsExitoso)
+            {
+                MessageBox.Show(
+                    "Marcación de asistencia registrada correctamente.",
+                    Text,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+        }
+        finally
+        {
+            btnMarcacion.Enabled = true;
+            if (lblEstado.Text == "Capturando huella para marcación...")
+                lblEstado.Text = "Esperando validación.";
+        }
+    }
+
+    // ── Teclado en pantalla — usuario (imgOpcion Index=2) ─────────────────────
+
+    /// <summary>
+    /// Abre teclado alfanumérico en pantalla para el campo usuario.
+    /// Legacy: imgOpcion_Click Case 2 — frmKeyBoard.Show vbModal; txtUsuario.Text = sDescrip.
+    /// </summary>
+    private void btnTecladoUsuario_Click(object sender, EventArgs e)
+    {
+        using var teclado = new FrmInputTeclado(
+            titulo:       "Usuario",
+            textoInicial: txtUsuario.Text,
+            esContrasena: false);
+
+        if (teclado.ShowDialog(this) == DialogResult.OK)
+            txtUsuario.Text = NormalizarLogin(teclado.ValorTexto);
+    }
+
+    // ── Teclado en pantalla — contraseña (imgOpcion Index=3) ─────────────────
+
+    /// <summary>
+    /// Abre teclado en pantalla enmascarado para el campo contraseña.
+    /// Legacy: imgOpcion_Click Case 3 — frmPassword.Show vbModal; txtPassword.Text = sDescrip.
+    /// </summary>
+    private void btnTecladoPassword_Click(object sender, EventArgs e)
+    {
+        using var teclado = new FrmInputTeclado(
+            titulo:       "Contraseña",
+            textoInicial: string.Empty,
+            esContrasena: true);
+
+        if (teclado.ShowDialog(this) == DialogResult.OK)
+            txtPassword.Text = teclado.ValorTexto;
+    }
+
+    // ── Acerca de (Image1_Click) ─────────────────────────────────────────────
+
+    /// <summary>
+    /// Muestra información de versión del sistema.
+    /// Legacy: Image1_Click — frmAbout.Show vbModal.
+    /// </summary>
+    private void MostrarAcercaDe()
+    {
+        var version = System.Windows.Forms.Application.ProductVersion;
+        MessageBox.Show(
+            $"INFOREST\nVersión {version}\n\n© Sistema ERP Gastronómico",
+            "Acerca de INFOREST",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+
+    // ── Utilidades ───────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Convierte el nombre del módulo al código numérico que usa el Legacy para biometría.
+    /// Legacy: lModulo = "01"/"02"/"03" según sModulo en AccesoInicio.
+    /// </summary>
+    private static string ResolverCodigoModulo(string nombreModulo) =>
+        nombreModulo.ToUpperInvariant() switch
+        {
+            "INFOREST"       => "01",
+            "ADMINISTRACION" => "02",
+            "CONSULTA"       => "03",
+            _                => "01"
+        };
 }

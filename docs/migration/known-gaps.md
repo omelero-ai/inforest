@@ -68,7 +68,7 @@
 | CashDro (cajón automático) | `modProcedimientoNuevo.bas` | Media | `ICashDroService` + `CashDroService` (Process.Start). Validado en tests; wiring operativo real pendiente. |
 | PinPad DLL3500 | `DLL3500.bas`, `CAJA_PINPAD.dll` | Alta — DLL Win32 | `IPinPadService` + `PinPadService` (P/Invoke). Falta validación con DLL/hardware real. |
 | Impresora fiscal Epson | `modImpresoraFiscal.bas`, `IFEpson.ocx` | Alta — OCX Win32 | UNKNOWN |
-| Biometría SecuGen | `FpLibX_Const.bas`, `sgfplibx.ocx` | Alta — OCX Win32 | UNKNOWN |
+| Biometría SecuGen | `FpLibX_Const.bas`, `sgfplibx.ocx` | Alta — OCX Win32 | `IBiometriaService` + `NullBiometriaService` (stub). UI en `FrmAcceso`: `btnHuella` (login 1:N), `btnMarcacion` (asistencia). Bloqueado hasta SDK .NET SecuGen disponible. GAP-004 BLOCKED. |
 | KDS pantalla cocina | `modKDS.bas` | Media — XML sobre directorio | PARTIAL — existe baseline .NET para XML/directorio, falta pantalla operativa y confirmación con hardware real |
 | BlueVision/TVS | `modBlueVision.bas` | Alta — COM Win32 | PARTIAL — `IBlueVisionService` + `BlueVisionHttpClient`; falta validar servidor/protocolo real en ambiente operativo |
 
