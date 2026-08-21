@@ -843,6 +843,7 @@ public class FrmPuntoVenta : Form
             return false;
 
         _turno = result.Valor.CodigoTurno;
+        _turnoIniciado = true;
         ActivaInicio(true);
         await ActualizarDiaContableAsync();
         ActualizarStatusBar();

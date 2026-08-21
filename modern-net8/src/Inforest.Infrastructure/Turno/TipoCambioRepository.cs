@@ -42,7 +42,7 @@ internal sealed class TipoCambioRepository : ITipoCambioRepository
         await _spExecutor.ExecuteAsync(connection, "spIns_TipoCambio", new
         {
             nTc     = (double)tipoCambio.Venta,
-            tUSUARIO = usuario,
+            tUsuario = usuario,
             nTco    = (double)tipoCambio.Oficial,
             nTc2    = (double)tipoCambio.Venta2,
             nTc3    = (double)tipoCambio.Venta3
