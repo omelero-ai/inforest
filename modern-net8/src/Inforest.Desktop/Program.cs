@@ -42,7 +42,7 @@ static class Program
         using (instanceLease)
         {
             // Formulario de acceso resuelto desde DI.
-            var form = host.Services.GetRequiredService<Form1>();
+            var form = host.Services.GetRequiredService<FrmAcceso>();
             System.Windows.Forms.Application.Run(form);
         }
     }
@@ -64,7 +64,7 @@ static class Program
                 services.AddInfrastructure(context.Configuration);
 
                 // Formulario de acceso registrado en DI.
-                services.AddTransient<Form1>();
+                services.AddTransient<FrmAcceso>();
 
                 // Módulos principales — resolubles desde DI
                 services.AddTransient<FrmPuntoVenta>();
