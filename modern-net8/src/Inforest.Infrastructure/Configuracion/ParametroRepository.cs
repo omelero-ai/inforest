@@ -328,7 +328,8 @@ internal sealed class ParametroRepository : IParametroRepository
             GetBoolean(reader, "lImpcomandaf2"),
             GetBoolean(reader, "lPassOtrosPagos"),
             GetBoolean(reader, "lImpClienteCab"),
-            GetString(reader, "tImpFiscal"));
+            GetString(reader, "tImpFiscal"),
+            GetBoolean(reader, "lTurnoCompartido"));
 
     private static string? GetString(IDataReader reader, string column)
     {

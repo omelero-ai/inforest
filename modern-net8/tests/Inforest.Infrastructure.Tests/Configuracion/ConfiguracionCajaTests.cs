@@ -22,12 +22,14 @@ public sealed class ConfiguracionCajaTests
             lComanda: true,
             lActivo: true,
             lPagoRapido: true,
+            lTurnoCompartido: true,
             EAN13: true,
             lCajaContingencia: true);
 
         Assert.True(configuracion.lComanda);
         Assert.True(configuracion.lActivo);
         Assert.True(configuracion.lPagoRapido);
+        Assert.True(configuracion.lTurnoCompartido);
         Assert.True(configuracion.EAN13);
         Assert.True(configuracion.lCajaContingencia);
     }
@@ -37,6 +39,7 @@ public sealed class ConfiguracionCajaTests
         bool lComanda = false,
         bool lActivo = false,
         bool lPagoRapido = false,
+        bool lTurnoCompartido = false,
         bool EAN13 = false,
         bool lCajaContingencia = false)
         => ConfiguracionCaja.Cargar(
@@ -141,5 +144,6 @@ public sealed class ConfiguracionCajaTests
             lImpcomandaf2: false,
             lPassOtrosPagos: false,
             lImpClienteCab: false,
-            tImpFiscal: null);
+            tImpFiscal: null,
+            lTurnoCompartido: lTurnoCompartido);
 }

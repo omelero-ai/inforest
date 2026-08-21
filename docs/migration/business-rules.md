@@ -146,7 +146,78 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 ## Caja y Pagos
 
-### BR-006
+### BR-TURNO-001
+**Nombre:** Apertura Nueva de Turno
+
+**Origen:** Legacy/frmInicio.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmInicio.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(0)` — Case apertura nueva (wPasa=True)
+
+**Descripción:** Si no existe turno activo para la caja (o el último tiene `lCierre=1`), se genera un correlativo único y se inserta un nuevo registro en `MTURNO`.
+
+**Correlativo:** Formato YY (año 2 dígitos) + 8 dígitos secuenciales. Obtenido desde `MAX(tTurno)` filtrando `SUBSTRING(tTurno,1,2)=YY`. Si no existe registro del año actual, la secuencia inicia en `00000001`. Ejemplo: `"2600000001"`.
+
+**Condición:** `ObtenerUltimoTurnoAsync` retorna `null` o `TurnoExistente.Cerrado = true`.
+
+**Resultado:** `INSERT INTO MTURNO (tTurno, tCaja, tSalon, fInicial, tUsuario, lCierre=0, nMontoIN, nMontoIE)`.
+
+**Excepciones:** Si la inserción falla → error `TURNO_APERTURA_FALLIDA`.
+
+**Destino .NET:** `AbrirTurnoHandler` + `TurnoRepository.InsertarAsync` + `TurnoRepository.GenerarCorrelativoAsync`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-TURNO-002
+**Nombre:** Re-Apertura de Turno
+
+**Origen:** Legacy/frmInicio.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmInicio.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(0)` — Case re-apertura (wPasa=False, wReApertura=True)
+
+**Descripción:** Si existe turno con `lCierre=0` para la caja, el sistema presenta "Re Apertura de Turno" cargando los montos existentes. Al confirmar, actualiza el turno existente con el nuevo usuario y montos.
+
+**Condición:** `ObtenerUltimoTurnoAsync` retorna `TurnoExistente.Cerrado = false`.
+
+**Resultado:** `UPDATE MTURNO SET tUsuario=@usuario, nMontoIN=@monto, nMontoIE=@montoME WHERE tTurno=@turno`.
+
+**Excepciones:** Si la actualización falla → error `TURNO_REAPERTURA_FALLIDA`.
+
+**Destino .NET:** `AbrirTurnoHandler` + `TurnoRepository.ReAperturarAsync`
+
+**Estado:** MIGRATED
+
+---
+
+### BR-TC-001
+**Nombre:** Registro de Tipo de Cambio al Aperturar Turno
+
+**Origen:** Legacy/frmInicio.frm
+
+**Archivo:** `legacy-restaurant/restaurant-vb6/Formularios/frmInicio.frm`
+
+**Procedimiento/Función:** `cmdOpcion_Click(0)` — `If wAgrega Then spIns_TipoCambio`
+
+**Descripción:** Si la caja maneja moneda extranjera (`lMonedaExtranjera=True`) y no existe tipo de cambio para el día (`wAgrega=True`), el sistema solicita el TC al usuario y lo registra mediante `spIns_TipoCambio` antes de aperturar el turno. Bolivia (país 003) requiere TC + TC2 + TC3 > 0; otros países requieren solo TC > 0.
+
+**Condición:** `RegistrarTipoCambio=true` en `AbrirTurnoCommand`.
+
+**Resultado:** Llamada a `spIns_TipoCambio` con `fFecha=hoy, nVenta=TC, nOficial=TCO, nVenta2=TC2, nVenta3=TC3`.
+
+**Excepciones:** Bolivia: si TC=0 o TC2=0 o TC3=0 → bloquea apertura. Otros: si TC=0 → bloquea apertura.
+
+**Destino .NET:** `ITipoCambioRepository.InsertarOActualizarAsync` + `TipoCambioRepository`
+
+**Estado:** MIGRATED
+
+---
+
+
 **Nombre:** Configuración de comportamiento por caja (30+ flags)
 
 **Origen:** Legacy/TCAJA

@@ -107,6 +107,7 @@ public static class DependencyInjection
         // W3: Turno / Día Contable (BR-004, BR-005)
         services.AddScoped<ITurnoRepository, TurnoRepository>();
         services.AddScoped<IDiaContableService, DiaContableService>();
+        services.AddScoped<ITipoCambioRepository, TipoCambioRepository>();
 
         // W4: Pedidos (BR-SQL-001, BR-SQL-002, BR-003)
         services.AddScoped<IPedidoRepository, PedidoRepository>();
