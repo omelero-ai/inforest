@@ -232,3 +232,68 @@ public sealed class ObtenerUltimoTurnoHandler
         return Result.Ok<TurnoExistente?>(ultimo);
     }
 }
+
+public sealed record ValidarInicioCajaRapidaQuery(
+    string CodigoCaja,
+    string CodigoUsuario,
+    ModoConsultaTurno Modo = ModoConsultaTurno.PorCaja);
+
+public sealed record ValidarInicioCajaRapidaResult(
+    bool PermiteIngresoDirecto,
+    string CodigoTurno = "");
+
+/// <summary>
+/// Valida si el POS multi-cajero puede entrar directo sin mostrar la apertura de turno.
+/// Legacy: <c>mdiPuntoVenta.frm</c> → <c>validaInicioCajaRapida()</c>.
+/// Requiere tipo de cambio del día y un turno abierto según el modo consultado.
+/// Si ambos existen, reaplica usuario/montos al turno abierto y habilita el inicio.
+/// </summary>
+public sealed class ValidarInicioCajaRapidaHandler
+{
+    private readonly ITurnoRepository _turnoRepository;
+    private readonly ITipoCambioRepository _tipoCambioRepository;
+
+    public ValidarInicioCajaRapidaHandler(
+        ITurnoRepository turnoRepository,
+        ITipoCambioRepository tipoCambioRepository)
+    {
+        _turnoRepository = turnoRepository;
+        _tipoCambioRepository = tipoCambioRepository;
+    }
+
+    public async Task<Result<ValidarInicioCajaRapidaResult>> HandleAsync(ValidarInicioCajaRapidaQuery query, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(query.CodigoCaja))
+            return Result.Fail<ValidarInicioCajaRapidaResult>("La caja es obligatoria.", "TURNO_CAJA_REQUERIDA");
+
+        if (string.IsNullOrWhiteSpace(query.CodigoUsuario))
+            return Result.Fail<ValidarInicioCajaRapidaResult>("El usuario es obligatorio.", "TURNO_USUARIO_REQUERIDO");
+
+        var tipoCambio = await _tipoCambioRepository.ObtenerDelDiaAsync(ct);
+        if (tipoCambio is null || tipoCambio.Venta <= 0)
+            return Result.Ok(new ValidarInicioCajaRapidaResult(false));
+
+        var ultimo = await _turnoRepository.ObtenerUltimoTurnoAsync(
+            query.CodigoCaja,
+            query.CodigoUsuario,
+            query.Modo,
+            ct);
+
+        if (ultimo is null || ultimo.Cerrado)
+            return Result.Ok(new ValidarInicioCajaRapidaResult(false));
+
+        var actualizado = await _turnoRepository.ReAperturarAsync(
+            ultimo.CodigoTurno,
+            query.CodigoUsuario,
+            ultimo.MontoInicialMN,
+            ultimo.MontoInicialME,
+            ct);
+
+        if (!actualizado)
+            return Result.Fail<ValidarInicioCajaRapidaResult>(
+                "No se pudo reutilizar el turno activo para el inicio directo.",
+                "TURNO_INICIO_DIRECTO_FALLIDO");
+
+        return Result.Ok(new ValidarInicioCajaRapidaResult(true, ultimo.CodigoTurno));
+    }
+}

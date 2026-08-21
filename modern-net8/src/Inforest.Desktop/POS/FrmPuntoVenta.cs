@@ -771,12 +771,11 @@ public class FrmPuntoVenta : Form
     ///
     /// BR-TURNO-001, BR-TURNO-002, BR-DC-001.
     /// </summary>
-    private void CmdApertura_Click()
+    private async void CmdApertura_Click()
     {
         // Paso 1: Día Contable manual (lDiaContable=False)
         if (_cfg?.lDiaContableAutomatico == false)
         {
-            var tipoCambioRepo = _serviceProvider.GetService<ITipoCambioRepository>();
             using var dlgDC = new FrmDiaContable(
                 FrmDiaContable.Modo.Apertura,
                 _usuario,
@@ -785,13 +784,15 @@ public class FrmPuntoVenta : Form
                 _serviceProvider.GetRequiredService<ObtenerDiaContableHandler>());
             dlgDC.ShowDialog(this);
             if (!dlgDC.IniciaPorDiaContable) return;
-            _ = ActualizarDiaContableAsync();
+            await ActualizarDiaContableAsync();
         }
 
         // Paso 2: Determinar modo de consulta de turno
-        var modoTurno = _cfgCaja?.lMCPV == true
-            ? ModoConsultaTurno.PorUsuario
-            : ModoConsultaTurno.PorCaja;
+        var modoTurno = DeterminarModoConsultaTurno();
+
+        // Legacy: lMultiCajero + validaInicioCajaRapida() → entra directo si ya existe TC y turno abierto.
+        if (_cfgCaja?.lMultiCajero == true && await IntentarInicioDirectoCajaRapidaAsync(modoTurno))
+            return;
 
         // Paso 3: Abrir FrmAperturaTurno (frmInicio)
         var tipoCambioRepository = _serviceProvider.GetService<ITipoCambioRepository>();
@@ -814,6 +815,38 @@ public class FrmPuntoVenta : Form
             _ = ActualizarDiaContableAsync();
             ActualizarStatusBar();
         }
+    }
+
+    private ModoConsultaTurno DeterminarModoConsultaTurno()
+    {
+        if (_cfgCaja?.lMCPV == true)
+            return ModoConsultaTurno.PorUsuario;
+
+        if (_cfgCaja?.lTurnoCompartido == true)
+            return ModoConsultaTurno.PorCajaYUsuario;
+
+        return ModoConsultaTurno.PorCaja;
+    }
+
+    private async Task<bool> IntentarInicioDirectoCajaRapidaAsync(ModoConsultaTurno modoTurno)
+    {
+        var handler = _serviceProvider.GetRequiredService<ValidarInicioCajaRapidaHandler>();
+        var result = await handler.HandleAsync(new ValidarInicioCajaRapidaQuery(_codigoCaja, _usuario, modoTurno));
+
+        if (!result.EsExitoso)
+        {
+            MessageBox.Show(result.MensajeError, Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
+
+        if (result.Valor is null || !result.Valor.PermiteIngresoDirecto)
+            return false;
+
+        _turno = result.Valor.CodigoTurno;
+        ActivaInicio(true);
+        await ActualizarDiaContableAsync();
+        ActualizarStatusBar();
+        return true;
     }
 
     /// <summary>

@@ -59,6 +59,7 @@ public sealed record ConfiguracionCaja
     public bool lCD { get; init; }
     public bool lFechaEntregaDelivery { get; init; }
     public bool lMultiCajero { get; init; }
+    public bool lTurnoCompartido { get; init; }
     public bool lMCPV { get; init; }
     public bool lCCVOX { get; init; }
     public bool lMotorizado { get; init; }
@@ -217,7 +218,8 @@ public sealed record ConfiguracionCaja
         bool lImpcomandaf2,
         bool lPassOtrosPagos,
         bool lImpClienteCab,
-        string? tImpFiscal)
+        string? tImpFiscal,
+        bool lTurnoCompartido = false)
     {
         if (string.IsNullOrWhiteSpace(codigoCaja))
             throw new DomainException("El código de caja es obligatorio.", "CONFIGURACION_CAJA_CODIGO_REQUERIDO");
@@ -275,6 +277,7 @@ public sealed record ConfiguracionCaja
             lCD = lCD,
             lFechaEntregaDelivery = lFechaEntregaDelivery,
             lMultiCajero = lMultiCajero,
+            lTurnoCompartido = lTurnoCompartido,
             lMCPV = lMCPV,
             lCCVOX = lCCVOX,
             lMotorizado = lMotorizado,
