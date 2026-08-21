@@ -111,6 +111,7 @@ public class FrmPuntoVenta : Form
     private readonly System.Windows.Forms.Timer _timerWebapp;     // KDS/alertas (10s)
     private readonly System.Windows.Forms.Timer _timerConexion;   // multiLocal check (inactivo al inicio)
     private int _contadorBizlink;
+    private bool _alertaVentaMostrada;
 
     private List<Mesa> _mesas = [];
 
@@ -271,18 +272,18 @@ public class FrmPuntoVenta : Form
 
         // ── Reportes ───────────────────────────────────────────────────────
         var mnuRep = new ToolStripMenuItem("&Reportes");
-        mnuRep.DropDownItems.Add("Estados Cta Cte",              null, (_, _) => AbrirReporte<FrmRepCtaCteReporte>());
-        mnuRep.DropDownItems.Add("Control de Transacciones",     null, (_, _) => AbrirReporte<FrmRepAnuladoReporte>());
-        mnuRep.DropDownItems.Add("Liquidación Ticketera",        null, (_, _) => AbrirReporte<FrmRepLiquidacionTicketReporte>());
-        mnuRep.DropDownItems.Add("Paloteo Ticketera",            null, (_, _) => AbrirReporte<FrmRepPaloteoTicketReporte>());
-        mnuRep.DropDownItems.Add("Cierre Cajeros Delivery",      null, (_, _) => AbrirReporte<FrmRepDeliveryTicketReporte>());
-        mnuRep.DropDownItems.Add("Reporte de Reservas",          null, (_, _) => AbrirReporte<FrmRepReservasReporte>());
-        mnuRep.DropDownItems.Add("Reporte de Entregas",          null, (_, _) => AbrirReporte<FrmRepEntregaReporte>());
-        mnuRep.DropDownItems.Add("Venta Mensual por Fechas",     null, (_, _) => AbrirReporte<FrmRepVentaFechaReporte>());
-        mnuRep.DropDownItems.Add("Cta Cte Integrado",            null, (_, _) => AbrirReporte<FrmCtaCteIntegradoReporte>());
-        mnuRep.DropDownItems.Add("Venta Mensual Integrado",      null, (_, _) => AbrirReporte<FrmVentaMensualIntegradoReporte>());
-        mnuRep.DropDownItems.Add("Registro de Ventas",           null, (_, _) => AbrirReporte<FrmRepRegistroVentaReporte>());
-        mnuRep.DropDownItems.Add("Analitico Motorizado",         null, (_, _) => AbrirReporte<FrmAnaliticoMotorizadoIntegradoReporte>());
+        mnuRep.DropDownItems.Add("Estados Cta Cte",              null, (_, _) => AbrirFormulario<FrmRepCtaCteReporte>());
+        mnuRep.DropDownItems.Add("Control de Transacciones",     null, (_, _) => AbrirFormulario<FrmRepAnuladoReporte>());
+        mnuRep.DropDownItems.Add("Liquidación Ticketera",        null, (_, _) => AbrirFormulario<FrmRepLiquidacionTicketReporte>());
+        mnuRep.DropDownItems.Add("Paloteo Ticketera",            null, (_, _) => AbrirFormulario<FrmRepPaloteoTicketReporte>());
+        mnuRep.DropDownItems.Add("Cierre Cajeros Delivery",      null, (_, _) => AbrirFormulario<FrmRepDeliveryTicketReporte>());
+        mnuRep.DropDownItems.Add("Reporte de Reservas",          null, (_, _) => AbrirFormulario<FrmRepReservasReporte>());
+        mnuRep.DropDownItems.Add("Reporte de Entregas",          null, (_, _) => AbrirFormulario<FrmRepEntregaReporte>());
+        mnuRep.DropDownItems.Add("Venta Mensual por Fechas",     null, (_, _) => AbrirFormulario<FrmRepVentaFechaReporte>());
+        mnuRep.DropDownItems.Add("Cta Cte Integrado",            null, (_, _) => AbrirFormulario<FrmCtaCteIntegradoReporte>());
+        mnuRep.DropDownItems.Add("Venta Mensual Integrado",      null, (_, _) => AbrirFormulario<FrmVentaMensualIntegradoReporte>());
+        mnuRep.DropDownItems.Add("Registro de Ventas",           null, (_, _) => AbrirFormulario<FrmRepRegistroVentaReporte>());
+        mnuRep.DropDownItems.Add("Analitico Motorizado",         null, (_, _) => AbrirFormulario<FrmAnaliticoMotorizadoIntegradoReporte>());
         menu.Items.Add(mnuRep);
 
         // ── Delivery ───────────────────────────────────────────────────────
@@ -494,7 +495,7 @@ public class FrmPuntoVenta : Form
     {
         try
         {
-            var cn = await _connectionFactory.CreateOpenConnectionAsync(); using var _cnDispose = (IDisposable)cn;
+            using var cn = await _connectionFactory.CreateOpenConnectionAsync();
 
             var otro = await cn.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM LOG_SESIONES WHERE ISNULL(lActivo,0) = 0 AND tCaja = @caja AND ISNULL(PC,'') <> @pc",
@@ -530,7 +531,7 @@ public class FrmPuntoVenta : Form
     {
         try
         {
-            var cn = await _connectionFactory.CreateOpenConnectionAsync(); using var _cnDispose = (IDisposable)cn;
+            using var cn = await _connectionFactory.CreateOpenConnectionAsync();
             await cn.ExecuteAsync(
                 "UPDATE LOG_SESIONES SET lActivo = 1 WHERE lActivo = 0 AND tCaja = @caja AND PC = @pc",
                 new { caja = _codigoCaja, pc = Environment.MachineName });
@@ -902,12 +903,15 @@ public class FrmPuntoVenta : Form
     {
         try
         {
-            // Alerta de venta horaria (lAlertaVenta)
-            if (EsHorarioAlertaVenta() && _turnoIniciado)
+            // Alerta de venta horaria (lAlertaVenta) — una sola vez por día
+            if (EsHorarioAlertaVenta() && _turnoIniciado && !_alertaVentaMostrada)
             {
+                _alertaVentaMostrada = true;
                 MessageBox.Show("Es necesario realizar descarga de Ventas", "Alerta de Venta",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+            // Resetear flag cuando se sale de la ventana horaria
+            if (!EsHorarioAlertaVenta()) _alertaVentaMostrada = false;
         }
         catch { /* Silencioso — timer no debe detener la app */ }
     }
@@ -963,13 +967,6 @@ public class FrmPuntoVenta : Form
         form.ShowDialog(this);
     }
 
-    private void AbrirReporte<T>() where T : Form
-    {
-        using var scope = _serviceProvider.CreateScope();
-        var form = scope.ServiceProvider.GetRequiredService<T>();
-        form.ShowDialog(this);
-    }
-
     private void MsgEnMigracion(string legacyForm) =>
         MessageBox.Show($"Funcionalidad en migración ({legacyForm}).", Text,
             MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -994,7 +991,7 @@ public class FrmPuntoVenta : Form
     {
         try
         {
-            var cn = await _connectionFactory.CreateOpenConnectionAsync(); using var _cnDispose = (IDisposable)cn;
+            using var cn = await _connectionFactory.CreateOpenConnectionAsync();
             await cn.ExecuteAsync("UPDATE TPARAMETRO SET tsolouno = 0, lNomSoloUno = ''");
             MessageBox.Show("¡Descargo de Venta Liberado!", "Descargo de Ventas",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
