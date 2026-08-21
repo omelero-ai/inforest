@@ -26,6 +26,6 @@ internal sealed class TurnoExistenteRow
     public string tUsuario { get; init; } = string.Empty;
     public DateTime? fInicial { get; init; }
     public bool lCierre { get; init; }
-    public double nMontoIN { get; init; }
-    public double nMontoIE { get; init; }
+    public decimal nMontoIN { get; init; }
+    public decimal nMontoIE { get; init; }
 }

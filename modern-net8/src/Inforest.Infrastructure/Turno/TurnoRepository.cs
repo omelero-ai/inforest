@@ -96,8 +96,8 @@ internal sealed class TurnoRepository : ITurnoRepository
             row.tUsuario,
             row.fInicial ?? DateTime.MinValue,
             row.lCierre,
-            (decimal)row.nMontoIN,
-            (decimal)row.nMontoIE);
+            row.nMontoIN,
+            row.nMontoIE);
     }
 
     public async Task<string> GenerarCorrelativoAsync(CancellationToken ct = default)
