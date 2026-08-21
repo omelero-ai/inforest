@@ -11,6 +11,7 @@ public sealed class FrmNumPad : Form
     // ── Estado ───────────────────────────────────────────────────────────────
     private string _entrada = "0";
     private bool   _puntoPuesto;
+    private readonly int _decimales;
 
     // ── Resultado ────────────────────────────────────────────────────────────
     /// <summary>Valor numérico ingresado (0 si el usuario canceló).</summary>
@@ -28,8 +29,13 @@ public sealed class FrmNumPad : Form
     /// </summary>
     /// <param name="titulo">Título del diálogo.</param>
     /// <param name="valorInicial">Valor pre-cargado (0 = vacío).</param>
-    public FrmNumPad(string titulo = "Ingrese el valor", decimal valorInicial = 0)
+    /// <param name="decimales">
+    /// Cantidad de decimales a mostrar y redondear el resultado.
+    /// Legacy: <c>sTipo = "TC"</c> usa 3; por defecto 2.
+    /// </param>
+    public FrmNumPad(string titulo = "Ingrese el valor", decimal valorInicial = 0, int decimales = 2)
     {
+        _decimales      = decimales;
         Text            = titulo;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         StartPosition   = FormStartPosition.CenterParent;
@@ -42,7 +48,7 @@ public sealed class FrmNumPad : Form
 
         if (valorInicial != 0)
         {
-            _entrada    = valorInicial.ToString("0.##");
+            _entrada     = valorInicial.ToString(decimales == 3 ? "0.###" : "0.##");
             _puntoPuesto = _entrada.Contains('.');
         }
 
@@ -62,7 +68,7 @@ public sealed class FrmNumPad : Form
         // ── Display ────────────────────────────────────────────────────────
         _lblDisplay = new Label
         {
-            Text      = FormatearDisplay(_entrada),
+            Text      = FormatearDisplay(_entrada, _decimales),
             Height    = 50,
             Dock      = DockStyle.Top,
             Font      = new Font("Segoe UI", 16, FontStyle.Bold),
@@ -197,18 +203,18 @@ public sealed class FrmNumPad : Form
 
     private void Confirmar()
     {
-        ValorTexto  = _entrada;
-        Valor       = decimal.TryParse(_entrada, out var v) ? v : 0;
+        ValorTexto   = _entrada;
+        Valor        = decimal.TryParse(_entrada, out var v) ? Math.Round(v, _decimales) : 0;
         DialogResult = DialogResult.OK;
         Close();
     }
 
-    private void ActualizarDisplay() => _lblDisplay.Text = FormatearDisplay(_entrada);
+    private void ActualizarDisplay() => _lblDisplay.Text = FormatearDisplay(_entrada, _decimales);
 
-    private static string FormatearDisplay(string entrada)
+    private static string FormatearDisplay(string entrada, int decimales)
     {
         if (decimal.TryParse(entrada, out var v) && !entrada.EndsWith('.'))
-            return v.ToString("N2");
+            return v.ToString(decimales == 3 ? "N3" : "N2");
         return entrada;
     }
 }
