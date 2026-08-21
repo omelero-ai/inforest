@@ -355,9 +355,9 @@ Evidencia: CONFIRMED | PARTIAL | UNKNOWN
 
 **Excepciones:** La migración .NET reemplaza el cifrado XOR/César por BCrypt y deja la validación física de HardKey como gap controlado.
 
-**Destino .NET:** `IAuthService`, `ISessionService`, `IRbacService`, `IAuditoriaService`, `Form1`
+**Destino .NET:** `IAuthService`, `ISessionService`, `IRbacService`, `IAuditoriaService`, `Form1`, `LoginPolicy`
 
-**Estado:** IN_PROGRESS
+**Estado:** COMPLETED
 
 **Evidencia:** CONFIRMED
 

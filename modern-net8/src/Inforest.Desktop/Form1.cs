@@ -1,5 +1,6 @@
 using Inforest.Application.Interfaces;
 using Inforest.Application.Configuracion;
+using Inforest.Application.Seguridad;
 using Inforest.Desktop.POS;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ namespace Inforest.Desktop;
 /// <summary>
 /// Formulario inicial de acceso.
 /// Legacy: frmAcceso.frm.
+/// Reglas: BR-006, BR-POS-006-LOCK.
 /// </summary>
 public partial class Form1 : Form
 {
@@ -17,20 +19,25 @@ public partial class Form1 : Form
     private readonly IAuthService _authService;
     private readonly ILicenseService _licenseService;
     private readonly ValidarInicioPosHandler _validarInicioPosHandler;
+    private readonly ObtenerConfiguracionSistemaHandler _obtenerConfiguracionSistemaHandler;
     private readonly IConfiguration _configuration;
     private readonly IServiceProvider _serviceProvider;
     private InicioPosValidado? _inicioPos;
+    private int _intentosFallidos;
+    private bool _cambioContrasenaHabilitado;
 
     public Form1(
         IAuthService authService,
         ILicenseService licenseService,
         ValidarInicioPosHandler validarInicioPosHandler,
+        ObtenerConfiguracionSistemaHandler obtenerConfiguracionSistemaHandler,
         IConfiguration configuration,
         IServiceProvider serviceProvider)
     {
         _authService = authService;
         _licenseService = licenseService;
         _validarInicioPosHandler = validarInicioPosHandler;
+        _obtenerConfiguracionSistemaHandler = obtenerConfiguracionSistemaHandler;
         _configuration = configuration;
         _serviceProvider = serviceProvider;
         InitializeComponent();
@@ -38,10 +45,16 @@ public partial class Form1 : Form
 
     private async void Form1_Load(object sender, EventArgs e)
     {
+        _intentosFallidos = 0;
         CargarUltimoUsuario();
+        lblCaja.Text = $"CAJA {_configuration["Inforest:CodigoCaja"] ?? "001"}";
+        lblBaseDatos.Text = $"{ResolveServerName().ToUpperInvariant()} : {ResolveDatabaseName().ToUpperInvariant()}";
         txtUsuario.Focus();
         await ValidarLicenciaAsync();
+        await CargarConfiguracionSistemaAsync();
         await ValidarInicioPosAsync();
+        ValidarVersiones();
+        timerVersiones.Start();
     }
 
     private async void btnIngresar_Click(object sender, EventArgs e)
@@ -58,14 +71,20 @@ public partial class Form1 : Form
                 _configuration["Inforest:Modulo"] ?? "INFOREST",
                 _inicioPos?.CodigoCaja ?? _configuration["Inforest:CodigoCaja"] ?? "01",
                 _configuration["Inforest:CodigoTerminal"] ?? Environment.MachineName,
-                ResolveDatabaseName());
+                ResolveDatabaseName(),
+                ExtraerDigitos(txtPassword.Text));
 
             var result = await _authService.AutenticarAsync(request);
             if (!result.Exitoso || result.Sesion is null)
             {
+                _intentosFallidos++;
                 lblEstado.Text = result.MensajeError ?? "No se pudo iniciar sesión.";
                 txtPassword.Clear();
                 txtPassword.Focus();
+
+                if (_intentosFallidos >= LoginPolicy.MaxIntentosFallidos)
+                    System.Windows.Forms.Application.Exit();
+
                 return;
             }
 
@@ -100,7 +119,7 @@ public partial class Form1 : Form
 
     private void btnCancelar_Click(object sender, EventArgs e)
     {
-        Close();
+        System.Windows.Forms.Application.Exit();
     }
 
     protected override async void OnFormClosing(FormClosingEventArgs e)
@@ -160,6 +179,17 @@ public partial class Form1 : Form
             : builder.InitialCatalog;
     }
 
+    private string ResolveServerName()
+    {
+        var connectionString = _configuration.GetConnectionString("Inforest")
+            ?? "Server=localhost;Database=INFOREST;Trusted_Connection=true;";
+
+        var builder = new SqlConnectionStringBuilder(connectionString);
+        return string.IsNullOrWhiteSpace(builder.DataSource)
+            ? "LOCALHOST"
+            : builder.DataSource;
+    }
+
     private void txtUsuario_Leave(object sender, EventArgs e)
     {
         txtUsuario.Text = NormalizarLogin(txtUsuario.Text);
@@ -203,4 +233,80 @@ public partial class Form1 : Form
 
     private static string NormalizarLogin(string? login)
         => (login ?? string.Empty).Trim().ToUpperInvariant();
+
+    private static string ExtraerDigitos(string? texto)
+        => new((texto ?? string.Empty).Where(char.IsDigit).ToArray());
+
+    private async Task CargarConfiguracionSistemaAsync()
+    {
+        var configuracion = await _obtenerConfiguracionSistemaHandler.HandleAsync(new ObtenerConfiguracionSistemaQuery());
+        _cambioContrasenaHabilitado = configuracion.EsExitoso && (configuracion.Valor?.lCambioContrasena ?? false);
+        btnCambiarContrasena.Enabled = _cambioContrasenaHabilitado;
+    }
+
+    private void btnCambiarContrasena_Click(object sender, EventArgs e)
+    {
+        if (!_cambioContrasenaHabilitado)
+        {
+            MessageBox.Show(
+                "Proceso no habilitado, indicar al administrador del sistema la activación en parametros generales!",
+                Text,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+            return;
+        }
+
+        using var frm = ActivatorUtilities.CreateInstance<FrmCambiarContrasenia>(_serviceProvider, NormalizarLogin(txtUsuario.Text));
+        if (frm.ShowDialog(this) == DialogResult.OK)
+            txtPassword.Clear();
+    }
+
+    private void txtPassword_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (e.KeyChar != (char)Keys.Enter)
+            return;
+
+        e.Handled = true;
+        btnIngresar.PerformClick();
+    }
+
+    private void txtUsuario_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (e.KeyChar != (char)Keys.Enter)
+            return;
+
+        e.Handled = true;
+        btnIngresar.PerformClick();
+    }
+
+    private void timerVersiones_Tick(object sender, EventArgs e)
+    {
+        ValidarVersiones();
+    }
+
+    private void ValidarVersiones()
+    {
+        try
+        {
+            var versionPath = Path.Combine(AppContext.BaseDirectory, "version.txt");
+            if (!File.Exists(versionPath))
+            {
+                panelVersion.Visible = false;
+                return;
+            }
+
+            var versionObjetivo = File.ReadLines(versionPath).FirstOrDefault()?.Trim();
+            var versionActual = System.Windows.Forms.Application.ProductVersion;
+            var hayActualizacion = !string.IsNullOrWhiteSpace(versionObjetivo)
+                && !string.Equals(versionObjetivo, versionActual, StringComparison.OrdinalIgnoreCase);
+
+            panelVersion.Visible = hayActualizacion;
+            if (hayActualizacion)
+                lblVersionDisponible.Text = $"InfoRest {versionObjetivo}";
+        }
+        catch
+        {
+            panelVersion.Visible = false;
+        }
+    }
 }
