@@ -86,6 +86,7 @@ public class FrmPuntoVenta : Form
     private ToolStripButton _btnDelivery   = null!; // cmdOpcion13
     private ToolStripButton _btnDeliveryNo = null!; // cmdOpcion14
     private ToolStripButton _btnPinPad     = null!; // cmdOpcion15
+    private ToolStripButton _btnSalir      = null!; // cmdOpcion16 (Salir / MCPV)
     private ToolStripButton _btnMensajes   = null!; // cmdOpcionMensaje
     private ToolStripButton _btnRecargar   = null!; // cmdRecargarTarjeta
     private ToolStripButton _btnConsulta   = null!; // cmdConsultaSaldo
@@ -105,11 +106,12 @@ public class FrmPuntoVenta : Form
     private ToolStripStatusLabel _statusTurno       = null!;
     private ToolStripStatusLabel _statusHora        = null!;
 
-    // Timers (equivalentes a Timer, TimerBizlink, Timerwebapp del Legacy)
-    private readonly System.Windows.Forms.Timer _timerReloj;      // actualiza hora en statusbar (1s)
-    private readonly System.Windows.Forms.Timer _timerBizlink;    // FE billing (60s)
-    private readonly System.Windows.Forms.Timer _timerWebapp;     // KDS/alertas (10s)
-    private readonly System.Windows.Forms.Timer _timerConexion;   // multiLocal check (inactivo al inicio)
+    // Timers (equivalentes a Timer, TimerBizlink, Timerwebapp, TimerActualizador del Legacy)
+    private readonly System.Windows.Forms.Timer _timerReloj;          // actualiza hora en statusbar (1s)
+    private readonly System.Windows.Forms.Timer _timerBizlink;        // FE billing (60s)
+    private readonly System.Windows.Forms.Timer _timerWebapp;         // KDS/alertas (10s)
+    private readonly System.Windows.Forms.Timer _timerConexion;       // multiLocal check (inactivo al inicio)
+    private readonly System.Windows.Forms.Timer _timerActualizador;   // version check (30s)
     private int _contadorBizlink;
     private bool _alertaVentaMostrada;
 
@@ -191,6 +193,9 @@ public class FrmPuntoVenta : Form
         _timerConexion = new System.Windows.Forms.Timer { Interval = 5_000 };
         _timerConexion.Tick += TimerConexion_Tick;
 
+        _timerActualizador = new System.Windows.Forms.Timer { Interval = 30_000 };
+        _timerActualizador.Tick += async (_, _) => await TimerActualizador_TickAsync();
+
         // ── Eventos ────────────────────────────────────────────────────────
         Load        += async (_, _) => await FrmPuntoVenta_LoadAsync();
         FormClosing += async (s, e) => await FrmPuntoVenta_ClosingAsync(s, e);
@@ -248,6 +253,17 @@ public class FrmPuntoVenta : Form
         _mnuImportacion.Click += (_, _) => AbrirFormulario<FrmImportacionRequerimientos>();
         mnuMov.DropDownItems.Add(_mnuImportacion);
 
+        mnuMov.DropDownItems.Add(new ToolStripSeparator());
+
+        // mnuAnulado (GAP-MDI-001: frmAnulado)
+        mnuMov.DropDownItems.Add("&Anulados", null, (_, _) => AbrirFormulario<FrmRepAnuladoReporte>());
+
+        // mnuCancelado (GAP-MDI-001: frmCancelado — stub, sin form equivalente)
+        mnuMov.DropDownItems.Add("&Cancelados", null, (_, _) => MsgEnMigracion("frmCancelado"));
+
+        // mnuClienteDeuda
+        mnuMov.DropDownItems.Add("Clientes con &Deuda", null, (_, _) => MsgEnMigracion("frmRepClienteDeuda"));
+
         menu.Items.Add(mnuMov);
 
         // ── Correlativos ───────────────────────────────────────────────────
@@ -280,6 +296,8 @@ public class FrmPuntoVenta : Form
         mnuRep.DropDownItems.Add("Reporte de Reservas",          null, (_, _) => AbrirFormulario<FrmRepReservasReporte>());
         mnuRep.DropDownItems.Add("Reporte de Entregas",          null, (_, _) => AbrirFormulario<FrmRepEntregaReporte>());
         mnuRep.DropDownItems.Add("Venta Mensual por Fechas",     null, (_, _) => AbrirFormulario<FrmRepVentaFechaReporte>());
+        mnuRep.DropDownItems.Add("Venta Mensual",                null, (_, _) => MsgEnMigracion("frmRepVentaMensual"));
+        mnuRep.DropDownItems.Add("Ranking de Ventas",            null, (_, _) => MsgEnMigracion("frmRepRanking"));
         mnuRep.DropDownItems.Add("Cta Cte Integrado",            null, (_, _) => AbrirFormulario<FrmCtaCteIntegradoReporte>());
         mnuRep.DropDownItems.Add("Venta Mensual Integrado",      null, (_, _) => AbrirFormulario<FrmVentaMensualIntegradoReporte>());
         mnuRep.DropDownItems.Add("Registro de Ventas",           null, (_, _) => AbrirFormulario<FrmRepRegistroVentaReporte>());
@@ -339,6 +357,7 @@ public class FrmPuntoVenta : Form
         _btnDelivery   = CrearBotonToolbar("Delivery",       "Delivery en Tránsito");      // cmdOpcion13
         _btnDeliveryNo = CrearBotonToolbar("Del. Entregado", "Delivery Entregados");       // cmdOpcion14
         _btnPinPad     = CrearBotonToolbar("PinPad",         "Activar PinPad");            // cmdOpcion15
+        _btnSalir      = CrearBotonToolbar("Salir",          "Salir del Sistema");          // cmdOpcion16
         _btnMensajes   = CrearBotonToolbar("Mensajes",       "Mensajes de Cocina");        // cmdOpcionMensaje
         _btnRecargar   = CrearBotonToolbar("Recargar Tarj.", "Recargar Tarjeta");          // cmdRecargarTarjeta
         _btnConsulta   = CrearBotonToolbar("Cons. Saldo",    "Consultar Saldos") ;         // cmdConsultaSaldo
@@ -359,6 +378,7 @@ public class FrmPuntoVenta : Form
         _btnDelivery.Click   += (_, _) => AbrirFormulario<FrmPedidoDelivery>();
         _btnDeliveryNo.Click += (_, _) => AbrirFormulario<FrmPedidoDeliveryNo>();
         _btnPinPad.Click     += (_, _) => _ = CmdPinPad_Click();
+        _btnSalir.Click      += (_, _) => CmdSalir_Click();
         _btnMensajes.Click   += (_, _) => AbrirFormulario<FrmMensajeCocina>();
         _btnRecargar.Click   += (_, _) => AbrirFormulario<FrmRecargarTarjeta>();
         _btnConsulta.Click   += (_, _) => MsgEnMigracion("frmConsultaSaldo");
@@ -380,7 +400,9 @@ public class FrmPuntoVenta : Form
             new ToolStripSeparator(),
             _btnDelivery, _btnDeliveryNo,
             new ToolStripSeparator(),
-            _btnMensajes, _btnRecargar, _btnConsulta, _btnPinPad
+            _btnMensajes, _btnRecargar, _btnConsulta, _btnPinPad,
+            new ToolStripSeparator(),
+            _btnSalir
         ]);
 
         return ts;
@@ -454,6 +476,14 @@ public class FrmPuntoVenta : Form
         _timerWebapp.Start();
         // _timerConexion se activará si multiLocal=true (ver AplicarFlagsDeConfiguracion)
 
+        // TimerActualizador — sólo si ActivoActualizador habilitado (TPARAMETROVERSION)
+        _timerActualizador.Start();
+
+        // Modo MCPV: inicializar turno del usuario (GAP-MDI-006/009)
+        // Legacy: If lMCPV Then Me.Visible = False; frmMozoUsuario.Show vbModal; InicializaMCPV
+        if (_cfgCaja?.lMCPV == true)
+            await InicializaMCPVAsync();
+
         // Cargar salones y mesas
         await CargarSalonesYMesasAsync();
 
@@ -481,6 +511,7 @@ public class FrmPuntoVenta : Form
         _timerBizlink.Stop();
         _timerWebapp.Stop();
         _timerConexion.Stop();
+        _timerActualizador.Stop();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -942,8 +973,94 @@ public class FrmPuntoVenta : Form
     /// </summary>
     public void Salir()
     {
+        try
+        {
+            // Auditoría de salida (equivalente a registroAccesoAuditoria "S", sUsuario)
+            var auditoria = _serviceProvider.GetService<IAuditoriaService>();
+            if (auditoria is not null)
+                _ = auditoria.RegistrarSalidaAsync(new RegistroAccesoAuditoriaRequest(
+                    "S", "INFOREST", "PuntoVenta", _usuario, 0));
+        }
+        catch { /* Silencioso — el cierre no puede bloquearse por auditoría */ }
+
         Close();
     }
+
+    /// <summary>
+    /// cmdOpcion16_Click — Salir del sistema o, en modo MCPV, mostrar selector de mozo.
+    /// Legacy: cmdOpcion16_Click → If lMCPV Then frmMozoUsuario.Show vbModal; InicializaMCPV Else Salir().
+    /// </summary>
+    private void CmdSalir_Click()
+    {
+        if (_cfgCaja?.lMCPV == true)
+        {
+            // Modo MCPV: selector de mozo (GAP-MDI-006: frmMozoUsuario no migrado)
+            MsgEnMigracion("frmMozoUsuario");
+            _ = InicializaMCPVAsync();
+        }
+        else
+        {
+            Salir();
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // InicializaMCPV  (GAP-MDI-009)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Inicializa el estado del turno en modo MCPV (Multi-Cajero Punto de Venta).
+    /// Busca un turno activo del usuario en MTURNO y establece el estado de la caja.
+    /// Legacy: InicializaMCPV() → SELECT * FROM MTURNO WHERE tUsuario=... AND lcierre=0.
+    /// </summary>
+    public async Task InicializaMCPVAsync()
+    {
+        try
+        {
+            using var cn = await _connectionFactory.CreateOpenConnectionAsync();
+
+            var turno = await cn.QueryFirstOrDefaultAsync<TurnoMcpvRow>(
+                "SELECT TOP 1 tTurno FROM MTURNO WHERE tUsuario = @usuario AND lcierre = 0 ORDER BY tTurno",
+                new { usuario = _usuario });
+
+            if (turno is not null)
+            {
+                // Verificar tipo de cambio del día
+                var nTC = await cn.ExecuteScalarAsync<double?>(
+                    "SELECT nVenta FROM TTIPOCAMBIO WHERE fFecha = CONVERT(date, GETDATE())") ?? 0;
+
+                _turno = turno.tTurno ?? string.Empty;
+
+                if (nTC == 0)
+                {
+                    // Turno encontrado pero sin tipo de cambio → mostrar apertura
+                    ActivaInicio(false);
+                    _btnApertura.Enabled = true;
+                }
+                else
+                {
+                    // Turno activo con tipo de cambio → habilitar operaciones
+                    ActivaInicio(true);
+                    _btnApertura.Enabled = false;
+                }
+            }
+            else
+            {
+                _turno = string.Empty;
+                ActivaInicio(false);
+                _btnApertura.Enabled = true;
+            }
+
+            ActualizarStatusBar();
+        }
+        catch
+        {
+            // Si hay error de BD, dejar el estado sin turno
+            ActivaInicio(false);
+        }
+    }
+
+    private sealed record TurnoMcpvRow(string? tTurno);
 
     // ══════════════════════════════════════════════════════════════════════════
     // NAVEGACIÓN A PEDIDO POR MESA
@@ -1001,4 +1118,61 @@ public class FrmPuntoVenta : Form
             MessageBox.Show($"Error al liberar descargo: {ex.Message}", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // TIMER ACTUALIZADOR  (GAP-MDI-010)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Comprueba si hay una nueva versión disponible en TPARAMETROVERSION.
+    /// Legacy: TimerActualizador_Timer → compara version.txt con TPARAMETROVERSION.VersionInfoRest
+    ///         y VersionFeInfoRest vs VersionActualFEInfoRest, luego muestra FrmActualizacion.
+    /// </summary>
+    private async Task TimerActualizador_TickAsync()
+    {
+        try
+        {
+            using var cn = await _connectionFactory.CreateOpenConnectionAsync();
+
+            var row = await cn.QueryFirstOrDefaultAsync<VersionParametroRow>(
+                "SELECT TOP 1 VersionInfoRest, VersionFeInfoRest, VersionActualFEInfoRest, lFEBiz " +
+                "FROM TPARAMETROVERSION");
+
+            if (row is null) return;
+
+            var asmVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            var versionActual = $"{asmVersion?.Major}.{asmVersion?.Minor}.{asmVersion?.Build}";
+
+            // Verificar actualización de Facturación Electrónica
+            if (!string.IsNullOrWhiteSpace(row.VersionFeInfoRest) && row.lFEBiz == true &&
+                row.VersionFeInfoRest != row.VersionActualFEInfoRest)
+            {
+                _timerActualizador.Stop();
+                var frm = new FrmActualizacion(
+                    $"Nueva Actualización disponible de Facturación Electrónica\n FE Versión: {row.VersionFeInfoRest}")
+                    { Tipo = "FE" };
+                frm.ShowDialog(this);
+                return;
+            }
+
+            // Verificar actualización de INFOREST
+            if (!string.IsNullOrWhiteSpace(row.VersionInfoRest) &&
+                row.VersionInfoRest != versionActual)
+            {
+                _timerActualizador.Stop();
+                var frm = new FrmActualizacion(
+                    $"Nueva Actualización disponible\n InfoRest Versión: {row.VersionInfoRest}\n" +
+                    "Se recomienda actualizar el sistema, ya que puede presentar problemas en algunos procesos.")
+                    { Tipo = "INFOREST" };
+                frm.ShowDialog(this);
+            }
+        }
+        catch { /* Silencioso — el timer actualizador no debe interferir con la operación */ }
+    }
+
+    private sealed record VersionParametroRow(
+        string? VersionInfoRest,
+        string? VersionFeInfoRest,
+        string? VersionActualFEInfoRest,
+        bool? lFEBiz);
 }
