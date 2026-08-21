@@ -1,4 +1,5 @@
 using Inforest.Application.Turno;
+using Inforest.Desktop.Shared;
 using Inforest.Domain.Entities.Configuracion;
 
 namespace Inforest.Desktop.Turno;
@@ -397,11 +398,10 @@ public class FrmAperturaTurno : Form
 
     /// <summary>
     /// Legacy: frmNumPad.Show vbModal — ingreso de abono MN / ME.
-    /// Usa FrmNumPadSimple mientras frmNumPad.frm no esté migrado (GAP-NUMPAD-001).
     /// </summary>
     private void IngresoNumerico(string titulo, ref decimal valor, TextBox txtControl, Label lblSaldo, decimal anterior)
     {
-        using var dlg = new FrmNumPadSimple(titulo, valor);
+        using var dlg = new FrmNumPad(titulo, valor);
         if (dlg.ShowDialog(this) == DialogResult.OK)
         {
             valor = dlg.Valor;
@@ -415,7 +415,7 @@ public class FrmAperturaTurno : Form
     /// </summary>
     private void IngresoTC(string titulo, ref decimal tcValor, Label lblMostrar)
     {
-        using var dlg = new FrmNumPadSimple(titulo, tcValor, decimales: 3);
+        using var dlg = new FrmNumPad(titulo, tcValor, decimales: 3);
         if (dlg.ShowDialog(this) == DialogResult.OK)
         {
             tcValor = dlg.Valor;
@@ -544,61 +544,5 @@ public class FrmAperturaTurno : Form
             ForeColor   = color ?? ColorValorMN,
             Text        = "0.00"
         };
-}
-
-/// <summary>
-/// Diálogo numérico simple.
-/// Legacy: frmNumPad.frm — ingreso numérico modal.
-/// GAP-NUMPAD-001: Placeholder mientras frmNumPad.frm no esté completamente migrado.
-/// </summary>
-public class FrmNumPadSimple : Form
-{
-    private readonly int _decimales;
-    private TextBox _txtValor = null!;
-
-    public decimal Valor { get; private set; }
-
-    public FrmNumPadSimple(string titulo, decimal valorActual, int decimales = 2)
-    {
-        _decimales = decimales;
-        Valor      = valorActual;
-        InitializeComponent(titulo, valorActual);
-    }
-
-    private void InitializeComponent(string titulo, decimal valorActual)
-    {
-        Text            = titulo;
-        StartPosition   = FormStartPosition.CenterParent;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox     = false;
-        MinimizeBox     = false;
-        ClientSize      = new Size(260, 100);
-        Font            = new Font("Segoe UI", 9f);
-
-        var lbl   = new Label { Left = 10, Top = 12, Width = 80, Text = titulo + ":" };
-        _txtValor = new TextBox
-        {
-            Left      = 100, Top = 10, Width = 140,
-            TextAlign = HorizontalAlignment.Right,
-            Text      = valorActual.ToString(_decimales == 3 ? "0.000" : "0.00")
-        };
-
-        var btnOk     = new Button { Left = 60,  Top = 50, Width = 80, Text = "Aceptar",  DialogResult = DialogResult.None };
-        var btnCancel = new Button { Left = 160, Top = 50, Width = 80, Text = "Cancelar", DialogResult = DialogResult.Cancel };
-
-        btnOk.Click += (_, _) =>
-        {
-            var raw = _txtValor.Text.Replace(",", "").Replace(" ", "");
-            if (decimal.TryParse(raw, System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out var v))
-                Valor = Math.Round(v, _decimales);
-            DialogResult = DialogResult.OK;
-            Close();
-        };
-
-        AcceptButton = btnOk;
-        CancelButton = btnCancel;
-        Controls.AddRange([lbl, _txtValor, btnOk, btnCancel]);
-    }
 }
 
