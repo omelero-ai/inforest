@@ -6,56 +6,122 @@ using TurnoEntity = Inforest.Domain.Entities.Configuracion.Turno;
 
 namespace Inforest.Application.Turno;
 
-public sealed record AbrirTurnoCommand(string CodigoCaja, string CodigoUsuario, decimal MontoInicial);
+/// <summary>
+/// Comando de apertura de turno.
+/// Legacy: frmInicio.frm cmdOpcion_Click(0) — INSERT/UPDATE MTURNO.
+/// BR-TURNO-001 (apertura nueva), BR-TURNO-002 (re-apertura).
+/// </summary>
+public sealed record AbrirTurnoCommand(
+    string CodigoCaja,
+    string CodigoUsuario,
+    decimal MontoInicial,
+    decimal MontoInicialME = 0m,
+    string? CodigoSalon = null,
+    ModoConsultaTurno ModoTurno = ModoConsultaTurno.PorCaja,
+    bool RegistrarTipoCambio = false,
+    decimal TipoCambio = 0m,
+    decimal TipoCambioOficial = 0m,
+    decimal TipoCambio2 = 0m,
+    decimal TipoCambio3 = 0m
+);
 
+/// <summary>
+/// Resultado de apertura de turno, incluye el código generado y si fue re-apertura.
+/// </summary>
+public sealed record AbrirTurnoResult(TurnoEntity Turno, bool EsReApertura, string CodigoTurno);
+
+/// <summary>
+/// Apertura de turno de caja.
+///
+/// Legacy: frmInicio.frm cmdOpcion_Click(0).
+///
+/// Flujo:
+///   1. Si existe turno con lCierre=0 → re-apertura: UPDATE MTURNO SET tUsuario, nMontoIN, nMontoIE (BR-TURNO-002).
+///   2. Si no existe turno o el último tiene lCierre=1 → apertura nueva:
+///      a. Genera correlativo: YY + Correlativo(MAX(tTurno) últimos 8, 8).
+///      b. INSERT INTO MTURNO (tTurno, tCaja, tSalon, fInicial, tUsuario, lCierre, nMontoIN, nMontoIE).
+///      (BR-TURNO-001)
+///   3. Si se indicó RegistrarTipoCambio → spIns_TipoCambio.
+///
+/// Reglas: BR-TURNO-001, BR-TURNO-002, BR-TC-001.
+/// </summary>
 public sealed class AbrirTurnoHandler
 {
-    private const bool DiaContableAutomatico = true;
-    private const string HoraCierreDiaContable = "05:00";
-
     private readonly ITurnoRepository _turnoRepository;
     private readonly IDiaContableService _diaContableService;
+    private readonly ITipoCambioRepository? _tipoCambioRepository;
 
-    public AbrirTurnoHandler(ITurnoRepository turnoRepository, IDiaContableService diaContableService)
+    public AbrirTurnoHandler(
+        ITurnoRepository turnoRepository,
+        IDiaContableService diaContableService,
+        ITipoCambioRepository? tipoCambioRepository = null)
     {
         _turnoRepository = turnoRepository;
         _diaContableService = diaContableService;
+        _tipoCambioRepository = tipoCambioRepository;
     }
 
-    public async Task<Result<TurnoEntity>> HandleAsync(AbrirTurnoCommand command, CancellationToken ct = default)
+    public async Task<Result<AbrirTurnoResult>> HandleAsync(AbrirTurnoCommand command, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(command.CodigoCaja))
-            return Result.Fail<TurnoEntity>("La caja es obligatoria.", "TURNO_CAJA_REQUERIDA");
+            return Result.Fail<AbrirTurnoResult>("La caja es obligatoria.", "TURNO_CAJA_REQUERIDA");
 
         if (string.IsNullOrWhiteSpace(command.CodigoUsuario))
-            return Result.Fail<TurnoEntity>("El usuario es obligatorio.", "TURNO_USUARIO_REQUERIDO");
+            return Result.Fail<AbrirTurnoResult>("El usuario es obligatorio.", "TURNO_USUARIO_REQUERIDO");
 
-        var turnoActual = await _turnoRepository.ObtenerTurnoActualAsync(command.CodigoCaja, ct);
-        if (turnoActual is not null)
-            return Result.Fail<TurnoEntity>("La caja ya tiene un turno abierto.", "TURNO_YA_ABIERTO");
+        // Registrar tipo de cambio si fue indicado (spIns_TipoCambio)
+        // BR-TC-001: se inserta/actualiza antes de aperturar el turno.
+        if (command.RegistrarTipoCambio && _tipoCambioRepository is not null)
+        {
+            var tc = new TipoCambioDelDia(command.TipoCambio, command.TipoCambioOficial, command.TipoCambio2, command.TipoCambio3);
+            await _tipoCambioRepository.InsertarOActualizarAsync(tc, command.CodigoUsuario, ct);
+        }
 
-        var fechaDiaContable = await _diaContableService.ObtenerDiaContableAsync(
-            DiaContableAutomatico,
-            HoraCierreDiaContable,
+        // Verificar si existe turno para la caja (cualquier estado)
+        var ultimo = await _turnoRepository.ObtenerUltimoTurnoAsync(
+            command.CodigoCaja,
             command.CodigoUsuario,
+            command.ModoTurno,
             ct);
 
-        var codigoTurno = GenerarCodigoTurno();
-        var turno = TurnoEntity.Abrir(
+        bool esReApertura = ultimo is not null && !ultimo.Cerrado;
+
+        if (esReApertura)
+        {
+            // BR-TURNO-002: re-apertura — UPDATE MTURNO SET tUsuario, nMontoIN, nMontoIE
+            var updated = await _turnoRepository.ReAperturarAsync(
+                ultimo!.CodigoTurno,
+                command.CodigoUsuario,
+                command.MontoInicial,
+                command.MontoInicialME,
+                ct);
+
+            if (!updated)
+                return Result.Fail<AbrirTurnoResult>("No se pudo re-aperturar el turno.", "TURNO_REAPERTURA_FALLIDA");
+
+            // Reconstruir entidad para el resultado
+            var fechaDC = await _diaContableService.ObtenerDiaContableAsync(true, "05:00", command.CodigoUsuario, ct);
+            var turnoRe = TurnoEntity.Abrir(ultimo.CodigoTurno, command.CodigoCaja, command.CodigoUsuario, fechaDC, command.MontoInicial);
+            return Result.Ok(new AbrirTurnoResult(turnoRe, true, ultimo.CodigoTurno));
+        }
+
+        // BR-TURNO-001: apertura nueva
+        var fechaDiaContable = await _diaContableService.ObtenerDiaContableAsync(true, "05:00", command.CodigoUsuario, ct);
+        var codigoTurno = await _turnoRepository.GenerarCorrelativoAsync(ct);
+        var turnoNuevo = TurnoEntity.Abrir(
             codigoTurno,
             command.CodigoCaja,
             command.CodigoUsuario,
             fechaDiaContable,
-            command.MontoInicial);
+            command.MontoInicial,
+            command.MontoInicialME,
+            command.CodigoSalon);
 
-        var inserted = await _turnoRepository.InsertarAsync(turno, ct);
+        var inserted = await _turnoRepository.InsertarAsync(turnoNuevo, ct);
         return inserted
-            ? Result.Ok(turno)
-            : Result.Fail<TurnoEntity>("No se pudo aperturar el turno.", "TURNO_APERTURA_FALLIDA");
+            ? Result.Ok(new AbrirTurnoResult(turnoNuevo, false, codigoTurno))
+            : Result.Fail<AbrirTurnoResult>("No se pudo aperturar el turno.", "TURNO_APERTURA_FALLIDA");
     }
-
-    private static string GenerarCodigoTurno()
-        => DateTime.Now.ToString("yyMMddHHmmss");
 }
 
 public sealed record CerrarTurnoCommand(
@@ -137,5 +203,32 @@ public sealed class ObtenerTurnoActualHandler
 
         var turno = await _turnoRepository.ObtenerTurnoActualAsync(query.CodigoCaja, ct);
         return Result.Ok<TurnoEntity?>(turno);
+    }
+}
+
+public sealed record ObtenerUltimoTurnoQuery(
+    string CodigoCaja,
+    string CodigoUsuario,
+    ModoConsultaTurno Modo = ModoConsultaTurno.PorCaja);
+
+/// <summary>
+/// Obtiene el último turno de la caja (cualquier estado, incluyendo cerrados).
+/// Legacy: frmInicio.frm Form_Load — SELECT * FROM MTURNO WHERE ... ORDER BY tTurno; RsTurno.MoveLast.
+/// Usado por FrmAperturaTurno para determinar si es apertura nueva o re-apertura y cargar montos anteriores.
+/// </summary>
+public sealed class ObtenerUltimoTurnoHandler
+{
+    private readonly ITurnoRepository _turnoRepository;
+
+    public ObtenerUltimoTurnoHandler(ITurnoRepository turnoRepository)
+        => _turnoRepository = turnoRepository;
+
+    public async Task<Result<TurnoExistente?>> HandleAsync(ObtenerUltimoTurnoQuery query, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(query.CodigoCaja))
+            return Result.Fail<TurnoExistente?>("La caja es obligatoria.", "TURNO_CAJA_REQUERIDA");
+
+        var ultimo = await _turnoRepository.ObtenerUltimoTurnoAsync(query.CodigoCaja, query.CodigoUsuario, query.Modo, ct);
+        return Result.Ok<TurnoExistente?>(ultimo);
     }
 }

@@ -74,6 +74,7 @@ public static class DependencyInjection
         services.AddScoped<AbrirTurnoHandler>();
         services.AddScoped<CerrarTurnoHandler>();
         services.AddScoped<ObtenerTurnoActualHandler>();
+        services.AddScoped<ObtenerUltimoTurnoHandler>();
 
         // W4: Pedidos — Handlers CQRS (BR-SQL-001, BR-SQL-002, BR-003)
         services.AddScoped<CreatePedidoHandler>();

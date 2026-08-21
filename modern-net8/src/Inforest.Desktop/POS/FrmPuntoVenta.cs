@@ -50,6 +50,7 @@ public class FrmPuntoVenta : Form
     private readonly ObtenerConfiguracionCajaHandler _configuracionCajaHandler;
     private readonly AbrirTurnoHandler _abrirTurnoHandler;
     private readonly CerrarTurnoHandler _cerrarTurnoHandler;
+    private readonly ObtenerUltimoTurnoHandler _obtenerUltimoTurnoHandler;
     private readonly IDiaContableService _diaContableService;
     private readonly IDbConnectionFactory _connectionFactory;
     private readonly IConfiguration _configuration;
@@ -125,6 +126,7 @@ public class FrmPuntoVenta : Form
         ObtenerConfiguracionCajaHandler configuracionCajaHandler,
         AbrirTurnoHandler abrirTurnoHandler,
         CerrarTurnoHandler cerrarTurnoHandler,
+        ObtenerUltimoTurnoHandler obtenerUltimoTurnoHandler,
         IDiaContableService diaContableService,
         IDbConnectionFactory connectionFactory,
         IConfiguration configuration,
@@ -137,6 +139,7 @@ public class FrmPuntoVenta : Form
         _configuracionCajaHandler = configuracionCajaHandler;
         _abrirTurnoHandler      = abrirTurnoHandler;
         _cerrarTurnoHandler     = cerrarTurnoHandler;
+        _obtenerUltimoTurnoHandler = obtenerUltimoTurnoHandler;
         _diaContableService     = diaContableService;
         _connectionFactory      = connectionFactory;
         _configuration          = configuration;
@@ -761,13 +764,51 @@ public class FrmPuntoVenta : Form
 
     /// <summary>
     /// cmdOpcion1_Click / mnuInicio_Click — Apertura de Turno.
-    /// Legacy: frmDiaContable.Show + frmInicio.Show.
+    ///
+    /// Legacy: mdiPuntoVenta.frm cmdOpcion1_Click.
+    ///   1. Si lDiaContable=False (manual): muestra frmDiaContable primero.
+    ///   2. Si lDiaContableAperturado=True: muestra frmInicio (FrmAperturaTurno).
+    ///
+    /// BR-TURNO-001, BR-TURNO-002, BR-DC-001.
     /// </summary>
     private void CmdApertura_Click()
     {
-        using var frm = new FrmAperturaTurno(_abrirTurnoHandler, _diaContableService);
+        // Paso 1: Día Contable manual (lDiaContable=False)
+        if (_cfg?.lDiaContableAutomatico == false)
+        {
+            var tipoCambioRepo = _serviceProvider.GetService<ITipoCambioRepository>();
+            using var dlgDC = new FrmDiaContable(
+                FrmDiaContable.Modo.Apertura,
+                _usuario,
+                _serviceProvider.GetRequiredService<AperturarDiaContableHandler>(),
+                _serviceProvider.GetRequiredService<CerrarDiaContableHandler>(),
+                _serviceProvider.GetRequiredService<ObtenerDiaContableHandler>());
+            dlgDC.ShowDialog(this);
+            if (!dlgDC.IniciaPorDiaContable) return;
+            _ = ActualizarDiaContableAsync();
+        }
+
+        // Paso 2: Determinar modo de consulta de turno
+        var modoTurno = _cfgCaja?.lMCPV == true
+            ? ModoConsultaTurno.PorUsuario
+            : ModoConsultaTurno.PorCaja;
+
+        // Paso 3: Abrir FrmAperturaTurno (frmInicio)
+        var tipoCambioRepository = _serviceProvider.GetService<ITipoCambioRepository>();
+        using var frm = new FrmAperturaTurno(
+            abrirTurnoHandler:    _abrirTurnoHandler,
+            obtenerUltimoHandler: _obtenerUltimoTurnoHandler,
+            codigoCaja:           _codigoCaja,
+            codigoUsuario:        _usuario,
+            modoTurno:            modoTurno,
+            monedaN:              _cfg?.tMonN ?? "S/.",
+            monedaE:              _cfg?.tMonE ?? "",
+            pais:                 _configuration["Inforest:Pais"] ?? "000",
+            tipoCambioRepo:       tipoCambioRepository);
+
         if (frm.ShowDialog(this) == DialogResult.OK)
         {
+            _turno         = frm.CodigoTurnoAbierto;
             _turnoIniciado = true;
             ActivaInicio(true);
             _ = ActualizarDiaContableAsync();
