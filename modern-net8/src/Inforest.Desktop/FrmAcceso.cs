@@ -2,6 +2,7 @@ using Inforest.Application.Interfaces;
 using Inforest.Application.Configuracion;
 using Inforest.Application.Seguridad;
 using Inforest.Desktop.POS;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,11 +14,13 @@ namespace Inforest.Desktop;
 /// Legacy: frmAcceso.frm.
 /// Reglas: BR-006, BR-POS-006-LOCK.
 /// </summary>
-public partial class Form1 : Form
+public partial class FrmAcceso : Form
 {
     private const string LastUserFileName = "USUARIO.INI";
     private readonly IAuthService _authService;
     private readonly ILicenseService _licenseService;
+    private readonly IDbConnectionFactory _connectionFactory;
+    private readonly ISpExecutor _spExecutor;
     private readonly ValidarInicioPosHandler _validarInicioPosHandler;
     private readonly ObtenerConfiguracionSistemaHandler _obtenerConfiguracionSistemaHandler;
     private readonly IConfiguration _configuration;
@@ -26,9 +29,11 @@ public partial class Form1 : Form
     private int _intentosFallidos;
     private bool _cambioContrasenaHabilitado;
 
-    public Form1(
+    public FrmAcceso(
         IAuthService authService,
         ILicenseService licenseService,
+        IDbConnectionFactory connectionFactory,
+        ISpExecutor spExecutor,
         ValidarInicioPosHandler validarInicioPosHandler,
         ObtenerConfiguracionSistemaHandler obtenerConfiguracionSistemaHandler,
         IConfiguration configuration,
@@ -36,6 +41,8 @@ public partial class Form1 : Form
     {
         _authService = authService;
         _licenseService = licenseService;
+        _connectionFactory = connectionFactory;
+        _spExecutor = spExecutor;
         _validarInicioPosHandler = validarInicioPosHandler;
         _obtenerConfiguracionSistemaHandler = obtenerConfiguracionSistemaHandler;
         _configuration = configuration;
@@ -43,18 +50,19 @@ public partial class Form1 : Form
         InitializeComponent();
     }
 
-    private async void Form1_Load(object sender, EventArgs e)
+    private async void FrmAcceso_Load(object sender, EventArgs e)
     {
         _intentosFallidos = 0;
         CargarUltimoUsuario();
         lblCaja.Text = $"CAJA {_configuration["Inforest:CodigoCaja"] ?? "001"}";
         lblBaseDatos.Text = $"{ResolveServerName().ToUpperInvariant()} : {ResolveDatabaseName().ToUpperInvariant()}";
-        txtUsuario.Focus();
+        await EjecutarInicializacionesLegacyAsync();
         await ValidarLicenciaAsync();
         await CargarConfiguracionSistemaAsync();
         await ValidarInicioPosAsync();
         ValidarVersiones();
         timerVersiones.Start();
+        AplicarFocoInicial();
     }
 
     private async void btnIngresar_Click(object sender, EventArgs e)
@@ -93,6 +101,12 @@ public partial class Form1 : Form
             PersistirUltimoUsuario(loginNormalizado);
             txtPassword.Clear();
 
+            if (DebeForzarActualizacionEnIngreso())
+            {
+                System.Windows.Forms.Application.Exit();
+                return;
+            }
+
             // Navegar al módulo principal tras login exitoso
             AbrirShellPrincipal();
         }
@@ -120,6 +134,11 @@ public partial class Form1 : Form
     private void btnCancelar_Click(object sender, EventArgs e)
     {
         System.Windows.Forms.Application.Exit();
+    }
+
+    private void FrmAcceso_Activated(object sender, EventArgs e)
+    {
+        AplicarFocoInicial();
     }
 
     protected override async void OnFormClosing(FormClosingEventArgs e)
@@ -193,6 +212,12 @@ public partial class Form1 : Form
     private void txtUsuario_Leave(object sender, EventArgs e)
     {
         txtUsuario.Text = NormalizarLogin(txtUsuario.Text);
+    }
+
+    private void txtPassword_Enter(object sender, EventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(txtPassword.Text))
+            btnIngresar.PerformClick();
     }
 
     private void CargarUltimoUsuario()
@@ -308,5 +333,133 @@ public partial class Form1 : Form
         {
             panelVersion.Visible = false;
         }
+    }
+
+    private async Task EjecutarInicializacionesLegacyAsync()
+    {
+        await EjecutarActualizacionCostosSiAplicaAsync();
+        await EjecutarTipoCambioSiAplicaAsync();
+    }
+
+    private async Task EjecutarActualizacionCostosSiAplicaAsync()
+    {
+        var almacenHabilitado = bool.TryParse(_configuration["Inforest:Almacen:Enabled"], out var enabled) && enabled;
+        if (!almacenHabilitado)
+            return;
+
+        try
+        {
+            var baseInforest = ResolveDatabaseName();
+            var baseAlmacen = ResolveDatabaseName("Almacen");
+            var codigoLocal = (_configuration["Inforest:CodigoLocal"] ?? "01").Trim();
+
+            using var connectionAlmacen = await _connectionFactory.CreateOpenConnectionAsync("Almacen");
+            await _spExecutor.ExecuteAsync(connectionAlmacen, "sp_ActualizaReceta");
+
+            using var connectionInforest = await _connectionFactory.CreateOpenConnectionAsync("Inforest");
+            await _spExecutor.ExecuteAsync(connectionInforest, "usp_Inforest_InicializaCostos");
+            await _spExecutor.ExecuteAsync(
+                connectionInforest,
+                "usp_Inforest_ActualizaCostos",
+                new
+                {
+                    tNombreInforest = baseInforest,
+                    tNombreAlmacen = baseAlmacen,
+                    tLocal = codigoLocal
+                });
+
+            await _spExecutor.ExecuteAsync(
+                connectionInforest,
+                "Usp_ActualizarPreciosTransferenciaAlmacen",
+                new
+                {
+                    SubGrupo = string.Empty,
+                    BaseDatoAlmacen = baseAlmacen,
+                    tipooper = 2
+                });
+        }
+        catch
+        {
+            // Compatibilidad legacy: no bloquear login por fallas de inicialización opcional.
+        }
+    }
+
+    private async Task EjecutarTipoCambioSiAplicaAsync()
+    {
+        var pais = (_configuration["Inforest:Pais"] ?? string.Empty).Trim();
+        if (!string.Equals(pais, "002", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        try
+        {
+            using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest");
+            var existe = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM TTIPOCAMBIO WHERE CONVERT(date, fFecha) = CONVERT(date, GETDATE())");
+
+            if (existe == 0)
+            {
+                await _spExecutor.ExecuteAsync(
+                    connection,
+                    "spIns_TipoCambio",
+                    new
+                    {
+                        nTc = 1d,
+                        tUSUARIO = string.Empty,
+                        nTco = 0d,
+                        nTc2 = 1d,
+                        nTc3 = 1d
+                    });
+            }
+        }
+        catch
+        {
+            // Compatibilidad legacy: no bloquear login por este flujo.
+        }
+    }
+
+    private bool DebeForzarActualizacionEnIngreso()
+    {
+        var actualizadorActivo = bool.TryParse(_configuration["Inforest:Actualizador:Activo"], out var activo) && activo;
+        if (!actualizadorActivo)
+            return false;
+
+        try
+        {
+            var versionPath = Path.Combine(AppContext.BaseDirectory, "version.txt");
+            if (!File.Exists(versionPath))
+                return false;
+
+            var versionObjetivo = File.ReadLines(versionPath).FirstOrDefault()?.Trim();
+            var versionActual = System.Windows.Forms.Application.ProductVersion;
+            return !string.IsNullOrWhiteSpace(versionObjetivo)
+                && !string.Equals(versionObjetivo, versionActual, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void AplicarFocoInicial()
+    {
+        if (string.IsNullOrWhiteSpace(txtUsuario.Text))
+        {
+            txtUsuario.Focus();
+            return;
+        }
+
+        txtPassword.Focus();
+    }
+
+    private string ResolveDatabaseName(string connectionName)
+    {
+        var connectionString = _configuration.GetConnectionString(connectionName);
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return ResolveDatabaseName();
+
+        var builder = new SqlConnectionStringBuilder(connectionString);
+        return string.IsNullOrWhiteSpace(builder.InitialCatalog)
+            ? ResolveDatabaseName()
+            : builder.InitialCatalog;
     }
 }

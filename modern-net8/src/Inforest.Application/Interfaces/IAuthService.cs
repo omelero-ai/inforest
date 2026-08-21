@@ -5,14 +5,14 @@ namespace Inforest.Application.Interfaces;
 
 /// <summary>
 /// Abstracción para el servicio de seguridad/autenticación.
-/// Legacy: ClsSeguridad.cls — cifrado XOR+César (REEMPLAZAR con BCrypt).
+/// Legacy: frmAcceso.frm + modProcedimiento.bas (Encapsula/Desencapsula) + transición BCrypt.
 /// Tablas: TUSUARIO, TGRUPOUSUARIO, TACCESO, TGRUPOACCESO en INFSEGURIDAD.
 /// </summary>
 public interface IAuthService
 {
     /// <summary>
     /// Autentica un usuario con contraseña/sesión base.
-    /// Legacy: frmAcceso.frm + usp_Inforest_ObtieneUsuarios + ClsSeguridad.TextDecript().
+    /// Legacy: frmAcceso.frm + usp_Inforest_ObtieneUsuarios + Desencapsula().
     /// </summary>
     Task<AuthResult> AutenticarAsync(AuthRequest request, CancellationToken cancellationToken = default);
 

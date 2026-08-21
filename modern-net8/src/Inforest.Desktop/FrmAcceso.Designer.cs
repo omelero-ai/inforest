@@ -1,6 +1,6 @@
 ﻿namespace Inforest.Desktop;
 
-partial class Form1
+partial class FrmAcceso
 {
     /// <summary>
     ///  Required designer variable.
@@ -55,7 +55,7 @@ partial class Form1
         panelVersion.SuspendLayout();
         SuspendLayout();
         AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.FromArgb(245, 246, 247);
+        BackColor = Color.FromArgb(248, 249, 252);
         ClientSize = new Size(520, 365);
         Controls.Add(panelVersion);
         Controls.Add(panelBody);
@@ -65,11 +65,12 @@ partial class Form1
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
-        Name = "Form1";
+        Name = "FrmAcceso";
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "INFOREST — Acceso";
-        Load += Form1_Load;
-        panelHeader.BackColor = Color.FromArgb(235, 236, 240);
+        Text = "Acceso al Sistema";
+        Activated += FrmAcceso_Activated;
+        Load += FrmAcceso_Load;
+        panelHeader.BackColor = Color.FromArgb(234, 250, 241);
         panelHeader.Controls.Add(lblSubtitulo);
         panelHeader.Controls.Add(lblTitulo);
         panelHeader.Dock = DockStyle.Top;
@@ -78,14 +79,15 @@ partial class Form1
         panelHeader.Padding = new Padding(18, 16, 18, 12);
         panelHeader.Size = new Size(520, 88);
         lblTitulo.AutoSize = true;
-        lblTitulo.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
-        lblTitulo.ForeColor = Color.FromArgb(35, 35, 35);
+        lblTitulo.Font = new Font("Montserrat", 13F, FontStyle.Bold);
+        lblTitulo.ForeColor = Color.FromArgb(30, 41, 71);
         lblTitulo.Location = new Point(18, 16);
         lblTitulo.Name = "lblTitulo";
         lblTitulo.Size = new Size(153, 25);
         lblTitulo.Text = "Inicio de sesión";
         lblSubtitulo.AutoSize = true;
-        lblSubtitulo.ForeColor = Color.DimGray;
+        lblSubtitulo.Font = new Font("Poppins", 8.5F, FontStyle.Regular);
+        lblSubtitulo.ForeColor = Color.FromArgb(113, 120, 131);
         lblSubtitulo.Location = new Point(20, 50);
         lblSubtitulo.Name = "lblSubtitulo";
         lblSubtitulo.Size = new Size(313, 15);
@@ -121,40 +123,46 @@ partial class Form1
         panelBody.SetColumnSpan(lblSesion, 2);
         panelBody.SetColumnSpan(panelButtons, 2);
         lblCaja.AutoSize = true;
-        lblCaja.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblCaja.ForeColor = Color.FromArgb(84, 84, 84);
+        lblCaja.Font = new Font("Poppins", 9F, FontStyle.Medium);
+        lblCaja.ForeColor = Color.FromArgb(30, 41, 71);
         lblCaja.Name = "lblCaja";
         lblCaja.Size = new Size(58, 15);
         lblCaja.Text = "CAJA 001";
         lblBaseDatos.AutoSize = true;
-        lblBaseDatos.ForeColor = Color.DimGray;
+        lblBaseDatos.Font = new Font("Poppins", 8F, FontStyle.Regular);
+        lblBaseDatos.ForeColor = Color.FromArgb(136, 145, 158);
         lblBaseDatos.Name = "lblBaseDatos";
         lblBaseDatos.Size = new Size(83, 15);
         lblBaseDatos.Text = "LOCAL : INFOREST";
         txtUsuario.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+        txtUsuario.BackColor = Color.FromArgb(242, 251, 247);
         txtUsuario.CharacterCasing = CharacterCasing.Upper;
+        txtUsuario.Font = new Font("Poppins", 10F, FontStyle.Regular);
         txtUsuario.Name = "txtUsuario";
         txtUsuario.Size = new Size(362, 23);
         txtUsuario.KeyPress += txtUsuario_KeyPress;
         txtUsuario.Leave += txtUsuario_Leave;
         txtPassword.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+        txtPassword.BackColor = Color.FromArgb(242, 251, 247);
+        txtPassword.Font = new Font("Poppins", 10F, FontStyle.Regular);
         txtPassword.Name = "txtPassword";
         txtPassword.PasswordChar = '*';
         txtPassword.Size = new Size(362, 23);
+        txtPassword.Enter += txtPassword_Enter;
         txtPassword.KeyPress += txtPassword_KeyPress;
         lblUsuario.AutoSize = true;
         lblUsuario.Anchor = AnchorStyles.Left;
-        lblUsuario.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblUsuario.Font = new Font("Poppins", 9F, FontStyle.Medium);
         lblUsuario.Name = "lblUsuario";
         lblUsuario.Size = new Size(52, 15);
         lblUsuario.Text = "Usuario";
         lblPassword.AutoSize = true;
         lblPassword.Anchor = AnchorStyles.Left;
-        lblPassword.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblPassword.Font = new Font("Poppins", 9F, FontStyle.Medium);
         lblPassword.Name = "lblPassword";
         lblPassword.Size = new Size(67, 15);
         lblPassword.Text = "Contraseña";
-        btnIngresar.BackColor = Color.FromArgb(0, 122, 204);
+        btnIngresar.BackColor = Color.FromArgb(66, 198, 126);
         btnIngresar.FlatAppearance.BorderSize = 0;
         btnIngresar.FlatStyle = FlatStyle.Flat;
         btnIngresar.ForeColor = Color.White;
@@ -166,7 +174,7 @@ partial class Form1
         btnIngresar.Click += btnIngresar_Click;
         btnCancelar.BackColor = Color.White;
         btnCancelar.DialogResult = DialogResult.Cancel;
-        btnCancelar.FlatAppearance.BorderColor = Color.FromArgb(207, 211, 216);
+        btnCancelar.FlatAppearance.BorderColor = Color.FromArgb(226, 229, 232);
         btnCancelar.FlatStyle = FlatStyle.Flat;
         btnCancelar.Name = "btnCancelar";
         btnCancelar.Size = new Size(120, 30);
@@ -174,7 +182,7 @@ partial class Form1
         btnCancelar.UseVisualStyleBackColor = false;
         btnCancelar.Click += btnCancelar_Click;
         btnCambiarContrasena.BackColor = Color.White;
-        btnCambiarContrasena.FlatAppearance.BorderColor = Color.FromArgb(207, 211, 216);
+        btnCambiarContrasena.FlatAppearance.BorderColor = Color.FromArgb(226, 229, 232);
         btnCambiarContrasena.FlatStyle = FlatStyle.Flat;
         btnCambiarContrasena.Margin = new Padding(0, 0, 12, 0);
         btnCambiarContrasena.Name = "btnCambiarContrasena";
@@ -183,12 +191,12 @@ partial class Form1
         btnCambiarContrasena.UseVisualStyleBackColor = false;
         btnCambiarContrasena.Click += btnCambiarContrasena_Click;
         lblEstado.AutoSize = true;
-        lblEstado.ForeColor = Color.DimGray;
+        lblEstado.ForeColor = Color.FromArgb(136, 145, 158);
         lblEstado.Name = "lblEstado";
         lblEstado.Size = new Size(125, 15);
         lblEstado.Text = "Esperando validación.";
         lblSesion.AutoSize = true;
-        lblSesion.ForeColor = Color.DimGray;
+        lblSesion.ForeColor = Color.FromArgb(136, 145, 158);
         lblSesion.Name = "lblSesion";
         lblSesion.Size = new Size(0, 15);
         panelButtons.Anchor = AnchorStyles.Right;
@@ -200,7 +208,7 @@ partial class Form1
         panelButtons.Margin = new Padding(0, 10, 0, 0);
         panelButtons.Name = "panelButtons";
         panelButtons.Size = new Size(387, 34);
-        panelVersion.BackColor = Color.FromArgb(126, 198, 66);
+        panelVersion.BackColor = Color.FromArgb(66, 198, 126);
         panelVersion.Controls.Add(lblVersionDisponible);
         panelVersion.Controls.Add(lblVersionTitulo);
         panelVersion.Dock = DockStyle.Bottom;
@@ -209,7 +217,7 @@ partial class Form1
         panelVersion.Size = new Size(520, 30);
         panelVersion.Visible = false;
         lblVersionTitulo.AutoSize = true;
-        lblVersionTitulo.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblVersionTitulo.Font = new Font("Poppins", 9F, FontStyle.Medium);
         lblVersionTitulo.ForeColor = Color.White;
         lblVersionTitulo.Location = new Point(12, 8);
         lblVersionTitulo.Name = "lblVersionTitulo";

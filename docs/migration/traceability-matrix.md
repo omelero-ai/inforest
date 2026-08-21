@@ -40,7 +40,7 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 | `modDeclaracion.bas` | Global State | — | — | NOT_STARTED | 543 variables globales — requiere análisis especial |
 | `modProcedimiento.bas` | Core Utils | — | — | NOT_STARTED | Actualizador, FPay, botones, QR |
 | `modProcedimientoNuevo.bas` | Extensions | `ICashDroService` + `CashDroService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/Hardware/ICashDroService.cs`, `modern-net8/src/Inforest.Infrastructure/Hardware/CashDroService.cs` |
-| `modPuntoVenta.bas` | App Entry | `Program.cs` + `Form1` | WinForms + DI | COMPLETED | `modern-net8/src/Inforest.Desktop/Program.cs`, `modern-net8/src/Inforest.Desktop/Form1.cs` |
+| `modPuntoVenta.bas` | App Entry | `Program.cs` + `FrmAcceso` | WinForms + DI | COMPLETED | `modern-net8/src/Inforest.Desktop/Program.cs`, `modern-net8/src/Inforest.Desktop/FrmAcceso.cs` |
 | `modCajaRapida.bas` | App Entry | — | — | NOT_STARTED | Sub Main caja |
 | `modAdicion.bas` | App Entry | — | — | NOT_STARTED | Sub Main adición |
 | `modAdministracion.bas` | App Entry | — | — | NOT_STARTED | Sub Main admin |
@@ -187,8 +187,8 @@ Esta matriz relaciona cada componente Legacy con su equivalente en .NET 8.
 
 | Legacy | Tipo | .NET 8 | Tipo | Estado | Evidencia |
 |---|---|---|---|---|---|
-| `frmAcceso.frm` | Form | `src/Inforest.Desktop/Form1.cs` | WinForms Form | COMPLETED | `modern-net8/src/Inforest.Desktop/Form1.cs`, `modern-net8/src/Inforest.Desktop/Form1.Designer.cs`, `modern-net8/src/Inforest.Infrastructure/Security/AuthService.cs` |
-| `frmAcceso.frm` / `USUARIO.INI` | Session bootstrap | `Form1` + `ISessionService` + `SessionService` | Form + Interface + Class | COMPLETED | `modern-net8/src/Inforest.Desktop/Form1.cs`, `modern-net8/src/Inforest.Application/Interfaces/ISessionService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/SessionService.cs` |
+| `frmAcceso.frm` | Form | `src/Inforest.Desktop/FrmAcceso.cs` | WinForms Form | COMPLETED | `modern-net8/src/Inforest.Desktop/FrmAcceso.cs`, `modern-net8/src/Inforest.Desktop/FrmAcceso.Designer.cs`, `modern-net8/src/Inforest.Infrastructure/Security/AuthService.cs` |
+| `frmAcceso.frm` / `USUARIO.INI` | Session bootstrap | `FrmAcceso` + `ISessionService` + `SessionService` | Form + Interface + Class | COMPLETED | `modern-net8/src/Inforest.Desktop/FrmAcceso.cs`, `modern-net8/src/Inforest.Application/Interfaces/ISessionService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/SessionService.cs` |
 | `frmDiaContable.frm` / `clsDiaContable.cls` (POS-FUNC-009) | Form + Class | `FrmDiaContable` + `AperturarDiaContableHandler` + `CerrarDiaContableHandler` + `ObtenerDiaContableHandler` + `IDiaContableService` (extendido: `CerrarDiaContableAsync`, `ObtenerFechaMaximaDiaContableAsync`) | WinForm + Handlers + Interface | MIGRATED | `src/Inforest.Desktop/Turno/FrmDiaContable.cs`, `src/Inforest.Application/Turno/DiaContableHandlers.cs`, `src/Inforest.Infrastructure/Turno/DiaContableService.cs` — Tests: `DiaContableHandlerTests` (10) |
 | `frmPedido.frm` (POS-FUNC-003) | Form | `FrmPedido` + `Pedido` + `DetallePedido` + `CreatePedidoHandler` + `UpdatePedidoHandler` + `ObtenerPedidoHandlers` + `PedidoRepository` | WinForm + Domain + Handlers + Repository | MIGRATED | `modern-net8/src/Inforest.Desktop/Pedidos/FrmPedido.cs`, `modern-net8/src/Inforest.Domain/Entities/Ventas/Pedido.cs`, `modern-net8/src/Inforest.Application/Pedidos/`, `modern-net8/src/Inforest.Infrastructure/Pedidos/PedidoRepository.cs` — Tests: `CreatePedidoHandlerTests` + `UpdatePedidoHandlerTests` + `ObtenerPedidoHandlerTests` + `PedidoTests` + `PedidoExtendidoTests` |
 | `TACCESO` / `TGRUPOACCESO` | RBAC | `IRbacService` + `RbacService` | Interface + Class | IN_PROGRESS | `modern-net8/src/Inforest.Application/Interfaces/IRbacService.cs`, `modern-net8/src/Inforest.Infrastructure/Security/RbacService.cs` |

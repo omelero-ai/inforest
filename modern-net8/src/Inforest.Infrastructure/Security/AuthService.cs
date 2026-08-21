@@ -9,7 +9,7 @@ namespace Inforest.Infrastructure.Security;
 
 /// <summary>
 /// Autenticación con compatibilidad Legacy + transición a BCrypt.
-/// Legacy: frmAcceso.frm + usp_Inforest_ObtieneUsuarios + ClsSeguridad.cls.
+/// Legacy: frmAcceso.frm + usp_Inforest_ObtieneUsuarios + modProcedimiento.bas.
 /// </summary>
 internal sealed class AuthService : IAuthService
 {
