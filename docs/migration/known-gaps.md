@@ -180,3 +180,20 @@
 | GAP-DOC-001 | Anulación de pagos de documento | `cmdOpcion_Click` Case 11 en frmDocumento.frm implementa la anulación de pagos con un flujo transaccional complejo: requiere supervisor "05", anula los registros en DPAGODOCUMENTO, revierte tEstadoDocumento a '01', y re-abre el pedido. En .NET 8 este flujo no está migrado. El botón "Anulación de Pagos" está temporalmente excluido de FrmDocumento. | `frmDocumento.frm` — cmdOpcion_Click Case 11 | OPEN |
 | GAP-DOC-002 | Permiso de supervisor en reimpresión | En la versión legacy, `cmdOpcion_Click` Case 7 (Reimprimir) requiere validar `Supervisor("12")` antes de proceder. En .NET 8 la validación de permisos por código de supervisor no está implementada en FrmDocumento. | `frmDocumento.frm` — cmdOpcion_Click Case 7 | OPEN |
 | GAP-DOC-003 | Integración Niubiz/Izipay en operaciones | frmDocumento.frm verifica integración con Niubiz (TCAJA.lActivaIntegracionNiubiz) antes de permitir ciertas operaciones. En .NET 8 esta comprobación no está implementada en FrmDocumento. | `frmDocumento.frm` — cmdOpcion_Click (validación lActivaIntegracionNiubiz) | OPEN |
+
+---
+
+## mdiPuntoVenta.frm — Formulario MDI Principal POS
+
+| ID | Gap | Descripción | Archivo Origen | Estado |
+|---|---|---|---|---|
+| GAP-MDI-001 | frmAnulado / frmCancelado | `mnuAnulado_Click` redirige a `FrmRepAnuladoReporte` (equivalente migrado). `mnuCancelado_Click` → `MsgEnMigracion` (frmCancelado sin equivalente .NET 8). | `mdiPuntoVenta.frm` — mnuAnulado_Click, mnuCancelado_Click | PARTIALLY_MIGRATED — Anulados wired a FrmRepAnuladoReporte; Cancelados stub |
+| GAP-MDI-002 | frmConsultaSaldo (SIAB) | `cmdConsultaSaldo_Click` abre formulario de consulta de saldo. No existe en .NET 8. El botón está oculto por defecto (lSiab=false). | `mdiPuntoVenta.frm` — cmdConsultaSaldo_Click | OPEN |
+| GAP-MDI-003 | frmServidorEnlace (multiLocal) | `mnuCambiaLocal_Click` abre frmServidorEnlace para cambio de local. No existe en .NET 8. El menú solo aparece si lMultilocal=true. | `mdiPuntoVenta.frm` — mnuCambiaLocal_Click | OPEN |
+| GAP-MDI-004 | frmGuiaTransporte | `mnuGuiaTransporte_Click` abre frmGuiaTransporte. No existe en .NET 8. | `mdiPuntoVenta.frm` — mnuGuiaTransporte_Click | OPEN |
+| GAP-MDI-005 | frmDocumentoElectronicoCorrelativo | `mnuDocumentoElectronico_Click` abre frmDocumentoElectronicoCorrelativo. No existe en .NET 8. | `mdiPuntoVenta.frm` — mnuDocumentoElectronico_Click | OPEN |
+| GAP-MDI-006 | frmMozoUsuario (MCPV) | En modo MCPV (`lMCPV=true`), el formulario oculta la ventana y abre frmMozoUsuario antes de mostrar el MDI. No implementado en .NET 8. El modo lMCPV se detecta desde ConfiguracionCaja. | `mdiPuntoVenta.frm` — MDIForm_Load lMCPV, cmdOpcion16_Click | OPEN |
+| GAP-MDI-007 | PinPad VisaNet completo | El flujo completo de PinPad no-financiera (fiStartOperation + bucle fiGetStatus + MensajePinPad) requiere DLL nativa VisaNet no portada. FrmPagoPinPad existe pero el flujo legacy de no-financiera es una operación de consulta de estado diferente. | `mdiPuntoVenta.frm` — mnuPinPad_Click | OPEN |
+| GAP-MDI-008 | comandaAuto (patio orders) | `Timerwebapp_Timer` con lIntPatio=true ejecuta `comandaAuto()` que imprime automáticamente pedidos de patio. La lógica requiere integración con el módulo de impresión (vAreaImpresora, ImprimePedidoAuto). No implementado en .NET 8. | `mdiPuntoVenta.frm` — Timerwebapp_Timer, comandaAuto() | OPEN |
+| GAP-MDI-009 | InicializaMCPV | Modo multi-cajero: busca turno activo del usuario en MTURNO y actualiza estado de la caja. Implementado en `InicializaMCPVAsync()`. frmMozoUsuario (selector de mozo) sigue pendiente (GAP-MDI-006). | `mdiPuntoVenta.frm` — InicializaMCPV() | MIGRATED — `FrmPuntoVenta.InicializaMCPVAsync()` |
+| GAP-MDI-010 | FrmActualizacion (versión) | TimerActualizador compara versión del ensamblado con TPARAMETROVERSION y lanza FrmActualizacion si hay diferencia. Implementado en .NET 8. | `mdiPuntoVenta.frm` — TimerActualizador_Timer | MIGRATED — `FrmActualizacion.cs` + `TimerActualizador_TickAsync` |
