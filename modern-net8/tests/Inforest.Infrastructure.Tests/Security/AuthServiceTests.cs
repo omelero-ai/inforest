@@ -29,19 +29,21 @@ public sealed class AuthServiceTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[]
             {
-                new LegacyModuleUserRecord(
-                    "USR01",
-                    "01",
-                    "Administrador",
-                    "ADMIN",
-                    LegacyPasswordCipher.Encrypt("SECRETO"),
-                    true,
-                    string.Empty)
+                new LegacyModuleUserRecord
+                {
+                    tCodigoUsuario = "USR01",
+                    tGrupoUsuario = "01",
+                    tDetallado = "Administrador",
+                    tResumido = "ADMIN",
+                    tPassword = LegacyPasswordCipher.Encrypt("SECRETO"),
+                    lActivo = true,
+                    tBandaMagnetica = string.Empty
+                }
             });
 
         var rbac = new Mock<IRbacService>();
         rbac
-            .Setup(service => service.ObtenerPermisosAsync("ADMIN", "01", It.IsAny<CancellationToken>()))
+            .Setup(service => service.ObtenerPermisosAsync("ADMIN", "02", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[]
             {
                 new PermisoAcceso("ACC001", "01", "frmCaja", "btnCobrar", "Cobrar")
@@ -95,14 +97,16 @@ public sealed class AuthServiceTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[]
             {
-                new LegacyModuleUserRecord(
-                    "USR01",
-                    "01",
-                    "Administrador",
-                    "ADMIN",
-                    LegacyPasswordCipher.Encrypt("SECRETO"),
-                    true,
-                    string.Empty)
+                new LegacyModuleUserRecord
+                {
+                    tCodigoUsuario = "USR01",
+                    tGrupoUsuario = "01",
+                    tDetallado = "Administrador",
+                    tResumido = "ADMIN",
+                    tPassword = LegacyPasswordCipher.Encrypt("SECRETO"),
+                    lActivo = true,
+                    tBandaMagnetica = string.Empty
+                }
             });
 
         var service = new AuthService(

@@ -45,7 +45,7 @@ internal sealed class AuthService : IAuthService
             return AuthResult.Fallido("Ingrese su usuario.", "SEGURIDAD_USUARIO_REQUERIDO");
 
         if (string.IsNullOrWhiteSpace(request.Contrasena) && string.IsNullOrWhiteSpace(request.BandaMagnetica))
-            return AuthResult.Fallido("Ingrese su contraseña.", "SEGURIDAD_PASSWORD_REQUERIDO");
+            return AuthResult.Fallido("Ingrese su password.", "SEGURIDAD_PASSWORD_REQUERIDO");
 
         using var connection = await _connectionFactory.CreateOpenConnectionAsync("Inforest", cancellationToken);
         var records = await _spExecutor.QueryAsync<LegacyModuleUserRecord>(
@@ -58,19 +58,20 @@ internal sealed class AuthService : IAuthService
             string.Equals(record.tResumido, request.CodigoUsuario.Trim(), StringComparison.OrdinalIgnoreCase));
 
         if (user is null)
-            return AuthResult.Fallido("Usuario no encontrado para el módulo solicitado.", "SEGURIDAD_USUARIO_NO_ENCONTRADO");
+            return AuthResult.Fallido("Usuario No Encontrado", "SEGURIDAD_USUARIO_NO_ENCONTRADO");
 
         if (!user.lActivo)
             return AuthResult.Fallido("El usuario se encuentra inactivo.", "SEGURIDAD_USUARIO_INACTIVO");
 
         var verification = await VerifyPasswordAsync(user, request, cancellationToken);
-        //if (!verification.Verified)
-        //    return AuthResult.Fallido("Password erróneo.", "SEGURIDAD_PASSWORD_INVALIDO");
+        if (!verification.Verified)
+            return AuthResult.Fallido("Password Erroneo", "SEGURIDAD_PASSWORD_INVALIDO");
 
-        var moduloSeguridad = ResolveModuloCode(request.Modulo);
-        var permissions = await _rbacService.ObtenerPermisosAsync(user.tResumido, moduloSeguridad, cancellationToken);
+        var moduloAcceso = ResolveAccessModuloCode(request.Modulo);
+        var moduloAuditoria = ResolveAuditoriaModuloCode(request.Modulo);
+        var permissions = await _rbacService.ObtenerPermisosAsync(user.tResumido, moduloAcceso, cancellationToken);
         var auditResult = await _auditoriaService.RegistrarIngresoAsync(
-            new RegistroAccesoAuditoriaRequest("I", request.BaseDatos, moduloSeguridad, user.tResumido.ToUpperInvariant(), 0),
+            new RegistroAccesoAuditoriaRequest("I", request.BaseDatos, moduloAuditoria, user.tResumido.ToUpperInvariant(), 0),
             cancellationToken);
 
         if (!auditResult.EsExitoso)
@@ -80,7 +81,7 @@ internal sealed class AuthService : IAuthService
             user.tCodigoUsuario,
             user.tDetallado,
             user.tGrupoUsuario,
-            moduloSeguridad,
+            moduloAcceso,
             request.CodigoCaja,
             request.CodigoTerminal,
             request.BaseDatos,
@@ -105,7 +106,7 @@ internal sealed class AuthService : IAuthService
             return Result.Fail("No existe una sesión activa.", "SEGURIDAD_SESION_INEXISTENTE");
 
         var auditResult = await _auditoriaService.RegistrarSalidaAsync(
-            new RegistroAccesoAuditoriaRequest("S", session.BaseDatos, session.Modulo, session.CodigoUsuario, session.CorrelativoAcceso),
+            new RegistroAccesoAuditoriaRequest("S", session.BaseDatos, ResolveAuditoriaByAccessModuloCode(session.Modulo), session.CodigoUsuario, session.CorrelativoAcceso),
             cancellationToken);
 
         if (!auditResult.EsExitoso)
@@ -209,12 +210,30 @@ internal sealed class AuthService : IAuthService
         }
     }
 
-    internal static string ResolveModuloCode(string modulo)
+    internal static string ResolveAccessModuloCode(string modulo)
         => modulo.Trim().ToUpperInvariant() switch
         {
             "INFOREST" => "02",
             "ADMINISTRACION" => "03",
             _ => "04"
+        };
+
+    internal static string ResolveAuditoriaModuloCode(string modulo)
+        => modulo.Trim().ToUpperInvariant() switch
+        {
+            "INFOREST" => "01",
+            "ADMINISTRACION" => "13",
+            "CONSULTA" => "14",
+            _ => "01"
+        };
+
+    internal static string ResolveAuditoriaByAccessModuloCode(string moduloAcceso)
+        => moduloAcceso.Trim().ToUpperInvariant() switch
+        {
+            "02" => "01",
+            "03" => "13",
+            "04" => "14",
+            _ => "01"
         };
 
     private async Task<PasswordVerificationResult> VerifyPasswordAsync(LegacyModuleUserRecord user, AuthRequest request, CancellationToken cancellationToken)
