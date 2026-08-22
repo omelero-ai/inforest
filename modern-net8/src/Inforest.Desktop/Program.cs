@@ -7,12 +7,18 @@ using Inforest.Desktop.POS;
 using Inforest.Desktop.CajaRapida;
 using Inforest.Desktop.Adicion;
 using Inforest.Desktop.Caja;
+using Inforest.Desktop.Caja.Recibos;
 using Inforest.Desktop.Clientes;
 using Inforest.Desktop.Maestros;
 using Inforest.Desktop.Motorizado;
 using Inforest.Desktop.Forms.Reportes;
 using Inforest.Application.Interfaces;
 using Inforest.Desktop.Delivery;
+using Inforest.Desktop.Kitchen;
+using Inforest.Desktop.Pedidos;
+using Inforest.Desktop.Reservas;
+using Inforest.Desktop.Ventas;
+using Inforest.Desktop.Almacen;
 
 namespace Inforest.Desktop;
 
@@ -87,7 +93,27 @@ static class Program
                 services.AddTransient<FrmRepVentaFechaReporte>();
                 services.AddTransient<FrmRepRegistroVentaReporte>(); // BR-REP-022
                 services.AddTransient<FrmBusquedaDelivery>();       // POS-FUNC-036
-                services.AddTransient<FrmClienteDelivery>();       // POS-FUNC-037
+                services.AddTransient<FrmClienteDelivery>();        // POS-FUNC-037
+
+                // Formularios POS llamados via AbrirFormulario<T>()
+                services.AddTransient<FrmMesaConsulta>();
+                services.AddTransient<FrmInsumo>();
+                services.AddTransient<FrmPrecios>();
+                services.AddTransient<FrmMensajeCocina>();
+                services.AddTransient<FrmReciboEgreso>();
+                services.AddTransient<FrmReciboIngreso>();
+                services.AddTransient<FrmNotaCredito>();
+                services.AddTransient<FrmDocumentoCorrelativo>();
+                services.AddTransient<FrmReserva>();
+                services.AddTransient<FrmPedidoCorrelativo>();
+                services.AddTransient<FrmImportacionRequerimientos>();
+                services.AddTransient<FrmCtaCte>();
+                services.AddTransient<FrmCuentaCobrar>();
+                services.AddTransient<FrmPedidoDelivery>();
+                services.AddTransient<FrmPedidoDeliveryNo>();
+                services.AddTransient<CentralPedidosForm>();
+                services.AddTransient<FrmVentaMensualIntegradoReporte>();
+                services.AddTransient<FrmAnaliticoMotorizadoIntegradoReporte>();
             });
     }
 }

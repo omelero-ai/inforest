@@ -3,9 +3,11 @@ using Inforest.Application.Caja;
 using Inforest.Application.Configuracion;
 using Inforest.Application.Interfaces;
 using Inforest.Application.Maestros;
+using Inforest.Application.Pedidos;
 using Inforest.Application.Turno;
 using Inforest.Desktop.Caja;
 using Inforest.Desktop.Caja.Recibos;
+using Inforest.Desktop.CajaRapida;
 using Inforest.Desktop.Clientes;
 using Inforest.Desktop.Delivery;
 using Inforest.Desktop.Forms.Reportes;
@@ -852,16 +854,69 @@ public class FrmPuntoVenta : Form
 
     /// <summary>
     /// cmdOpcion2_Click / mnuVenta_Click — Abrir Punto de Venta (venta en mesa).
-    /// Legacy: frmVenta.Show vbModal.
+    /// Legacy: cmdOpcion2_Click en mdiPuntoVenta.frm — valida TC, abre CajaRápida o frmVenta (mesas).
+    /// Reglas: BR-POS-001, BR-POS-002, BR-POS-003.
     /// </summary>
-    private void CmdVenta_Click()
+    private async void CmdVenta_Click()
     {
         if (!_turnoIniciado)
         {
             MessageBox.Show("Es necesario aperturar el Turno!", "Inforest", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
-        AbrirFormulario<FrmVenta>();
+
+        // Validar tipo de cambio del día cuando se opera con moneda extranjera.
+        // Legacy: If nTC = 0 And lMonE And pais <> "002" And pais <> "005" Then MsgBox ...
+        if (_cfg is not null
+            && !string.IsNullOrEmpty(_cfg.tMonE)
+            && _cfg.tMonE != _cfg.tMonN)
+        {
+            var pais = _configuration["Inforest:Pais"] ?? "000";
+            if (pais != "002" && pais != "005")
+            {
+                using var cn = await _connectionFactory.CreateOpenConnectionAsync();
+                var nTC = await cn.ExecuteScalarAsync<decimal?>(
+                    "SELECT nVenta FROM TTIPOCAMBIO WHERE fFecha = CONVERT(date, GETDATE())") ?? 0m;
+
+                if (nTC == 0)
+                {
+                    MessageBox.Show(
+                        $"Es necesario registrar el Tipo de Cambio del día ({_cfg.tMonE}/{_cfg.tMonN}).",
+                        "Inforest", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+        }
+
+        // Branching CajaRápida / MultiCajero.
+        // Legacy: If lOCR Or lMultiCajero Then frmCajaRapida.Show; If Not wEnter Then frmVenta.Show
+        // Cuando CajaRápida confirma la venta (OK), el workflow completo ya ocurrió dentro de FrmCajaRapida.
+        // Si el usuario sale sin confirmar (Not wEnter), se abre el flujo de mesas normal.
+        if (_cfgCaja?.lCajaRapida == true || _cfgCaja?.lMultiCajero == true)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            using var frmCR = scope.ServiceProvider.GetRequiredService<FrmCajaRapida>();
+            var resultCR    = frmCR.ShowDialog(this);
+            if (resultCR != DialogResult.OK)
+                AbrirVentaPos(); // wEnter = False → también abrir flujo de mesas
+        }
+        else
+        {
+            AbrirVentaPos();
+        }
+    }
+
+    /// <summary>
+    /// Abre el workflow completo de venta por mesa:
+    /// FrmMesaConsulta (seleccionar mesa) → FrmPedido (tomar pedido) → FrmVenta (facturar).
+    /// Equivalente .NET del flujo de frmVenta.frm en modo mesas.
+    /// </summary>
+    private void AbrirVentaPos()
+    {
+        using var frm = CrearFrmMesaConsulta(ModoConsulta.Seleccionar);
+        if (frm.ShowDialog(this) == DialogResult.OK && frm.MesaSeleccionada is not null)
+            AbrirPedidoMesa(frm.MesaSeleccionada);
+        _ = CargarSalonesYMesasAsync();
     }
 
     /// <summary>
@@ -898,14 +953,28 @@ public class FrmPuntoVenta : Form
     }
 
     /// <summary>
-    /// cmdOpcion4_Click / mnuMesa_Click — Consulta de Mesas.
+    /// cmdOpcion4_Click / mnuMesa_Click — Consulta de Mesas (modo visual).
     /// Legacy: sTipo = "V"; frmMesaConsulta.Show vbModal.
     /// </summary>
     private void CmdMesas_Click()
     {
-        AbrirFormulario<FrmMesaConsulta>();
-        _ = CargarSalonesYMesasAsync(); // refrescar mapa de mesas
+        using var frm = CrearFrmMesaConsulta(ModoConsulta.Visual);
+        frm.ShowDialog(this);
+        _ = CargarSalonesYMesasAsync();
     }
+
+    /// <summary>
+    /// Crea un <see cref="FrmMesaConsulta"/> resolviendo sus dependencias desde el contenedor,
+    /// con el modo y codigoCaja del contexto actual.
+    /// </summary>
+    private FrmMesaConsulta CrearFrmMesaConsulta(ModoConsulta modo) =>
+        new(
+            _serviceProvider.GetRequiredService<ObtenerMesasActivosHandler>(),
+            _serviceProvider.GetRequiredService<ObtenerSalonesActivosHandler>(),
+            _serviceProvider.GetRequiredService<CambiarEstadoMesaHandler>(),
+            _serviceProvider.GetService<ObtenerPedidosSinMesaHandler>(),
+            modo,
+            _codigoCaja);
 
     /// <summary>
     /// cmdOpcion10_Click / mnuCtaCte_Click — Cuentas Corrientes.
