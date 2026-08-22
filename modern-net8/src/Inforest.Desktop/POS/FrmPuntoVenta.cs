@@ -890,13 +890,15 @@ public class FrmPuntoVenta : Form
 
         // Branching CajaRápida / MultiCajero.
         // Legacy: If lOCR Or lMultiCajero Then frmCajaRapida.Show; If Not wEnter Then frmVenta.Show
+        // Cuando CajaRápida confirma la venta (OK), el workflow completo ya ocurrió dentro de FrmCajaRapida.
+        // Si el usuario sale sin confirmar (Not wEnter), se abre el flujo de mesas normal.
         if (_cfgCaja?.lCajaRapida == true || _cfgCaja?.lMultiCajero == true)
         {
             using var scope = _serviceProvider.CreateScope();
             using var frmCR = scope.ServiceProvider.GetRequiredService<FrmCajaRapida>();
             var resultCR    = frmCR.ShowDialog(this);
             if (resultCR != DialogResult.OK)
-                AbrirVentaPos();
+                AbrirVentaPos(); // wEnter = False → también abrir flujo de mesas
         }
         else
         {
@@ -911,22 +913,9 @@ public class FrmPuntoVenta : Form
     /// </summary>
     private void AbrirVentaPos()
     {
-        var mesasHandler         = _serviceProvider.GetRequiredService<ObtenerMesasActivosHandler>();
-        var salonesHandler       = _serviceProvider.GetRequiredService<ObtenerSalonesActivosHandler>();
-        var cambiarEstadoHandler = _serviceProvider.GetRequiredService<CambiarEstadoMesaHandler>();
-        var sinMesaHandler       = _serviceProvider.GetService<ObtenerPedidosSinMesaHandler>();
-
-        using var frm = new FrmMesaConsulta(
-            mesasHandler,
-            salonesHandler,
-            cambiarEstadoHandler,
-            sinMesaHandler,
-            ModoConsulta.Seleccionar,
-            _codigoCaja);
-
+        using var frm = CrearFrmMesaConsulta(ModoConsulta.Seleccionar);
         if (frm.ShowDialog(this) == DialogResult.OK && frm.MesaSeleccionada is not null)
             AbrirPedidoMesa(frm.MesaSeleccionada);
-
         _ = CargarSalonesYMesasAsync();
     }
 
@@ -969,20 +958,23 @@ public class FrmPuntoVenta : Form
     /// </summary>
     private void CmdMesas_Click()
     {
-        var mesasHandler         = _serviceProvider.GetRequiredService<ObtenerMesasActivosHandler>();
-        var salonesHandler       = _serviceProvider.GetRequiredService<ObtenerSalonesActivosHandler>();
-        var cambiarEstadoHandler = _serviceProvider.GetRequiredService<CambiarEstadoMesaHandler>();
-
-        using var frm = new FrmMesaConsulta(
-            mesasHandler,
-            salonesHandler,
-            cambiarEstadoHandler,
-            modo: ModoConsulta.Visual,
-            codigoCaja: _codigoCaja);
-
+        using var frm = CrearFrmMesaConsulta(ModoConsulta.Visual);
         frm.ShowDialog(this);
         _ = CargarSalonesYMesasAsync();
     }
+
+    /// <summary>
+    /// Crea un <see cref="FrmMesaConsulta"/> resolviendo sus dependencias desde el contenedor,
+    /// con el modo y codigoCaja del contexto actual.
+    /// </summary>
+    private FrmMesaConsulta CrearFrmMesaConsulta(ModoConsulta modo) =>
+        new(
+            _serviceProvider.GetRequiredService<ObtenerMesasActivosHandler>(),
+            _serviceProvider.GetRequiredService<ObtenerSalonesActivosHandler>(),
+            _serviceProvider.GetRequiredService<CambiarEstadoMesaHandler>(),
+            _serviceProvider.GetService<ObtenerPedidosSinMesaHandler>(),
+            modo,
+            _codigoCaja);
 
     /// <summary>
     /// cmdOpcion10_Click / mnuCtaCte_Click — Cuentas Corrientes.
